@@ -1,51 +1,28 @@
-# Cinch Example Project
+![logo](doc/flecsi.png)
+[![Build Status](https://travis-ci.org/losalamos/flecsi.svg?branch=master)](https://travis-ci.org/losalamos/flecsi)
 
-Congratulations! If you are reading this file, you have successfully created
-a cinch skeleton project.  From here, you should try to configure and build
-the example project:
+# FleCSI Specializations Project
 
-    % mkdir build
-    % cd build
-    % cmake -DENABLE\_DOCUMENTATION=ON -DENABLE\_DOXYGEN=ON -DENABLE\_JENKINS\_OUTPUT -DENABLE\_UNIT\_TESTS
-    % make
+# Release
 
-After you have built the project, you should have several executable and
-documentation files in your build tree:
+This software has been approved for open source release and has
+been assigned **LA-CC-16-022**.
 
-    bin/app
-    lib/libexample.a
-    test/example/sanity
-    doc/user-guide-0.0.pdf
-    doc/developer-guide-0.0.pdf
-    doc/doxygen
+# Copyright
 
-To run the application example:
+Copyright (c) 2016, Los Alamos National Security, LLC
+All rights reserved.
 
-    % bin/app
+Copyright 2016. Los Alamos National Security, LLC. This software was produced under U.S. Government contract DE-AC52-06NA25396 for Los Alamos National Laboratory (LANL), which is operated by Los Alamos National Security, LLC for the U.S. Department of Energy. The U.S. Government has rights to use, reproduce, and distribute this software.  NEITHER THE GOVERNMENT NOR LOS ALAMOS NATIONAL SECURITY, LLC MAKES ANY WARRANTY, EXPRESS OR IMPLIED, OR ASSUMES ANY LIABILITY FOR THE USE OF THIS SOFTWARE.  If software is modified to produce derivative works, such modified software should be clearly marked, so as not to confuse it with the version available from LANL.
+ 
+Additionally, redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:  
 
-This should produce, "Hello World".
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-To run the unit tests:
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-    % make test
+3. Neither the name of Los Alamos National Security, LLC, Los Alamos National Laboratory, LANL, the U.S. Government, nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
 
-Or optionally:
+THIS SOFTWARE IS PROVIDED BY LOS ALAMOS NATIONAL SECURITY, LLC AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL LOS ALAMOS NATIONAL SECURITY, LLC OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-    % ctest -N (list the available unit tests)
-    % ctest -V -R sanity (run tests verbose that match 'sanity')
-
-# Push your new project to a remote git repository
-
-To push to a remote, you will first need to create the repository on
-whichever git server you plan to use.  Generally, this requires
-logging-in to the server and creating an empty project.  The server
-will usually tell you the path to the new project, which might look
-something like:
-
-    git@github.com:organization/project.git
-
-Using this url as an example, to push your cinch project to the remote:
-
-    % cd /path/to/project
-    % git remote add origin git@github.com:organization/project.git
-    % git push -u origin master
+<!-- vim: set tabstop=4 shiftwidth=4 expandtab : -->
