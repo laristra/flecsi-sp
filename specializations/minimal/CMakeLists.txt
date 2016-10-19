@@ -3,18 +3,20 @@
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
 
-set(example_HEADERS
-  utils.h
+set(minimal_HEADERS
+  minimal_types.h
+  minimal_mesh_properties.h
+  minimal_entity_types.h
+  minimal_mesh.h
   PARENT_SCOPE
 )
 
-set(example_SOURCES
-  utils.cc
+set(minimal_SOURCES
   PARENT_SCOPE
 )
 
-cinch_add_unit(sanity
-  SOURCES test/unit.cc
+cinch_add_unit(properties
+ SOURCES test/properties.cc
 )
 
 #----------------------------------------------------------------------------~-#

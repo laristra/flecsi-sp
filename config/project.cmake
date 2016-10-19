@@ -6,16 +6,10 @@
 project(flecsi-specializations)
 
 #------------------------------------------------------------------------------#
-# Set application directory
-#------------------------------------------------------------------------------#
-
-cinch_add_application_directory(app)
-
-#------------------------------------------------------------------------------#
 # Add library targets
 #------------------------------------------------------------------------------#
 
-cinch_add_library_target(example src)
+cinch_add_library_target(flecsi-specializations specializations)
 
 #------------------------------------------------------------------------------#
 # Set header suffix regular expression
