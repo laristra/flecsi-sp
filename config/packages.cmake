@@ -17,6 +17,12 @@ else()
 	message(FATAL_ERROR "C++14 compatible compiler not found")
 endif()
 
+#------------------------------------------------------------------------------#
+# FleCSI Library
+#------------------------------------------------------------------------------#
+
+find_package(FleCSI REQUIRED)
+
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
 # vim: set tabstop=2 shiftwidth=2 expandtab :
