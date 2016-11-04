@@ -4,17 +4,17 @@
 #~----------------------------------------------------------------------------~#
 
 #------------------------------------------------------------------------------#
-# Check for C++11 compiler.
+# Check for C++14 compiler.
 #------------------------------------------------------------------------------#
 
-include(cxx11)
+include(cxx14)
 
-check_for_cxx11_compiler(CXX11_COMPILER)
+check_for_cxx14_compiler(CXX14_COMPILER)
 
-if(CXX11_COMPILER)
-	enable_cxx11()
+if(CXX14_COMPILER)
+	enable_cxx14()
 else()
-	message(FATAL_ERROR "C++11 compatible compiler not found")
+	message(FATAL_ERROR "C++14 compatible compiler not found")
 endif()
 
 #----------------------------------------------------------------------------~-#
