@@ -3,10 +3,11 @@
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#ifndef flecsi_specializations_minimal_mesh_h
-#define flecsi_specializations_minimal_mesh_h
+#ifndef felcsisp_minimal_mesh_h
+#define felcsisp_minimal_mesh_h
 
-#include "flecsi-specializations/minimal/minimal_types.h"
+#include "flecsi-sp/geometry/point.h"
+#include "flecsi-sp/minimal/minimal_types.h"
 
 ///
 // \file minimal_mesh.h
@@ -15,19 +16,29 @@
 ///
 
 namespace flecsi {
-namespace specializations {
+namespace sp {
 
 ///
 // \class minimal_mesh_t minimal_mesh.h
 // \brief minimal_mesh_t provides...
 ///
 class minimal_mesh_t
-  : topology::mesh_topology_t<minimal_types_t>
+  : public topology::mesh_topology_t<minimal_types_t>
 {
 public:
 
+  using base_t = topology::mesh_topology_t<minimal_types_t>;
+
+  static constexpr size_t dimension = minimal_config_t::num_dimensions;
+  
+  using vertex_t = minimal_types_t::vertex_t;
+  using cell_t = minimal_types_t::cell_t;
+
+  using point_t = minimal_config_t::point_t;
+
   /// Default constructor
-  minimal_mesh_t() {}
+  minimal_mesh_t()
+    : base_t() {}
 
   /// Copy constructor (disabled)
   minimal_mesh_t(const minimal_mesh_t &) = delete;
@@ -38,14 +49,51 @@ public:
   /// Destructor
    ~minimal_mesh_t() {}
 
+  ///
+  // Initialize the mesh.
+  ///
+  void
+  init()
+  {
+    // Initialize domain 0 of the mesh topology.
+    base_t::init<0>();
+  } // init
+
+  ///
+  // Add a vertex to the mesh topology.
+  ///
+  vertex_t *
+  make_vertex(
+    const point_t & pos
+  )
+  {
+    auto v = base_t::make<vertex_t>(*this, pos);
+    base_t::add_entity<0, 0>(v);
+    return v;
+  } // make_vertex
+
+  ///
+  // Add a cell to the mesh topology
+  ///
+  cell_t *
+  make_cell(
+    const std::initializer_list<vertex_t *> & vertices
+  )
+  {
+    auto c = base_t::make<cell_t>(*this);
+    base_t::add_entity<dimension, 0>(c);
+    base_t::init_entity<0, dimension, 0>(c, vertices);
+    return c;
+  } // make_cell
+
 private:
 
 }; // class minimal_mesh_t
 
-} // namespace specializations
+} // namespace sp
 } // namespace flecsi
 
-#endif // flecsi_specializations_minimal_mesh_h
+#endif // felcsisp_minimal_mesh_h
 
 /*~-------------------------------------------------------------------------~-*
  * Formatting options for vim.

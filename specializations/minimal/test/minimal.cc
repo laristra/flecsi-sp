@@ -5,9 +5,55 @@
 
 #include <cinchtest.h>
 
-#include "flecsi-specializations/minimal/minimal_mesh.h"
+#include "flecsi-sp/minimal/minimal_mesh.h"
 
-TEST(properties, sanity) {
+using namespace flecsi::sp;
+using vertex_t = minimal_mesh_t::vertex_t;
+
+class minimal_t
+  : public ::testing::Test
+{
+protected:
+
+  static constexpr size_t N = 2;
+  minimal_mesh_t m;
+
+  void
+  SetUp()
+  {
+    std::vector<vertex_t *> vs;
+
+    for(size_t j(0); j<N+1; ++j) {
+      for(size_t i(0); i<N+1; ++i) {
+        vs.push_back(m.make_vertex({double(i), double(j)}));
+      } // for
+    } // for
+
+    size_t width = N+1;
+
+    for(size_t j(0); j<N; ++j) {
+      for(size_t i(0); i<N; ++i) {
+        m.make_cell({
+          vs[ i    + ( j    * width)],
+          vs[(i+1) + ( j    * width)],
+          vs[(i+1) + ((j+1) * width)],
+          vs[ i    + ((j+1) * width)]
+        });
+      } // for
+    } // for
+
+    m.init();
+
+  } // SetUp
+
+  virtual void TearDown() {}
+
+}; // class minimal_t
+
+TEST_F(minimal_t, sanity) {
+
+  m.dump();
+
 } // TEST
 
 /*----------------------------------------------------------------------------*

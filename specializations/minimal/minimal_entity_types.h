@@ -3,12 +3,12 @@
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#ifndef flecsi_specializations_minimal_entity_types_h
-#define flecsi_specializations_minimal_entity_types_h
+#ifndef flecsi_sp_minimal_entity_types_h
+#define flecsi_sp_minimal_entity_types_h
 
 #include <flecsi/topology/mesh_types.h>
 
-#include "flecsi-specializations/minimal/minimal_mesh_properties.h"
+#include "flecsi-sp/minimal/minimal_config.h"
 
 ///
 // \file minimal_entity_types.h
@@ -17,26 +17,35 @@
 ///
 
 namespace flecsi {
-namespace specializations {
+namespace sp {
 
 ///
 // \struct minimal_vertex_t
 // \breif FIXME
 ///
 struct minimal_vertex_t
-  : topology::mesh_entity_t<0, minimal_mesh_properties_t::num_domains>
+  : public topology::mesh_entity_t<0,
+    minimal_config_t::num_domains>
 {
+  using point_t = minimal_config_t::point_t;
+
   ///
   // Constructor.
   //
   // \param mesh FIXME
   ///
-  minimal_vertex_t(topology::mesh_topology_base_t & mesh)
-    : mesh_(mesh) {}
+  minimal_vertex_t(
+    topology::mesh_topology_base_t & mesh,
+    const point_t & coordinates
+  )
+    : mesh_(mesh), coordinates_(coordinates)
+  {
+  }
 
 private:
 
   topology::mesh_topology_base_t & mesh_;
+  point_t coordinates_;
 
 }; // class minimal_vertex_t
 
@@ -45,7 +54,8 @@ private:
 // \breif FIXME
 ///
 struct minimal_edge_t
-  : topology::mesh_entity_t<0, minimal_mesh_properties_t::num_domains>
+  : public topology::mesh_entity_t<1,
+    minimal_config_t::num_domains>
 {
   ///
   // Constructor.
@@ -61,12 +71,15 @@ private:
 
 }; // class minimal_edge_t
 
+#if FLECSI_MESH_DIMENSION == 3
+
 ///
 // \struct minimal_face_t
 // \breif FIXME
 ///
 struct minimal_face_t
-  : topology::mesh_entity_t<0, minimal_mesh_properties_t::num_domains>
+  : public topology::mesh_entity_t<2,
+    minimal_config_t::num_domains>
 {
   ///
   // Constructor.
@@ -82,12 +95,15 @@ private:
 
 }; // class minimal_face_t
 
+#endif // FLECSI_MESH_DIMENSION
+
 ///
 // \struct minimal_cell_t
 // \breif FIXME
 ///
 struct minimal_cell_t
-  : topology::mesh_entity_t<0, minimal_mesh_properties_t::num_domains>
+  : public topology::mesh_entity_t<FLECSI_MESH_DIMENSION,
+    minimal_config_t::num_domains>
 {
   ///
   // Constructor.
@@ -97,16 +113,28 @@ struct minimal_cell_t
   minimal_cell_t(topology::mesh_topology_base_t & mesh)
     : mesh_(mesh) {}
 
+  std::vector<size_t>
+  create_entities(
+    id_t cell_id,
+    size_t dim,
+    topology::domain_connectivity<FLECSI_MESH_DIMENSION> & c,
+    id_t * e
+  )
+  {
+    // FIXME
+    return {};
+  } // create_entities
+
 private:
 
   topology::mesh_topology_base_t & mesh_;
 
 }; // class minimal_cell_t
 
-} // namespace specializations
+} // namespace sp
 } // namespace flecsi
 
-#endif // flecsi_specializations_minimal_entity_types_h
+#endif // flecsi_sp_minimal_entity_types_h
 
 /*~-------------------------------------------------------------------------~-*
  * Formatting options for vim.

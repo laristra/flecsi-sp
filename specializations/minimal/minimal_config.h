@@ -3,36 +3,52 @@
  * All rights reserved.
  *~--------------------------------------------------------------------------~*/
 
-#ifndef flecsi_specializations_minimal_mesh_properties_h
-#define flecsi_specializations_minimal_mesh_properties_h
+#ifndef flecsi_sp_minimal_config_h
+#define flecsi_sp_minimal_config_h
+
+#include "flecsi-sp/geometry/point.h"
 
 ///
-// \file minimal_mesh_properties.h
+// \file minimal_basic_types.h
 // \authors bergen bird
 // \date Initial file creation: Oct 19, 2016
 ///
 
 namespace flecsi {
-namespace specializations {
+namespace sp {
 
 #ifndef FLECSI_MESH_DIMENSION
 #define FLECSI_MESH_DIMENSION 2
 #endif // FLECSI_MESH_DIMENSION
 
-struct minimal_mesh_properties_t {
+///
+// \class minimal_config_t minimal_types.h
+// \brief minimal_config_t provides...
+///
+struct minimal_config_t
+{
+  //--------------------------------------------------------------------------//
+  // Define local properties to satisfy mesh_topology requirements.
+  //--------------------------------------------------------------------------//
 
-  /// The dimension of the burton mesh.
+  /// The dimension of the mesh
   static constexpr size_t num_dimensions = FLECSI_MESH_DIMENSION;
 
-  /// The number of mesh domains.
+  /// The number of domains
   static constexpr size_t num_domains = 1;
 
-}; // minimal_mesh_properties_t
+  /// Floating-point type
+  using real_t = double;
 
-} // namespace specializations
+  /// Point type
+  using point_t = point<real_t, num_dimensions>;
+
+}; // class minimal_config_t
+
+} // namespace sp
 } // namespace flecsi
 
-#endif // flecsi_specializations_minimal_mesh_properties_h
+#endif // flecsi_sp_minimal_config_h
 
 /*~-------------------------------------------------------------------------~-*
  * Formatting options for vim.

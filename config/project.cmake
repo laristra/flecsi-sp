@@ -3,13 +3,13 @@
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
 
-project(flecsi-specializations)
+project(flecsi-sp)
 
 #------------------------------------------------------------------------------#
 # Add library targets
 #------------------------------------------------------------------------------#
 
-cinch_add_library_target(flecsi-specializations specializations)
+cinch_add_library_target(flecsi-sp specializations)
 
 #------------------------------------------------------------------------------#
 # Set header suffix regular expression

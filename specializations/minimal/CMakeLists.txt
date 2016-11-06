@@ -4,10 +4,10 @@
 #~----------------------------------------------------------------------------~#
 
 set(minimal_HEADERS
-  minimal_types.h
-  minimal_mesh_properties.h
+  minimal_config.h
   minimal_entity_types.h
   minimal_mesh.h
+  minimal_types.h
   PARENT_SCOPE
 )
 
@@ -15,8 +15,8 @@ set(minimal_SOURCES
   PARENT_SCOPE
 )
 
-cinch_add_unit(properties
-  SOURCES test/properties.cc
+cinch_add_unit(minimal
+  SOURCES test/minimal.cc
   LIBRARIES ${FleCSI_LIBRARY}
 )
 
