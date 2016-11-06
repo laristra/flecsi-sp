@@ -5,7 +5,7 @@
 
 #include <cinchtest.h>
 
-#include "flecsi-specializations/minimal/minimal_mesh_properties.h"
+#include "flecsi-specializations/minimal/minimal_mesh.h"
 
 TEST(properties, sanity) {
 } // TEST

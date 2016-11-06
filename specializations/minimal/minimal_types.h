@@ -6,9 +6,9 @@
 #ifndef flecsi_specializations_minimal_types_h
 #define flecsi_specializations_minimal_types_h
 
-#include <flecsi/topology/mesh_toplogy.h>
+#include <flecsi/topology/mesh_topology.h>
 
-#include "specializations/minimal/minimal_entity_types.h"
+#include "flecsi-specializations/minimal/minimal_entity_types.h"
 
 ///
 // \file minimal_types.h
@@ -45,13 +45,13 @@ struct minimal_types_t
   using vertex_t = minimal_vertex_t;
 
   /// Mesh edge type
-  using edge_t =
+  using edge_t = minimal_edge_t;
 
   /// Mesh face type
-  using face_t =
+  using face_t = minimal_face_t;
 
   /// Mesh cell type
-  using cell_t =
+  using cell_t = minimal_cell_t;
 
   /// Convenience type
   template<size_t D>

@@ -16,7 +16,8 @@ set(minimal_SOURCES
 )
 
 cinch_add_unit(properties
- SOURCES test/properties.cc
+  SOURCES test/properties.cc
+  LIBRARIES ${FleCSI_LIBRARY}
 )
 
 #----------------------------------------------------------------------------~-#

@@ -6,7 +6,7 @@
 #ifndef flecsi_specializations_minimal_mesh_h
 #define flecsi_specializations_minimal_mesh_h
 
-#include "specializations/minimal/minimal_types.h"
+#include "flecsi-specializations/minimal/minimal_types.h"
 
 ///
 // \file minimal_mesh.h

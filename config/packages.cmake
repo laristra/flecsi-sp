@@ -23,6 +23,8 @@ endif()
 
 find_package(FleCSI REQUIRED)
 
+include_directories(${FleCSI_INCLUDE_DIR})
+
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
 # vim: set tabstop=2 shiftwidth=2 expandtab :
