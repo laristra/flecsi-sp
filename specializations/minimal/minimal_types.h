@@ -122,6 +122,25 @@ struct minimal_types_t
     size_t num_vertices
   )
   {
+    switch(M) {
+
+      case 0:
+      {
+        switch(D) {
+          case 1:
+            return mesh->make<edge_t>(*mesh);
+
+          default:
+            assert(false && "invalid topological dimension");
+        } // switch
+
+        break;
+      } // case
+
+      default:
+        assert(false && "invalid domain");
+
+    } // switch
   } // create_entity
 
 }; // class minimal_types_t

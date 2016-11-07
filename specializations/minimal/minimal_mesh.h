@@ -19,6 +19,20 @@ namespace flecsi {
 namespace sp {
 
 ///
+// Use this namespace to expose enumerations and types.
+///
+namespace minimal {
+
+  enum minimal_index_spaces_t : size_t {
+    vertices,
+    edges,
+    faces,
+    cells
+  }; // enum minimal_index_spaces_t
+
+} // namespace minimal
+
+///
 // \class minimal_mesh_t minimal_mesh.h
 // \brief minimal_mesh_t provides...
 ///
@@ -85,6 +99,47 @@ public:
     base_t::init_entity<0, dimension, 0>(c, vertices);
     return c;
   } // make_cell
+
+  ///
+  //
+  ///
+  size_t
+  indices(
+    size_t index_space_id
+  ) override
+  {
+    switch(index_space_id) {
+      case minimal::vertices:
+        return base_t::num_entities(0);
+      case minimal::cells:
+        return base_t::num_entities(dimension);
+      default:
+        assert(false && "unknown index space");
+    } // switch
+  } // indices
+
+  ///
+  //
+  ///
+  auto
+  vertices()
+  {
+    return base_t::entities<0, 0>();
+  } // vertices
+
+  ///
+  //
+  ///
+  template<
+    typename E
+  >
+  auto
+  vertices(
+    E * e
+  )
+  {
+    return base_t::entities<0, 0>(e);
+  } // vertices
 
 private:
 

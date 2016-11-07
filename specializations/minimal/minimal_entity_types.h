@@ -42,6 +42,13 @@ struct minimal_vertex_t
   {
   }
 
+  const point_t &
+  coordinates()
+  const
+  {
+    return coordinates_;
+  } // coordinates
+
 private:
 
   topology::mesh_topology_base_t & mesh_;
