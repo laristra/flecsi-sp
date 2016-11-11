@@ -21,7 +21,7 @@ namespace sp {
 
 ///
 // \struct minimal_vertex_t
-// \breif FIXME
+// \brief FIXME
 ///
 struct minimal_vertex_t
   : public topology::mesh_entity_t<0,
@@ -112,6 +112,8 @@ struct minimal_cell_t
   : public topology::mesh_entity_t<FLECSI_MESH_DIMENSION,
     minimal_config_t::num_domains>
 {
+  using real_t = minimal_config_t::real_t;
+
   ///
   // Constructor.
   //
@@ -131,6 +133,13 @@ struct minimal_cell_t
     // FIXME
     return {};
   } // create_entities
+
+  real_t
+  volume()
+  {
+    // FIXME
+    return 1.0;
+  } // volume
 
 private:
 

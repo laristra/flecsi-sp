@@ -8,14 +8,17 @@
 
 #include <iostream>
 
-// Files from flecsi
+// Files from FleCSI
+#include <flecsi/execution/execution.h>
 #include <flecsi/data/data.h>
 
-// Files from flecsi-sp
+// Files from FleCSI-SP
 #include <flecsi-sp/minimal/minimal_mesh.h>
 
+// Basic mesh initialization
 #include "../common/init_mesh.h"
 
+// Pull in the appropriate namespaces
 using namespace flecsi;
 using namespace flecsi::data;
 

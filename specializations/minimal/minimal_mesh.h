@@ -141,6 +141,27 @@ public:
     return base_t::entities<0, 0>(e);
   } // vertices
 
+  ///
+  //
+  ///
+  auto
+  cells()
+  {
+    return base_t::entities<dimension, 0>();
+  } // cells
+
+  ///
+  //
+  ///
+  template<
+    typename E
+  >
+  auto
+  cells(E * e)
+  {
+    return base_t::entities<dimension, 0>(e);
+  } // cells
+
 private:
 
 }; // class minimal_mesh_t
