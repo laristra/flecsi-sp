@@ -7,7 +7,7 @@ services:
 
 env:
   matrix:
-    - DOCKERFILE=fedora MPI=OFF RUNTIME=serial
+    - DOCKERFILE=fedora MPI=OFF RUNTIME=serial DOCKERHUB=true
 
 script:
  - docker build --build-arg MPI=${MPI} --build-arg RUNTIME=${RUNTIME}
