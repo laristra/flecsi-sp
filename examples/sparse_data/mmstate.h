@@ -66,7 +66,7 @@ void driver(int argc, char ** argv) {
   ///
   std::set<size_t> nzs;
   for(auto c: mesh.cells()) {
-    cell[c].volume = c->volume();
+    cell(c).volume = c->volume();
 
     ///
     // Create a random set of indices that will be non-zero.
@@ -117,21 +117,21 @@ void driver(int argc, char ** argv) {
   // Iterate over the cells.
   ///
   for(auto c: mesh.cells()) {
-    cell[c].density = 0.0;
+    cell(c).density = 0.0;
 
     ///
     // Iterate over the materials within this cell.
     ///
     for(auto m: mats.entries(c)) {
-      cell[c].density += mats(c, m);
+      cell(c).density += mats(c, m);
     } // for
 
     // Normalize.
-    cell[c].density /= cell[c].volume;
+    cell(c).density /= cell(c).volume;
 
     // Print the result.
     std::cout << "average " << c->id<0>() << ": " <<
-      cell[c].density << std::endl;
+      cell(c).density << std::endl;
   } // for
 
   } // scope
@@ -148,7 +148,7 @@ void driver(int argc, char ** argv) {
   // Iterate over the cells to re-zero the macroscopic density.
   ///
   for(auto c: mesh.cells()) {
-    cell[c].density = 0.0;
+    cell(c).density = 0.0;
   } // for
 
   ///
@@ -160,7 +160,7 @@ void driver(int argc, char ** argv) {
     // Iterate over the cells that contain this material.
     ///
     for(auto c: mats.indices(m)) {
-      cell[c].density += mats(c, m);
+      cell(c).density += mats(c, m);
     } // for
   } // for
 
@@ -169,11 +169,11 @@ void driver(int argc, char ** argv) {
   ///
   for(auto c: mesh.cells()) {
     // Normalize.
-    cell[c].density /= cell[c].volume;
+    cell(c).density /= cell(c).volume;
 
     // Print the result.
     std::cout << "average " << c->id<0>() << ": " <<
-      cell[c].density << std::endl;
+      cell(c).density << std::endl;
   } // for
 
   } // scope
