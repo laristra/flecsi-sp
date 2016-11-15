@@ -104,6 +104,11 @@ private:
 
 #endif // FLECSI_MESH_DIMENSION
 
+enum class cell_type_t : size_t {
+  unknown,
+  domain_boundary
+}; // enum cell_type_t
+
 ///
 // \struct minimal_cell_t
 // \breif FIXME
@@ -119,8 +124,8 @@ struct minimal_cell_t
   //
   // \param mesh FIXME
   ///
-  minimal_cell_t(topology::mesh_topology_base_t & mesh)
-    : mesh_(mesh) {}
+  minimal_cell_t(topology::mesh_topology_base_t & mesh, cell_type_t type)
+    : mesh_(mesh), type_(type) {}
 
   std::vector<size_t>
   create_entities(
@@ -141,9 +146,16 @@ struct minimal_cell_t
     return 1.0;
   } // volume
 
+  cell_type_t
+  type()
+  {
+    return type_;
+  } // type
+
 private:
 
   topology::mesh_topology_base_t & mesh_;
+  cell_type_t type_;
 
 }; // class minimal_cell_t
 

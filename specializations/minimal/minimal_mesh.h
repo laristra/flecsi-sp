@@ -91,10 +91,11 @@ public:
   ///
   cell_t *
   make_cell(
-    const std::initializer_list<vertex_t *> & vertices
+    const std::initializer_list<vertex_t *> & vertices,
+    cell_type_t type
   )
   {
-    auto c = base_t::make<cell_t>(*this);
+    auto c = base_t::make<cell_t>(*this, type);
     base_t::add_entity<dimension, 0>(c);
     base_t::init_entity<0, dimension, 0>(c, vertices);
     return c;

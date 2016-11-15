@@ -33,12 +33,14 @@ protected:
 
     for(size_t j(0); j<N; ++j) {
       for(size_t i(0); i<N; ++i) {
+        bool is_domain_boundary = i==0 || j==0 || i==(N-1) || j==(N-1);
         m.make_cell({
           vs[ i    + ( j    * width)],
           vs[(i+1) + ( j    * width)],
           vs[(i+1) + ((j+1) * width)],
           vs[ i    + ((j+1) * width)]
-        });
+        }, is_domain_boundary ? cell_type_t::domain_boundary :
+          cell_type_t::unknown);
       } // for
     } // for
 
