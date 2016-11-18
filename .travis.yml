@@ -7,19 +7,20 @@ services:
 
 env:
   matrix:
-    - DOCKERBASE=flecsi:fedora_serial MPI=OFF DOCKERHUB=true
+    - DISTRO=fedora_serial MPI=OFF DOCKERHUB=true
+    - DISTRO=ubuntu_serial MPI=OFF DOCKERHUB=true
 
 script:
   - cp -vr docker ${HOME}/docker
-  - sed -i "1s/flecsi:fedora_serial/${DOCKERBASE}/" ${HOME}/docker/Dockerfile
+  - sed -i "1s/fedora_serial/${DISTRO}/" ${HOME}/docker/Dockerfile
   - cd ../../
   - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker
   - ccache -z
   - cp -r $HOME/.ccache ${HOME}/docker/ccache
   - docker build --build-arg MPI=${MPI}
-                -t flecsi/flecsi-sp:${DOCKERBASE#flecsi:} ${HOME}/docker/ &&
+                -t flecsi/flecsi-sp:${DISTRO} ${HOME}/docker/ &&
     rm -rf ${HOME}/.ccache &&
-    CON=$(docker run -d flecsi/flecsi-sp:${DOCKERBASE#flecsi:} /bin/bash) &&
+    CON=$(docker run -d flecsi/flecsi-sp:${DISTRO} /bin/bash) &&
     docker cp ${CON}:/home/flecsi/.ccache ${HOME}/
   - ccache -s
 
@@ -29,5 +30,5 @@ cache:
 after_success:
   - if [[ ${DOCKERHUB} = true && ${DOCKER_EMAIL} && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master ]]; then
       docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-      docker push "flecsi/flecsi-sp:${DOCKERBASE#flecsi:}";
+      docker push "flecsi/flecsi-sp:${DISTRO}";
     fi
