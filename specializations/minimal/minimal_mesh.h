@@ -30,6 +30,11 @@ namespace minimal {
     cells
   }; // enum minimal_index_spaces_t
 
+  enum minimal_cell_index_spaces_t : size_t {
+    interior,
+    boundary
+  }; // enum minimal_cell_index_spaces_t
+
 } // namespace minimal
 
 ///
@@ -71,6 +76,11 @@ public:
   {
     // Initialize domain 0 of the mesh topology.
     base_t::init<0>();
+
+    interior_cells_ =
+      base_t::entities<dimension, 0>().filter(is_interior);
+    boundary_cells_ =
+      base_t::entities<dimension, 0>().filter(is_domain_boundary);
   } // init
 
   ///
@@ -163,7 +173,51 @@ public:
     return base_t::entities<dimension, 0>(e);
   } // cells
 
+  auto
+  cells(
+    size_t is
+  )
+  {
+    switch(is) {
+      case minimal::interior:
+        return interior_cells_;
+      case minimal::boundary:
+        return boundary_cells_;
+    } // switch
+  } // cells
+
 private:
+
+  ///
+  // Predicate function to create index space for accessing
+  // domain boundary cells.
+  ///
+  static
+  bool
+  is_domain_boundary(
+    cell_t * c
+  )
+  {
+    return c->type() == cell_type_t::domain_boundary;
+  } // is_domain_boundary
+
+  ///
+  // Predicate function to create index space for accessing
+  // interior cells.
+  ///
+  static
+  bool
+  is_interior(
+    cell_t * c
+  )
+  {
+    return !is_domain_boundary(c);
+  } // is_interior
+
+  topology::index_space<
+    topology::domain_entity<0, cell_t>, false, true, false> interior_cells_;
+  topology::index_space<
+    topology::domain_entity<0, cell_t>, false, true, false> boundary_cells_;
 
 }; // class minimal_mesh_t
 
