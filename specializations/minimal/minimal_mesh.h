@@ -77,8 +77,13 @@ public:
     // Initialize domain 0 of the mesh topology.
     base_t::init<0>();
 
+    // Use a predicate function to create the interior cells
+    // index space
     interior_cells_ =
       base_t::entities<dimension, 0>().filter(is_interior);
+
+    // Use a predicate function to create the domain boundary cells
+    // index space
     boundary_cells_ =
       base_t::entities<dimension, 0>().filter(is_domain_boundary);
   } // init
@@ -183,6 +188,8 @@ public:
         return interior_cells_;
       case minimal::boundary:
         return boundary_cells_;
+      default:
+        assert(false && "unknown index space");
     } // switch
   } // cells
 

@@ -35,8 +35,18 @@ void driver(int argc, char ** argv) {
   {
   auto cell = get_accessor(mesh, solver, pressure, double, dense, 0);
 
-  for(auto c: mesh.cells(boundary)) {
+  for(auto c: mesh.cells(interior)) {
     cell[c] = 1.0;
+  } // for
+
+  } // scope
+
+  // iterate over the boundary cells
+  {
+  auto cell = get_accessor(mesh, solver, pressure, double, dense, 0);
+
+  for(auto c: mesh.cells(boundary)) {
+    cell[c] = 2.0;
   } // for
 
   } // scope
