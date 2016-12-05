@@ -178,14 +178,6 @@ void driver(int argc, char ** argv) {
 
   } // scope
 
-  for(auto c: mesh.cells()) {
-    for(auto sc: c.cells()) {
-      for(auto f: sc.faces()) {
-        // f -> cf
-      } // for
-    } // for
-  } // for
-
 } // driver
 
 #endif // mmstate_h
