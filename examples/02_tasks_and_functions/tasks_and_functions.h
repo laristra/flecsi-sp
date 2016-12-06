@@ -183,19 +183,19 @@ void driver(int argc, char ** argv) {
   auto mats = get_accessor(m, hydro, materials, material_t, dense, 0);
 
   for(size_t i(0); i<4; ++i) {
-    mats[i] = copper_t(2.0, 2.0);
+    mats(i) = copper_t(2.0, 2.0);
   } // for
 
   for(size_t i(4); i<8; ++i) {
-    mats[i] = steel_t(2.0, 2.0);
+    mats(i) = steel_t(2.0, 2.0);
   } // for
 
   for(size_t i(8); i<10; ++i) {
-    mats[i] = silver_t(2.0, 2.0);
+    mats(i) = silver_t(2.0, 2.0);
   } // for
 
   for(size_t i(0); i<10; ++i) {
-    std::cout << mats[i].eos() << std::endl;
+    std::cout << mats(i).eos() << std::endl;
   } // for
 
 } // driver

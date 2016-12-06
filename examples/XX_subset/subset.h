@@ -33,30 +33,30 @@ void driver(int argc, char ** argv) {
 
   // iterate over the interior cells
   {
-  auto cell = get_accessor(mesh, solver, pressure, double, dense, 0);
+  auto p = get_accessor(mesh, solver, pressure, double, dense, 0);
 
   for(auto c: mesh.cells(interior)) {
-    cell[c] = 1.0;
+    p(c) = 1.0;
   } // for
 
   } // scope
 
   // iterate over the boundary cells
   {
-  auto cell = get_accessor(mesh, solver, pressure, double, dense, 0);
+  auto p = get_accessor(mesh, solver, pressure, double, dense, 0);
 
   for(auto c: mesh.cells(boundary)) {
-    cell[c] = 2.0;
+    p(c) = 2.0;
   } // for
 
   } // scope
 
   // iterate over all cells
   {
-  auto cell = get_accessor(mesh, solver, pressure, double, dense, 0);
+  auto p = get_accessor(mesh, solver, pressure, double, dense, 0);
 
   for(auto c: mesh.cells()) {
-    std::cout << c->id<0>() << " " << cell[c] << std::endl;
+    std::cout << c->id<0>() << " " << p(c) << std::endl;
   } // for
 
   } // scope
