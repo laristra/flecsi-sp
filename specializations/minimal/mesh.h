@@ -7,7 +7,7 @@
 #define felcsisp_minimal_mesh_h
 
 #include "flecsi-sp/geometry/point.h"
-#include "flecsi-sp/minimal/minimal_types.h"
+#include "flecsi-sp/minimal/types.h"
 
 ///
 // \file minimal_mesh.h

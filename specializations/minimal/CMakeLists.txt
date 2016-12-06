@@ -4,10 +4,10 @@
 #~----------------------------------------------------------------------------~#
 
 set(minimal_HEADERS
-  minimal_config.h
-  minimal_entity_types.h
-  minimal_mesh.h
-  minimal_types.h
+  config.h
+  entity_types.h
+  mesh.h
+  types.h
   PARENT_SCOPE
 )
 

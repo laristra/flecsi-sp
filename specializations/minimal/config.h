@@ -9,7 +9,7 @@
 #include "flecsi-sp/geometry/point.h"
 
 ///
-// \file minimal_basic_types.h
+// \file minimal/config.h
 // \authors bergen bird
 // \date Initial file creation: Oct 19, 2016
 ///

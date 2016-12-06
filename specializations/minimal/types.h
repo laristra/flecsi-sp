@@ -9,7 +9,7 @@
 #include <flecsi/topology/mesh_topology.h>
 
 #include "flecsi-sp/geometry/point.h"
-#include "flecsi-sp/minimal/minimal_entity_types.h"
+#include "flecsi-sp/minimal/entity_types.h"
 
 ///
 // \file minimal_types.h
