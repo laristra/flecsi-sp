@@ -18,9 +18,9 @@ script:
   - ccache -z
   - cp -r $HOME/.ccache ${HOME}/docker/ccache
   - docker build --build-arg MPI=${MPI}
-                -t flecsi/flecsi-sp:${DISTRO} ${HOME}/docker/ &&
+                -t ${TRAVIS_REPO_SLUG}:${DISTRO} ${HOME}/docker/ &&
     rm -rf ${HOME}/.ccache &&
-    CON=$(docker run -d flecsi/flecsi-sp:${DISTRO} /bin/bash) &&
+    CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO} /bin/bash) &&
     docker cp ${CON}:/home/flecsi/.ccache ${HOME}/
   - ccache -s
 
@@ -30,5 +30,5 @@ cache:
 after_success:
   - if [[ ${DOCKERHUB} = true && ${DOCKER_EMAIL} && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master ]]; then
       docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-      docker push "flecsi/flecsi-sp:${DISTRO}";
+      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}";
     fi
