@@ -128,7 +128,7 @@ struct minimal_types_t
       {
         switch(D) {
           case 1:
-            return mesh->make<edge_t>(*mesh);
+            return mesh->make<edge_t>(*mesh,edge_type_t::interior_edge);
 
           default:
             assert(false && "invalid topological dimension");
