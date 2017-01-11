@@ -79,8 +79,12 @@ struct minimal_types_t
   ///
   using connectivities =
     std::tuple<
+      std::tuple<domain_<0>, vertex_t, edge_t>,
       std::tuple<domain_<0>, vertex_t, cell_t>,
-      std::tuple<domain_<0>, cell_t, vertex_t>
+      std::tuple<domain_<0>, edge_t, vertex_t>,
+      std::tuple<domain_<0>, edge_t, cell_t>,
+      std::tuple<domain_<0>, cell_t, vertex_t>,
+      std::tuple<domain_<0>, cell_t, edge_t>
     >;
 #if 0
   using connectivities =
