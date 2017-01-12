@@ -13,7 +13,7 @@
 #include <flecsi/data/data.h>
 
 // Files from FleCSI-SP
-#include <flecsi-sp/minimal/minimal_mesh.h>
+#include <flecsi-sp/minimal/mesh.h>
 
 // Basic mesh initialization
 #include "../common/init_mesh.h"
