@@ -43,6 +43,7 @@ endif()
 #------------------------------------------------------------------------------#
 
 cinch_add_library_target(flecsi-sp specializations)
+list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
 
 #------------------------------------------------------------------------------#
 # Set header suffix regular expression

@@ -3,7 +3,7 @@
 # All rights reserved
 #~----------------------------------------------------------------------------~#
 
-set(mesh_HEADERS
+set(burton_HEADERS
   burton.h
 
   burton_io_exodus.h
@@ -38,7 +38,7 @@ set(mesh_HEADERS
 )
 
 
-set(mesh_SOURCES
+set(burton_SOURCES
   burton_element.cc
   burton_hexahedron.cc
   burton_polygon.cc
@@ -55,7 +55,7 @@ set(mesh_SOURCES
 # get a relative path
 file(RELATIVE_PATH DATA_DIR "${CMAKE_CURRENT_SOURCE_DIR}" ${FleCSI_SP_DATA_DIR})
 
-cinch_add_unit(mesh
+cinch_add_unit(burton
     SOURCES 
       test/burton_test_base.h
       test/burton_create_test.h
