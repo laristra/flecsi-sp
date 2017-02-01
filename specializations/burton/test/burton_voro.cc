@@ -14,7 +14,7 @@
 #include "burton_voro_test.h"
 
 // user includes
-#include "ale/mesh/voronoi.h"
+#include "../voronoi.h"
 
 #if defined(HAVE_EXODUS) && defined(HAVE_SHAPO)
 

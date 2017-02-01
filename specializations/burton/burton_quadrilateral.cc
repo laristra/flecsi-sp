@@ -4,8 +4,8 @@
  *~--------------------------------------------------------------------------~*/
 
 // user includes
-#include "ale/mesh/burton/burton_mesh_topology.h"
-#include "ale/mesh/burton/burton_quadrilateral.h"
+#include "burton_mesh_topology.h"
+#include "burton_quadrilateral.h"
 
 
 namespace ale {

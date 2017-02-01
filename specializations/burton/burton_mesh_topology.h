@@ -10,7 +10,7 @@
 #pragma once
 
 // user incldues
-#include "ale/mesh/burton/burton_types.h"
+#include "burton_types.h"
 #include "flecsi/topology/mesh_types.h"
 
 

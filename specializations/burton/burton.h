@@ -10,7 +10,7 @@
 
 // user includes
 #include "flecsi/io/io.h"
-#include "ale/mesh/burton/burton_mesh.h"
+#include "burton_mesh.h"
 
 
 
@@ -53,11 +53,11 @@ using namespace ale::mesh::burton;
 // Delayed includes
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "ale/mesh/burton/burton_io_exodus.h"
-#include "ale/mesh/burton/burton_io_tecplot.h"
-#include "ale/mesh/burton/burton_io_vtk.h"
-#include "ale/mesh/burton/burton_io_vtu.h"
-#include "ale/mesh/burton/burton_io_vtm.h"
+#include "burton_io_exodus.h"
+#include "burton_io_tecplot.h"
+#include "burton_io_vtk.h"
+#include "burton_io_vtu.h"
+#include "burton_io_vtm.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // load some things

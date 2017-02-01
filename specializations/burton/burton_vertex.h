@@ -10,9 +10,9 @@
 #pragma once
 
 // user includes
-#include "ale/geom/shapes/geometric_shapes.h"
-#include "ale/mesh/burton/burton_config.h"
-#include "ale/utils/errors.h"
+#include "geom/shapes/geometric_shapes.h"
+#include "burton_config.h"
+#include "utils/errors.h"
 #include "flecsi/topology/mesh_types.h"
 
 

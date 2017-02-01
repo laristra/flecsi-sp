@@ -4,9 +4,9 @@
  *~--------------------------------------------------------------------------~*/
 
 // user includes
-#include "ale/math/general.h"
-#include "ale/mesh/burton/burton_mesh_topology.h"
-#include "ale/mesh/burton/burton_element.h"
+#include "math/general.h"
+#include "burton/burton_mesh_topology.h"
+#include "burton/burton_element.h"
 
 
 namespace ale {

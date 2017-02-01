@@ -11,11 +11,11 @@
 
 // user includes
 #include "flecsi/io/io_base.h"
-#include "ale/mesh/burton/burton_mesh.h"
+#include "burton_mesh.h"
 #ifdef HAVE_VTK
-#include "ale/mesh/vtk_utils.h"
+#include "vtk_utils.h"
 #endif
-#include "ale/utils/errors.h"
+#include "utils/errors.h"
 
 // vtk doesnt like double-precision
 #ifdef DOUBLE_PRECISION

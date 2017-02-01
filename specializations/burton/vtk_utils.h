@@ -10,7 +10,7 @@
 
 
 // user includes
-#include "ale/io/vtk.h"
+#include "io/vtk.h"
 
 #ifdef HAVE_VTK
 #  include <vtkCellArray.h>

@@ -10,10 +10,10 @@
 #pragma once
 
 // user includes
-#include "ale/common/types.h"
-#include "ale/geom/point.h"
-#include "ale/math/vector.h"
-#include "ale/utils/fixed_vector.h"
+#include "common/types.h"
+#include "geom/point.h"
+#include "math/vector.h"
+#include "utils/fixed_vector.h"
 #include "flecsi/utils/bitfield.h"
 #include "flecsi/data/data.h"
 

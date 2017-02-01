@@ -11,9 +11,9 @@
 
 // user includes
 #include "flecsi/io/io_base.h"
-#include "ale/mesh/burton/burton_mesh.h"
-#include "ale/utils/errors.h"
-#include "ale/utils/string_utils.h"
+#include "burton_mesh.h"
+#include "utils/errors.h"
+#include "utils/string_utils.h"
 
 #ifdef HAVE_TECIO
 #  include <TECIO.h>

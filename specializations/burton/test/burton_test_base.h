@@ -9,7 +9,7 @@
 #pragma once
 
 // user includes
-#include "ale/mesh/burton/burton.h"
+#include "../burton.h"
 
 // system includes
 #include <cinchtest.h>

@@ -10,20 +10,20 @@
 #pragma once
 
 // user incldues
-#include "ale/mesh/burton/burton_vertex.h"
-#include "ale/mesh/burton/burton_corner.h"
-#include "ale/mesh/burton/burton_element.h"
-#include "ale/mesh/burton/burton_wedge.h"
+#include "burton_vertex.h"
+#include "burton_corner.h"
+#include "burton_element.h"
+#include "burton_wedge.h"
 
-#include "ale/mesh/burton/burton_triangle.h"
-#include "ale/mesh/burton/burton_quadrilateral.h"
-#include "ale/mesh/burton/burton_polygon.h"
-#include "ale/mesh/burton/burton_hexahedron.h"
-#include "ale/mesh/burton/burton_tetrahedron.h"
-#include "ale/mesh/burton/burton_polyhedron.h"
+#include "burton_triangle.h"
+#include "burton_quadrilateral.h"
+#include "burton_polygon.h"
+#include "burton_hexahedron.h"
+#include "burton_tetrahedron.h"
+#include "burton_polyhedron.h"
 
 #include "flecsi/topology/mesh_topology.h"
-#include "ale/mesh/burton/burton_config.h"
+#include "burton_config.h"
 
 namespace ale {
 namespace mesh {

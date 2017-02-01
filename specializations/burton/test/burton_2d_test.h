@@ -15,7 +15,7 @@
 #include "burton_test_base.h"
 
 // user includes
-#include "ale/mesh/factory.h"
+#include "../factory.h"
 
 // some general using statements
 using std::vector;

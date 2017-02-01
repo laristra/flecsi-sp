@@ -10,9 +10,9 @@
 #pragma once
 
 // user includes
-#include "ale/geom/shapes/triangle.h"
-#include "ale/mesh/burton/burton_vertex.h"
-#include "ale/mesh/burton/burton_element.h"
+#include "geom/shapes/triangle.h"
+#include "burton_vertex.h"
+#include "burton_element.h"
 
 
 namespace ale {

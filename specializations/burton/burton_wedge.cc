@@ -4,8 +4,8 @@
  *~--------------------------------------------------------------------------~*/
 
 // user includes
-#include "ale/mesh/burton/burton_wedge.h"
-#include "ale/mesh/burton/burton_mesh_topology.h"
+#include "burton_wedge.h"
+#include "burton_mesh_topology.h"
 
 
 namespace ale {

@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes
-#include "ale/geom/shapes/quadrilateral.h"
-#include "ale/mesh/burton/burton_element.h"
+#include "geom/shapes/quadrilateral.h"
+#include "burton_element.h"
 
 
 namespace ale {

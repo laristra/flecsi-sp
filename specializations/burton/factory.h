@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes
-#include "ale/math/constants.h"
-#include "ale/math/matrix.h"
+#include "math/constants.h"
+#include "math/matrix.h"
 
 // system includes
 #include<cmath>

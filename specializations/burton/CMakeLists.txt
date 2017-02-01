@@ -3,51 +3,42 @@
 # All rights reserved
 #~----------------------------------------------------------------------------~#
 
+file(GLOB headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/detail/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/common/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/geom/shapes/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/io/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/math/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/math/detail/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/std/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/*.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/detail/*.h
+)
+
+file(GLOB sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
+  ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/detail/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/common/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/geom/shapes/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/io/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/math/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/math/detail/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/std/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/*.cc
+  ${CMAKE_CURRENT_SOURCE_DIR}/utils/detail/*.cc
+)
+
 set(burton_HEADERS
-  burton.h
-
-  burton_io_exodus.h
-  burton_io_tecplot.h
-  burton_io_vtk.h
-  burton_io_vtm.h
-  burton_io_vtu.h
-
-  burton_config.h
-  burton_mesh.h
-  burton_mesh_topology.h
-  burton_types.h
-
-  burton_corner.h
-  burton_element.h
-  burton_vertex.h
-  burton_wedge.h
-
-  burton_triangle.h
-  burton_quadrilateral.h
-  burton_polygon.h
-
-  burton_tetrahedron.h
-  burton_hexahedron.h
-  burton_polyhedron.h
-
-  factory.h
-  voronoi.h  detail/voronoi_impl.h
-  vtk_utils.h
-
+  ${headers}
   PARENT_SCOPE
 )
 
 
 set(burton_SOURCES
-  burton_element.cc
-  burton_hexahedron.cc
-  burton_polygon.cc
-  burton_polyhedron.cc
-  burton_quadrilateral.cc
-  burton_tetrahedron.cc
-  burton_triangle.cc
-  burton_wedge.cc
-  burton_vertex.cc
+  ${sources} 
   PARENT_SCOPE
 )
 
