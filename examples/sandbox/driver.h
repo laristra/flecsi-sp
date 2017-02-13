@@ -30,8 +30,15 @@ void driver(int argc, char ** argv) {
   // Register cell state
   register_data(mesh, hydro, cell_state, cell_state_t, dense, 2, cells);
 
-  for(auto z: mesh.cells()) {
-    
+  auto ms = get_accessor(mesh, hydro, mat_state_t, 0);
+  for(auto c: mesh.cells()) {
+    ms(c).mass = 0.0;
+
+    for(auto n: mesh.cells(c)) {
+    } // for
+
+    for(auto v: mesh.vertices(c)) {
+    } // for
   } // for
 
 } // driver
