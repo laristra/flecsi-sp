@@ -29,11 +29,11 @@ void driver(int argc, char ** argv) {
   ///
   //
   ///
-	register_data(mesh, solver, pressure, double, dense, 1, cells);
+	flecsi_register_data(mesh, solver, pressure, double, dense, 1, cells);
 
   // iterate over the interior cells
   {
-  auto p = get_accessor(mesh, solver, pressure, double, dense, 0);
+  auto p = flecsi_get_accessor(mesh, solver, pressure, double, dense, 0);
 
   for(auto c: mesh.cells(interior)) {
     p(c) = 1.0;
@@ -43,7 +43,7 @@ void driver(int argc, char ** argv) {
 
   // iterate over the boundary cells
   {
-  auto p = get_accessor(mesh, solver, pressure, double, dense, 0);
+  auto p = flecsi_get_accessor(mesh, solver, pressure, double, dense, 0);
 
   for(auto c: mesh.cells(boundary)) {
     p(c) = 2.0;
@@ -53,7 +53,7 @@ void driver(int argc, char ** argv) {
 
   // iterate over all cells
   {
-  auto p = get_accessor(mesh, solver, pressure, double, dense, 0);
+  auto p = flecsi_get_accessor(mesh, solver, pressure, double, dense, 0);
 
   for(auto c: mesh.cells()) {
     std::cout << c->id<0>() << " " << p(c) << std::endl;

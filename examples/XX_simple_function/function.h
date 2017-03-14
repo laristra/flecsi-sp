@@ -16,15 +16,15 @@ double sum(double x, double y) {
   return x+y;
 } // sum
 
-register_function(sum);
+flecsi_register_function(sum);
 
-define_function_type(example_function_t, double, double, double);
+flecsi_define_function_type(example_function_t, double, double, double);
 
 void driver(int argc, char ** argv) {
 
-  example_function_t example_sum = function_handle(sum);
+  example_function_t example_sum = flecsi_function_handle(sum);
 
-  auto result = execute_function(example_sum, 2.0, 2.0);
+  auto result = flecsi_execute_function(example_sum, 2.0, 2.0);
 
   std::cout << "Result: " << result << std::endl;
 

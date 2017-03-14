@@ -16,35 +16,35 @@
 #include <flecsi/data/data.h>
 
 // Files from flecsi-sp
-#include <flecsi-sp/minimal/minimal_mesh.h>
+#include <flecsi-sp/minimal/mesh.h>
 
 #include "../common/init_mesh.h"
 
 using namespace flecsi;
 using namespace flecsi::data;
 
-void driver(int argc, char ** argv) {
-	minimal_mesh_t m;
+void driver(int argc, char **argv) {
+  minimal_mesh_t m;
 
-	init_mesh(m);
+  init_mesh(m);
 
-	register_data(m, solver, unknowns, double, dense, 2, vertices);
-	register_data(m, solver, p, double, sparse, 2, vertices, 3);
+  flecsi_register_data(m, solver, unknowns, double, dense, 2, vertices);
+  flecsi_register_data(m, solver, p, double, sparse, 2, vertices, 3);
 
   {
-  auto ap = get_mutator(m, solver, p, double, sparse, 0, 3);
+    auto ap = flecsi_get_mutator(m, solver, p, double, sparse, 0, 3);
 
-  for(auto v: m.vertices()) {
-    for(size_t i(0); i<3; ++i) {
-      ap(v, i) = 1.0;
+    for (auto v: m.vertices()) {
+      for (size_t i(0); i < 3; ++i) {
+        ap(v, i) = 1.0;
+      } // for
     } // for
-  } // for
 
   } // scope
 
-  auto u = get_accessor(m, solver, unknowns, double, dense, 0);
+  auto u = flecsi_get_accessor(m, solver, unknowns, double, dense, 0);
 
-  for(auto v: m.vertices()) {
+  for (auto v: m.vertices()) {
     std::cout << v->coordinates() << std::endl;
     u[v] = 0.0;
   } // for

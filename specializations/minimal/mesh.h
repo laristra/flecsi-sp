@@ -159,6 +159,14 @@ public:
     return base_t::entities<0, 0>(e);
   } // vertices
 
+  template <size_t M, class E>
+  decltype(auto) vertices(const flecsi::topology::domain_entity<M, E> & e) const
+  {
+    return
+      base_t::template entities<vertex_t::dimension, M, vertex_t::domain>(
+        e.entity()
+      );
+  }
   ///
   //
   ///
@@ -195,6 +203,14 @@ public:
     } // switch
   } // cells
 
+  template <size_t M, class E>
+  decltype(auto) cells(const flecsi::topology::domain_entity<M, E> & e) const
+  {
+    return
+      base_t::template entities<cell_t::dimension, M, cell_t::domain>(
+        e.entity()
+      );
+  }
 private:
 
   ///

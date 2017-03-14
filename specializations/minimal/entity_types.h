@@ -28,7 +28,8 @@ struct minimal_vertex_t
     minimal_config_t::num_domains>
 {
   using point_t = minimal_config_t::point_t;
-
+  static constexpr auto dimension = 0;
+  static constexpr auto domain = 0;
   ///
   // Constructor.
   //
@@ -64,6 +65,8 @@ struct minimal_edge_t
   : public topology::mesh_entity_t<1,
     minimal_config_t::num_domains>
 {
+  static constexpr auto dimension = 1;
+  static constexpr auto domain = 0;
   ///
   // Constructor.
   //
@@ -118,7 +121,8 @@ struct minimal_cell_t
     minimal_config_t::num_domains>
 {
   using real_t = minimal_config_t::real_t;
-
+  static constexpr auto dimension = 2;
+  static constexpr auto domain = 0;
   ///
   // Constructor.
   //

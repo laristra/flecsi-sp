@@ -19,14 +19,14 @@ double gruneisen(double r, double e) {
 	return r+e+1.8;
 } // gruneisen
 
-register_function(gruneisen);
+flecsi_register_function(gruneisen);
 
 // FIXME: Add real physics.
 double sesame(double r, double e) {
 	return r+e+27.0;
 } // sesame
 
-register_function(sesame);
+flecsi_register_function(sesame);
 
 //----------------------------------------------------------------------------//
 // Stress functions.
@@ -37,21 +37,21 @@ double ptw(double var1, double var2) {
 	return var1+var2+3.1415;
 } // ptw
 
-register_function(ptw);
+flecsi_register_function(ptw);
 
 // FIXME: Add real physics.
 double kospall(double var1, double var2) {
 	return var1+var2+2.8;
 } // kospall
 
-register_function(kospall);
+flecsi_register_function(kospall);
 
 //----------------------------------------------------------------------------//
 // Data structures.
 //----------------------------------------------------------------------------//
 
-define_function_type(eos_function_t, double, double, double);
-define_function_type(stress_function_t, double, double, double);
+flecsi_define_function_type(eos_function_t, double, double, double);
+flecsi_define_function_type(stress_function_t, double, double, double);
 
 ///
 /// Material state structure.
@@ -67,16 +67,16 @@ struct mat_state__ {
 	eos_function_t eos_function;
 
 	double eos(double r, double e) {
-		return execute_function(eos_function, r, e);
+		return flecsi_execute_function(eos_function, r, e);
 	} // eos
 
 	stress_function_t stress_function;
 
 	double stress(double var1, double var2) {
-		return execute_function(stress_function, var1, var2);
+		return flecsi_execute_function(stress_function, var1, var2);
 	} // stress
 
-	vector<D> velocity;
+	vector_t<D> velocity;
 }; // struct mat_state__
 
 ///
@@ -90,7 +90,7 @@ struct cell_state__ {
 	double pressure;
 	double sound_speed;
 
-	vector<D> velocity;
+	vector_t<D> velocity;
 }; // struct cell_state__
 
 #if 0
