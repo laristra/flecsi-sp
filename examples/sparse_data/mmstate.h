@@ -43,8 +43,10 @@ void driver(int argc, char ** argv) {
   // material volume fractions are stored using the sparse storage type,
   // while the macroscopic quantities use a dense storage type.
   ///
-	flecsi_register_data(mesh, solver, density, double, sparse, 1, cells, num_mats);
-	flecsi_register_data(mesh, solver, macro, cell_data_t, dense, 1, cells);
+	flecsi_register_data(mesh, solver, density, double, sparse,
+    1, cells, num_mats);
+	flecsi_register_data(mesh, solver, macro, cell_data_t, dense,
+    1, cells);
 
   // Initialize material data and cell volumes
   {
