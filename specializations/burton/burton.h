@@ -32,8 +32,9 @@ auto filter_boundary = []( auto && entities )
 // Alias mesh types
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 //! \brief The final 2d mesh type
 using burton_mesh_2d_t = burton_mesh_t<2>;
@@ -42,12 +43,13 @@ using burton_mesh_3d_t = burton_mesh_t<3>;
 
 }
 }
+}
 
 //! \brief Expose attributes and attachement sites to all namspaces.
 //! This is horrible but it has to be done other wise users need to 
-//! write stuff like has_attribute_at( ale::mesh::burton::persistent,
-//! ale::mesh::burton::vertex ).
-using namespace ale::mesh::burton;
+//! write stuff like has_attribute_at( flecsi::sp::burton::attributes::persistent,
+//! flecsi::sp::burton::attributes::vertex ).
+using namespace flecsi::sp::burton::attributes;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Delayed includes
@@ -63,13 +65,15 @@ using namespace ale::mesh::burton;
 // load some things
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
-//! \brief bring write/read mesh into the ale::mesh namespace
+//! \brief bring write/read mesh into the flecsi::sp::burton namespace
 using flecsi::io::write_mesh;
-//! \brief bring write/read mesh into the ale::mesh namespace
+//! \brief bring write/read mesh into the flecsi::sp::burton namespace
 using flecsi::io::read_mesh;
 
+}
 }
 }

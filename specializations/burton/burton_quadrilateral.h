@@ -10,12 +10,13 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/quadrilateral.h"
+#include "geometry/shapes/quadrilateral.h"
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Provides a derived instance of burton_cell_t for multidimensional 
@@ -64,8 +65,8 @@ public:
   real_t min_length() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::quadrilateral<num_dimensions>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::quadrilateral<num_dimensions>::shape; };
 
   //----------------------------------------------------------------------------
   //! \brief create_entities function for burton_quadrilateral_cell_t.
@@ -279,8 +280,8 @@ public:
   real_t min_length() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::quadrilateral<num_dimensions>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::quadrilateral<num_dimensions>::shape; };
 
   //----------------------------------------------------------------------------
   //! \brief create_entities function for burton_quadrilateral_cell_t.
@@ -318,5 +319,6 @@ public:
 
 
 
+} // namespace
 } // namespace
 } // namespace

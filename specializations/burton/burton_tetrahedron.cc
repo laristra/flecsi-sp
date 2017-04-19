@@ -8,8 +8,9 @@
 #include "burton_tetrahedron.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 // 3D tetrahedron
@@ -20,7 +21,7 @@ burton_tetrahedron_t::point_t burton_tetrahedron_t::centroid() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::tetrahedron::centroid( 
+  return geometry::shapes::tetrahedron::centroid( 
     vs[0]->coordinates(), vs[1]->coordinates(), 
     vs[2]->coordinates(), vs[3]->coordinates() );
 }
@@ -30,7 +31,7 @@ burton_tetrahedron_t::point_t burton_tetrahedron_t::midpoint() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::tetrahedron::midpoint( 
+  return geometry::shapes::tetrahedron::midpoint( 
     vs[0]->coordinates(), vs[1]->coordinates(), 
     vs[2]->coordinates(), vs[3]->coordinates() );
 }
@@ -41,10 +42,11 @@ burton_tetrahedron_t::real_t burton_tetrahedron_t::volume() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::tetrahedron::volume( 
+  return geometry::shapes::tetrahedron::volume( 
     vs[0]->coordinates(), vs[1]->coordinates(), 
     vs[2]->coordinates(), vs[3]->coordinates() );
 }
 
+} // namespace
 } // namespace
 } // namespace

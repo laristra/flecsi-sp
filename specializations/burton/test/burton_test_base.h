@@ -15,14 +15,14 @@
 #include <cinchtest.h>
 
 //! \brief the mesh type
-using mesh_2d_t   = ale::mesh::burton_mesh_2d_t;
+using mesh_2d_t   = flecsi::sp::burton::burton_mesh_2d_t;
 //! \brief the mesh type
-using mesh_3d_t   = ale::mesh::burton_mesh_3d_t;
+using mesh_3d_t   = flecsi::sp::burton::burton_mesh_3d_t;
 
 // some general using statements
 using std::string;
-using ale::mesh::write_mesh;
-using ale::mesh::read_mesh;
+using flecsi::sp::burton::write_mesh;
+using flecsi::sp::burton::read_mesh;
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief base test fixture for burton

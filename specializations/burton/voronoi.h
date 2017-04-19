@@ -19,8 +19,9 @@
 #define DUMP_DIAGNOSTICS
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 //! a unique pointer type for shapo
 //! \tparam T the shapo type
@@ -148,4 +149,5 @@ T voronoi(
 } // voronoi
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

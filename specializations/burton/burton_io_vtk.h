@@ -40,8 +40,9 @@
 #include <fstream>
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -176,7 +177,7 @@ public:
     // WRITE HEADERS
     //--------------------------------------------------------------------------
     
-    using ale::io::vtk_writer;
+    using flecsi::sp::io::vtk_writer;
 
     // open the file
     vtk_writer writer;
@@ -456,4 +457,5 @@ static bool burton_3d_vtk_registered =
 //! @}
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

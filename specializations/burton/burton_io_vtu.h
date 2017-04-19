@@ -39,8 +39,9 @@
 #include <cstring>
 #include <fstream>
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 
 
@@ -166,4 +167,5 @@ static bool burton_3d_vtu_registered =
 //! @}
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

@@ -10,12 +10,13 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/polygon.h"
+#include "geometry/shapes/polygon.h"
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Provides some multidimensional polygon types.
@@ -60,8 +61,8 @@ public:
   real_t area() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::polygon<num_dimensions>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::polygon<num_dimensions>::shape; };
 
   //----------------------------------------------------------------------------
   //! \brief create_entities function for burton_polygonal_cell_t.
@@ -191,8 +192,8 @@ public:
   real_t area() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::polygon<num_dimensions>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::polygon<num_dimensions>::shape; };
 
 
   //----------------------------------------------------------------------------
@@ -224,5 +225,6 @@ public:
 };
 
 
+} // namespace
 } // namespace
 } // namespace

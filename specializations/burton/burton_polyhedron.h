@@ -10,12 +10,13 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/polyhedron.h"
+#include "geometry/shapes/polyhedron.h"
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief The burton_polyhedron_t type provides a derived instance of
@@ -58,8 +59,8 @@ public:
   real_t volume() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::polyhedron<point_t>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::polyhedron<point_t>::shape; };
 
   //----------------------------------------------------------------------------
   //! \brief create_entities function for burton_polyhedron_cell_t.
@@ -316,5 +317,6 @@ private:
 
 
 
+} // namespace
 } // namespace
 } // namespace

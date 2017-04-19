@@ -8,8 +8,9 @@
 #include "burton_polyhedron.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 // 3D polyhedron
@@ -20,7 +21,7 @@ burton_polyhedron_t::point_t burton_polyhedron_t::centroid() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto fs = msh->template entities<  face_t::dimension,   face_t::domain>(this);
-  geom::shapes::polyhedron<point_t> poly;     
+  geometry::shapes::polyhedron<point_t> poly;     
   for ( auto f : fs ) {
     auto cs = msh->template entities<cell_t::dimension, cell_t::domain>(f);
     auto reverse = (cs[0] != this); // FIXME: reverse
@@ -33,7 +34,7 @@ burton_polyhedron_t::point_t burton_polyhedron_t::centroid() const
 burton_polyhedron_t::point_t burton_polyhedron_t::midpoint() const
 {
   auto coords = coordinates();
-  return geom::shapes::polyhedron<point_t>::midpoint( coords );
+  return geometry::shapes::polyhedron<point_t>::midpoint( coords );
 }
 
 
@@ -42,12 +43,13 @@ burton_polyhedron_t::real_t burton_polyhedron_t::volume() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto fs = msh->template entities<  face_t::dimension,   face_t::domain>(this);
-  geom::shapes::polyhedron<point_t> poly;     
+  geometry::shapes::polyhedron<point_t> poly;     
   for ( auto f : fs ) 
     poly.insert( f->coordinates() );
   return poly.volume();
 }
 
 
+} // namespace
 } // namespace
 } // namespace

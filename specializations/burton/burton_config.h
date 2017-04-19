@@ -11,14 +11,15 @@
 
 // user includes
 #include "common/types.h"
-#include "geom/point.h"
+#include "geometry/point.h"
 #include "math/vector.h"
 #include "utils/fixed_vector.h"
 #include "flecsi/utils/bitfield.h"
 #include "flecsi/data/data.h"
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The mesh traits
@@ -52,7 +53,7 @@ struct burton_config_t {
   using integer_t = common::integer_t;
 
   //! A point type with real_t data and mesh dimension.
-  using point_t = geom::point<real_t, num_dimensions>;
+  using point_t = geometry::point<real_t, num_dimensions>;
 
   //! A space ("physics") vector type with real_t data and mesh dimension.
   using vector_t = math::vector<real_t, num_dimensions>;
@@ -72,5 +73,6 @@ struct burton_config_t {
 };
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale
 

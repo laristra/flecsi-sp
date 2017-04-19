@@ -8,8 +8,9 @@
 #include "burton_mesh_topology.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 // some type aliases
 using burton_2d_vertex_t = burton_vertex_t<2>;
@@ -62,5 +63,6 @@ const burton_3d_vertex_t::tag_list_t &  burton_3d_vertex_t::tags() const
 }
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale
 

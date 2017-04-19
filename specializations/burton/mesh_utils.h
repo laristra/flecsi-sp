@@ -17,8 +17,9 @@
 // system includes
 #include <iomanip>
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Output the checksums of solution quantities.
@@ -158,5 +159,6 @@ int32_t checksum( T & mesh )
   return 0;
 }
 
+} // namespace
 } // namespace
 } // namespace

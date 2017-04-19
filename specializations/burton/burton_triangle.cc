@@ -8,8 +8,9 @@
 #include "burton_triangle.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 // some type aliases
 using burton_2d_triangle_t = burton_triangle_t<2>;
@@ -24,7 +25,7 @@ burton_2d_triangle_t::point_t burton_2d_triangle_t::centroid() const
 {
   auto msh = static_cast<const burton_2d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::centroid( 
+  return geometry::shapes::triangle<num_dimensions>::centroid( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -33,7 +34,7 @@ burton_2d_triangle_t::point_t burton_2d_triangle_t::midpoint() const
 {
   auto msh = static_cast<const burton_2d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::midpoint( 
+  return geometry::shapes::triangle<num_dimensions>::midpoint( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -42,7 +43,7 @@ burton_2d_triangle_t::real_t burton_2d_triangle_t::area() const
 {
   auto msh = static_cast<const burton_2d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::area( 
+  return geometry::shapes::triangle<num_dimensions>::area( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -73,7 +74,7 @@ burton_3d_triangle_t::point_t burton_3d_triangle_t::centroid() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::centroid( 
+  return geometry::shapes::triangle<num_dimensions>::centroid( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -82,7 +83,7 @@ burton_3d_triangle_t::point_t burton_3d_triangle_t::midpoint() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::midpoint( 
+  return geometry::shapes::triangle<num_dimensions>::midpoint( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -91,7 +92,7 @@ burton_3d_triangle_t::vector_t burton_3d_triangle_t::normal() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::normal( 
+  return geometry::shapes::triangle<num_dimensions>::normal( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -100,7 +101,7 @@ burton_3d_triangle_t::real_t burton_3d_triangle_t::area() const
 {
   auto msh = static_cast<const burton_3d_mesh_topology_t *>(mesh()); 
   auto vs = msh->template entities<vertex_t::dimension, vertex_t::domain>(this);
-  return geom::shapes::triangle<num_dimensions>::area( 
+  return geometry::shapes::triangle<num_dimensions>::area( 
     vs[0]->coordinates(), vs[1]->coordinates(), vs[2]->coordinates() );
 }
 
@@ -121,5 +122,6 @@ burton_3d_triangle_t::real_t burton_3d_triangle_t::min_length() const
   return min_length;
 }
 
+} // namespace 
 } // namespace 
 } // namespace 

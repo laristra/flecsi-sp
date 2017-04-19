@@ -29,8 +29,9 @@
 #endif
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 #ifdef HAVE_VTK 
 
@@ -664,5 +665,6 @@ static auto to_mesh( vtkUnstructuredGrid* ug )
 //##############################################################################
 //##############################################################################
 
+} // namespace
 } // namespace
 } // namespace

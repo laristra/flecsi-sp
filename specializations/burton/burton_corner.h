@@ -14,8 +14,9 @@
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 
 
@@ -101,4 +102,5 @@ public:
 };
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

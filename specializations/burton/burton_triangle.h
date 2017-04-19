@@ -10,12 +10,13 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/triangle.h"
+#include "geometry/shapes/triangle.h"
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Provides various triangular element type specializations.
@@ -63,8 +64,8 @@ public:
   real_t min_length() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::triangle<num_dimensions>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::triangle<num_dimensions>::shape; };
 
   //----------------------------------------------------------------------------
   //! \brief create_entities function for burton_triangle_cell_t.
@@ -218,8 +219,8 @@ public:
   real_t min_length() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::triangle<num_dimensions>::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::triangle<num_dimensions>::shape; };
 
 
   //----------------------------------------------------------------------------
@@ -250,5 +251,6 @@ public:
 
 };
 
+} // namespace
 } // namespace
 } // namespace

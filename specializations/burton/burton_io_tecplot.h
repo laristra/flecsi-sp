@@ -23,8 +23,9 @@
 #include <cstring>
 #include <fstream>
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 
 
@@ -1116,4 +1117,5 @@ static bool burton_3d_tecplot_plt_registered =
 
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

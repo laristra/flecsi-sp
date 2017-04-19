@@ -27,8 +27,9 @@
 // #define PARAVIEW_EXODUS_3D_REGION_BUGFIX
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1407,4 +1408,5 @@ static bool burton_3d_exodus_exo_registered =
 //! @}
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

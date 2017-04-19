@@ -11,12 +11,13 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/tetrahedron.h"
+#include "geometry/shapes/tetrahedron.h"
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Provides a derived instance of burton_cell_t for 3D tetrahedron '
@@ -55,8 +56,8 @@ public:
   real_t volume() const override;
 
   //! the cell type
-  geom::shapes::geometric_shapes_t type() const override 
-  { return geom::shapes::tetrahedron::shape; };
+  geometry::shapes::geometric_shapes_t type() const override 
+  { return geometry::shapes::tetrahedron::shape; };
 
   //----------------------------------------------------------------------------
   //! \brief create_entities function for burton_tetrahedron_cell_t.
@@ -337,5 +338,6 @@ public:
 
 
 
+} // namespace
 } // namespace
 } // namespace

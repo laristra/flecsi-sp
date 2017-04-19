@@ -12,6 +12,7 @@
 #include "burton_mesh_topology.h"
 #include "burton_types.h"
 #include "utils/errors.h"
+#include "utils/type_traits.h"
 
 #include "flecsi/data/data.h"
 #include "flecsi/execution/task.h"
@@ -22,11 +23,12 @@
 #include <sstream>
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 //! This namespace is used to expose enumerations and types.
-namespace burton {
+namespace attributes {
   
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The burton mesh index spaces.
@@ -200,19 +202,19 @@ public:
   size_t indices( size_t index_space_id ) const override
   {
     switch(index_space_id) {
-      case burton::vertices:
+      case attributes::vertices:
         return base_t::num_entities(vertex_t::dimension);
-      case burton::edges:
+      case attributes::edges:
         return base_t::num_entities(edge_t::dimension);
-      case burton::faces:
+      case attributes::faces:
         return base_t::num_entities(face_t::dimension);
-      case burton::cells:
+      case attributes::cells:
         return base_t::num_entities(cell_t::dimension);
-      case burton::corners:
+      case attributes::corners:
         return 
           base_t::template 
             num_entities<corner_t::dimension, corner_t::domain>();
-      case burton::wedges:
+      case attributes::wedges:
         return 
           base_t::template num_entities<wedge_t::dimension, wedge_t::domain>();
       default:
@@ -856,7 +858,7 @@ public:
   auto create_cell(
     V && verts,
     typename std::enable_if_t< 
-      std::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
+      utils::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
       std::remove_pointer_t<typename std::decay_t<V>::value_type>::num_dimensions == 2
     >* = nullptr ) 
   {
@@ -870,7 +872,7 @@ public:
   auto  create_cell( 
     std::initializer_list<V*> verts,
     typename std::enable_if_t< 
-      std::is_same_v<V, vertex_t> && V::num_dimensions == 2 
+      utils::is_same_v<V, vertex_t> && V::num_dimensions == 2 
     >* = nullptr ) 
   {
     return create_2d_element_from_verts_<cell_t>( verts );
@@ -884,7 +886,7 @@ public:
   auto create_cell(
     V && verts,
     typename std::enable_if_t< 
-      std::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
+      utils::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
       std::remove_pointer_t<typename std::decay_t<V>::value_type>::num_dimensions == 3
     >* = nullptr ) 
   {
@@ -898,7 +900,7 @@ public:
   auto  create_cell( 
     std::initializer_list<V*> verts,
     typename std::enable_if_t< 
-      std::is_same_v<V, vertex_t> && V::num_dimensions == 3
+      utils::is_same_v<V, vertex_t> && V::num_dimensions == 3
     >* = nullptr ) 
   {
     return create_3d_element_from_verts_( verts );
@@ -911,7 +913,7 @@ public:
   auto create_cell(
     F && faces,
     typename std::enable_if_t< 
-      std::is_same_v< typename std::decay_t<F>::value_type, face_t* >  &&
+      utils::is_same_v< typename std::decay_t<F>::value_type, face_t* >  &&
       std::remove_pointer_t<typename std::decay_t<F>::value_type>::num_dimensions == 3
     >* = nullptr ) 
   {
@@ -1005,22 +1007,22 @@ public:
 #endif
 
     // register cell data
-    flecsi_register_data(*this, mesh, cell_volume, real_t, dense, 1, burton::cells);
-    flecsi_register_data(*this, mesh, cell_centroid, vector_t, dense, 1, burton::cells);
-    flecsi_register_data(*this, mesh, cell_min_length, real_t, dense, 1, burton::cells);
+    flecsi_register_data(*this, mesh, cell_volume, real_t, dense, 1, attributes::cells);
+    flecsi_register_data(*this, mesh, cell_centroid, vector_t, dense, 1, attributes::cells);
+    flecsi_register_data(*this, mesh, cell_min_length, real_t, dense, 1, attributes::cells);
 
     // register face data
-    flecsi_register_data(*this, mesh, face_area, real_t, dense, 1, burton::faces);
-    flecsi_register_data(*this, mesh, face_normal, vector_t, dense, 1, burton::faces);
-    flecsi_register_data(*this, mesh, face_midpoint, vector_t, dense, 1, burton::faces);
+    flecsi_register_data(*this, mesh, face_area, real_t, dense, 1, attributes::faces);
+    flecsi_register_data(*this, mesh, face_normal, vector_t, dense, 1, attributes::faces);
+    flecsi_register_data(*this, mesh, face_midpoint, vector_t, dense, 1, attributes::faces);
 
     // register edge data
-    flecsi_register_data(*this, mesh, edge_midpoint, vector_t, dense, 1, burton::edges);
+    flecsi_register_data(*this, mesh, edge_midpoint, vector_t, dense, 1, attributes::edges);
     
     // register wedge data
-    flecsi_register_data(*this, mesh, wedge_facet_area, real_t, dense, 1, burton::wedges);
-    flecsi_register_data(*this, mesh, wedge_facet_normal, vector_t, dense, 1, burton::wedges);
-    flecsi_register_data(*this, mesh, wedge_facet_centroid, vector_t, dense, 1, burton::wedges);
+    flecsi_register_data(*this, mesh, wedge_facet_area, real_t, dense, 1, attributes::wedges);
+    flecsi_register_data(*this, mesh, wedge_facet_normal, vector_t, dense, 1, attributes::wedges);
+    flecsi_register_data(*this, mesh, wedge_facet_centroid, vector_t, dense, 1, attributes::wedges);
     
     // register time state
     flecsi_register_data(*this, mesh, time, real_t, global, 1 );
@@ -1032,17 +1034,17 @@ public:
     *step = 0;
 
     // register some flags for identifying boundarys and various other things
-    flecsi_register_data(*this, mesh, node_flags, bitfield_t, dense, 1, burton::vertices);
-    flecsi_register_data(*this, mesh, edge_flags, bitfield_t, dense, 1, burton::edges);
+    flecsi_register_data(*this, mesh, node_flags, bitfield_t, dense, 1, attributes::vertices);
+    flecsi_register_data(*this, mesh, edge_flags, bitfield_t, dense, 1, attributes::edges);
 
     auto point_flags = flecsi_get_accessor(*this, mesh, node_flags, bitfield_t, dense, 0);
     auto edge_flags = flecsi_get_accessor(*this, mesh, edge_flags, bitfield_t, dense, 0);
 
     // register some flags for associating boundaries with entities
-    flecsi_register_data(*this, mesh, node_tags, tag_list_t, dense, 1, burton::vertices);
-    flecsi_register_data(*this, mesh, edge_tags, tag_list_t, dense, 1, burton::edges);
-    flecsi_register_data(*this, mesh, face_tags, tag_list_t, dense, 1, burton::faces);
-    flecsi_register_data(*this, mesh, cell_tags, tag_list_t, dense, 1, burton::cells);
+    flecsi_register_data(*this, mesh, node_tags, tag_list_t, dense, 1, attributes::vertices);
+    flecsi_register_data(*this, mesh, edge_tags, tag_list_t, dense, 1, attributes::edges);
+    flecsi_register_data(*this, mesh, face_tags, tag_list_t, dense, 1, attributes::faces);
+    flecsi_register_data(*this, mesh, cell_tags, tag_list_t, dense, 1, attributes::cells);
 
     // now set the boundary flags.
     for ( auto f : faces() ) {
@@ -1062,7 +1064,7 @@ public:
     } // for
 
     // identify the cell regions
-    flecsi_register_data(*this, mesh, cell_region, size_t, dense, 1, burton::cells);
+    flecsi_register_data(*this, mesh, cell_region, size_t, dense, 1, attributes::cells);
     flecsi_register_data(*this, mesh, num_regions, size_t, global, 1);
 
     auto cell_region = flecsi_get_accessor(*this, mesh, cell_region, size_t, dense, 0);
@@ -1603,4 +1605,5 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh_t<M>& mesh)
 
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

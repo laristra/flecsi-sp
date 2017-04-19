@@ -40,8 +40,9 @@
 #include <fstream>
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the mesh reader and writer based on the vtm format.
@@ -576,4 +577,5 @@ static bool burton_vtm_registered =
 
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

@@ -6,29 +6,11 @@
 file(GLOB headers RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/*.h
   ${CMAKE_CURRENT_SOURCE_DIR}/detail/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/common/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/geom/shapes/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/io/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/math/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/math/detail/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/std/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils/*.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils/detail/*.h
 )
 
 file(GLOB sources RELATIVE ${CMAKE_CURRENT_SOURCE_DIR}
   ${CMAKE_CURRENT_SOURCE_DIR}/*.cc
   ${CMAKE_CURRENT_SOURCE_DIR}/detail/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/common/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/geom/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/geom/shapes/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/io/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/math/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/math/detail/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/std/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils/*.cc
-  ${CMAKE_CURRENT_SOURCE_DIR}/utils/detail/*.cc
 )
 
 set(burton_HEADERS

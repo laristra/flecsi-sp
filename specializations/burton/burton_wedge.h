@@ -10,13 +10,14 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/triangle.h"
+#include "geometry/shapes/triangle.h"
 #include "burton_vertex.h"
 #include "burton_element.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 
 //! forward decares
@@ -238,7 +239,7 @@ public:
     const point_t & e, //!< [in] The associated edge midpoint
     const point_t & f  //!< [in] The associated face midpoint
   ) {
-    return geom::shapes::triangle<num_dimensions>::normal( v, e, f );
+    return geometry::shapes::triangle<num_dimensions>::normal( v, e, f );
   }
 
   //! \brief The "right" orientation of the facet normal.
@@ -248,7 +249,7 @@ public:
     const point_t & e, //!< [in] The associated edge midpoint
     const point_t & f  //!< [in] The associated face midpoint
   ) {
-    return geom::shapes::triangle<num_dimensions>::normal( v, f, e );
+    return geometry::shapes::triangle<num_dimensions>::normal( v, f, e );
   }
 
   //! \brief Get the cell facet centroid
@@ -281,5 +282,6 @@ public:
 
 }; // struct burton_wedge_t
 
+} // namespace
 } // namespace
 } // namespace

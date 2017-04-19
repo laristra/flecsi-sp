@@ -17,8 +17,9 @@
 #include<cmath>
 #include<vector>
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Create a box mesh
@@ -254,4 +255,5 @@ void rotate( T & mesh, typename T::real_t degrees )
 }
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale

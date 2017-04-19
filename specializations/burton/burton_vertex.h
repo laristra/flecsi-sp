@@ -10,14 +10,15 @@
 #pragma once
 
 // user includes
-#include "geom/shapes/geometric_shapes.h"
+#include "geometry/shapes/geometric_shapes.h"
 #include "burton_config.h"
 #include "utils/errors.h"
 #include "flecsi/topology/mesh_types.h"
 
 
-namespace ale {
-namespace mesh {
+namespace flecsi {
+namespace sp {
+namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief The burton_vertex_t type provides an interface for managing
@@ -238,5 +239,6 @@ private:
 
 
 } // namespace mesh
+} // namespace ale
 } // namespace ale
 
