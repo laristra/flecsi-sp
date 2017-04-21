@@ -80,7 +80,7 @@ RUN cd .. && if [ ${SONARQUBE} ]; then \
        -Dsonar.github.pullRequest=${TRAVIS_PULL_REQUEST} \
        -Dsonar.github.repository=${TRAVIS_REPO_SLUG} \
        -Dsonar.github.oauth=${SONARQUBE_GITHUB_TOKEN}) \
-    -Dsonar.login=${SONARQUBE_TOKEN}; \
+    -Dsonar.login=${SONARQUBE_TOKEN} || true; \
 fi && cd -
 USER root
 RUN make install
