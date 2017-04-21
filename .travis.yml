@@ -12,8 +12,9 @@ env:
     - DISTRO=ubuntu_serial MPI=OFF COVERAGE=ON SONARQUBE=ON
 
 script:
+  - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
   - cp -vr docker ${HOME}/docker
-  - sed -i "1s/fedora_serial/${DISTRO}/" ${HOME}/docker/Dockerfile
+  - sed -i "1s/fedora_serial/${DISTRO}${TAG}/" ${HOME}/docker/Dockerfile
   - cd ../../
   - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker
   - cp -r $HOME/.ccache ${HOME}/docker/ccache
