@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,10 +10,10 @@
 #pragma once
 
 // user includes
-#include "common/types.h"
-#include "geometry/point.h"
-#include "math/vector.h"
-#include "utils/fixed_vector.h"
+#include "flecsi-sp/common/types.h"
+#include "flecsi-sp/geometry/point.h"
+#include "flecsi-sp/math/vector.h"
+#include "flecsi-sp/utils/fixed_vector.h"
 #include "flecsi/utils/bitfield.h"
 #include "flecsi/data/data.h"
 

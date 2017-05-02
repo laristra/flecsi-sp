@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -11,9 +11,9 @@
 
 // user includes
 #include "flecsi/io/io_base.h"
-#include "burton_mesh.h"
-#include "utils/errors.h"
-#include "utils/string_utils.h"
+#include "flecsi-sp/burton/burton_mesh.h"
+#include "flecsi-sp/utils/errors.h"
+#include "flecsi-sp/utils/string_utils.h"
 
 #ifdef HAVE_TECIO
 #  include <TECIO.h>

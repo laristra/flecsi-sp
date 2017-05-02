@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -11,7 +11,7 @@
 
 // user includes
 #include "flecsi/io/io_base.h"
-#include "burton_mesh.h"
+#include "flecsi-sp/burton/burton_mesh.h"
 
 
 #ifdef HAVE_EXODUS

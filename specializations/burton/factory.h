@@ -1,5 +1,5 @@
 /*~-------------------------------------------------------------------------~~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~-------------------------------------------------------------------------~~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes
-#include "math/constants.h"
-#include "math/matrix.h"
+#include "flecsi-sp/math/constants.h"
+#include "flecsi-sp/math/matrix.h"
 
 // system includes
 #include<cmath>

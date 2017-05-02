@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,9 +10,9 @@
 #pragma once
 
 // user includes
-#include "geometry/shapes/geometric_shapes.h"
-#include "burton_config.h"
-#include "utils/errors.h"
+#include "flecsi-sp/geometry/shapes/geometric_shapes.h"
+#include "flecsi-sp/burton/burton_config.h"
+#include "flecsi-sp/utils/errors.h"
 #include "flecsi/topology/mesh_types.h"
 
 

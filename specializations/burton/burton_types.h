@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,20 +10,20 @@
 #pragma once
 
 // user incldues
-#include "burton_vertex.h"
-#include "burton_corner.h"
-#include "burton_element.h"
-#include "burton_wedge.h"
+#include "flecsi-sp/burton/burton_vertex.h"
+#include "flecsi-sp/burton/burton_corner.h"
+#include "flecsi-sp/burton/burton_element.h"
+#include "flecsi-sp/burton/burton_wedge.h"
 
-#include "burton_triangle.h"
-#include "burton_quadrilateral.h"
-#include "burton_polygon.h"
-#include "burton_hexahedron.h"
-#include "burton_tetrahedron.h"
-#include "burton_polyhedron.h"
+#include "flecsi-sp/burton/burton_triangle.h"
+#include "flecsi-sp/burton/burton_quadrilateral.h"
+#include "flecsi-sp/burton/burton_polygon.h"
+#include "flecsi-sp/burton/burton_hexahedron.h"
+#include "flecsi-sp/burton/burton_tetrahedron.h"
+#include "flecsi-sp/burton/burton_polyhedron.h"
 
 #include "flecsi/topology/mesh_topology.h"
-#include "burton_config.h"
+#include "flecsi-sp/burton/burton_config.h"
 
 namespace flecsi {
 namespace sp {
