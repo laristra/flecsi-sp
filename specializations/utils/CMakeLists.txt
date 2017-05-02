@@ -1,11 +1,10 @@
 #~----------------------------------------------------------------------------~#
-# Copyright (c) 2014 Los Alamos National Security, LLC
+# Copyright (c) 2017 Los Alamos National Security, LLC
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
 
-set(common_HEADERS
+set(utils_HEADERS
   array_ref.h
-  detail
   errors.h
   exceptions.h
   fixed_vector.h
@@ -16,7 +15,7 @@ set(common_HEADERS
   PARENT_SCOPE
 )
 
-set(common_SOURCES
+set(utils_SOURCES
   PARENT_SCOPE
 )
 

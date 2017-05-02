@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 
 
 // user includes
-#include "io/vtk.h"
+#include "flecsi-sp/io/vtk.h"
 
 #ifdef HAVE_VTK
 #  include <vtkCellArray.h>

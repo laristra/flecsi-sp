@@ -1,5 +1,5 @@
 /*~-------------------------------------------------------------------------~~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~-------------------------------------------------------------------------~~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -13,7 +13,7 @@
 
 
 // user includes
-#include "detail/voronoi_impl.h"
+#include "flecsi-sp/burton/detail/voronoi_impl.h"
 
 // uncomment this to dump shapo data
 #define DUMP_DIAGNOSTICS

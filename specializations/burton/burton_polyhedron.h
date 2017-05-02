@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes
-#include "geometry/shapes/polyhedron.h"
-#include "burton_element.h"
+#include "flecsi-sp/geometry/shapes/polyhedron.h"
+#include "flecsi-sp/burton/burton_element.h"
 
 
 namespace flecsi {

@@ -1,12 +1,12 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 
 // user includes
-#include "math/general.h"
-#include "burton/burton_mesh_topology.h"
-#include "burton/burton_element.h"
+#include "flecsi-sp/math/general.h"
+#include "flecsi-sp/burton/burton_mesh_topology.h"
+#include "flecsi-sp/burton/burton_element.h"
 
 
 namespace flecsi {

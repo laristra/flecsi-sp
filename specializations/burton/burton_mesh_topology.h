@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2016 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,7 +10,7 @@
 #pragma once
 
 // user incldues
-#include "burton_types.h"
+#include "flecsi-sp/burton/burton_types.h"
 #include "flecsi/topology/mesh_types.h"
 
 
