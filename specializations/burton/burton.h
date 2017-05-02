@@ -55,11 +55,11 @@ using namespace flecsi::sp::burton::attributes;
 // Delayed includes
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "burton_io_exodus.h"
-#include "burton_io_tecplot.h"
-#include "burton_io_vtk.h"
-#include "burton_io_vtu.h"
-#include "burton_io_vtm.h"
+#include "flecsi-sp/burton/burton_io_exodus.h"
+#include "flecsi-sp/burton/burton_io_tecplot.h"
+#include "flecsi-sp/burton/burton_io_vtk.h"
+#include "flecsi-sp/burton/burton_io_vtu.h"
+#include "flecsi-sp/burton/burton_io_vtm.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // load some things
