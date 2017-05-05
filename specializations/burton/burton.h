@@ -47,7 +47,7 @@ using burton_mesh_3d_t = burton_mesh_t<3>;
 
 //! \brief Expose attributes and attachement sites to all namspaces.
 //! This is horrible but it has to be done other wise users need to 
-//! write stuff like has_attribute_at( flecsi::sp::burton::attributes::persistent,
+//! write stuff like flecsi_has_attribute_at( flecsi::sp::burton::attributes::persistent,
 //! flecsi::sp::burton::attributes::vertex ).
 using namespace flecsi::sp::burton::attributes;
 
