@@ -17,22 +17,11 @@
 #endif
 #include "flecsi-sp/utils/errors.h"
 
-// vtk doesnt like double-precision
-#ifdef DOUBLE_PRECISION
-#  undef DOUBLE_PRECISION
-#  define _DOUBLE_PRECISION_
-#endif
-
 #ifdef HAVE_VTK
 #  include <vtkCompositeDataIterator.h>
 #  include <vtkMultiBlockDataSet.h>
 #  include <vtkXMLMultiBlockDataReader.h>
 #  include <vtkXMLMultiBlockDataWriter.h>
-#endif
-
-#ifdef _DOUBLE_PRECISION_
-#  undef _DOUBLE_PRECISION_
-#  define DOUBLE_PRECISION
 #endif
 
 // system includes

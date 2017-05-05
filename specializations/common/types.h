@@ -25,7 +25,7 @@ enum return_t {
 };
 
 //! real precision type
-#ifdef DOUBLE_PRECISION
+#ifdef FLECSI_SP_DOUBLE_PRECISION
 using real_t = double;
 #else
 using real_t = float;
@@ -39,7 +39,7 @@ using index_t = uint32_t;
 #endif
 
 //! type of integer data to use
-#ifdef DOUBLE_PRECISION
+#ifdef FLECSI_SP_DOUBLE_PRECISION
 using integer_t = int64_t;
 #else
 using integer_t = int32_t;
