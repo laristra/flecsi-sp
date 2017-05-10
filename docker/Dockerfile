@@ -48,7 +48,7 @@ RUN if [ ${COVERAGE} ]; then \
       python -m coverxygen --xml-dir doc/doxygen/xml/ --src-dir .. --output doxygen.coverage.info; \
       wget -O codecov.sh https://codecov.io/bash; \
       bash codecov.sh -X gcov -f doxygen.coverage.info -F documentation; \
-      doxy-coverage --threshold 24 doc/doxygen/xml/; \
+      doxy-coverage --threshold 64 doc/doxygen/xml/; \
     fi
 RUN ctest --verbose
 RUN make install DESTDIR=${PWD}/install && rm -rf ${PWD}/install
