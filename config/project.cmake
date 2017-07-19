@@ -42,7 +42,7 @@ endif()
 # Add library targets
 #------------------------------------------------------------------------------#
 
-cinch_add_library_target(flecsi-sp specializations)
+cinch_add_library_target(flecsi-sp flecsi-sp)
 list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
 
 #------------------------------------------------------------------------------#
@@ -50,6 +50,17 @@ list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
 #------------------------------------------------------------------------------#
 
 set(CINCH_HEADER_SUFFIXES "\\.h")
+
+cinch_load_extras()
+
+#------------------------------------------------------------------------------#
+# FleCSI Library
+#------------------------------------------------------------------------------#
+
+find_package(FleCSI REQUIRED)
+MESSAGE( STATUS ${FleCSI_LIBRARIES} )
+list( APPEND FleCSI_SP_LIBRARIES ${FleCSI_LIBRARIES} )
+include_directories(${FleCSI_INCLUDE_DIR})
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
