@@ -38,6 +38,7 @@ else()
   message(STATUS "Note: using 32 bit integer ids.")
 endif()
 
+cinch_load_extras()
 #------------------------------------------------------------------------------#
 # Add library targets
 #------------------------------------------------------------------------------#
@@ -51,7 +52,7 @@ list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
 
 set(CINCH_HEADER_SUFFIXES "\\.h")
 
-cinch_load_extras()
+#cinch_load_extras()
 
 #------------------------------------------------------------------------------#
 # FleCSI Library
