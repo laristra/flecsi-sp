@@ -10,9 +10,9 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/geometry/shapes/triangle.h"
-#include "flecsi-sp/burton/burton_vertex.h"
-#include "flecsi-sp/burton/burton_element.h"
+#include "specializations/geometry/shapes/triangle.h"
+#include "specializations/burton/burton_vertex.h"
+#include "specializations/burton/burton_element.h"
 
 
 namespace flecsi {

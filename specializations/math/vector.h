@@ -9,7 +9,7 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/math/array.h"
+#include "specializations/math/array.h"
 
 namespace flecsi {
 namespace sp {

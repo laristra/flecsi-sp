@@ -11,7 +11,7 @@
 
 // user includes
 #include "flecsi/io/io_base.h"
-#include "flecsi-sp/burton/burton_mesh.h"
+#include "specializations/burton/burton_mesh.h"
 
 
 #ifdef HAVE_EXODUS

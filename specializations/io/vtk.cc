@@ -10,7 +10,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 // user includes
-#include "flecsi-sp/io/vtk.h"
+#include "specializations/io/vtk.h"
 
 namespace flecsi {
 namespace sp {

@@ -11,9 +11,9 @@
 
 
 // user includes
-#include "flecsi-sp/geometry/shapes/geometric_shapes.h"
-#include "flecsi-sp/burton/burton_config.h"
-#include "flecsi-sp/utils/errors.h"
+#include "specializations/geometry/shapes/geometric_shapes.h"
+#include "specializations/burton/burton_config.h"
+#include "specializations/utils/errors.h"
 #include "flecsi/topology/mesh_types.h"
 
 namespace flecsi {

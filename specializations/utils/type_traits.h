@@ -10,7 +10,7 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/utils/detail/type_traits_impl.h"
+#include "specializations/utils/detail/type_traits_impl.h"
 
 // system inculdes
 #include <iterator>

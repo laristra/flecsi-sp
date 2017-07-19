@@ -10,20 +10,20 @@
 #pragma once
 
 // user incldues
-#include "flecsi-sp/burton/burton_vertex.h"
-#include "flecsi-sp/burton/burton_corner.h"
-#include "flecsi-sp/burton/burton_element.h"
-#include "flecsi-sp/burton/burton_wedge.h"
+#include "specializations/burton/burton_vertex.h"
+#include "specializations/burton/burton_corner.h"
+#include "specializations/burton/burton_element.h"
+#include "specializations/burton/burton_wedge.h"
 
-#include "flecsi-sp/burton/burton_triangle.h"
-#include "flecsi-sp/burton/burton_quadrilateral.h"
-#include "flecsi-sp/burton/burton_polygon.h"
-#include "flecsi-sp/burton/burton_hexahedron.h"
-#include "flecsi-sp/burton/burton_tetrahedron.h"
-#include "flecsi-sp/burton/burton_polyhedron.h"
+#include "specializations/burton/burton_triangle.h"
+#include "specializations/burton/burton_quadrilateral.h"
+#include "specializations/burton/burton_polygon.h"
+#include "specializations/burton/burton_hexahedron.h"
+#include "specializations/burton/burton_tetrahedron.h"
+#include "specializations/burton/burton_polyhedron.h"
 
 #include "flecsi/topology/mesh_topology.h"
-#include "flecsi-sp/burton/burton_config.h"
+#include "specializations/burton/burton_config.h"
 
 namespace flecsi {
 namespace sp {
