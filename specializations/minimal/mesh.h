@@ -161,7 +161,13 @@ public:
   size_t
   indices(
     size_t index_space_id
+<<<<<<< HEAD
   ) const override
+=======
+  )
+  const
+  override
+>>>>>>> upstream/master
   {
     switch(index_space_id) {
       case minimal::vertices:

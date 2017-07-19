@@ -22,8 +22,15 @@ endif()
 #------------------------------------------------------------------------------#
 
 find_package(FleCSI REQUIRED)
-
+MESSAGE( STATUS ${FleCSI_LIBRARIES} )
+list( APPEND FleCSI_SP_LIBRARIES ${FleCSI_LIBRARIES} )
 include_directories(${FleCSI_INCLUDE_DIR})
+
+# This is needed to pick up cinch.h.  If a dependency (library,headers) is 
+# a cinch project and is installed somewhere else, and it includes cinch.h,
+# which cinch.h should get used.  The one in this project, or the one initially
+# used to to make the thirdparty library.
+include_directories( ${CMAKE_BINARY_DIR} )
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.

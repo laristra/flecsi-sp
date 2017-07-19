@@ -146,17 +146,17 @@ struct material_t {
     : eos_function(eos_function_), r(r_), e(e_) {}
 }; // struct material_t
 
-struct copper_t : material_t {
+struct copper_t : public material_t {
   copper_t(double r_, double e_)
     : material_t(function_handle(eos_gruneisen), r_, e_) {}
 }; // struct copper_t
 
-struct steel_t : material_t {
+struct steel_t : public material_t {
   steel_t(double r_, double e_)
     : material_t(function_handle(eos_gamma), r_, e_) {}
 }; // struct steel_t
 
-struct silver_t : material_t {
+struct silver_t : public material_t {
   silver_t(double r_, double e_)
     : material_t(function_handle(eos_other), r_, e_) {}
 }; // silver_t

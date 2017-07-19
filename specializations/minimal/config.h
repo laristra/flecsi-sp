@@ -41,7 +41,7 @@ struct minimal_config_t
   using real_t = double;
 
   /// Point type
-  using point_t = point<real_t, num_dimensions>;
+  using point_t = geometry::point<real_t, num_dimensions>;
 
 }; // class minimal_config_t
 

@@ -43,8 +43,10 @@ void driver(int argc, char ** argv) {
   // material volume fractions are stored using the sparse storage type,
   // while the macroscopic quantities use a dense storage type.
   ///
-	register_data(mesh, solver, density, double, sparse, 1, cells, num_mats);
-	register_data(mesh, solver, macro, cell_data_t, dense, 1, cells);
+	flecsi_register_data(mesh, solver, density, double, sparse,
+    1, cells, num_mats);
+	flecsi_register_data(mesh, solver, macro, cell_data_t, dense,
+    1, cells);
 
   // Initialize material data and cell volumes
   {
@@ -53,12 +55,12 @@ void driver(int argc, char ** argv) {
   // the user to mutate the sparsity pattern of the data. Users can add
   // non-zero entries via the () operator described below.
   ///
-  auto mats = get_mutator(mesh, solver, density, double, sparse, 0, 3);
+  auto mats = flecsi_get_mutator(mesh, solver, density, double, sparse, 0, 3);
 
   ///
   // An accessor allows read/write access to registered data.
   ///
-  auto cell = get_accessor(mesh, solver, macro, cell_data_t, dense, 0);
+  auto cell = flecsi_get_accessor(mesh, solver, macro, cell_data_t, dense, 0);
 
   ///
   // Iterate over the cells and randomly initialize non-zero
@@ -110,8 +112,8 @@ void driver(int argc, char ** argv) {
   // Here we use an accessor for the sparse storage type because we only
   // need read/write access (as opposed to mutate access).
   ///
-  auto mats = get_accessor(mesh, solver, density, double, sparse, 0);
-  auto cell = get_accessor(mesh, solver, macro, cell_data_t, dense, 0);
+  auto mats = flecsi_get_accessor(mesh, solver, density, double, sparse, 0);
+  auto cell = flecsi_get_accessor(mesh, solver, macro, cell_data_t, dense, 0);
 
   ///
   // Iterate over the cells.
@@ -141,8 +143,8 @@ void driver(int argc, char ** argv) {
   ///-------------------------------------------------------------------------//
   {
   // See explanation for Algorithm 1.
-  auto mats = get_accessor(mesh, solver, density, double, sparse, 0);
-  auto cell = get_accessor(mesh, solver, macro, cell_data_t, dense, 0);
+  auto mats = flecsi_get_accessor(mesh, solver, density, double, sparse, 0);
+  auto cell = flecsi_get_accessor(mesh, solver, macro, cell_data_t, dense, 0);
 
   ///
   // Iterate over the cells to re-zero the macroscopic density.
