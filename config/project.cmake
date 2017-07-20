@@ -58,7 +58,7 @@ endif()
 # Add library targets
 #------------------------------------------------------------------------------#
 
-cinch_add_library_target(flecsi-sp flecsi-sp)
+cinch_add_library_target(flecsi-sp specializations)
 list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
 
 #------------------------------------------------------------------------------#
