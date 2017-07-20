@@ -39,6 +39,21 @@ else()
 endif()
 
 cinch_load_extras()
+
+#------------------------------------------------------------------------------#
+# Check for C++14 compiler.
+#------------------------------------------------------------------------------#
+
+include(cxx14)
+
+check_for_cxx14_compiler(CXX14_COMPILER)
+
+if(CXX14_COMPILER)
+	enable_cxx14()
+else()
+	message(FATAL_ERROR "C++14 compatible compiler not found")
+endif()
+
 #------------------------------------------------------------------------------#
 # Add library targets
 #------------------------------------------------------------------------------#
@@ -51,8 +66,6 @@ list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
 #------------------------------------------------------------------------------#
 
 set(CINCH_HEADER_SUFFIXES "\\.h")
-
-#cinch_load_extras()
 
 #------------------------------------------------------------------------------#
 # FleCSI Library
