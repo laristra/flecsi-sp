@@ -56,13 +56,6 @@ private:
 
 }; // class minimal_vertex_t
 
-enum class edge_type_t : size_t {
-  unknown,
-  reflec_bc,
-  src_bc,
-  vacuum_bc,
-  interior_edge
-};//enum edge_type_t
 ///
 // \struct minimal_edge_t
 // \breif FIXME
@@ -76,27 +69,13 @@ struct minimal_edge_t
   //
   // \param mesh FIXME
   ///
-  minimal_edge_t(
-    topology::mesh_topology_base_t & mesh,
-    edge_type_t type
-  )
-    : mesh_(mesh), type_(type) 
-  {
-  }
+  minimal_edge_t(topology::mesh_topology_base_t & mesh)
+    : mesh_(mesh) {}
 
-  edge_type_t type()
-  {
-    return type_;
-  }
-
-
-    
 private:
 
   topology::mesh_topology_base_t & mesh_;
 
-  edge_type_t type_;
-  
 }; // class minimal_edge_t
 
 #if FLECSI_MESH_DIMENSION == 3
