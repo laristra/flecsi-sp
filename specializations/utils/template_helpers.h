@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes 
-#include "flecsi-sp/utils/detail/template_helpers_impl.h"
-#include "flecsi-sp/common/types.h"
+#include "specializations/utils/detail/template_helpers_impl.h"
+#include "specializations/common/types.h"
 
 // system includes
 #include <functional>

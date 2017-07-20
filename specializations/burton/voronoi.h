@@ -13,7 +13,7 @@
 
 
 // user includes
-#include "flecsi-sp/burton/detail/voronoi_impl.h"
+#include "specializations/burton/detail/voronoi_impl.h"
 
 // uncomment this to dump shapo data
 #define DUMP_DIAGNOSTICS

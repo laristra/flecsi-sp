@@ -9,7 +9,7 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/common/types.h"
+#include "specializations/common/types.h"
 
 namespace flecsi {
 namespace sp {

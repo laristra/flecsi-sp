@@ -9,8 +9,8 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/math/multi_array.h"
-#include "flecsi-sp/math/vector.h"
+#include "specializations/math/multi_array.h"
+#include "specializations/math/vector.h"
 
 // system includes
  #include <cmath>

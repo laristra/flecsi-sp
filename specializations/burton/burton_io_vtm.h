@@ -11,11 +11,11 @@
 
 // user includes
 #include "flecsi/io/io_base.h"
-#include "flecsi-sp/burton/burton_mesh.h"
+#include "specializations/burton/burton_mesh.h"
 #ifdef HAVE_VTK
-#include "flecsi-sp/burton/vtk_utils.h"
+#include "specializations/burton/vtk_utils.h"
 #endif
-#include "flecsi-sp/utils/errors.h"
+#include "specializations/utils/errors.h"
 
 #ifdef HAVE_VTK
 #  include <vtkCompositeDataIterator.h>

@@ -9,10 +9,10 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/geometry/shapes/geometric_shapes.h"
-#include "flecsi-sp/geometry/shapes/triangle.h"
-#include "flecsi-sp/math/general.h"
-#include "flecsi-sp/utils/array_ref.h"
+#include "specializations/geometry/shapes/geometric_shapes.h"
+#include "specializations/geometry/shapes/triangle.h"
+#include "specializations/math/general.h"
+#include "specializations/utils/array_ref.h"
 
 namespace flecsi {
 namespace sp {

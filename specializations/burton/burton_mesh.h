@@ -9,10 +9,10 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/burton/burton_mesh_topology.h"
-#include "flecsi-sp/burton/burton_types.h"
-#include "flecsi-sp/utils/errors.h"
-#include "flecsi-sp/utils/type_traits.h"
+#include "specializations/burton/burton_mesh_topology.h"
+#include "specializations/burton/burton_types.h"
+#include "specializations/utils/errors.h"
+#include "specializations/utils/type_traits.h"
 
 #include "flecsi/data/data.h"
 #include "flecsi/execution/task.h"

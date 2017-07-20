@@ -11,8 +11,8 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/io/write_binary.h"
-#include "flecsi-sp/common/types.h"
+#include "specializations/io/write_binary.h"
+#include "specializations/common/types.h"
 
 // system includes
 #include <typeindex>

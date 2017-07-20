@@ -5,7 +5,7 @@
 
 #include <cinchtest.h>
 
-#include "flecsi-sp/minimal/mesh.h"
+#include "specializations/minimal/mesh.h"
 
 using namespace flecsi::sp;
 using vertex_t = minimal_mesh_t::vertex_t;

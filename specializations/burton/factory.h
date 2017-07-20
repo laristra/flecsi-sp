@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/math/constants.h"
-#include "flecsi-sp/math/matrix.h"
+#include "specializations/math/constants.h"
+#include "specializations/math/matrix.h"
 
 // system includes
 #include<cmath>

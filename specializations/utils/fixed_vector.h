@@ -11,8 +11,8 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/utils/type_traits.h"
-#include "flecsi-sp/utils/template_helpers.h"
+#include "specializations/utils/type_traits.h"
+#include "specializations/utils/template_helpers.h"
 
 // system includes
 #include <algorithm>

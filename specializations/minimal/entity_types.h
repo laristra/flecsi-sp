@@ -8,7 +8,7 @@
 
 #include <flecsi/topology/mesh_types.h>
 
-#include "flecsi-sp/minimal/config.h"
+#include "specializations/minimal/config.h"
 
 ///
 // \file minimal_entity_types.h

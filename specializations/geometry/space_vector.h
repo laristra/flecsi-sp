@@ -20,7 +20,7 @@
 
 #include <flecsi/utils/dimensioned_array.h>
 #include <flecsi/utils/common.h>
-#include "flecsi-sp/geometry/point.h"
+#include "specializations/geometry/point.h"
 
 /*!
  * \file space_vector.h

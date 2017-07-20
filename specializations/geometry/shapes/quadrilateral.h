@@ -9,8 +9,8 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/geometry/shapes/geometric_shapes.h"
-#include "flecsi-sp/geometry/shapes/polygon.h"
+#include "specializations/geometry/shapes/geometric_shapes.h"
+#include "specializations/geometry/shapes/polygon.h"
 
 namespace flecsi {
 namespace sp {

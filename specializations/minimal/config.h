@@ -6,7 +6,7 @@
 #ifndef flecsi_sp_minimal_config_h
 #define flecsi_sp_minimal_config_h
 
-#include "flecsi-sp/geometry/point.h"
+#include "specializations/geometry/point.h"
 
 ///
 // \file minimal/config.h
