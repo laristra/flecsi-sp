@@ -15,7 +15,7 @@
 #ifndef flecsi_sp_point_h
 #define flecsi_sp_point_h
 
-#include "flecsi-sp/math/vector.h"
+#include "specializations/math/vector.h"
 
 #include <flecsi/utils/common.h>
 

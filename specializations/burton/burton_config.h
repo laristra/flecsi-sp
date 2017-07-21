@@ -10,10 +10,10 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/common/types.h"
-#include "flecsi-sp/geometry/point.h"
-#include "flecsi-sp/math/vector.h"
-#include "flecsi-sp/utils/fixed_vector.h"
+#include "specializations/common/types.h"
+#include "specializations/geometry/point.h"
+#include "specializations/math/vector.h"
+#include "specializations/utils/fixed_vector.h"
 #include "flecsi/utils/bitfield.h"
 #include "flecsi/data/data.h"
 

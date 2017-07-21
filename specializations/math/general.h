@@ -10,11 +10,11 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/math/detail/general_impl.h"
+#include "specializations/math/detail/general_impl.h"
 
-#include "flecsi-sp/utils/errors.h"
-#include "flecsi-sp/utils/template_helpers.h"
-#include "flecsi-sp/utils/type_traits.h"
+#include "specializations/utils/errors.h"
+#include "specializations/utils/template_helpers.h"
+#include "specializations/utils/type_traits.h"
 
 // system includes
 #include <algorithm> 

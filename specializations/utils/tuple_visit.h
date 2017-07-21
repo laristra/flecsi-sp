@@ -9,7 +9,7 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/utils/detail/tuple_visit_impl.h"
+#include "specializations/utils/detail/tuple_visit_impl.h"
 
 namespace flecsi {
 namespace sp {

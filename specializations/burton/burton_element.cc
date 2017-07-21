@@ -4,9 +4,9 @@
  *~--------------------------------------------------------------------------~*/
 
 // user includes
-#include "flecsi-sp/math/general.h"
-#include "flecsi-sp/burton/burton_mesh_topology.h"
-#include "flecsi-sp/burton/burton_element.h"
+#include "specializations/math/general.h"
+#include "specializations/burton/burton_mesh_topology.h"
+#include "specializations/burton/burton_element.h"
 
 
 namespace flecsi {

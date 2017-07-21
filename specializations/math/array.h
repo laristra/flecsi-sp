@@ -9,9 +9,9 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/utils/type_traits.h"
-#include "flecsi-sp/utils/template_helpers.h"
-#include "flecsi-sp/utils/tuple_visit.h"
+#include "specializations/utils/type_traits.h"
+#include "specializations/utils/template_helpers.h"
+#include "specializations/utils/tuple_visit.h"
 
 // system includes
 #include <algorithm>

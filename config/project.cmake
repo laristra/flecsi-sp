@@ -38,18 +38,43 @@ else()
   message(STATUS "Note: using 32 bit integer ids.")
 endif()
 
+cinch_load_extras()
+
 #------------------------------------------------------------------------------#
-# Add library targets
+# Check for C++14 compiler.
 #------------------------------------------------------------------------------#
 
-cinch_add_library_target(flecsi-sp specializations)
-list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
+include(cxx14)
+
+check_for_cxx14_compiler(CXX14_COMPILER)
+
+if(CXX14_COMPILER)
+	enable_cxx14()
+else()
+	message(FATAL_ERROR "C++14 compatible compiler not found")
+endif()
 
 #------------------------------------------------------------------------------#
 # Set header suffix regular expression
 #------------------------------------------------------------------------------#
 
 set(CINCH_HEADER_SUFFIXES "\\.h")
+
+#------------------------------------------------------------------------------#
+# FleCSI Library
+#------------------------------------------------------------------------------#
+
+find_package(FleCSI REQUIRED)
+MESSAGE( STATUS ${FleCSI_LIBRARIES} )
+list( APPEND FleCSI_SP_LIBRARIES ${FleCSI_LIBRARIES} )
+include_directories(${FleCSI_INCLUDE_DIR})
+
+#------------------------------------------------------------------------------#
+# Add library targets
+#------------------------------------------------------------------------------#
+
+list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
+cinch_add_library_target(flecsi-sp specializations)
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.

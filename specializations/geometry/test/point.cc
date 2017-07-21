@@ -14,7 +14,7 @@
 
 #include <cinchtest.h>
 
-#include "flecsi-sp/geometry/point.h"
+#include "specializations/geometry/point.h"
 
 #include <flecsi/utils/dimensioned_array.h>
 

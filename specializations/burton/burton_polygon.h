@@ -10,8 +10,8 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/geometry/shapes/polygon.h"
-#include "flecsi-sp/burton/burton_element.h"
+#include "specializations/geometry/shapes/polygon.h"
+#include "specializations/burton/burton_element.h"
 
 
 namespace flecsi {
