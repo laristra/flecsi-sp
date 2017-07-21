@@ -17,7 +17,7 @@ set(minimal_SOURCES
 
 cinch_add_unit(minimal
   SOURCES test/minimal.cc
-  LIBRARIES ${FleCSI_LIBRARY}
+  LIBRARIES ${FleCSI_LIBRARIES}
 )
 
 #----------------------------------------------------------------------------~-#
