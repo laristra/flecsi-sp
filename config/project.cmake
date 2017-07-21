@@ -55,13 +55,6 @@ else()
 endif()
 
 #------------------------------------------------------------------------------#
-# Add library targets
-#------------------------------------------------------------------------------#
-
-cinch_add_library_target(flecsi-sp specializations)
-list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
-
-#------------------------------------------------------------------------------#
 # Set header suffix regular expression
 #------------------------------------------------------------------------------#
 
@@ -75,6 +68,13 @@ find_package(FleCSI REQUIRED)
 MESSAGE( STATUS ${FleCSI_LIBRARIES} )
 list( APPEND FleCSI_SP_LIBRARIES ${FleCSI_LIBRARIES} )
 include_directories(${FleCSI_INCLUDE_DIR})
+
+#------------------------------------------------------------------------------#
+# Add library targets
+#------------------------------------------------------------------------------#
+
+list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
+cinch_add_library_target(flecsi-sp specializations)
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
