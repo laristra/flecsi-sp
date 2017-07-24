@@ -56,7 +56,7 @@ public:
   real_t volume() const override;
 
   //! the cell type
-  geometry::shapes::geometric_shapes_t type() const override 
+  shape_t type() const override 
   { return geometry::shapes::tetrahedron::shape; };
 
   //----------------------------------------------------------------------------

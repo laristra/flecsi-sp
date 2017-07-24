@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2017 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2016 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -50,7 +50,7 @@ enum data_attributes_t : size_t {
 };
 
 
-} // namespace burton
+} // namespace attributes
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief A specialization of the flecsi low-level mesh topology, state and
@@ -128,6 +128,9 @@ public:
   using tag_t = typename config_t::tag_t;
   using tag_list_t = typename config_t::tag_list_t;
 
+  //! Shape data type.
+  using shape_t = typename config_t::shape_t;
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -193,7 +196,7 @@ public:
   };
 
   //! Destructor
-  ~burton_mesh_t() = default;
+  virtual ~burton_mesh_t() {};
 
   //============================================================================
   //! \brief Return the size of an associated index space/
@@ -542,6 +545,19 @@ public:
     return base_t::template entity_ids<face_t::dimension, face_t::domain>(e);
   }
 
+  //! \brief Return the precomputed areas for each face.
+  decltype(auto) face_areas() const 
+  {
+    return flecsi_get_accessor( *this, mesh, face_area, real_t, dense, 0 );
+  }
+
+  //! \brief Return the precomputed normals for each face.
+  decltype(auto) face_normals() const 
+  {
+    return flecsi_get_accessor( *this, mesh, face_normal, vector_t, dense, 0 );
+  }
+
+
   //============================================================================
   // Cell Interface
   //============================================================================
@@ -632,6 +648,24 @@ public:
     return cell_types;
   }
 
+  //! \brief Return the precomputed volumes for each cell.
+  decltype(auto) cell_volumes() const 
+  {
+    return flecsi_get_accessor( *this, mesh, cell_volume, real_t, dense, 0 );
+  }
+
+  //! \brief Return the precomputed centroids for each cell.
+  decltype(auto) cell_centroids() const 
+  {
+    return flecsi_get_accessor( *this, mesh, cell_centroid, vector_t, dense, 0 );
+  }
+
+  //! \brief Return the precomputed centroids for each cell.
+  decltype(auto) cell_min_lengths() const 
+  {
+    return flecsi_get_accessor( *this, mesh, cell_min_length, real_t, dense, 0 );
+  }
+
 
   //============================================================================
   // Wedge Interface
@@ -710,6 +744,24 @@ public:
   decltype(auto) wedge_ids(E * e) const
   {
     return base_t::template entity_ids<wedge_t::dimension, wedge_t::domain>(e);
+  }
+
+  //! \brief Return the precomputed facet normals for each wedge.
+  decltype(auto) wedge_facet_normals() const 
+  {
+    return flecsi_get_accessor( *this, mesh, wedge_facet_normal, vector_t, dense, 0 );
+  }
+
+  //! \brief Return the precomputed facet centroids for each wedge.
+  decltype(auto) wedge_facet_centroids() const 
+  {
+    return flecsi_get_accessor( *this, mesh, wedge_facet_centroid, vector_t, dense, 0 );
+  }
+
+  //! \brief Return the precomputed facet area for each wdge.
+  decltype(auto) wedge_facet_areas() const 
+  {
+    return flecsi_get_accessor( *this, mesh, wedge_facet_area, real_t, dense, 0 );
   }
 
   //============================================================================
@@ -1106,7 +1158,7 @@ public:
     bool bad_face = false;
     auto fs = faces();
     auto num_faces = fs.size();
-
+    
     #pragma omp parallel for reduction( || : bad_face )
     for( counter_t fid=0; fid<num_faces; ++fid ) {
       auto f = fs[fid];
@@ -1600,6 +1652,6 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh_t<M>& mesh)
 }
 
 
-} // namespace mesh
-} // namespace ale
-} // namespace ale
+} // namespace burton
+} // namespace sp
+} // namespace flecsi

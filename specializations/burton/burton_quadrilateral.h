@@ -65,7 +65,7 @@ public:
   real_t min_length() const override;
 
   //! the cell type
-  geometry::shapes::geometric_shapes_t type() const override 
+  shape_t type() const override 
   { return geometry::shapes::quadrilateral<num_dimensions>::shape; };
 
   //----------------------------------------------------------------------------
@@ -280,7 +280,7 @@ public:
   real_t min_length() const override;
 
   //! the cell type
-  geometry::shapes::geometric_shapes_t type() const override 
+  shape_t type() const override 
   { return geometry::shapes::quadrilateral<num_dimensions>::shape; };
 
   //----------------------------------------------------------------------------

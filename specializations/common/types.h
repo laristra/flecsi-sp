@@ -14,6 +14,8 @@
 // system includes
 #include <cstdint> // for types
 
+#include "flecsi-sp.h"
+
 namespace flecsi {
 namespace sp {
 namespace common {

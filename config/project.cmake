@@ -41,6 +41,14 @@ endif()
 cinch_load_extras()
 
 #------------------------------------------------------------------------------#
+# configure header
+#------------------------------------------------------------------------------#
+
+configure_file(${PROJECT_SOURCE_DIR}/config/flecsi-sp.h.in ${CMAKE_BINARY_DIR}/flecsi-sp.h @ONLY)
+include_directories(${CMAKE_BINARY_DIR})
+install(FILES ${CMAKE_BINARY_DIR}/flecsi-sp.h DESTINATION include)
+
+#------------------------------------------------------------------------------#
 # Check for C++14 compiler.
 #------------------------------------------------------------------------------#
 
