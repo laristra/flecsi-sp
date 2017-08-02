@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2017 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2016-2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ public:
   real_t volume() const override;
 
   //! the cell type
-  geometry::shapes::geometric_shapes_t type() const override 
+  shape_t type() const override 
   { return geometry::shapes::polyhedron<point_t>::shape; };
 
   //----------------------------------------------------------------------------

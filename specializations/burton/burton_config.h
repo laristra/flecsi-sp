@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2017 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2016-2017 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -12,6 +12,7 @@
 // user includes
 #include "specializations/common/types.h"
 #include "specializations/geometry/point.h"
+#include "specializations/geometry/shapes/geometric_shapes.h"
 #include "specializations/math/vector.h"
 #include "specializations/utils/fixed_vector.h"
 #include "flecsi/utils/bitfield.h"
@@ -68,11 +69,14 @@ struct burton_config_t {
   using tag_t = uint8_t;
   using tag_list_t = utils::fixed_vector< tag_t, N*N >;
 
+  //! \brief the shape type
+  using shape_t = geometry::shapes::geometric_shapes_t;
+
 
 
 };
 
-} // namespace mesh
-} // namespace ale
-} // namespace ale
+} // namespace burton
+} // namespace sp
+} // namespace flecsi
 
