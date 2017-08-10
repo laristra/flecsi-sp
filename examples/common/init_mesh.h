@@ -6,7 +6,7 @@
 #ifndef init_mesh_h
 #define init_mesh_h
 
-#include <specializations/minimal/mesh.h>
+#include <flecsi-sp/minimal/mesh.h>
 
 //using namespace flecsi;
 //using namespace flecsi::data;

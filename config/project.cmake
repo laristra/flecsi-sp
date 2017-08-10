@@ -82,7 +82,7 @@ include_directories(${FleCSI_INCLUDE_DIR})
 #------------------------------------------------------------------------------#
 
 list( APPEND FleCSI_SP_LIBRARIES flecsi-sp )
-cinch_add_library_target(flecsi-sp specializations)
+cinch_add_library_target(flecsi-sp flecsi-sp)
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
