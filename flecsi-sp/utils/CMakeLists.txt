@@ -3,17 +3,15 @@
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
 
-set(io_HEADERS
-  vtk.h
-  write_binary.h
+set(utils_HEADERS
+  common.h
   PARENT_SCOPE
 )
 
-set(io_SOURCES
-  vtk.cc
+set(utils_SOURCES
+  common.cc
   PARENT_SCOPE
 )
-
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.
