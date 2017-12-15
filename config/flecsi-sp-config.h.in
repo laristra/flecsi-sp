@@ -56,7 +56,7 @@ using integer_t = int32_t;
 //! \remark should be big enough to hold an unsigned_integer_t
 //! \remark allows one to play with loop counters for optimization purposes
 //! \remark signed loop counters may be more efficient
-using counter_t =`:q std::size_t;
+using counter_t = std::size_t;
 
 //! the test tolerance 
 static constexpr real_t test_tolerance = FLECSI_SP_TEST_TOLERANCE;

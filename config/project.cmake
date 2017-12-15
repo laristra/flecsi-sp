@@ -27,15 +27,10 @@ set(CINCH_HEADER_SUFFIXES "\\.h")
 # If a C++14 compiler is available, then set the appropriate flags
 #------------------------------------------------------------------------------#
 
-include(cxx14)
-
-check_for_cxx14_compiler(CXX14_COMPILER)
-
-if(CXX14_COMPILER)
-    enable_cxx14()
-else()
-    message(FATAL_ERROR "C++14 compatible compiler not found")
-endif()
+# We need C++ 14
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED on)
+set(CMAKE_CXX_EXTENSIONS off)
 
 #------------------------------------------------------------------------------#
 # Load the cinch extras
@@ -48,7 +43,7 @@ cinch_load_extras()
 #------------------------------------------------------------------------------#
 
 find_package(FleCSI CONFIG REQUIRED)
-list(APPEND FleCSI_SP_LIBRARIES ${FleCSI_LIBRARIES})
+list(APPEND FLECSI_SP_LIBRARIES ${FleCSI_LIBRARIES})
 include_directories(${FleCSI_INCLUDE_DIRS})
 
 #------------------------------------------------------------------------------#
@@ -56,16 +51,16 @@ include_directories(${FleCSI_INCLUDE_DIRS})
 #------------------------------------------------------------------------------#
 
 find_package(Ristra CONFIG REQUIRED)
-list(APPEND FleCSI_SP_LIBRARIES ${Ristra_LIBRARIES})
-include_directories(${Ristra_INCLUDE_DIRS})
+list(APPEND FLECSI_SP_LIBRARIES ${RISTRA_LIBRARIES})
+include_directories(${RISTRA_INCLUDE_DIRS})
 
 
 #------------------------------------------------------------------------------#
 # Set directory information
 #------------------------------------------------------------------------------#
 
-set(FleCSI_SP_DATA_DIR "${CMAKE_SOURCE_DIR}/data")
-set(FleCSI_SP_LIBRARIES)
+set(FLECSI_SP_DATA_DIR "${CMAKE_SOURCE_DIR}/data")
+set(FLECSI_SP_LIBRARIES)
 
 #------------------------------------------------------------------------------#
 # Some precision setup
@@ -92,6 +87,23 @@ else()
 endif()
 
 #------------------------------------------------------------------------------#
+# Exodus II
+#------------------------------------------------------------------------------#
+
+find_package(EXODUSII QUIET)
+
+option(FLECSI_SP_ENABLE_EXODUS "Enable I/O with exodus." ${EXODUSII_FOUND})
+
+if(FLECSI_SP_ENABLE_EXODUS AND NOT EXODUSII_FOUND)
+  message(FATAL_ERROR "Exodus requested, but not found")
+endif()
+
+if(FLECSI_SP_ENABLE_EXODUS)
+  include_directories(${EXODUSII_INCLUDE_DIRS})
+endif()
+
+
+#------------------------------------------------------------------------------#
 # configure header
 #------------------------------------------------------------------------------#
 
@@ -106,10 +118,42 @@ include_directories(${CMAKE_BINARY_DIR})
 #------------------------------------------------------------------------------#
 
 cinch_add_library_target(FleCSI-SP flecsi-sp)
-list(APPEND FleCSI_SP_LIBRARIES FleCSI-SP)
+list(APPEND FLECSI_SP_LIBRARIES FleCSI-SP)
 
 #------------------------------------------------------------------------------#
-# configure .cmake file (for other projects)
+# Extract all project options so they can be exported to the ProjectConfig.cmake
+# file.
+#------------------------------------------------------------------------------#
+
+get_cmake_property(_variableNames VARIABLES)
+string (REGEX MATCHALL "(^|;)FLECSI_SP_[A-Za-z0-9_]*" _matchedVars
+  "${_variableNames}")
+foreach (_variableName ${_matchedVars})
+  set( FLECSI_SP_CONFIG_CODE
+    "${FLECSI_SP_CONFIG_CODE}
+set(${_variableName} \"${${_variableName}}\")"
+  )
+endforeach()
+
+#------------------------------------------------------------------------------#
+# Prepare variables for ProjectConfig file.
+#------------------------------------------------------------------------------#
+
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+  PROPERTY INCLUDE_DIRECTORIES)
+
+foreach(dir ${dirs})
+  if(NOT ${dir} MATCHES ${CMAKE_CURRENT_SOURCE_DIR})
+    list(APPEND FLECSI_SP_EXTERNAL_INCLUDE_DIRS ${dir})
+  endif()
+endforeach()
+
+set(FLECSI_SP_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/${LIBDIR})
+set(FLECSI_SP_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+set(FLECSI_SP_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/cmake/FleCSI-SP)
+
+#------------------------------------------------------------------------------#
+# Export targets and package.
 #------------------------------------------------------------------------------#
 
 export(
@@ -119,9 +163,9 @@ export(
 
 export(PACKAGE FleCSI-SP)
 
-set(FLECSI_SP_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/${LIBDIR})
-set(FLECSI_SP_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
-set(FLECSI_SP_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/cmake/FleCSI-SP)
+#------------------------------------------------------------------------------#
+# configure .cmake file (for other projects)
+#------------------------------------------------------------------------------#
 
 configure_file(${PROJECT_SOURCE_DIR}/config/FleCSI-SPConfig.cmake.in
   ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPConfig.cmake @ONLY)
