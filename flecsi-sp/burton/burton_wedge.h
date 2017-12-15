@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2017 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2016 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,19 +10,13 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/geometry/shapes/triangle.h"
-#include "flecsi-sp/burton/burton_vertex.h"
-#include "flecsi-sp/burton/burton_element.h"
+#include <flecsi-sp/burton/burton_vertex.h>
+#include <flecsi-sp/burton/burton_element.h>
+#include <ristra/geometry/shapes/triangle.h>
 
 
-namespace flecsi {
-namespace sp {
+namespace flecsi_sp {
 namespace burton {
-
-
-//! forward decares
-template< std::size_t N >
-class burton_corner_t;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -32,16 +26,8 @@ class burton_corner_t;
 //! \tparam N The dimension of the wedge.
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N >
-class burton_wedge_t {};
-
-////////////////////////////////////////////////////////////////////////////////
-//! \brief The burton_wedge_t type provides an interface for managing and
-//!   geometry and state associated with mesh wedges.
-//! \remark This is a two-dimensional specialization.
-////////////////////////////////////////////////////////////////////////////////
-template<>
-class burton_wedge_t<2>
-  : public flecsi::topology::mesh_entity_t<1, burton_config_t<2>::num_domains>
+class burton_wedge_t
+  : public flecsi::topology::mesh_entity__<1, burton_config_t<N>::num_domains>
 {
 public:
 
@@ -49,11 +35,8 @@ public:
   // Typedefs
   //============================================================================
 
-  //! the flecsi mesh topology type
-  using mesh_topology_base_t =  flecsi::topology::mesh_topology_base_t;
- 
   //! the mesh traits
-  using config_t = burton_config_t<2>;
+  using config_t = burton_config_t<N>;
 
   //! Number of domains in the burton mesh.
   static constexpr auto num_domains = config_t::num_domains;
@@ -63,6 +46,19 @@ public:
 
   //! The domain of the entity
   static constexpr auto domain = 1;
+
+  //! the flecsi mesh topology storage type
+  using mesh_storage_t = 
+    flecsi::topology::mesh_storage_t<num_dimensions, num_domains>;
+  //! the flecsi mesh topology type
+  using mesh_topology_base_t = 
+    flecsi::topology::mesh_topology_base_t< mesh_storage_t >;
+
+  //! The bitfield.
+  using bitfield_t = typename config_t::bitfield_t;
+
+  //! Type of floating point.
+  using real_t = typename config_t::real_t;
 
   //! Physics vector type.
   using vector_t = typename config_t::vector_t;
@@ -87,7 +83,7 @@ public:
   //============================================================================
 
   // default constructor
-  burton_wedge_t(mesh_topology_base_t & mesh) : mesh_(&mesh) {};
+  burton_wedge_t() = default;
 
   // dissallow copying
   burton_wedge_t( burton_wedge_t & ) = delete;
@@ -101,52 +97,41 @@ public:
   // Accessors / Modifiers
   //============================================================================
 
+  //! \brief update the wedge geometry
+  //! \param [in] is_right  This wedge is the right orientation when true.
+  template< typename MESH_TOPOLOGY >
+  void update( const MESH_TOPOLOGY * mesh, bool is_right );
 
   //! \brief Get the cell facet normal for the wedge.
   //! \return Cell facet normal vector.
-  vector_t facet_normal_left() const;
-  //! \copydoc facet_normal_left
-  vector_t facet_normal_right() const;
-  
-  //! \brief The "left" orientation of the facet normal.
-  //! \return The facet normal vector.
-  static vector_t facet_normal_left(
-    const point_t & v, //!< [in] The associated vertex coordinate
-    const point_t & e, //!< [in] The associated edge midpoint
-    const point_t &    //!< [in] The associated face midpoint (not used in 2d)
-  ) {
-    return { v[1] - e[1], e[0] - v[0] };
-  }
+  const auto & facet_normal() const
+  { return facet_normal_; }
 
-  //! \brief The "right" orientation of the facet normal.
-  //! \return The facet normal vector.
-  static vector_t facet_normal_right(
-    const point_t & v, //!< [in] The associated vertex coordinate
-    const point_t & e, //!< [in] The associated edge midpoint
-    const point_t &    //!< [in] The associated face midpoint (not used in 2d)
-  ) {
-    return { e[1] - v[1], v[0] - e[0] };
-  }
-  
+  //! \brief the facet area
+  auto facet_area() const
+  { return facet_area_; }
 
   //! \brief Get the cell facet centroid
-  //! \return Cell facet centroid.
-  point_t facet_centroid() const;
+  const auto & facet_centroid() const
+  { return facet_centroid_; }
+  
   //! \brief Get the cell facet midpoint
-  //! \return Cell facet midpoint.
-  point_t facet_midpoint() const;
-
-  //! \brief reset the mesh pointer
-  //! \param [in] mesh The new mesh to point to.
-  void reset(mesh_topology_base_t & mesh) 
-  { 
-    mesh_ = &mesh;
-  }
-
+  const auto & facet_midpoint() const
+  { return facet_centroid_; }
+  
+  //! return the bitfield flags
+  const auto & flags() const { return flags_; }
+  auto & flags() { return flags_; }
 
   //! \brief Is this wedge on the boundary.
   //! \return true if on boundary.
-  bool is_boundary() const;
+  auto is_boundary() const
+  { return flags_.test( config_t::bits::boundary ); }
+  
+  //! \brief set whether this element is on the boundary
+  //! \param [in] is_boundary  True if on the boundary.
+  void set_boundary( bool is_boundary )
+  { flags_.set(config_t::bits::boundary, is_boundary); }
 
   //============================================================================
   // Private Data
@@ -154,134 +139,72 @@ public:
 
  private:
 
-  //! a reference to the mesh topology
-  mesh_topology_base_t * mesh_ = nullptr;
+  //! centroid of the outer facetn
+  point_t facet_centroid_ = 0;
+  //! the normal of the outer facet
+  vector_t facet_normal_ = 0;
+  //! the area of the outer facet
+  real_t facet_area_ = 0;
+  //! the entity flags
+  bitfield_t flags_;
+
 
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-//! \brief The burton_wedge_t type provides an interface for managing and
-//!   geometry and state associated with mesh wedges.
-//! \remark This is a three-dimensional specialization.
+// left and right facet normals for 2d wedge
 ////////////////////////////////////////////////////////////////////////////////
 template<>
-class burton_wedge_t<3>
-  : public flecsi::topology::mesh_entity_t<1, burton_config_t<3>::num_domains>
+template< typename MESH_TOPOLOGY >
+void burton_wedge_t<2>::update( const MESH_TOPOLOGY * mesh, bool is_right )
 {
-public:
+  using ristra::math::abs;
+  auto vs = mesh->template entities<vertex_t::dimension, domain, vertex_t::domain>(this);
+  auto es = mesh->template entities<edge_t::dimension, domain, edge_t::domain>(this);
+  assert( vs.size() == 1 );
+  assert( es.size() == 1 );
+  const auto & e = es.front()->midpoint();
+  const auto & v = vs.front()->coordinates();
+  if ( is_right )
+    facet_normal_ = { e[1] - v[1], v[0] - e[0] };
+  else
+    facet_normal_ = { v[1] - e[1], e[0] - v[0] };
+  facet_area_ = abs(facet_normal_);
+  facet_normal_ /= facet_area_;
+  facet_centroid_ = 0.5 * ( e + v );
+  set_boundary( es.front()->is_boundary() );
+}
 
-  //============================================================================
-  // Typedefs
-  //============================================================================
+////////////////////////////////////////////////////////////////////////////////
+// left and right facet normals for 3d wedge
+////////////////////////////////////////////////////////////////////////////////
+template<>
+template< typename MESH_TOPOLOGY >
+void burton_wedge_t<3>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
+{
+  using ristra::math::abs;
+  auto vs = mesh->template entities<vertex_t::dimension, domain, vertex_t::domain>(this);
+  auto es = mesh->template entities<edge_t::dimension, domain, edge_t::domain>(this);
+  auto fs = mesh->template entities<face_t::dimension, domain, face_t::domain>(this);
+  assert( vs.size() == 1 );
+  assert( es.size() == 1 );
+  assert( fs.size() == 1 );
+  auto e = es.front()->midpoint();
+  auto v = vs.front()->coordinates();
+  auto f = fs.front()->midpoint();
+  if ( is_right )
+    facet_normal_ =
+      ristra::geometry::shapes::triangle<num_dimensions>::normal( v, f, e );
+  else 
+    facet_normal_ =
+      ristra::geometry::shapes::triangle<num_dimensions>::normal( v, e, f );
+  facet_area_ = abs(facet_normal_);
+  facet_normal_ /= facet_area_;
+  facet_centroid_ =
+    ristra::geometry::shapes::triangle<num_dimensions>::centroid( v, f, e );
+  set_boundary( fs.front()->is_boundary() );
+}
 
-  //! the flecsi mesh topology type
-  using mesh_topology_base_t =  flecsi::topology::mesh_topology_base_t;
- 
-  //! the mesh traits
-  using config_t = burton_config_t<3>;
 
-  //! Number of domains in the burton mesh.
-  static constexpr auto num_domains = config_t::num_domains;
-
-  //! Number of domains in the burton mesh.
-  static constexpr auto num_dimensions = config_t::num_dimensions;
-
-  //! The domain of the entity
-  static constexpr auto domain = 1;
-
-  //! Physics vector type.
-  using vector_t = typename config_t::vector_t;
-
-  //! Coordinate point type.
-  using point_t = typename config_t::point_t;
-
-  //! the base vertex type
-  using vertex_t = burton_vertex_t<num_dimensions>;
-
-  //! the base edge type
-  using edge_t = burton_edge_t<num_dimensions>;
-
-  //! the base edge type
-  using face_t = burton_face_t<num_dimensions>;
-
-  //! the base cell type
-  using cell_t = burton_cell_t<num_dimensions>;
-
-  //============================================================================
-  // Constructors
-  //============================================================================
-
-  // default constructor
-  burton_wedge_t(mesh_topology_base_t & mesh) : mesh_(&mesh) {};
-
-  // dissallow copying
-  burton_wedge_t( burton_wedge_t & ) = delete;
-  burton_wedge_t & operator=( burton_wedge_t & ) = delete;
-
-  // dissallow moving
-  burton_wedge_t( burton_wedge_t && ) = delete;
-  burton_wedge_t & operator=( burton_wedge_t && ) = delete;
-
-  //============================================================================
-  // Accessors / Modifiers
-  //============================================================================
-
-  //! \brief Get the cell facet normal for the wedge.
-  //! \return Cell facet normal vector.
-  vector_t facet_normal_left() const;
-  //! \copydoc facet_normal_left
-  vector_t facet_normal_right() const;
-
-  //! \brief The "left" orientation of the facet normal.
-  //! \return The facet normal vector.
-  static vector_t facet_normal_left(
-    const point_t & v, //!< [in] The associated vertex coordinate
-    const point_t & e, //!< [in] The associated edge midpoint
-    const point_t & f  //!< [in] The associated face midpoint
-  ) {
-    return geometry::shapes::triangle<num_dimensions>::normal( v, e, f );
-  }
-
-  //! \brief The "right" orientation of the facet normal.
-  //! \return The facet normal vector.
-  static vector_t facet_normal_right(
-    const point_t & v, //!< [in] The associated vertex coordinate
-    const point_t & e, //!< [in] The associated edge midpoint
-    const point_t & f  //!< [in] The associated face midpoint
-  ) {
-    return geometry::shapes::triangle<num_dimensions>::normal( v, f, e );
-  }
-
-  //! \brief Get the cell facet centroid
-  //! \return Cell facet centroid.
-  point_t facet_centroid() const;
-
-  //! \brief Get the cell facet midpoint
-  //! \return Cell facet midpoint.
-  point_t facet_midpoint() const;
-
-  //! \brief reset the mesh pointer
-  //! \param [in] mesh The new mesh to point to.
-  void reset(mesh_topology_base_t & mesh) 
-  { 
-    mesh_ = &mesh;
-  }
-
-  //! \brief Is this wedge on the boundary.
-  //! \return true if on boundary.
-  bool is_boundary() const;
-
-  //============================================================================
-  // Private Data
-  //============================================================================
-
- private:
-
-  //! a reference to the mesh topology
-  mesh_topology_base_t * mesh_ = nullptr;
-
-}; // struct burton_wedge_t
-
-} // namespace
 } // namespace
 } // namespace

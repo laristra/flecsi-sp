@@ -6,7 +6,7 @@
 #ifndef flecsi_sp_minimal_config_h
 #define flecsi_sp_minimal_config_h
 
-#include "flecsi-sp/geometry/point.h"
+#include <ristra/geometry/point.h>
 
 ///
 // \file minimal/config.h
@@ -14,8 +14,8 @@
 // \date Initial file creation: Oct 19, 2016
 ///
 
-namespace flecsi {
-namespace sp {
+namespace flecsi_sp {
+namespace minimal {
 
 #ifndef FLECSI_MESH_DIMENSION
 #define FLECSI_MESH_DIMENSION 2
@@ -41,7 +41,7 @@ struct minimal_config_t
   using real_t = double;
 
   /// Point type
-  using point_t = geometry::point<real_t, num_dimensions>;
+  using point_t = ristra::geometry::point<real_t, num_dimensions>;
 
 }; // class minimal_config_t
 

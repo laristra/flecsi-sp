@@ -6,7 +6,6 @@
 #ifndef felcsisp_minimal_mesh_h
 #define felcsisp_minimal_mesh_h
 
-#include "flecsi-sp/geometry/point.h"
 #include "flecsi-sp/minimal/types.h"
 
 ///
@@ -15,8 +14,8 @@
 // \date Initial file creation: Oct 19, 2016
 ///
 
-namespace flecsi {
-namespace sp {
+namespace flecsi_sp {
+namespace minimal {
 
 ///
 // Use this namespace to expose enumerations and types.

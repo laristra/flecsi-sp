@@ -15,7 +15,7 @@
 #include "burton_test_base.h"
 
 // user includes
-#include "../factory.h"
+#include "flecsale/mesh/factory.h"
 
 // some general using statements
 using std::vector;
@@ -67,7 +67,7 @@ public:
   static constexpr size_t height = 2;
 
   //! \brief some test tolerance
-  static constexpr real_t test_tolerance = flecsi::sp::common::test_tolerance;
+  static constexpr real_t test_tolerance = flecsale::common::test_tolerance;
 
 
 
@@ -79,7 +79,7 @@ protected:
   //---------------------------------------------------------------------------
   virtual void SetUp() {
 
-    mesh_ = flecsi::sp::burton::box<mesh_t>( 
+    mesh_ = flecsale::mesh::box<mesh_t>( 
       width, height, 0, 0, width, height );
 
   } // SetUp

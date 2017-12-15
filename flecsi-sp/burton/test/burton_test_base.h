@@ -9,20 +9,21 @@
 #pragma once
 
 // user includes
-#include "../burton.h"
+#include "flecsale/common/constants.h"
+#include "flecsale/mesh/burton/burton.h"
 
 // system includes
 #include <cinchtest.h>
 
 //! \brief the mesh type
-using mesh_2d_t   = flecsi::sp::burton::burton_mesh_2d_t;
+using mesh_2d_t   = flecsale::mesh::burton::burton_mesh_2d_t;
 //! \brief the mesh type
-using mesh_3d_t   = flecsi::sp::burton::burton_mesh_3d_t;
+using mesh_3d_t   = flecsale::mesh::burton::burton_mesh_3d_t;
 
 // some general using statements
 using std::string;
-using flecsi::sp::burton::write_mesh;
-using flecsi::sp::burton::read_mesh;
+using flecsale::mesh::write_mesh;
+using flecsale::mesh::read_mesh;
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief base test fixture for burton

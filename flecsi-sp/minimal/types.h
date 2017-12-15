@@ -8,7 +8,6 @@
 
 #include <flecsi/topology/mesh_topology.h>
 
-#include "flecsi-sp/geometry/point.h"
 #include "flecsi-sp/minimal/entity_types.h"
 
 ///
@@ -17,8 +16,8 @@
 // \date Initial file creation: Oct 19, 2016
 ///
 
-namespace flecsi {
-namespace sp {
+namespace flecsi_sp {
+namespace minimal {
 
 ///
 // \class minimal_types_t minimal_types.h

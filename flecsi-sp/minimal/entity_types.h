@@ -16,15 +16,15 @@
 // \date Initial file creation: Oct 19, 2016
 ///
 
-namespace flecsi {
-namespace sp {
+namespace flecsi_sp {
+namespace minimal {
 
 ///
 // \struct minimal_vertex_t
 // \brief FIXME
 ///
 struct minimal_vertex_t
-  : public topology::mesh_entity_t<0,
+  : public flecsi::topology::mesh_entity_t<0,
     minimal_config_t::num_domains>
 {
   using point_t = minimal_config_t::point_t;
@@ -35,7 +35,7 @@ struct minimal_vertex_t
   // \param mesh FIXME
   ///
   minimal_vertex_t(
-    topology::mesh_topology_base_t & mesh,
+    flecsi::topology::mesh_topology_base_t & mesh,
     const point_t & coordinates
   )
     : mesh_(mesh), coordinates_(coordinates)
@@ -51,7 +51,7 @@ struct minimal_vertex_t
 
 private:
 
-  topology::mesh_topology_base_t & mesh_;
+  flecsi::topology::mesh_topology_base_t & mesh_;
   point_t coordinates_;
 
 }; // class minimal_vertex_t
@@ -61,7 +61,7 @@ private:
 // \breif FIXME
 ///
 struct minimal_edge_t
-  : public topology::mesh_entity_t<1,
+  : public flecsi::topology::mesh_entity_t<1,
     minimal_config_t::num_domains>
 {
   ///
@@ -69,12 +69,12 @@ struct minimal_edge_t
   //
   // \param mesh FIXME
   ///
-  minimal_edge_t(topology::mesh_topology_base_t & mesh)
+  minimal_edge_t(flecsi::topology::mesh_topology_base_t & mesh)
     : mesh_(mesh) {}
 
 private:
 
-  topology::mesh_topology_base_t & mesh_;
+  flecsi::topology::mesh_topology_base_t & mesh_;
 
 }; // class minimal_edge_t
 

@@ -15,6 +15,8 @@ cinch_minimum_required(1.0)
 
 project(FleCSI-SP)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
+
 #------------------------------------------------------------------------------#
 # Set header suffix regular expression
 #------------------------------------------------------------------------------#
@@ -47,7 +49,16 @@ cinch_load_extras()
 
 find_package(FleCSI CONFIG REQUIRED)
 list(APPEND FleCSI_SP_LIBRARIES ${FleCSI_LIBRARIES})
-include_directories(${FleCSI_INCLUDE_DIR})
+include_directories(${FleCSI_INCLUDE_DIRS})
+
+#------------------------------------------------------------------------------#
+# Ristra Library
+#------------------------------------------------------------------------------#
+
+find_package(Ristra CONFIG REQUIRED)
+list(APPEND FleCSI_SP_LIBRARIES ${Ristra_LIBRARIES})
+include_directories(${Ristra_INCLUDE_DIRS})
+
 
 #------------------------------------------------------------------------------#
 # Set directory information
@@ -65,24 +76,30 @@ OPTION (FLECSI_SP_DOUBLE_PRECISION "Use double precision reals"  ON)
 
 if( FLECSI_SP_DOUBLE_PRECISION ) 
   message(STATUS "Note: Double precision build activated.")
-  add_definitions( -DFLECSI_SP_DOUBLE_PRECISION )
-  SET (TEST_TOLERANCE 1.0e-14 CACHE STRING "The testing tolerance")
+  SET (FLECSI_SP_TEST_TOLERANCE 1.0e-14 CACHE STRING "The testing tolerance")
 else()
   message(STATUS "Note: Single precision build activated.")
-  SET (TEST_TOLERANCE 1.0e-6 CACHE STRING "The testing tolerance")
+  SET (FLECSI_SP_TEST_TOLERANCE 1.0e-6 CACHE STRING "The testing tolerance")
 endif()
 
-add_definitions( -DTEST_TOLERANCE=${TEST_TOLERANCE} )
-
 # size of integer ids to use
-option( USE_64BIT_IDS "Type of integer to use for ids" ON )
+option( FLECSI_SP_USE_64BIT_IDS "Type of integer to use for ids" ON )
 
-if( USE_64BIT_IDS ) 
+if( FLECSI_SP_USE_64BIT_IDS ) 
   message(STATUS "Note: using 64 bit integer ids.")
-  add_definitions( -DUSE_64BIT_IDS )
 else()
   message(STATUS "Note: using 32 bit integer ids.")
 endif()
+
+#------------------------------------------------------------------------------#
+# configure header
+#------------------------------------------------------------------------------#
+
+configure_file(${PROJECT_SOURCE_DIR}/config/flecsi-sp-config.h.in
+  ${CMAKE_BINARY_DIR}/flecsi-sp-config.h @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/flecsi-sp-config.h DESTINATION include)
+
+include_directories(${CMAKE_BINARY_DIR})
 
 #------------------------------------------------------------------------------#
 # Add library targets
@@ -90,6 +107,36 @@ endif()
 
 cinch_add_library_target(FleCSI-SP flecsi-sp)
 list(APPEND FleCSI_SP_LIBRARIES FleCSI-SP)
+
+#------------------------------------------------------------------------------#
+# configure .cmake file (for other projects)
+#------------------------------------------------------------------------------#
+
+export(
+  TARGETS FleCSI-SP
+  FILE ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPTargets.cmake
+)
+
+export(PACKAGE FleCSI-SP)
+
+set(FLECSI_SP_LIBRARY_DIR ${CMAKE_INSTALL_PREFIX}/${LIBDIR})
+set(FLECSI_SP_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
+set(FLECSI_SP_CMAKE_DIR ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/cmake/FleCSI-SP)
+
+configure_file(${PROJECT_SOURCE_DIR}/config/FleCSI-SPConfig.cmake.in
+  ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPConfig.cmake @ONLY)
+
+install(
+  FILES ${PROJECT_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/FleCSI-SPConfig.cmake
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/cmake/FleCSI-SP
+)
+
+install(
+  EXPORT FleCSI-SPTargets
+  DESTINATION ${CMAKE_INSTALL_PREFIX}/${LIBDIR}/cmake/FleCSI-SP
+  COMPONENT dev
+)
+
 
 #----------------------------------------------------------------------------~-#
 # Formatting options for vim.

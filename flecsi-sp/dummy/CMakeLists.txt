@@ -3,13 +3,12 @@
 # All rights reserved.
 #~----------------------------------------------------------------------------~#
 
-set(utils_HEADERS
-  common.h
+set(dummy_HEADERS
   PARENT_SCOPE
 )
 
-set(utils_SOURCES
-  common.cc
+set(dummy_SOURCES
+  dummy.cc
   PARENT_SCOPE
 )
 

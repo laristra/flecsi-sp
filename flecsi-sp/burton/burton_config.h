@@ -1,5 +1,5 @@
 /*~--------------------------------------------------------------------------~*
- * Copyright (c) 2017 Los Alamos National Laboratory, LLC
+ * Copyright (c) 2016 Los Alamos National Laboratory, LLC
  * All rights reserved
  *~--------------------------------------------------------------------------~*/
 ////////////////////////////////////////////////////////////////////////////////
@@ -10,15 +10,18 @@
 #pragma once
 
 // user includes
-#include "flecsi-sp/common/types.h"
-#include "flecsi-sp/geometry/point.h"
-#include "flecsi-sp/math/vector.h"
-#include "flecsi-sp/utils/fixed_vector.h"
-#include "flecsi/utils/bitfield.h"
-#include "flecsi/data/data.h"
+#include <flecsi-sp-config.h>
 
-namespace flecsi {
-namespace sp {
+#include <flecsi/data/data.h>
+#include <ristra/geometry/point.h>
+#include <ristra/geometry/shapes/geometric_shapes.h>
+#include <ristra/math/vector.h>
+#include <ristra/utils/fixed_vector.h>
+
+// system includes
+#include<bitset>
+
+namespace flecsi_sp {
 namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,22 +44,22 @@ struct burton_config_t {
   using const_string_t = flecsi::utils::const_string_t;
 
   //! the bitfield type
-  using bitfield_t = flecsi::utils::bitfield_t;
+  using bitfield_t = std::bitset<8>;
 
   //! A type used for loop indexing.
-  using counter_t = long long;
+  using counter_t = flecsi_sp::config::counter_t;
 
   //! The type for floating-point values.
-  using real_t = common::real_t;
+  using real_t = flecsi_sp::config::real_t;
 
   //! The type for integer values.
-  using integer_t = common::integer_t;
+  using integer_t = flecsi_sp::config::integer_t;
 
   //! A point type with real_t data and mesh dimension.
-  using point_t = geometry::point<real_t, num_dimensions>;
+  using point_t = ristra::geometry::point<real_t, num_dimensions>;
 
   //! A space ("physics") vector type with real_t data and mesh dimension.
-  using vector_t = math::vector<real_t, num_dimensions>;
+  using vector_t = ristra::math::vector<real_t, num_dimensions>;
 
   //! \brief The locations of different bits that we set as flags
   enum bits : uint8_t
@@ -66,13 +69,30 @@ struct burton_config_t {
 
   // the tags type
   using tag_t = uint8_t;
-  using tag_list_t = utils::fixed_vector< tag_t, N*N >;
+  using tag_list_t = ristra::utils::fixed_vector< tag_t, N*N >;
 
+  //! \brief the shape type
+  using shape_t = ristra::geometry::shapes::geometric_shapes_t;
 
+  //! the flecsi id type
+  using id_t = flecsi::utils::id_t;
+
+  //! the flecsi mesh topology storage type
+  using mesh_storage_t = 
+    flecsi::topology::mesh_storage_t<num_dimensions, num_domains>;
+
+  //! the flecsi mesh topology type
+  using mesh_topology_base_t = 
+    flecsi::topology::mesh_topology_base_t< mesh_storage_t >;
+
+  //! the base type for the entities
+  using mesh_entity_base_t = flecsi::topology::mesh_entity_base_t<num_domains>;
+  
+  //! The flecsi domain connectivity type.
+  using connectivity_t = flecsi::topology::domain_connectivity<num_dimensions>;
 
 };
 
-} // namespace mesh
-} // namespace ale
-} // namespace ale
+} // namespace burton
+} // namespace flecsale
 
