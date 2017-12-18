@@ -33,18 +33,29 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_CXX_EXTENSIONS off)
 
 #------------------------------------------------------------------------------#
-# Load the cinch extras
+# Set directory information
 #------------------------------------------------------------------------------#
 
-cinch_load_extras()
+set(FLECSI_SP_DATA_DIR "${CMAKE_SOURCE_DIR}/data")
 
 #------------------------------------------------------------------------------#
 # FleCSI Library
+#
+# Ristra libraries come first in case any options depened on what we found.
 #------------------------------------------------------------------------------#
 
 find_package(FleCSI CONFIG REQUIRED)
 list(APPEND FLECSI_SP_LIBRARIES ${FleCSI_LIBRARIES})
 include_directories(${FleCSI_INCLUDE_DIRS})
+
+set( FLECSI_SP_RUNTIME_MODEL ${FLECSI_RUNTIME_MODEL} )
+
+if ( FLECSI_SP_RUNTIME_MODEL STREQUAL "mpi" )
+  set( ENABLE_MPI ON CACHE BOOL "" FORCE)
+else()
+  MESSAGE( FATAL_ERROR 
+    "Unknown FLECSI_SP_RUNTIME_MODEL being used: ${FLECSI_SP_RUNTIME_MODEL}" )
+endif()
 
 #------------------------------------------------------------------------------#
 # Ristra Library
@@ -56,14 +67,7 @@ include_directories(${RISTRA_INCLUDE_DIRS})
 
 
 #------------------------------------------------------------------------------#
-# Set directory information
-#------------------------------------------------------------------------------#
-
-set(FLECSI_SP_DATA_DIR "${CMAKE_SOURCE_DIR}/data")
-set(FLECSI_SP_LIBRARIES)
-
-#------------------------------------------------------------------------------#
-# Some precision setup
+# Flecsi-sp-specific configuration
 #------------------------------------------------------------------------------#
 
 # double or single precision
@@ -84,6 +88,46 @@ if( FLECSI_SP_USE_64BIT_IDS )
   message(STATUS "Note: using 64 bit integer ids.")
 else()
   message(STATUS "Note: using 32 bit integer ids.")
+endif()
+
+  
+#------------------------------------------------------------------------------#
+# Boost is needed for program options
+#------------------------------------------------------------------------------#
+
+find_package(Boost COMPONENTS program_options QUIET)
+
+# this option overrides what will get set in cinch_load_extras()
+option(
+  ENABLE_BOOST_PROGRAM_OPTIONS
+  "Enable Boost program options for command-line flags"
+  ${Boost_FOUND}
+)
+
+#------------------------------------------------------------------------------#
+# Load the cinch extras
+#
+# Now all options have been set / overriden
+#------------------------------------------------------------------------------#
+
+cinch_load_extras()
+
+
+#------------------------------------------------------------------------------#
+# Legion / MPI
+#------------------------------------------------------------------------------#
+
+find_package(Legion)
+
+if (Legion_FOUND) 
+  include_directories(${Legion_INCLUDE_DIRS})
+endif()
+
+find_package(MPI)
+
+if (MPI_FOUND) 
+  set(MPI_LANGUAGE C CACHE STRING "" FORCE)
+  include_directories(${MPI_C_INCLUDE_PATH})
 endif()
 
 #------------------------------------------------------------------------------#
@@ -118,7 +162,7 @@ include_directories(${CMAKE_BINARY_DIR})
 #------------------------------------------------------------------------------#
 
 cinch_add_library_target(FleCSI-SP flecsi-sp)
-list(APPEND FLECSI_SP_LIBRARIES FleCSI-SP)
+target_link_libraries( FleCSI-SP ${FLECSI_SP_LIBRARIES} )
 
 #------------------------------------------------------------------------------#
 # Extract all project options so they can be exported to the ProjectConfig.cmake

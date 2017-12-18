@@ -30,31 +30,6 @@ namespace io {
 namespace detail {
 
 //==============================================================================
-//! \brief Find or insert a list within a list of lists..
-//! \return An index of where it was inserted or found.
-//==============================================================================
-template<typename CONNECTIVITY_TYPE, typename INSERT_TYPE>
-std::pair<size_t, bool>
-try_emplace(CONNECTIVITY_TYPE & connectivity, INSERT_TYPE && to_insert) {
-
-  using std::forward;
-  using std::make_pair;
-
-  // now find the list
-  auto it = std::find(connectivity.begin(), connectivity.end(), to_insert);
-
-  // if it was not found, insert it
-  if (it == connectivity.end()) {
-    connectivity.emplace_back(std::move(to_insert));
-    return make_pair(connectivity.size() - 1, true);
-  }
-  // it was found, just return the index
-  else {
-    return make_pair(std::distance(connectivity.begin(), it), false);
-  }
-}
-
-//==============================================================================
 //! \brief Transpose a connectivity array
 //==============================================================================
 template<typename CONNECTIVITY_TYPE>
@@ -101,7 +76,6 @@ build_connectivity(
     CONNECTIVITY_TYPE new_edges;
     std::forward<FUNCTION>(build_edges_from_vertices)(these_verts, new_edges);
 
-#if 1
     // now look for exsiting vertex pairs in the edge-to-vertex master list
     // or add a new edge to the list.  add the matched edge id to the
     // cell-to-edge list
@@ -117,26 +91,7 @@ build_connectivity(
         these_edges.push_back(edges[sorted_vs]);
       }
     }
-#else
-    // now look for exsiting vertex pairs in the edge-to-vertex master list
-    // or add a new edge to the list.  add the matched edge id to the
-    // cell-to-edge list
-    for (auto && vs : new_edges) {
-      // sort the vertices
-      auto sorted_vs = vs;
-      std::sort(sorted_vs.begin(), sorted_vs.end());
-      // Try the insertion
-      //   res.first has the id of the location inserted,
-      //   res.second is a boolean saying whether the insertion happend
-      auto res = try_emplace(sorted_edge_to_vertex, std::move(sorted_vs));
-      // if there was an insertion, add the un-perturbed list of vertices
-      // to the master list
-      if (res.second)
-        edge_to_vertex.emplace_back(std::move(vs));
-      // now add the edge id to the cell->edges connectitivity
-      these_edges.push_back(res.first);
-    }
-#endif
+
   } // for
 }
 

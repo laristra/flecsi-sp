@@ -21,3 +21,11 @@ set(burton_SOURCES
   burton_types.cc
   PARENT_SCOPE # THIS NEEDS TO BE HERE
 )
+
+# get a relative path
+cinch_add_unit(burton_2d
+  SOURCES 
+    test/burton_2d.cc
+    ${FLECSI_RUNTIME_DRIVER}
+  LIBRARIES FleCSI-SP
+)

@@ -9,7 +9,7 @@
 #pragma once
 
 // user includes
-#include "flecsale/mesh/burton/burton_mesh.h"
+#include <flecsi-sp/burton/burton_mesh.h>
 
 
 
@@ -32,8 +32,7 @@ auto filter_boundary( E && entities )
 // Alias mesh types
 ////////////////////////////////////////////////////////////////////////////////
 
-namespace flecsale {
-namespace mesh {
+namespace flecsi_sp {
 namespace burton {
 
 //! \brief The final 2d mesh type
@@ -41,6 +40,5 @@ using burton_mesh_2d_t = burton_mesh_t<2>;
 //! \brief The final 3d mesh type
 using burton_mesh_3d_t = burton_mesh_t<3>;
 
-}
 }
 }

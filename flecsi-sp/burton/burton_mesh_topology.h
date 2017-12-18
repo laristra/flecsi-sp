@@ -10,12 +10,11 @@
 #pragma once
 
 // user incldues
-#include "flecsale/mesh/burton/burton_types.h"
-#include "flecsi/topology/mesh_types.h"
+#include <flecsi-sp/burton/burton_types.h>
+#include <flecsi/topology/mesh_types.h>
 
 
-namespace flecsale {
-namespace mesh {
+namespace flecsi_sp {
 namespace burton {
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,9 +23,8 @@ namespace burton {
 ////////////////////////////////////////////////////////////////////////////////
 template < std::size_t N, bool Extra_Elements >
 using burton_mesh_topology_t = 
-  flecsi::topology::mesh_topology_t< burton_types_t<N, Extra_Elements> >;
+  flecsi::topology::mesh_topology__< burton_types_t<N, Extra_Elements> >;
 
 
-} // namespace
 } // namespace
 } // namespace

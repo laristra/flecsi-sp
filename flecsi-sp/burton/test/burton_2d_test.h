@@ -12,14 +12,11 @@
 #pragma once
 
 // test include
-#include "burton_test_base.h"
+#include "burton_test.h"
 
-// user includes
-#include "flecsale/mesh/factory.h"
-
-// some general using statements
-using std::vector;
-
+namespace flecsi_sp {
+namespace burton {
+namespace test {
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test fixture for creating the mesh
@@ -67,7 +64,7 @@ public:
   static constexpr size_t height = 2;
 
   //! \brief some test tolerance
-  static constexpr real_t test_tolerance = flecsale::common::test_tolerance;
+  static constexpr real_t test_tolerance = flecsi_sp::config::test_tolerance;
 
 
 
@@ -77,12 +74,7 @@ protected:
   //! \brief the test setup function
   //! \remark this function is called before each test
   //---------------------------------------------------------------------------
-  virtual void SetUp() {
-
-    mesh_ = flecsale::mesh::box<mesh_t>( 
-      width, height, 0, 0, width, height );
-
-  } // SetUp
+  virtual void SetUp() { }
 
   //---------------------------------------------------------------------------
   //! \brief the test teardown function
@@ -105,7 +97,7 @@ public:
   template < typename E >
   decltype(auto) get_cell_neighbors( E cell ) {
 
-    vector<E> neighbors;
+    std::vector<E> neighbors;
 
     for ( auto e : mesh_.edges(cell) ) 
       for ( auto neigh : mesh_.cells(e) ) 
@@ -124,3 +116,7 @@ public:
   mesh_t mesh_;
 
 };
+
+} // namespace test
+} // namespace burton
+} // namespace flecsi_sp

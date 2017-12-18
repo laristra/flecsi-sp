@@ -79,17 +79,17 @@ struct burton_config_t {
 
   //! the flecsi mesh topology storage type
   using mesh_storage_t = 
-    flecsi::topology::mesh_storage_t<num_dimensions, num_domains>;
+    flecsi::topology::mesh_storage__<num_dimensions, num_domains>;
 
   //! the flecsi mesh topology type
   using mesh_topology_base_t = 
-    flecsi::topology::mesh_topology_base_t< mesh_storage_t >;
+    flecsi::topology::mesh_topology_base__< mesh_storage_t >;
 
   //! the base type for the entities
-  using mesh_entity_base_t = flecsi::topology::mesh_entity_base_t<num_domains>;
+  using mesh_entity_base_t = flecsi::topology::mesh_entity_base__<num_domains>;
   
   //! The flecsi domain connectivity type.
-  using connectivity_t = flecsi::topology::domain_connectivity<num_dimensions>;
+  using connectivity_t = flecsi::topology::domain_connectivity__<num_dimensions>;
 
 };
 

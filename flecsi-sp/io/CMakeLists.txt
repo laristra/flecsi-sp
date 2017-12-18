@@ -28,5 +28,19 @@ if ( FLECSI_SP_ENABLE_EXODUS )
       ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-nfaced.exo
     LIBRARIES ${EXODUSII_LIBRARIES}
   )
+
+
+  cinch_add_unit(color_exodus
+    SOURCES test/color_exodus.cc
+    INPUTS
+      ${FLECSI_SP_DATA_DIR}/meshes/2d/mixed/mixed.exo
+      ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-hex.exo
+    LIBRARIES
+      ${FleCSI_LIBRARIES}
+      ${EXODUSII_LIBRARIES}
+    POLICY MPI
+    THREADS 5
+  )
+
 endif()
 

@@ -50,10 +50,10 @@ public:
 
   //! the flecsi mesh topology storage type
   using mesh_storage_t = 
-    flecsi::topology::mesh_storage_t<num_dimensions, num_domains>;
+    flecsi::topology::mesh_storage__<num_dimensions, num_domains>;
   //! the flecsi mesh topology type
   using mesh_topology_base_t = 
-    flecsi::topology::mesh_topology_base_t< mesh_storage_t >;
+    flecsi::topology::mesh_topology_base__< mesh_storage_t >;
 
   //! Type containing coordinates of the vertex.
   using point_t = typename config_t::point_t;

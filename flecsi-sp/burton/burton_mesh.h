@@ -9,12 +9,13 @@
 #pragma once
 
 // user includes
-#include "flecsale/mesh/burton/burton_mesh_topology.h"
-#include "flecsale/mesh/burton/burton_types.h"
-#include "flecsale/utils/errors.h"
-
-#include "flecsi/data/data.h"
-#include "flecsi/execution/task.h"
+#include <flecsi/data/data.h>
+#include <flecsi/execution/task.h>
+#include <flecsi-sp/burton/burton_mesh_topology.h>
+#include <flecsi-sp/burton/burton_types.h>
+#include <ristra/assertions/errors.h>
+#include <ristra/compatibility/type_traits.h>
+#include <ristra/utils/type_traits.h>
 
 // system includes
 #include <set>
@@ -22,8 +23,7 @@
 #include <sstream>
 
 
-namespace flecsale {
-namespace mesh {
+namespace flecsi_sp {
 namespace burton {
 
 //! This namespace is used to expose enumerations and types.
@@ -213,7 +213,7 @@ public:
   //!
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) vertices(const flecsi::topology::domain_entity<M, E> & e) const
+  decltype(auto) vertices(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return 
       base_t::template entities<vertex_t::dimension, M, vertex_t::domain>(
@@ -232,7 +232,7 @@ public:
   //!    sequence.
   template <
     typename P,
-    typename = typename std::enable_if_t< utils::is_callable_v<P> >
+    typename = typename std::enable_if_t< ristra::utils::is_callable_v<P> >
   >
   decltype(auto) vertices( P && p ) const
   {
@@ -274,7 +274,7 @@ public:
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
   decltype(auto) 
-  vertex_ids(const flecsi::topology::domain_entity<M, E> & e) const
+  vertex_ids(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return 
       base_t::template entity_ids<vertex_t::dimension, M, vertex_t::domain>(
@@ -335,7 +335,7 @@ public:
   //!
   //! \return Edges for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) edges(const flecsi::topology::domain_entity<M, E> & e) const
+  decltype(auto) edges(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return base_t::template entities<edge_t::dimension, M, edge_t::domain>(
       e.entity()
@@ -440,7 +440,7 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) faces(const flecsi::topology::domain_entity<M, E> & e) const
+  decltype(auto) faces(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return 
       base_t::template entities<face_t::dimension, M, face_t::domain>(
@@ -533,7 +533,7 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) cells(const flecsi::topology::domain_entity<M, E> & e) const
+  decltype(auto) cells(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return 
       base_t::template entities<cell_t::dimension, M, cell_t::domain>(
@@ -623,7 +623,7 @@ public:
   //!
   //! \return Wedges for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) wedges(const flecsi::topology::domain_entity<M, E> & e) const
+  decltype(auto) wedges(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return 
       base_t::template entities<wedge_t::dimension, M, wedge_t::domain>(
@@ -704,7 +704,7 @@ public:
   //!
   //! \return Corners for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) corners(const flecsi::topology::domain_entity<M, E> & e) const
+  decltype(auto) corners(const flecsi::topology::domain_entity__<M, E> & e) const
   {
     return 
       base_t::template entities<corner_t::dimension, M, corner_t::domain>(
@@ -783,9 +783,11 @@ public:
   template< typename V >
   auto create_cell(
     V && verts,
-    typename std::enable_if_t< 
-      utils::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
-      std::remove_pointer_t<typename std::decay_t<V>::value_type>::num_dimensions == 2
+    std::enable_if_t< 
+      ristra::compatibility::is_same_v<
+        typename std::decay_t<V>::value_type, vertex_t* > &&
+      std::remove_pointer_t<typename
+        std::decay_t<V>::value_type>::num_dimensions == 2
     >* = nullptr ) 
   {
     return create_2d_element_from_verts_<cell_t>( std::forward<V>(verts) );
@@ -797,8 +799,8 @@ public:
   template< typename V >
   auto  create_cell( 
     std::initializer_list<V*> verts,
-    typename std::enable_if_t< 
-      utils::is_same_v<V, vertex_t> && V::num_dimensions == 2 
+    std::enable_if_t< 
+      ristra::compatibility::is_same_v<V, vertex_t> && V::num_dimensions == 2 
     >* = nullptr ) 
   {
     return create_2d_element_from_verts_<cell_t>( verts );
@@ -812,7 +814,7 @@ public:
   auto create_cell(
     V && verts,
     typename std::enable_if_t< 
-      utils::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
+      ristra::compatibility::is_same_v< typename std::decay_t<V>::value_type, vertex_t* > &&
       std::remove_pointer_t<typename std::decay_t<V>::value_type>::num_dimensions == 3
     >* = nullptr ) 
   {
@@ -826,7 +828,7 @@ public:
   auto  create_cell( 
     std::initializer_list<V*> verts,
     typename std::enable_if_t< 
-      utils::is_same_v<V, vertex_t> && V::num_dimensions == 3
+      ristra::compatibility::is_same_v<V, vertex_t> && V::num_dimensions == 3
     >* = nullptr ) 
   {
     return create_3d_element_from_verts_( verts );
@@ -839,7 +841,7 @@ public:
   auto create_cell(
     F && faces,
     typename std::enable_if_t< 
-      utils::is_same_v< typename std::decay_t<F>::value_type, face_t* >  &&
+      ristra::compatibility::is_same_v< typename std::decay_t<F>::value_type, face_t* >  &&
       std::remove_pointer_t<typename std::decay_t<F>::value_type>::num_dimensions == 3
     >* = nullptr ) 
   {
@@ -943,7 +945,7 @@ public:
   bool is_valid( bool raise_on_error = true )
   {
     // some includes
-    using math::dot_product;
+    using ristra::math::dot_product;
 
     // a lambda function for raising errors or returning 
     // false
@@ -998,7 +1000,6 @@ public:
     if ( bad_face ) return raise_or_return( ss );
 
 
-#pragma message("DISABLED CORNERS AND WEDGES")
 #if 0
 
     //--------------------------------------------------------------------------
@@ -1193,7 +1194,6 @@ public:
       //--------------------------------------------------------------------------
       // compute wedge parameters
 
-#pragma message("DISABLED CORNERS AND WEDGES")
 #if 0
 
       #pragma omp for
@@ -1446,5 +1446,4 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh_t<M>& mesh)
 
 
 } // namespace burton
-} // namespace mesh
-} // namespace flecsale
+} // namespace flecsi-sp

@@ -75,7 +75,7 @@ TEST(exodus_definition_2d, neighbors) {
 ////////////////////////////////////////////////////////////////////////////////
 TEST(exodus_definition_3d, neighbors_hex) {
 
-  exodus_definition_t<3> mesh("exodus3d-hex.exo");
+  exodus_definition_t<3> mesh("box-hex.exo");
 
   // Primary partititon
   std::vector<size_t> selected_cells = { 21 };
@@ -126,7 +126,7 @@ TEST(exodus_definition_3d, neighbors_hex) {
 ////////////////////////////////////////////////////////////////////////////////
 TEST(exodus_definition_3d, neighbors_nfaced) {
 
-  exodus_definition_t<3> mesh("exodus3d-nfaced.exo");
+  exodus_definition_t<3> mesh("box-nfaced.exo");
 
   // Primary partititon
   std::vector<size_t> selected_cells = { 21 };
