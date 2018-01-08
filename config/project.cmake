@@ -33,10 +33,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_CXX_EXTENSIONS off)
 
 #------------------------------------------------------------------------------#
-# Set directory information
+# Set some global variables
 #------------------------------------------------------------------------------#
 
-set(FLECSI_SP_DATA_DIR "${CMAKE_SOURCE_DIR}/data")
+# directory information
+set(FLECSI_SP_DATA_DIR  "${CMAKE_SOURCE_DIR}/data")
+set(FLECSI_SP_TOOLS_DIR "${CMAKE_SOURCE_DIR}/tools")
+
+# the default test init driver
+set(FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER 
+  ${FLECSI_SP_TOOLS_DIR}/driver_initialization.cc)
 
 #------------------------------------------------------------------------------#
 # FleCSI Library
@@ -52,6 +58,9 @@ set( FLECSI_SP_RUNTIME_MODEL ${FLECSI_RUNTIME_MODEL} )
 
 if ( FLECSI_SP_RUNTIME_MODEL STREQUAL "mpi" )
   set( ENABLE_MPI ON CACHE BOOL "" FORCE)
+  set( FLECSI_SP_UNIT_POLICY MPI )
+elseif ( FLECSI_SP_RUNTIME_MODEL STREQUAL "legion" )
+  set( FLECSI_SP_UNIT_POLICY LEGION )
 else()
   MESSAGE( FATAL_ERROR 
     "Unknown FLECSI_SP_RUNTIME_MODEL being used: ${FLECSI_SP_RUNTIME_MODEL}" )
@@ -144,6 +153,7 @@ endif()
 
 if(FLECSI_SP_ENABLE_EXODUS)
   include_directories(${EXODUSII_INCLUDE_DIRS})
+  list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
 endif()
 
 

@@ -24,6 +24,9 @@
 // define the test tolerance 
 #define FLECSI_SP_TEST_TOLERANCE @FLECSI_SP_TEST_TOLERANCE@
 
+// is exodus enabled?
+#cmakedefine FLECSI_SP_ENABLE_EXODUS
+
 //----------------------------------------------------------------------------//
 // Configuration
 //----------------------------------------------------------------------------//
@@ -60,6 +63,9 @@ using counter_t = std::size_t;
 
 //! the test tolerance 
 static constexpr real_t test_tolerance = FLECSI_SP_TEST_TOLERANCE;
+
+//! the maximum string lenght
+static constexpr std::size_t max_char_length = 256;
 
 } // namespace
 } // namespace
