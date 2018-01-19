@@ -44,7 +44,7 @@ enum data_attributes_t : size_t {
 /// \tparam N The number of dimensions.
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N, bool Extra_Elements = false >
-class burton_mesh_t  : public burton_mesh_topology_t<N, Extra_Elements>
+class burton_mesh__  : public burton_mesh_topology_t<N, Extra_Elements>
 
 {
 public:
@@ -131,24 +131,24 @@ public:
   //============================================================================
 
   //! Default constructor
-  burton_mesh_t() = default;
+  burton_mesh__() = default;
 
   //! \brief Assignment operator (default)
-  burton_mesh_t & operator=(const burton_mesh_t &) = default;
+  burton_mesh__ & operator=(const burton_mesh__ &) = default;
 
   //! \brief Copy constructor
 
-  burton_mesh_t(const burton_mesh_t &src) = default;
+  burton_mesh__(const burton_mesh__ &src) = default;
 
   //! \brief allow move construction
-  burton_mesh_t( burton_mesh_t && ) = default;
+  burton_mesh__( burton_mesh__ && ) = default;
 
   //! \brief Copy constructor for data client handle
-  burton_mesh_t(const burton_mesh_t& m, bool dummy) : base_t(m, dummy)
+  burton_mesh__(const burton_mesh__& m, bool dummy) : base_t(m, dummy)
   {}
 
   //! Destructor
-  virtual ~burton_mesh_t() {};
+  virtual ~burton_mesh__() {};
 
   //============================================================================
   // Accessors
@@ -1300,7 +1300,7 @@ public:
 
   //! Print some statistics.
   template< std::size_t M >
-  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh_t<M>& mesh);
+  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh);
 
 
 
@@ -1399,27 +1399,6 @@ public:
 // External Class Definitions
 ////////////////////////////////////////////////////////////////////////////////
 
-#if 0
-//! Maps dimension-to-dimension connectivity to an index space id
-template<>
-inline
-burton_mesh_t<2>::size_t burton_mesh_t<2>::index_space_map[3][3] =
-  {
-    // row
-    100,
-    index_spaces_t::vertices_to_edges,
-    index_spaces_t::vertices_to_cells,
-    // row 
-    index_spaces_t::edges_to_vertices,
-    100,
-    index_spaces_t::edges_to_cells,
-    // row
-    index_spaces_t::cells_to_vertices,
-    index_spaces_t::cells_to_edges,
-    100
-  };
-#endif
-
 //==============================================================================
 // Friends
 //==============================================================================
@@ -1433,7 +1412,7 @@ burton_mesh_t<2>::size_t burton_mesh_t<2>::index_space_map[3][3] =
 //!  \return the stream operator.
 template< std::size_t M >
 inline
-std::ostream& operator<< (std::ostream& stream, const burton_mesh_t<M>& mesh)
+std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
 {
   using std::endl;
   stream << "Burton mesh:" << endl;
@@ -1444,6 +1423,14 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh_t<M>& mesh)
   return stream;
 }
 
+//==============================================================================
+// Final mesh type
+//==============================================================================
+#ifdef FLECSI_SP_BURTON_MESH_DIMENSION
+using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION>;
+#else
+using burton_mesh_t = burton_mesh__<2>;
+#endif
 
 } // namespace burton
 } // namespace flecsi-sp

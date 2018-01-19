@@ -16,7 +16,7 @@
 #include <flecsi/coloring/parmetis_colorer.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
-#include <flecsi-sp/burton/burton.h>
+#include <flecsi-sp/burton/burton_mesh.h>
 #include <flecsi-sp/io/exodus_definition.h>
 #include <flecsi-sp/utils/char_array.h>
 #include <flecsi-sp/utils/types.h>
@@ -30,10 +30,6 @@
 
 namespace flecsi_sp {
 namespace burton {
-
-// the mesh type
-using mesh_t = flecsi_sp::burton::burton_mesh_t<2>;
-
   
 ////////////////////////////////////////////////////////////////////////////////
 //! Build the list of exclusve, shared and ghost entities
@@ -518,12 +514,12 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 void partition_mesh( utils::char_array_t filename ) 
 {
   // set some compile time constants 
-  constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
   constexpr auto cell_dim = num_dims;
   constexpr auto thru_dim = 0;
 
   // make some type aliases
-  using real_t = mesh_t::real_t;
+  using real_t = burton_mesh_t::real_t;
   using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
   using entity_info_t = flecsi::coloring::entity_info_t;
   
@@ -709,7 +705,7 @@ void partition_mesh( utils::char_array_t filename )
   //----------------------------------------------------------------------------
 
   // Alias the index spaces type
-  using index_spaces = mesh_t::index_spaces_t;
+  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // Get the context instance.
   auto & context = flecsi::execution::context_t::instance();
@@ -880,18 +876,18 @@ void partition_mesh( utils::char_array_t filename )
 void partition_mesh_with_corners_n_wedges( utils::char_array_t filename ) 
 {
   // set some compile time constants 
-  constexpr auto num_dims = mesh_t::num_dimensions;
-  constexpr auto num_domains = mesh_t::num_domains;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
+  constexpr auto num_domains = burton_mesh_t::num_domains;
   constexpr auto cell_dim = num_dims;
   constexpr auto thru_dim = 0;
 
   // make some type aliases
-  using real_t = mesh_t::real_t;
-  using size_t = mesh_t::size_t;
+  using real_t = burton_mesh_t::real_t;
+  using size_t = burton_mesh_t::size_t;
   using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
   using entity_info_t = flecsi::coloring::entity_info_t;
-  using corner_t = mesh_t::corner_t;
-  using wedge_t = mesh_t::wedge_t;
+  using corner_t = burton_mesh_t::corner_t;
+  using wedge_t = burton_mesh_t::wedge_t;
   
   // load the mesh
   auto filename_string = filename.str();
@@ -1111,7 +1107,7 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   //----------------------------------------------------------------------------
 
   // Alias the index spaces type
-  using index_spaces = mesh_t::index_spaces_t;
+  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // Get the context instance.
   auto & context = flecsi::execution::context_t::instance();
@@ -1293,7 +1289,7 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
 /// \brief the main mesh initialization driver
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_mesh( 
-  utils::client_handle_w__<mesh_t> mesh, 
+  utils::client_handle_w__<burton_mesh_t> mesh, 
   utils::char_array_t filename
 ) {
   
@@ -1302,10 +1298,10 @@ void initialize_mesh(
   //----------------------------------------------------------------------------
 
   // some constant expressions
-  constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
   
   // alias some types
-  using real_t = mesh_t::real_t;
+  using real_t = burton_mesh_t::real_t;
   using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 
   // get the context
@@ -1352,7 +1348,7 @@ flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
 flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
     single|flecsi::leaf);
 
-flecsi_register_data_client(mesh_t, meshes, mesh0);
+flecsi_register_data_client(burton_mesh_t, meshes, mesh0);
 
 
 } // namespace

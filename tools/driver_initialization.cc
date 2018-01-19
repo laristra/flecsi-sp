@@ -6,10 +6,7 @@
 /// \file
 ////////////////////////////////////////////////////////////////////////////////
 
-#pragma once
-
 #include <flecsi/execution/context.h>
-
 
 void driver_initialization(int argc, char ** argv)
 {
