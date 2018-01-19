@@ -1,0 +1,26 @@
+#------------------------------------------------------------------------------#
+# Ristra configuration
+#------------------------------------------------------------------------------#
+
+@FLECSI_SP_CONFIG_CODE@
+
+#------------------------------------------------------------------------------#
+# Set the path to the Ristra headers.
+#------------------------------------------------------------------------------#
+
+set(FleCSI_SP_INCLUDE_DIRS @FLECSI_SP_INCLUDE_DIR@
+  @FLECSI_SP_EXTERNAL_INCLUDE_DIRS@)
+
+#------------------------------------------------------------------------------#
+# Ristra library dependencies (contains definitions for IMPORTED targets)
+#------------------------------------------------------------------------------#
+
+if(NOT TARGET FleCSI-SP AND NOT FleCSI_SP_BINARY_DIR)
+  include(@FLECSI_SP_CMAKE_DIR@/FleCSI-SPTargets.cmake)
+endif()
+
+#------------------------------------------------------------------------------#
+# Set the Ristra libraries.
+#------------------------------------------------------------------------------#
+
+set(FleCSI_SP_LIBRARIES FleCSI-SP)
