@@ -1,4 +1,4 @@
-FROM laristra/flecsi:fedora_serial
+FROM laristra/libristra:fedora_serial
 
 ARG MPI
 ARG COVERAGE
