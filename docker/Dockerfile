@@ -28,6 +28,7 @@ RUN mkdir build
 WORKDIR build
 
 RUN cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+          -DCMAKE_PREFIX_PATH=${PWD}/../libristra
           -DENABLE_UNIT_TESTS=ON \
           ..
 RUN make -j2 || make VERBOSE=1
