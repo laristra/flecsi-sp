@@ -7,9 +7,8 @@ services:
 
 env:
   matrix:
-    - DISTRO=fedora_legion MPI=OFF DOCKERHUB=true
-    - DISTRO=ubuntu_legion MPI=OFF DOCKERHUB=true
-    - DISTRO=ubuntu_legion MPI=OFF COVERAGE=ON SONARQUBE=ON
+    - DISTRO=fedora_legion BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=ubuntu_legion BUILD_TYPE=Release DOCKERHUB=true
 
 script:
   - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
@@ -18,13 +17,8 @@ script:
   - sed -i "1s/fedora_serial/${DISTRO}${TAG}/" ${HOME}/docker/Dockerfile
   - cd ../../
   - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker
-  - cp -r $HOME/.ccache ${HOME}/docker/ccache
-  - cp -r $HOME/.sonar ${HOME}/docker/sonar
-  - docker build --build-arg MPI=${MPI}
-                --build-arg COVERAGE=${COVERAGE}
+  - docker build --build-arg BUILD_TYPE=${BUILD_TYPE} 
                 --build-arg CC=${CC} --build-arg CXX=${CXX}
-                --build-arg SONARQUBE=${SONARQUBE} --build-arg SONARQUBE_TOKEN=${SONARQUBE_TOKEN}
-                --build-arg SONARQUBE_GITHUB_TOKEN=${SONARQUBE_GITHUB_TOKEN}
                 --build-arg CI=${CI} --build-arg TRAVIS=${TRAVIS} --build-arg TRAVIS_OS_NAME=${DISTRO}
                 --build-arg TRAVIS_BRANCH=${TRAVIS_BRANCH} --build-arg TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
                 --build-arg TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST} --build-arg TRAVIS_JOB_ID=${TRAVIS_JOB_ID}
@@ -37,15 +31,10 @@ script:
     docker cp ${CON}:/home/flecsi/.sonar ${HOME}/
 
 after_success:
-  - if [[ ${DOCKERHUB} = true && ${DOCKER_EMAIL} && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == stable ]]; then
-      docker login -e="$DOCKER_EMAIL" -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}${TAG}";
+  - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master && ${CC} = gcc ]]; then
+      docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
+      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}";
     fi
-
-cache:
-  ccache: true
-  directories:
-    - $HOME/.sonar
 
 compiler:
   - gcc
