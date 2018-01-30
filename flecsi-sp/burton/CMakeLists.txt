@@ -26,7 +26,7 @@ cinch_add_unit(burton_2d
   -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
   SOURCES 
     test/burton.cc
-    burton_specialization_default_driver.cc
+    burton_specialization_init.cc
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
     ${FLECSI_RUNTIME_DRIVER}
   INPUTS
@@ -51,7 +51,7 @@ cinch_add_unit(burton_3d
   -m ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-hex.g
   SOURCES 
     test/burton.cc
-    burton_specialization_default_driver.cc
+    burton_specialization_init.cc
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
     ${FLECSI_RUNTIME_DRIVER}
   INPUTS
