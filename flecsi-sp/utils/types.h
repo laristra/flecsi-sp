@@ -1,4 +1,8 @@
 
+#include <flecsi/data/common/privilege.h>
+#include <flecsi/data/data_client_handle.h>
+#include <flecsi/data/dense_accessor.h>
+
 #pragma once
 
 namespace flecsi_sp {
