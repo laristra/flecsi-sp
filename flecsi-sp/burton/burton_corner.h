@@ -46,8 +46,7 @@ public:
   static constexpr auto domain = 1;
 
   //! the flecsi mesh topology storage type
-  using mesh_storage_t = 
-    flecsi::topology::mesh_storage__<num_dimensions, num_domains>;
+  using mesh_storage_t = typename config_t::mesh_storage_t;
   //! the flecsi mesh topology type
   using mesh_topology_base_t = 
     flecsi::topology::mesh_topology_base__< mesh_storage_t >;

@@ -21,6 +21,10 @@ set(burton_SOURCES
   PARENT_SCOPE # THIS NEEDS TO BE HERE
 )
 
+set(FLECSI_SP_BURTON_SPECIALIZATION_INIT
+  ${FLECSI_SP_SHARE_DIR}/burton_specialization_init.cc PARENT_SCOPE)
+install(FILES burton_specialization_init.cc DESTINATION ${FLECSI_SP_SHARE_DIR})
+
 cinch_add_unit(burton_2d
   ARGUMENTS
   -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g

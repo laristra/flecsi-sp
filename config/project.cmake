@@ -39,6 +39,7 @@ set(CMAKE_CXX_EXTENSIONS off)
 # directory information
 set(FLECSI_SP_DATA_DIR  "${CMAKE_SOURCE_DIR}/data")
 set(FLECSI_SP_TOOLS_DIR "${CMAKE_SOURCE_DIR}/tools")
+set(FLECSI_SP_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/FleCSI-SP")
 
 # the default test init driver
 set(FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER 
