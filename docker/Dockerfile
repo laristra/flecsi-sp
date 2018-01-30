@@ -1,4 +1,4 @@
-FROM laristra/libristra:fedora_serial
+FROM laristra/flecsi:fedora_serial
 
 ARG MPI
 ARG COVERAGE
@@ -35,8 +35,7 @@ RUN mkdir build
 
 WORKDIR build
 RUN ccache -z
-RUN cmake -DENABLE_MPI=$MPI \
-          -DENABLE_UNIT_TESTS=ON \
+RUN cmake -DENABLE_UNIT_TESTS=ON \
           -DENABLE_DOXYGEN=ON \
           -DENABLE_DOCUMENTATION=ON \
           ${COVERAGE:+-DENABLE_COVERAGE_BUILD=ON} ..
