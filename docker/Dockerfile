@@ -20,6 +20,7 @@ ARG TRAVIS_OS_NAME
 COPY flecsi-sp /home/flecsi/flecsi-sp
 USER root
 RUN chown -R flecsi:flecsi /home/flecsi/flecsi-sp
+RUN find / -name RistraConfig.cmake
 USER flecsi
 
 WORKDIR /home/flecsi/flecsi-sp
