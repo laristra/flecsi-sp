@@ -23,4 +23,5 @@ endif()
 # Set the Ristra libraries.
 #------------------------------------------------------------------------------#
 
-set(FleCSI_SP_LIBRARIES FleCSI-SP)
+# this might override what is defined in FLECSI_SP_CONFIG_CODE but thats ok
+set(FLECSI_SP_LIBRARIES FleCSI-SP)

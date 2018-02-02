@@ -5,6 +5,7 @@
 
 set(utils_HEADERS
   char_array.h
+  parse_arguments.h
   types.h
 
   PARENT_SCOPE # THIS NEEDS TO BE HERE

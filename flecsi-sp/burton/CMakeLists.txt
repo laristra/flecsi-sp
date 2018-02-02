@@ -5,11 +5,13 @@
 
 set(burton_HEADERS
   burton_config.h
-  burton_mesh.h
-  burton_mesh_topology.h
-  burton_types.h
   burton_corner.h
   burton_element.h
+  burton_mesh.h
+  burton_mesh_topology.h
+  burton_specialization_init.h
+  burton_specialization_arguments.h
+  burton_types.h
   burton_vertex.h
   burton_wedge.h
 
@@ -21,11 +23,10 @@ set(burton_SOURCES
   PARENT_SCOPE # THIS NEEDS TO BE HERE
 )
 
-set(FLECSI_SP_BURTON_SPECIALIZATION_INIT
-  ${FLECSI_SP_SHARE_DIR}/burton_specialization_init.cc PARENT_SCOPE)
+# install common files
 install(FILES burton_specialization_init.cc DESTINATION ${FLECSI_SP_SHARE_DIR})
 
-cinch_add_unit(burton_2d
+cinch_add_unit(burton_1d
   ARGUMENTS
   -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
   SOURCES 

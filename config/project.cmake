@@ -175,6 +175,12 @@ include_directories(${CMAKE_BINARY_DIR})
 cinch_add_library_target(FleCSI-SP flecsi-sp)
 target_link_libraries( FleCSI-SP ${FLECSI_SP_LIBRARIES} )
 
+# this has to go here.  Since cinch_add_library_target is a function, it
+# cannot propagate anything outside of function scope.
+set(FLECSI_SP_BURTON_SPECIALIZATION_INIT
+  ${FLECSI_SP_SHARE_DIR}/burton_specialization_init.cc)
+
+
 #------------------------------------------------------------------------------#
 # Extract all project options so they can be exported to the ProjectConfig.cmake
 # file.

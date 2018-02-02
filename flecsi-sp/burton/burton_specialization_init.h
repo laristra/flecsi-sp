@@ -1348,8 +1348,11 @@ flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
 flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
     single|flecsi::leaf);
 
+///////////////////////////////////////////////////////////////////////////////
+// Clent Registration happens here because the specialization initialization
+// needs to know which mesh to access
+///////////////////////////////////////////////////////////////////////////////
 flecsi_register_data_client(burton_mesh_t, meshes, mesh0);
-
 
 } // namespace
 } // namespace
