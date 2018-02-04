@@ -8,7 +8,9 @@ services:
 env:
   matrix:
     - DISTRO=fedora_legion BUILD_TYPE=Release DOCKERHUB=true
-    - DISTRO=ubuntu_legion BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=ubuntu_legion BUILD_TYPE=Debug DOCKERHUB=true
+    - DISTRO=fedora_mpi BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=ubuntu_mpi BUILD_TYPE=Debug DOCKERHUB=true
 
 script:
   - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
@@ -33,10 +35,9 @@ script:
 after_success:
   - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master && ${CC} = gcc ]]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
-      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}";
+      docker push "${TRAVIS_REPO_SLUG}:${DISTRO}${TAG}";
     fi
 
 compiler:
   - gcc
-  - clang
 
