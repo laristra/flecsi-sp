@@ -37,8 +37,8 @@ set(CMAKE_CXX_EXTENSIONS off)
 #------------------------------------------------------------------------------#
 
 # directory information
-set(FLECSI_SP_DATA_DIR  "${CMAKE_SOURCE_DIR}/data")
-set(FLECSI_SP_TOOLS_DIR "${CMAKE_SOURCE_DIR}/tools")
+set(FLECSI_SP_DATA_DIR  "${PROJECT_SOURCE_DIR}/data")
+set(FLECSI_SP_TOOLS_DIR "${PROJECT_SOURCE_DIR}/tools")
 set(FLECSI_SP_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/FleCSI-SP")
 
 # the default test init driver
@@ -51,9 +51,22 @@ set(FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER
 # Ristra libraries come first in case any options depened on what we found.
 #------------------------------------------------------------------------------#
 
-find_package(FleCSI CONFIG REQUIRED)
-list(APPEND FLECSI_SP_LIBRARIES ${FleCSI_LIBRARIES})
-include_directories(${FleCSI_INCLUDE_DIRS})
+file(GLOB _flecsi_contents ${CMAKE_SOURCE_DIR}/flecsi/*)
+
+if ( _flecsi_contents )
+  if ( CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME )
+    add_subdirectory( ${CMAKE_SOURCE_DIR}/flecsi )
+  endif()
+  include_directories(${CMAKE_SOURCE_DIR}/flecsi)
+  list(APPEND FLECSI_SP_LIBRARIES FleCSI)
+  set(FLECSI_SP_RUNTIME_DRIVER
+    ${FleCSI_SOURCE_DIR}/flecsi/execution/${FLECSI_RUNTIME_MODEL}/runtime_driver.cc)
+else()
+  find_package(FleCSI CONFIG REQUIRED)
+  include_directories(${FleCSI_INCLUDE_DIRS})
+  list(APPEND FLECSI_SP_LIBRARIES ${FleCSI_LIBRARIES})
+  set(FLECSI_SP_RUNTIME_DRIVER ${FLECSI_RUNTIME_DRIVER})
+endif()
 
 set( FLECSI_SP_RUNTIME_MODEL ${FLECSI_RUNTIME_MODEL} )
 
@@ -66,14 +79,25 @@ else()
   MESSAGE( FATAL_ERROR 
     "Unknown FLECSI_SP_RUNTIME_MODEL being used: ${FLECSI_SP_RUNTIME_MODEL}" )
 endif()
+  
 
 #------------------------------------------------------------------------------#
 # Ristra Library
 #------------------------------------------------------------------------------#
 
-find_package(Ristra CONFIG REQUIRED)
-list(APPEND FLECSI_SP_LIBRARIES ${RISTRA_LIBRARIES})
-include_directories(${RISTRA_INCLUDE_DIRS})
+file(GLOB _ristra_contents ${CMAKE_SOURCE_DIR}/ristra/*)
+
+if ( _ristra_contents )
+  if ( CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME )
+    add_subdirectory( ${CMAKE_SOURCE_DIR}/ristra )
+  endif()
+  include_directories(${RISTRA_INCLUDE_DIRS})
+  list(APPEND FLECSI_SP_LIBRARIES Ristra)
+else()
+  find_package(Ristra CONFIG REQUIRED)
+  include_directories(${RISTRA_INCLUDE_DIRS})
+  list(APPEND FLECSI_SP_LIBRARIES ${RISTRA_LIBRARIES})
+endif()
 
 
 #------------------------------------------------------------------------------#
