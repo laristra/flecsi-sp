@@ -181,6 +181,24 @@ if(FLECSI_SP_ENABLE_EXODUS)
   list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
 endif()
 
+#------------------------------------------------------------------------------#
+# ParMETIS
+#------------------------------------------------------------------------------#
+
+# Counter-intuitive variable: set to TRUE to disable test
+set(PARMETIS_TEST_RUNS TRUE)
+find_package(ParMETIS 4.0)
+
+option(FLECSI_SP_ENABLE_PARMETIS "Enable partitioning with parnetis." ${PARMETIS_FOUND})
+
+if(FLECSI_SP_ENABLE_PARMETIS AND NOT PARMETIS_FOUND)
+  message(FATAL_ERROR "Parmetis requested, but not found")
+endif()
+
+if(FLECSI_SP_ENABLE_PARMETIS)
+  include_directories(${PARMETIS_INCLUDE_DIRS})
+  list(APPEND FLECSI_SP_LIBRARIES ${PARMETIS_LIBRARIES})
+endif()
 
 #------------------------------------------------------------------------------#
 # configure header

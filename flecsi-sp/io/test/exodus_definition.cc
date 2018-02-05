@@ -15,6 +15,15 @@ template< int D >
 using exodus_definition_t = 
   flecsi_sp::io::exodus_definition__<D, double>;
 
+// The flecsi library has undefined symbols in it.  It calls 
+// flecsi::execution::driver even though we are not using the execution model.
+// Define an empty stub for linkage.
+namespace flecsi {
+namespace execution {
+void runtime_driver(int argc, char ** argv) {}
+}
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This tests the 2d version of the exodus mesh definition
 ////////////////////////////////////////////////////////////////////////////////
