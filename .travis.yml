@@ -7,8 +7,6 @@ services:
 
 env:
   matrix:
-    - DISTRO=fedora_legion BUILD_TYPE=Release DOCKERHUB=true
-    - DISTRO=ubuntu_legion BUILD_TYPE=Debug DOCKERHUB=true
     - DISTRO=fedora_mpi BUILD_TYPE=Release DOCKERHUB=true
     - DISTRO=ubuntu_mpi BUILD_TYPE=Debug DOCKERHUB=true
 
