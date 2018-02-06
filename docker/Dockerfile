@@ -20,8 +20,6 @@ ARG TRAVIS_OS_NAME
 COPY flecsi-sp /home/flecsi/flecsi-sp
 USER root
 RUN chown -R flecsi:flecsi /home/flecsi/flecsi-sp
-RUN ls /home/flecsi
-RUN find / -name RistraConfig.cmake
 USER flecsi
 
 WORKDIR /home/flecsi/flecsi-sp
@@ -30,7 +28,6 @@ RUN mkdir build
 WORKDIR build
 
 RUN cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-          -DCMAKE_PREFIX_PATH=${PWD}/../libristra \
           -DENABLE_UNIT_TESTS=ON \
           ..
 RUN make -j2 || make VERBOSE=1
