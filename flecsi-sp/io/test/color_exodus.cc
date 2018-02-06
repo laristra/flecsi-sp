@@ -30,6 +30,16 @@
 
 clog_register_tag(coloring);
 
+// The flecsi library has undefined symbols in it.  It calls 
+// flecsi::execution::driver even though we are not using the execution model.
+// Define an empty stub for linkage.
+namespace flecsi {
+namespace execution {
+void runtime_driver(int argc, char ** argv) {}
+}
+}
+
+
 // some type aliases
 using exodus_definition_2d_t = flecsi_sp::io::exodus_definition__<2, double>;
 
