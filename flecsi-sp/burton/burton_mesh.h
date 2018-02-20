@@ -946,6 +946,7 @@ public:
   {
     // some includes
     using ristra::math::dot_product;
+    std::cout << "CHECKING IF VALID" << std::endl;
 
     // a lambda function for raising errors or returning 
     // false
@@ -967,11 +968,11 @@ public:
     // make sure face normal points out from first cell
     bool bad_face = false;
     
-  auto & context = flecsi::execution::context_t::instance();
-  auto rank = context.color();
-  auto & vertex_map = context.index_map( index_spaces_t::vertices );
-  auto & face_map = context.index_map( index_spaces_t::faces );
-  auto & cell_map = context.index_map( index_spaces_t::cells );
+    // auto & context = flecsi::execution::context_t::instance();
+    // auto rank = context.color();
+    // auto & vertex_map = context.index_map( index_spaces_t::vertices );
+    // auto & face_map = context.index_map( index_spaces_t::faces );
+    // auto & cell_map = context.index_map( index_spaces_t::cells );
 
 
     for( auto f : faces(flecsi::owned) ) {
@@ -999,8 +1000,7 @@ public:
 
     if ( bad_face ) return raise_or_return( ss );
 
-
-#if 0
+#if FLECSI_SP_BURTON_MESH_EXTRAS
 
     //--------------------------------------------------------------------------
     // check all the corners and wedges
@@ -1010,6 +1010,8 @@ public:
 
     //#omp parallel for reduction( || : bad_corner )
     for( counter_t cnid=0; cnid<num_corners; ++cnid ) {
+  
+      std::cout << "checking corner " << cnid << std::endl;
 
       auto cn = cnrs[cnid];
       auto cs = cells(cn);
@@ -1144,7 +1146,8 @@ public:
 
 
     if ( bad_corner ) return raise_or_return( ss );
-#endif
+
+#endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
     return true;
 
@@ -1426,10 +1429,22 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
 //==============================================================================
 // Final mesh type
 //==============================================================================
-#ifdef FLECSI_SP_BURTON_MESH_DIMENSION
+#ifndef FLECSI_SP_BURTON_MESH_EXTRAS
+
+#  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
 using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION>;
-#else
+#  else
 using burton_mesh_t = burton_mesh__<2>;
+#  endif
+
+#else
+
+#  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
+using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
+#  else
+using burton_mesh_t = burton_mesh__<2,true>;
+#  endif
+
 #endif
 
 } // namespace burton

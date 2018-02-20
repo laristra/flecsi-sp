@@ -101,6 +101,20 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
       << " with centroid " << c->centroid() << endl;
   } // for
 
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  file << "Corners in mesh:" << endl;
+
+  for(auto c : mesh.corners()) {
+    file << "----------- corner id: " << c.id() << endl;
+  } // for
+
+  file << "Wedges in mesh:" << endl;
+
+  for(auto c : mesh.wedges()) {
+    file << "----------- wedge id: " << c.id() << endl;
+  } // for
+#endif
+
   file << "For each vertex:" << endl;
 
   for(auto v: mesh.vertices()) {
@@ -117,6 +131,17 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "    ----Edges:" << endl;
     for(auto e: mesh.edges(v))
       file << "    ++++ edge id: " << e.id() << endl;
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+    file << "    ----Corners:" << endl;
+    for(auto c: mesh.corners(v))
+      file << "    ++++ corner id: " << c.id() << endl;
+
+    file << "    ----Wedges:" << endl;
+    for(auto w: mesh.wedges(v))
+			file << "    ++++ wedge id: " << w.id() << endl;
+#endif
+
   } // for
 
   file << "For each edge:" << endl;
@@ -137,6 +162,16 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "    ----Vertices:" << endl;
     for(auto v : mesh.vertices(e))
       file << "    ++++ vertex id: " << v.id() << endl;
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+    file << "    ----Corners:" << endl;
+    for(auto cnr : mesh.corners(e))
+      file << "    ++++ corner id: " << cnr.id() << endl;
+
+    file << "    ----Wedges:" << endl;
+    for(auto w: mesh.wedges(e))
+			file << "    ++++ wedge id: " << w.id() << endl;
+#endif
 
   } // for
 
