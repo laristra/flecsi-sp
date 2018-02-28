@@ -103,6 +103,32 @@ cinch_add_unit(flecsi_sp_burton_3d
   LIBRARIES FleCSI-SP
 )
 
+cinch_add_unit(flecsi_sp_burton_extras_3d
+  ARGUMENTS
+  -m ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-hex.g
+  SOURCES 
+    test/burton.cc
+    burton_specialization_init.cc
+    ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+    ${FLECSI_SP_RUNTIME_DRIVER}
+  INPUTS
+   test/burton_3d_dump_rank0.out.std
+   test/burton_3d_dump_rank1.out.std
+   test/burton_3d_connectivity_rank0.out.std
+   test/burton_3d_connectivity_rank1.out.std
+   test/burton_3d_geometry_rank0.out.std
+   test/burton_3d_geometry_rank1.out.std
+  DEFINES
+    -DFLECSI_SP_BURTON_MESH_DIMENSION=3
+    -DFLECSI_SP_BURTON_MESH_EXTRAS
+    -DFLECSI_ENABLE_SPECIALIZATION_TLT_INIT
+    -DFLECSI_ENABLE_SPECIALIZATION_SPMD_INIT
+    -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
+  POLICY ${FLECSI_SP_UNIT_POLICY}
+  THREADS 2
+  LIBRARIES FleCSI-SP
+)
+
 cinch_add_unit(flecsi_sp_larsen_thin_2d
   ARGUMENTS
   -m ${FLECSI_SP_DATA_DIR}/meshes/2d/larsen-thin.g

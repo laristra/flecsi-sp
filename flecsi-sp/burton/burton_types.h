@@ -356,6 +356,27 @@ struct burton_3d_types_base
       cells_to_vertices,
       cells_to_edges,
       cells_to_faces,
+      // corners
+      cells_to_corners,
+      faces_to_corners,
+      edges_to_corners,
+      vertices_to_corners,
+      corners_to_cells,
+      corners_to_faces,
+      corners_to_edges,
+      corners_to_vertices,
+      // wedges
+      cells_to_wedges,
+      faces_to_wedges,
+      edges_to_wedges,
+      vertices_to_wedges,
+      wedges_to_cells, 
+      wedges_to_faces,
+      wedges_to_edges,
+      wedges_to_vertices,
+      // wedges <-> corners
+      wedges_to_corners,
+      corners_to_wedges,
     };
 
     //! Maps an entity dimension to an index space id
@@ -466,19 +487,17 @@ struct burton_3d_types_base
       default:
         throw_logic_error("invalid topological dimensions");
       }
-#if 0
       //---------- Dual Mesh ----------//
     case 1:
       switch(D) {
       case 0:
-        return mesh->template make<corner_t>();
+        return mesh->template make<corner_t, corner_t::domain>(id);
       case 1:
-        return mesh->template make<wedge_t>();
+        return mesh->template make<wedge_t, wedge_t::domain>(id);
       default:
         throw_logic_error("invalid topological dimension");
       }
       //---------- Error ----------//
-#endif
     default:
       throw_logic_error("invalid domain");
     }
@@ -502,8 +521,6 @@ struct burton_types_t<3, false> : public burton_3d_types_base
     flecsi_entity_type( index_spaces_t::edges, 0, edge_t ),
     flecsi_entity_type( index_spaces_t::faces, 0, face_t ),
     flecsi_entity_type( index_spaces_t::cells, 0, cell_t )
-    //flecsi_entity_type( attributes::wedges, 1, wedge_t ),
-    //flecsi_entity_type( attributes::corners, 1, corner_t )
   );
 
 
@@ -525,32 +542,69 @@ struct burton_types_t<3, false> : public burton_3d_types_base
 
   //! Bindings are adjacencies of entities across two domains.
   flecsi_register_bindings();
-#if 0
-  using bindings =
-      std::tuple<
-        // corners
-        std::tuple<index_space_<18>, domain_<0>, domain_<1>,   cell_t, corner_t>,
-        std::tuple<index_space_<19>, domain_<0>, domain_<1>,   face_t, corner_t>,
-        std::tuple<index_space_<20>, domain_<0>, domain_<1>,   edge_t, corner_t>,
-        std::tuple<index_space_<21>, domain_<0>, domain_<1>, vertex_t, corner_t>,
-        std::tuple<index_space_<22>, domain_<1>, domain_<0>, corner_t,   cell_t>,
-        std::tuple<index_space_<23>, domain_<1>, domain_<0>, corner_t,   face_t>,
-        std::tuple<index_space_<24>, domain_<1>, domain_<0>, corner_t,   edge_t>,
-        std::tuple<index_space_<25>, domain_<1>, domain_<0>, corner_t, vertex_t>,
-        // wedges
-        std::tuple<index_space_<26>, domain_<0>, domain_<1>,   cell_t,  wedge_t>,
-        std::tuple<index_space_<27>, domain_<0>, domain_<1>,   face_t,  wedge_t>,
-        std::tuple<index_space_<28>, domain_<0>, domain_<1>,   edge_t,  wedge_t>,
-        std::tuple<index_space_<29>, domain_<0>, domain_<1>, vertex_t,  wedge_t>,
-        std::tuple<index_space_<30>, domain_<1>, domain_<0>,  wedge_t,   cell_t>,
-        std::tuple<index_space_<31>, domain_<1>, domain_<0>,  wedge_t,   face_t>,
-        std::tuple<index_space_<32>, domain_<1>, domain_<0>,  wedge_t,   edge_t>,
-        std::tuple<index_space_<33>, domain_<1>, domain_<0>,  wedge_t, vertex_t>,
-        // corner <-> wedges
-        std::tuple<index_space_<34>, domain_<1>, domain_<1>,  wedge_t,  corner_t>,
-        std::tuple<index_space_<35>, domain_<1>, domain_<1>,  corner_t, wedge_t>
-      >;
-#endif
+
+};
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief A collection of type information needed to specialize the flecsi
+//!   low-level mesh infrastructure for ALE methods.
+//! \remark This is the two-dimensional version.
+////////////////////////////////////////////////////////////////////////////////
+template<>
+struct burton_types_t<3, true> : public burton_3d_types_base
+{
+
+  //! Definitions of burton mesh entities and their domain.
+  flecsi_register_entity_types(
+    flecsi_entity_type( index_spaces_t::vertices, 0, vertex_t ),
+    flecsi_entity_type( index_spaces_t::edges, 0, edge_t ),
+    flecsi_entity_type( index_spaces_t::faces, 0, face_t ),
+    flecsi_entity_type( index_spaces_t::cells, 0, cell_t ),
+    flecsi_entity_type( index_spaces_t::corners, 1, corner_t ),
+    flecsi_entity_type( index_spaces_t::wedges, 1, wedge_t )
+  );
+
+
+  //! Connectivities are adjacencies of entities within a single domain.
+  flecsi_register_connectivities(
+    flecsi_connectivity( index_spaces_t::vertices_to_edges, 0, vertex_t, edge_t ),
+    flecsi_connectivity( index_spaces_t::vertices_to_faces, 0, vertex_t, face_t ),
+    flecsi_connectivity( index_spaces_t::vertices_to_cells, 0, vertex_t, cell_t ),
+    flecsi_connectivity( index_spaces_t::edges_to_vertices, 0, edge_t, vertex_t ),
+    flecsi_connectivity( index_spaces_t::edges_to_faces,    0, edge_t,   face_t ),
+    flecsi_connectivity( index_spaces_t::edges_to_cells,    0, edge_t,   cell_t ),
+    flecsi_connectivity( index_spaces_t::faces_to_vertices, 0, face_t, vertex_t ),
+    flecsi_connectivity( index_spaces_t::faces_to_edges,    0, face_t,   edge_t ),
+    flecsi_connectivity( index_spaces_t::faces_to_cells,    0, face_t,   cell_t ),
+    flecsi_connectivity( index_spaces_t::cells_to_vertices, 0, cell_t, vertex_t ),
+    flecsi_connectivity( index_spaces_t::cells_to_faces,    0, cell_t,   face_t ),
+    flecsi_connectivity( index_spaces_t::cells_to_edges,    0, cell_t,   edge_t )
+  );
+
+  //! Bindings are adjacencies of entities across two domains.
+  flecsi_register_bindings(
+    // corners
+    flecsi_binding( index_spaces_t::cells_to_corners,    0, 1,   cell_t, corner_t ),
+    flecsi_binding( index_spaces_t::faces_to_corners,    0, 1,   face_t, corner_t ),
+    flecsi_binding( index_spaces_t::edges_to_corners,    0, 1,   edge_t, corner_t ),
+    flecsi_binding( index_spaces_t::vertices_to_corners, 0, 1, vertex_t, corner_t ),
+    flecsi_binding( index_spaces_t::corners_to_cells,    1, 0, corner_t,   cell_t ),
+    flecsi_binding( index_spaces_t::corners_to_faces,    1, 0, corner_t,   face_t ),
+    flecsi_binding( index_spaces_t::corners_to_edges,    1, 0, corner_t,   edge_t ),
+    flecsi_binding( index_spaces_t::corners_to_vertices, 1, 0, corner_t, vertex_t ),
+    // wedges
+    flecsi_binding( index_spaces_t::cells_to_wedges,     0, 1,   cell_t,  wedge_t ),
+    flecsi_binding( index_spaces_t::faces_to_wedges,     0, 1,   face_t,  wedge_t ),
+    flecsi_binding( index_spaces_t::edges_to_wedges,     0, 1,   edge_t,  wedge_t ),
+    flecsi_binding( index_spaces_t::vertices_to_wedges,  0, 1, vertex_t,  wedge_t ),
+    flecsi_binding( index_spaces_t::wedges_to_cells,     1, 0,  wedge_t,   cell_t ),
+    flecsi_binding( index_spaces_t::wedges_to_faces,     1, 0,  wedge_t,   face_t ),
+    flecsi_binding( index_spaces_t::wedges_to_edges,     1, 0,  wedge_t,   edge_t ),
+    flecsi_binding( index_spaces_t::wedges_to_vertices,  1, 0,  wedge_t, vertex_t ),
+    // corners <-> wedges
+    flecsi_binding( index_spaces_t::wedges_to_corners,   1, 1,  wedge_t, corner_t ),
+    flecsi_binding( index_spaces_t::corners_to_wedges,   1, 1, corner_t,  wedge_t )
+  );
 
 };
 
