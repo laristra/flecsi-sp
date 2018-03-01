@@ -25,6 +25,22 @@ namespace flecsi_sp {
 namespace burton {
 namespace test {
 
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief Construct the test prefix string.
+////////////////////////////////////////////////////////////////////////////////
+auto prefix() 
+{
+  std::stringstream ss;
+  ss << "burton_";
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  ss << "extras_";
+#endif
+  ss << FLECSI_SP_BURTON_MESH_DIMENSION << "d";
+  return ss.str();
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Test some initial connectivity
 ////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +52,7 @@ void dump_test( utils::client_handle_r__<mesh_t> mesh ) {
   
   // create an output file name
   std::stringstream ss;
-  ss << "burton_" << mesh_t::num_dimensions << "d_dump_rank" << rank << ".out";
+  ss << prefix() << "_dump_rank" << rank << ".out";
 
   // dump the mesh to a file
   std::ofstream file( ss.str() );
@@ -68,8 +84,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   // create an output file name
   std::stringstream ss;
-  ss << "burton_" << mesh_t::num_dimensions << "d_connectivity_rank" << rank
-     << ".out";
+  ss << prefix() << "_connectivity_rank" << rank << ".out";
 
   // dump the mesh to a file
   std::ofstream file( ss.str() );
@@ -194,6 +209,16 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     for(auto v : mesh.vertices(f))
       file << "    ++++ vertex id: " << v.id() << endl;
 
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+    file << "    ----Corners:" << endl;
+    for(auto cnr : mesh.corners(f))
+      file << "    ++++ corner id: " << cnr.id() << endl;
+
+    file << "    ----Wedges:" << endl;
+    for(auto w: mesh.wedges(f))
+			file << "    ++++ wedge id: " << w.id() << endl;
+#endif
+
   } // for
 
   file << "For each cell:" << endl;
@@ -212,6 +237,16 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "    ----Vertices:" << endl;
     for(auto v : mesh.vertices(c))
       file << "    ++++ vertex id: " << v.id() << endl;
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+    file << "    ----Corners:" << endl;
+    for(auto cnr : mesh.corners(c))
+      file << "    ++++ corner id: " << cnr.id() << endl;
+
+    file << "    ----Wedges:" << endl;
+    for(auto w: mesh.wedges(c))
+			file << "    ++++ wedge id: " << w.id() << endl;
+#endif
 
   } // for
 
@@ -243,8 +278,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   // create an output file name
   std::stringstream ss;
-  ss << "burton_" << mesh_t::num_dimensions << "d_geometry_rank" << rank
-    << ".out";
+  ss << prefix() << "_geometry_rank" << rank << ".out";
 
   // dump the mesh to a file
   std::ofstream file( ss.str() );

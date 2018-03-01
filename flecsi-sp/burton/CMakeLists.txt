@@ -60,12 +60,12 @@ cinch_add_unit(flecsi_sp_burton_extras_2d
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
     ${FLECSI_SP_RUNTIME_DRIVER}
   INPUTS
-   test/burton_2d_dump_rank0.out.std
-   test/burton_2d_dump_rank1.out.std
-   test/burton_2d_connectivity_rank0.out.std
-   test/burton_2d_connectivity_rank1.out.std
-   test/burton_2d_geometry_rank0.out.std
-   test/burton_2d_geometry_rank1.out.std
+   test/burton_extras_2d_dump_rank0.out.std
+   test/burton_extras_2d_dump_rank1.out.std
+   test/burton_extras_2d_connectivity_rank0.out.std
+   test/burton_extras_2d_connectivity_rank1.out.std
+   test/burton_extras_2d_geometry_rank0.out.std
+   test/burton_extras_2d_geometry_rank1.out.std
   DEFINES
     -DFLECSI_SP_BURTON_MESH_DIMENSION=2
     -DFLECSI_SP_BURTON_MESH_EXTRAS
@@ -112,12 +112,12 @@ cinch_add_unit(flecsi_sp_burton_extras_3d
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
     ${FLECSI_SP_RUNTIME_DRIVER}
   INPUTS
-   test/burton_3d_dump_rank0.out.std
-   test/burton_3d_dump_rank1.out.std
-   test/burton_3d_connectivity_rank0.out.std
-   test/burton_3d_connectivity_rank1.out.std
-   test/burton_3d_geometry_rank0.out.std
-   test/burton_3d_geometry_rank1.out.std
+   test/burton_extras_3d_dump_rank0.out.std
+   test/burton_extras_3d_dump_rank1.out.std
+   test/burton_extras_3d_connectivity_rank0.out.std
+   test/burton_extras_3d_connectivity_rank1.out.std
+   test/burton_extras_3d_geometry_rank0.out.std
+   test/burton_extras_3d_geometry_rank1.out.std
   DEFINES
     -DFLECSI_SP_BURTON_MESH_DIMENSION=3
     -DFLECSI_SP_BURTON_MESH_EXTRAS

@@ -1231,59 +1231,6 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
     }
   }
 
-#if FLECSI_SP_BURTON_MESH_EXTRAS
-  
-
-  std::vector< size_t > corners_to_entities( num_dims+1, 0 );
-  std::vector< size_t > entities_to_corners( num_dims+1, 0 );
-  
-  std::vector< size_t > wedges_to_entities( num_dims+1, 0 );
-  std::vector< size_t > entities_to_wedges( num_dims+1, 0 );
-
-  const auto & cells_to_faces = mesh_def.entities(num_dims, num_dims-1);
-  const auto & cells_to_edges = mesh_def.entities(num_dims, num_dims-2);
-  const auto & cells_to_vertices = mesh_def.entities(num_dims, 0);
-  const auto & faces_to_edges = mesh_def.entities(num_dims-1, num_dims-2);
-
-  size_t tot_corners = 0;
-  size_t tot_wedges = 0;
-
-  for ( auto cell_id : entity_ids[num_dims] ) {
-    const auto & es = cells_to_edges.at(cell_id);
-    const auto & vs = cells_to_vertices.at(cell_id);
-  
-    // vertices
-    corners_to_entities[0] += vs.size(); // one to one relationship
-    entities_to_corners[0] += vs.size(); // each vertex to one corner
-    
-    wedges_to_entities[0] += 4 * es.size(); // each wedge attaches to one vert
-    entities_to_wedges[0] += 4 * es.size(); // two wedges for each vert on the face
-
-    // edges
-    corners_to_entities[1] += 2 * es.size(); // two times number of exdges
-    entities_to_corners[1] += 2 * es.size(); // each edge to two corners
-        
-    wedges_to_entities[1] += 4 * es.size(); // one to one relationship
-    entities_to_wedges[1] += 4 * es.size(); // each edge to two/four wedges in 2d/3d
-  
-    // cells
-    corners_to_entities[3] += vs.size(); // each corner attaches to this cell
-    entities_to_corners[3] += vs.size(); // cell to one corner for each edge
-  
-    wedges_to_entities[3] += 4 * es.size(); // two wedges per edge, each to one cell
-    entities_to_wedges[3] += 4 * es.size(); // cell to two wedges per edge
-
-    for ( auto f : cells_to_faces.at(cell_id) ) {
-      const auto & es = faces_to_edges.at(f);
-
-      // faces
-      wedges_to_entities[2] += 2 * es.size(); // two wedges per edge, each to one face
-      entities_to_wedges[2] += 2 * es.size(); // face to two wedges per edge
-
-      corners_to_entities[2] += es.size(); // each corner attaches to this face
-      entities_to_corners[2] += es.size(); // face to one corner for each edge
-    }
-  }
 
   flecsi::coloring::adjacency_info_t ai;
   auto & adjacency_info = context.adjacency_info();
@@ -1296,32 +1243,26 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.index_space = index_spaces::cells_to_corners;
   ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  //ai.color_sizes =
-  //  context.adjacency_info().at(index_spaces::cells_to_vertices).color_sizes;
   ai.color_sizes = gathered_corners;
-  assert( entities_to_corners[3] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // face to corner
   ai.index_space = index_spaces::faces_to_corners;
   ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.color_sizes = gathered_wedges;
   for ( auto & i : ai.color_sizes ) i /= 2;
-  assert( entities_to_corners[2] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
+#endif
 
   // edge to corner
   // each edge goes to two corners, for every cell it touches
   ai.index_space = index_spaces::edges_to_corners;
   ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  // ai.color_sizes =
-  //   context.adjacency_info().at(index_spaces::edges_to_cells).color_sizes;
-  // for ( auto & i : ai.color_sizes ) i *= 2;
   ai.color_sizes = gathered_wedges;
   for ( auto & i : ai.color_sizes ) i /= 2;
-  assert( entities_to_corners[1] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
   
   // vertex to corner
@@ -1329,10 +1270,7 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.index_space = index_spaces::vertices_to_corners;
   ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  // ai.color_sizes =
-  //   context.adjacency_info().at(index_spaces::vertices_to_cells).color_sizes;
   ai.color_sizes = gathered_corners;
-  assert( entities_to_corners[0] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
   // corner to cell
@@ -1341,18 +1279,17 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.to_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.color_sizes = gathered_corners;
-  assert( corners_to_entities[3] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // corner to face
-  // TODO
   ai.index_space = index_spaces::corners_to_faces;
   ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.to_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.color_sizes = gathered_wedges;
   for ( auto & i : ai.color_sizes ) i /= 2;
-  assert( corners_to_entities[2] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
+#endif
 
   // corner to edges
   // twice as many corners connected to an edge as cells
@@ -1360,12 +1297,8 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.index_space = index_spaces::corners_to_edges;
   ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.to_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
-  //ai.color_sizes =
-  //  context.adjacency_info().at(index_spaces::cells_to_edges).color_sizes;
-  //for ( auto & i : ai.color_sizes ) i *= 2;
   ai.color_sizes = gathered_wedges;
   for ( auto & i : ai.color_sizes ) i /= 2;
-  assert( corners_to_entities[1] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
   // corner to vertex
@@ -1374,7 +1307,6 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.to_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.color_sizes = gathered_corners;
-  assert( corners_to_entities[0] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
   // cell to wedge
@@ -1382,48 +1314,30 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.index_space = index_spaces::cells_to_wedges;
   ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  // ai.color_sizes =
-  //  context.adjacency_info().at(index_spaces::cells_to_edges).color_sizes;
-  //for ( auto & i : ai.color_sizes ) i *= 2 * (num_dims-1);
   ai.color_sizes = gathered_wedges;
-  assert( entities_to_wedges[3] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // face to wedge
-  // TODO
   ai.index_space = index_spaces::faces_to_wedges;
   ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  //ai.color_sizes =
-  //  context.adjacency_info().at(index_spaces::cells_to_edges).color_sizes;
-  //for ( auto & i : ai.color_sizes ) i *= 2 * (num_dims-1);
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
+#endif
 
   // edge to wedge
   ai.index_space = index_spaces::edges_to_wedges;
   ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  //ai.color_sizes =
-  //  context.adjacency_info().at(index_spaces::edges_to_cells).color_sizes;
-  //for ( auto & i : ai.color_sizes ) i *= 2 * (num_dims-1);
   ai.color_sizes = gathered_wedges;
-  assert( entities_to_wedges[1] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
   // vertex to wedge
-  // FIXME
   // For every edge connected to a vertex, there is one wedge in 2d, and two wedges in 3d.
-  // THIS ONE THE MOST FUCKED UP
   ai.index_space = index_spaces::vertices_to_wedges;
   ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  //ai.color_sizes =
-  //  context.adjacency_info().at(index_spaces::vertices_to_cells).color_sizes;
-  //for ( auto & i : ai.color_sizes ) i *= 2;
-  // ai.color_sizes =
-  //   context.adjacency_info().at(index_spaces::vertices_to_edges).color_sizes;
-  // for ( auto & i : ai.color_sizes ) i *= (num_dims-1);
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
@@ -1433,17 +1347,17 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.color_sizes = gathered_wedges;
-  assert( wedges_to_entities[3] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // wedge to face
   // each wedge goes to once face
   ai.index_space = index_spaces::wedges_to_faces;
   ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.color_sizes = gathered_wedges;
-  assert( wedges_to_entities[2] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
+#endif
 
   // wedge to edges
   // each wedge goes to one edge
@@ -1451,7 +1365,6 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.color_sizes = gathered_wedges;
-  assert( wedges_to_entities[1] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
   // wedge to vertex
@@ -1460,7 +1373,6 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.color_sizes = gathered_wedges;
-  assert( wedges_to_entities[0] == ai.color_sizes[rank] );
   context.add_adjacency(ai);
 
   // wedge to corner
@@ -1478,8 +1390,6 @@ void partition_mesh_with_corners_n_wedges( utils::char_array_t filename )
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
-
-#endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
   //----------------------------------------------------------------------------
   // add intermediate mappings

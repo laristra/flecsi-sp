@@ -946,7 +946,6 @@ public:
   {
     // some includes
     using ristra::math::dot_product;
-    std::cout << "CHECKING IF VALID" << std::endl;
 
     // a lambda function for raising errors or returning 
     // false
@@ -1011,8 +1010,6 @@ public:
     //#omp parallel for reduction( || : bad_corner )
     for( counter_t cnid=0; cnid<num_corners; ++cnid ) {
   
-      std::cout << "checking corner " << cnid << std::endl;
-
       auto cn = cnrs[cnid];
       auto cs = cells(cn);
       auto fs = faces(cn);
