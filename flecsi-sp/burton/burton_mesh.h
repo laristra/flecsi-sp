@@ -584,6 +584,11 @@ public:
     return base_t::template num_entities<wedge_t::dimension, wedge_t::domain>();
   }
 
+  size_t num_wedges(ownership_t subset) const
+  {
+    return base_t::template num_entities<wedge_t::dimension, wedge_t::domain>(subset);
+  }
+
   //! \brief Return all wedges in the burton mesh.
   //!
   //! \return Return all wedges in the burton mesh as a sequence for use, e.g.,
@@ -591,6 +596,11 @@ public:
   decltype(auto) wedges() const
   {
     return base_t::template entities<wedge_t::dimension, wedge_t::domain>();
+  }
+
+  decltype(auto) wedges(ownership_t subset) const
+  {
+    return base_t::template entities<wedge_t::dimension, wedge_t::domain>(subset);
   }
 
   //! \brief Return all wedges in the burton mesh.
@@ -664,6 +674,12 @@ public:
       base_t::template num_entities<corner_t::dimension, corner_t::domain>();
   }
 
+  size_t num_corners(ownership_t subset) const
+  {
+    return 
+      base_t::template num_entities<corner_t::dimension, corner_t::domain>(subset);
+  }
+
   //! \brief Return all corners in the burton mesh.
   //!
   //! \return Return all corners in the burton mesh as a sequence for use, e.g.,
@@ -671,6 +687,11 @@ public:
   decltype(auto) corners() const
   {
     return base_t::template entities<corner_t::dimension, corner_t::domain>();
+  }
+
+  decltype(auto) corners(ownership_t subset) const
+  {
+    return base_t::template entities<corner_t::dimension, corner_t::domain>(subset);
   }
 
   //! \brief Return all corners in the burton mesh.

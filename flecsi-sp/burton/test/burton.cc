@@ -13,13 +13,26 @@
 #include <flecsi-sp/burton/burton_mesh.h>
 #include <flecsi-sp/utils/types.h>
 
+// system includes
+#include <array>
+
 // using statements
 using std::cout;
 using std::endl;
 
 using mesh_t = flecsi_sp::burton::burton_mesh_t;
+using index_spaces_t = mesh_t::index_spaces_t;
+
 using real_t = mesh_t::real_t;
 using vector_t = mesh_t::vector_t;
+using array_t = std::array<int, 9>;
+
+// a temporary data type
+struct data_t
+{
+  int i;
+  double x;
+};
 
 namespace flecsi_sp {
 namespace burton {
@@ -380,56 +393,165 @@ void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
 flecsi_register_task(normals_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
 
-// Data registration for the tests
-flecsi_register_field(mesh_t, hydro, pressure, real_t, dense, 1, mesh_t::index_spaces_t::cells);
-flecsi_register_field(mesh_t, hydro, velocity, vector_t, dense, 1, mesh_t::index_spaces_t::vertices);
-flecsi_register_field(mesh_t, hydro, H, vector_t, dense, 1, mesh_t::index_spaces_t::edges);
+////////////////////////////////////////////////////////////////////////////////
+//! \brief test the mesh state
+////////////////////////////////////////////////////////////////////////////////
+flecsi_register_field(mesh_t, hydro, cell_data, real_t, dense, 1, index_spaces_t::cells);
+flecsi_register_field(mesh_t, hydro, face_data, data_t, dense, 1, index_spaces_t::faces);
+flecsi_register_field(mesh_t, hydro, edge_data, vector_t, dense, 1, index_spaces_t::edges);
+flecsi_register_field(mesh_t, hydro, vert_data, array_t, dense, 1, index_spaces_t::vertices);
+
+void state_fill_test(
+  utils::client_handle_r__<mesh_t> mesh,
+  utils::dense_handle_w__<real_t> cell_data,
+  utils::dense_handle_w__<data_t> face_data,
+  utils::dense_handle_w__<vector_t> edge_data,
+  utils::dense_handle_w__<array_t> vert_data
+) {
+  
+  const auto & context = flecsi::execution::context_t::instance();
+  auto & verts_lid_to_mid = context.index_map( index_spaces_t::vertices );
+  auto & edges_lid_to_mid = context.index_map( index_spaces_t::edges );
+  auto & faces_lid_to_mid = context.index_map( index_spaces_t::faces );
+  auto & cells_lid_to_mid = context.index_map( index_spaces_t::cells );
+
+  // cells
+  for(auto c: mesh.cells(flecsi::owned)) {
+    auto id = cells_lid_to_mid.at( c.id() );
+    cell_data(c) = id;
+  }
+
+  // faces
+  for (auto f: mesh.faces(flecsi::owned)) {
+    auto id = faces_lid_to_mid.at( f.id() );
+    face_data(f).i = id;
+    face_data(f).x = id;
+  }
+
+  // edges
+  for (auto e: mesh.edges(flecsi::owned)) {
+    auto id = edges_lid_to_mid.at( e.id() );
+    for ( auto & x : edge_data(e) ) x = id;
+  }
+
+  // vertices
+  for (auto v: mesh.vertices(flecsi::owned)) {
+    auto id = verts_lid_to_mid.at( v.id() );
+    for ( auto & x : vert_data(v) ) x = id;
+  }
+
+} // TEST_F
+
+void state_check_test(
+  utils::client_handle_r__<mesh_t> mesh,
+  utils::dense_handle_r__<real_t> cell_data,
+  utils::dense_handle_r__<data_t> face_data,
+  utils::dense_handle_r__<vector_t> edge_data,
+  utils::dense_handle_r__<array_t> vert_data
+) {
+  
+  const auto & context = flecsi::execution::context_t::instance();
+  auto & verts_lid_to_mid = context.index_map( index_spaces_t::vertices );
+  auto & edges_lid_to_mid = context.index_map( index_spaces_t::edges );
+  auto & faces_lid_to_mid = context.index_map( index_spaces_t::faces );
+  auto & cells_lid_to_mid = context.index_map( index_spaces_t::cells );
+
+  // cells
+  for(auto c: mesh.cells(flecsi::owned)) {
+    auto id = cells_lid_to_mid.at( c.id() );
+    ASSERT_EQ( cell_data(c), id );
+  }
+
+  // faces
+  for (auto f: mesh.faces(flecsi::owned)) {
+    auto id = faces_lid_to_mid.at( f.id() );
+    ASSERT_EQ( face_data(f).i, id );
+    ASSERT_EQ( face_data(f).x, id );
+  }
+
+  // edges
+  for (auto e: mesh.edges(flecsi::owned)) {
+    auto id = edges_lid_to_mid.at( e.id() );
+    for ( auto & x : edge_data(e) ) ASSERT_EQ(x, id);
+  }
+
+  // vertices
+  for (auto v: mesh.vertices(flecsi::owned)) {
+    auto id = verts_lid_to_mid.at( v.id() );
+    for ( auto & x : vert_data(v) ) ASSERT_EQ(x, id);
+  }
+
+} // TEST_F
+
+flecsi_register_task(state_fill_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
+flecsi_register_task(state_check_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh state
 ////////////////////////////////////////////////////////////////////////////////
-void state_test(
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+
+flecsi_register_field(mesh_t, hydro, wedge_data, int, dense, 1, index_spaces_t::wedges);
+flecsi_register_field(mesh_t, hydro, cornr_data, double, dense, 1, index_spaces_t::corners);
+
+void extra_state_fill_test(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_r__<real_t> press,
-  utils::dense_handle_rw__<vector_t> vel,
-  utils::dense_handle_rw__<vector_t> H
+  utils::dense_handle_w__<int> wedge_data,
+  utils::dense_handle_w__<double> corner_data
 ) {
+  
+  const auto & context = flecsi::execution::context_t::instance();
+  auto & wedges_lid_to_mid = context.index_map( index_spaces_t::wedges );
+  auto & corners_lid_to_mid = context.index_map( index_spaces_t::corners );
 
-  // cells
-  for(auto c: mesh.cells()) {
-    press(c) = c.id();
-  } // for
+  // corners
+  for(auto c: mesh.corners(flecsi::owned)) {
+    auto id = corners_lid_to_mid.at( c.id() );
+    corner_data(c) = id;
+  }
 
-  for(auto c: mesh.cells()) {
-    ASSERT_EQ(c.id(), press(c));
-  } // for
-
-  // vertices
-  for (auto v: mesh.vertices()) {
-    vel(v)[0] = v.id();
-    vel(v)[1] = 2.0*v.id();
-  } // for
-
-  for (auto v: mesh.vertices()) {
-    ASSERT_EQ(v.id(), vel(v)[0]);
-    ASSERT_EQ(2.0*v.id(), vel(v)[1]);
-  } // for
-
-  // edges
-  for (auto e: mesh.edges()) {
-    H(e)[0] = e.id()*e.id();
-    H(e)[1] = e.id()*e.id()*e.id();
-  } // for
-
-  for (auto e: mesh.edges()) {
-    ASSERT_EQ(e.id()*e.id(), H(e)[0]);
-    ASSERT_EQ(e.id()*e.id()*e.id(), H(e)[1]);
-  } // for
+  // wedges
+  for (auto w: mesh.wedges(flecsi::owned)) {
+    auto id = wedges_lid_to_mid.at( w.id() );
+    wedge_data(w) = id;
+  }
 
 } // TEST_F
 
-flecsi_register_task(state_test, flecsi_sp::burton::test, loc,
+void extra_state_check_test(
+  utils::client_handle_r__<mesh_t> mesh,
+  utils::dense_handle_r__<int> wedge_data,
+  utils::dense_handle_r__<double> corner_data
+) {
+  
+  const auto & context = flecsi::execution::context_t::instance();
+  auto & wedges_lid_to_mid = context.index_map( index_spaces_t::wedges );
+  auto & corners_lid_to_mid = context.index_map( index_spaces_t::corners );
+
+  // corners
+  for(auto c: mesh.corners(flecsi::owned)) {
+    auto id = corners_lid_to_mid.at( c.id() );
+    ASSERT_EQ( corner_data(c), id );
+  }
+
+  // wedges
+  for (auto w: mesh.wedges(flecsi::owned)) {
+    auto id = wedges_lid_to_mid.at( w.id() );
+    ASSERT_EQ( wedge_data(w), id );
+  }
+
+} // TEST_F
+
+flecsi_register_task(extra_state_fill_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
+
+flecsi_register_task(extra_state_check_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
+#endif
 
 } // namespace
 } // namespace
@@ -462,11 +584,55 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(normals_test, flecsi_sp::burton::test, single, mesh_handle);
 
   // launch the state test task
-  auto p_handle = flecsi_get_handle(mesh_handle, hydro, pressure, real_t, dense, 0);
-  auto v_handle = flecsi_get_handle(mesh_handle, hydro, velocity, vector_t, dense, 0);
-  auto H_handle = flecsi_get_handle(mesh_handle, hydro, H, vector_t, dense, 0);
-  flecsi_execute_task(state_test, flecsi_sp::burton::test, single, mesh_handle,
-    p_handle, v_handle, H_handle);
+  auto cell_data_handle = flecsi_get_handle(mesh_handle, hydro, cell_data, real_t, dense, 0);
+  auto face_data_handle = flecsi_get_handle(mesh_handle, hydro, face_data, data_t, dense, 0);
+  auto edge_data_handle = flecsi_get_handle(mesh_handle, hydro, edge_data, vector_t, dense, 0);
+  auto vert_data_handle = flecsi_get_handle(mesh_handle, hydro, vert_data, array_t, dense, 0);
+
+  flecsi_execute_task(
+      state_fill_test,
+      flecsi_sp::burton::test,
+      single,
+      mesh_handle,
+      cell_data_handle,
+      face_data_handle,
+      edge_data_handle,
+      vert_data_handle );
+
+  flecsi_execute_task(
+      state_check_test,
+      flecsi_sp::burton::test,
+      single,
+      mesh_handle,
+      cell_data_handle,
+      face_data_handle,
+      edge_data_handle,
+      vert_data_handle );
+
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+
+  // now do the same for the corners and wedges
+  auto wedge_data_handle = flecsi_get_handle(mesh_handle, hydro, wedge_data, int, dense, 0);
+  auto corner_data_handle = flecsi_get_handle(mesh_handle, hydro, cornr_data, double, dense, 0);
+
+  flecsi_execute_task(
+      extra_state_fill_test,
+      flecsi_sp::burton::test,
+      single,
+      mesh_handle,
+      wedge_data_handle,
+      corner_data_handle );
+
+  flecsi_execute_task(
+      extra_state_check_test,
+      flecsi_sp::burton::test,
+      single,
+      mesh_handle,
+      wedge_data_handle,
+      corner_data_handle );
+
+#endif
 
 } // driver
 
