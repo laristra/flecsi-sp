@@ -171,7 +171,6 @@ void burton_wedge_t<2>::update( const MESH_TOPOLOGY * mesh, bool is_right )
   facet_area_ = abs(facet_normal_);
   facet_normal_ /= facet_area_;
   facet_centroid_ = 0.5 * ( e + v );
-  set_boundary( es.front()->is_boundary() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////

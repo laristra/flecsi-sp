@@ -182,6 +182,11 @@ struct burton_element_t<2,1> :
   bool is_boundary() const
   { return flags_.test( config_t::bits::boundary ); }
 
+  //! \brief set whether this element is on the boundary
+  //! \param [in] is_boundary  True if on the boundary.
+  void set_boundary( bool is_boundary )
+  { flags_.set(config_t::bits::boundary, is_boundary); }
+
   //! return the bitfield flags
   const auto & flags() const { return flags_; }
   auto & flags() { return flags_; }
@@ -201,7 +206,6 @@ struct burton_element_t<2,1> :
     using ristra::math::sqr;
     using ristra::math::normal;
     auto vs = mesh->template entities<0, domain>(this);
-    auto cs = mesh->template entities<2, domain>(this);
     const auto & a = vs[0]->coordinates();
     const auto & b = vs[1]->coordinates();
     midpoint_[0] = 0.5*(a[0] + b[0]);
@@ -209,7 +213,6 @@ struct burton_element_t<2,1> :
     length_ = std::sqrt( sqr(a[0]-b[0]) + sqr(a[1]-b[1]) );
     normal_ = normal( b, a );
     normal_ /= length_;
-    flags_.set( config_t::bits::boundary, (cs.size() == 1) );
   }
 
   //============================================================================
@@ -310,6 +313,11 @@ struct burton_element_t<3,1> :
   //! is this a boundary
   bool is_boundary() const
   { return flags_.test( config_t::bits::boundary ); }
+
+  //! \brief set whether this element is on the boundary
+  //! \param [in] is_boundary  True if on the boundary.
+  void set_boundary( bool is_boundary )
+  { flags_.set(config_t::bits::boundary, is_boundary); }
 
   //! get all entity tags
   const tag_list_t & tags() const
@@ -773,6 +781,11 @@ struct burton_element_t<3,2>
   bool is_boundary() const
   { return flags_.test( config_t::bits::boundary ); }
   
+  //! \brief set whether this element is on the boundary
+  //! \param [in] is_boundary  True if on the boundary.
+  void set_boundary( bool is_boundary )
+  { flags_.set(config_t::bits::boundary, is_boundary); }
+
   //! return the bitfield flags
   const auto & flags() const { return flags_; }
   auto & flags() { return flags_; }
@@ -885,8 +898,6 @@ struct burton_element_t<3,2>
     using ristra::math::abs;
   
     auto vs = mesh->template entities<0, domain>(this);
-    auto es = mesh->template entities<1, domain>(this);
-    auto cs = mesh->template entities<3, domain>(this);
   
     switch (shape_) {
   
@@ -957,7 +968,6 @@ struct burton_element_t<3,2>
     
     area_ = abs( normal_ );
     normal_ /= area_;
-    flags_.set( config_t::bits::boundary, (cs.size() == 1) );
   }
 
   //----------------------------------------------------------------------------

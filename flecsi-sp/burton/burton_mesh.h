@@ -936,21 +936,28 @@ public:
     base_t::template init_bindings<1>();
 
     // now set the boundary flags.
-    for ( auto f : faces( ownership_t::owned ) ) {
+    for ( auto f : faces() ) {
+      f->set_boundary( (cells(f).size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
         // point flags
         auto ps = vertices(f);
-        for ( auto p : ps ) 
-          p->flags().set( bits::boundary );
+        for ( auto p : ps )
+          p->set_boundary( true );
         // edge flags are only for 3d
         if ( num_dimensions == 3 ) {
           auto es = edges(f);
           for ( auto e : es ) 
-            e->flags().set( bits::boundary );
+            e->set_boundary( true );
         } // dims
       } // is_boundary
     } // for
+    
+#if FLECSI_SP_BURTON_MESH_EXTRAS
+    // set boundary wedges
+    for ( auto w : wedges() ) 
+      w->set_boundary( edges(w).front()->is_boundary() );
+#endif
 
     // identify the cell regions
     for ( auto c : cells() ) c->region() = 0;
@@ -995,7 +1002,7 @@ public:
     // auto & cell_map = context.index_map( index_spaces_t::cells );
 
 
-    for( auto f : faces(flecsi::owned) ) {
+    for( auto f : faces() ) {
       auto n = f->normal();
       auto fx = f->midpoint();
       auto c = cells(f).front();
@@ -1215,7 +1222,7 @@ public:
       //--------------------------------------------------------------------------
       // compute wedge parameters
 
-#if 0
+#if FLECSI_SP_BURTON_MESH_EXTRAS
 
       #pragma omp for
       for ( counter_t i=0; i<num_corners; ++i ) {
@@ -1225,14 +1232,15 @@ public:
         for ( auto wit = ws.begin(); wit != ws.end(); ++wit ) 
         {
           // get the first wedge normal
-          (*wit)->update( true );
+          (*wit)->update( this, true );
           // move to next wedge
           assert( ++wit != ws.end() );
           // get the second wedge normal
-          (*wit)->update( false );
+          (*wit)->update( this, false );
         }
       }
-#endif
+
+#endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
     } // end omp parallel
 
@@ -1243,64 +1251,44 @@ public:
   //! \brief Install a boundary and tag the relatex entities.
   //============================================================================
   template< typename P >
-  tag_t install_boundary( P && p ) 
+  void install_boundary( P && p, tag_t key ) 
   {
-    std::vector< std::vector<face_t*> >   face_sets_;
-    std::vector< std::vector<edge_t*> >   edge_sets_;
-    std::vector< std::vector<vertex_t*> > vert_sets_;
-
-    // increment the boundary face storage
-    auto this_bnd = face_sets_.size();
-    auto num_bnd = this_bnd + 1;
-    face_sets_.resize( num_bnd );
-    edge_sets_.resize( num_bnd );
-    vert_sets_.resize( num_bnd );
-
-    auto & this_bnd_faces = face_sets_[ this_bnd ];
-    auto & this_bnd_edges = edge_sets_[ this_bnd ];
-    auto & this_bnd_verts = vert_sets_[ this_bnd ];
+    std::vector<face_t*>   bnd_faces;
+    std::vector<edge_t*>   bnd_edges;
+    std::vector<vertex_t*> bnd_verts;
 
     // add the face tags and collect the attached edge and vertices
     for ( auto f : faces() )
       if ( p( f ) ) {
         // tag the face
-        f->tag( this_bnd );
-        this_bnd_faces.emplace_back( f );
+        f->tag( key );
+        bnd_faces.emplace_back( f );
         // tag the vertices
         auto vs = vertices( f );
-        this_bnd_verts.reserve( this_bnd_verts.size() + vs.size() );
-        for ( auto v : vs ) this_bnd_verts.emplace_back( v );
+        bnd_verts.reserve( bnd_verts.size() + vs.size() );
+        for ( auto v : vs ) bnd_verts.emplace_back( v );
         // tag edges in 3d
         if ( num_dimensions == 3 ) {
           auto es = edges( f );
-          this_bnd_edges.reserve( this_bnd_edges.size() + es.size() );
-          for ( auto e : es ) this_bnd_edges.emplace_back( e );
+          bnd_edges.reserve( bnd_edges.size() + es.size() );
+          for ( auto e : es ) bnd_edges.emplace_back( e );
         } // dims
       }
 
     // need to remove duplicates from edge and vertex lists
-    std::sort( this_bnd_edges.begin(), this_bnd_edges.end() );
-    std::sort( this_bnd_verts.begin(), this_bnd_verts.end() );
+    std::sort( bnd_edges.begin(), bnd_edges.end() );
+    std::sort( bnd_verts.begin(), bnd_verts.end() );
 
-    this_bnd_edges.erase( 
-      std::unique( this_bnd_edges.begin(), this_bnd_edges.end() ), 
-      this_bnd_edges.end() 
-    );
-    this_bnd_verts.erase( 
-      std::unique( this_bnd_verts.begin(), this_bnd_verts.end() ), 
-      this_bnd_verts.end() 
-    );
+    bnd_edges.erase( 
+      std::unique( bnd_edges.begin(), bnd_edges.end() ), bnd_edges.end() );
+    bnd_verts.erase( 
+      std::unique( bnd_verts.begin(), bnd_verts.end() ), bnd_verts.end() );
 
     // add the edge tags
-    for ( auto e : this_bnd_edges ) e->tag( this_bnd );
+    for ( auto e : bnd_edges ) e->tag( key );
     // add the vertex tags
-    for ( auto v : this_bnd_verts ) v->tag( this_bnd );
+    for ( auto v : bnd_verts ) v->tag( key );
 
-    // if it's two dimensions, copy the face list into the edge list
-    // if ( num_dimensions == 2 )
-    //   this_bnd_edges.assign( this_bnd_faces.begin(), this_bnd_faces.end() );
-
-    return this_bnd;
   }
 
 #if 0

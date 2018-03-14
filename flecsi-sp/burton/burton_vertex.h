@@ -105,6 +105,11 @@ public:
   bool is_boundary() const
   { return flags_.test( config_t::bits::boundary ); }
 
+  //! \brief set whether this element is on the boundary
+  //! \param [in] is_boundary  True if on the boundary.
+  void set_boundary( bool is_boundary )
+  { flags_.set(config_t::bits::boundary, is_boundary); }
+
   //! get all entity tags
   const tag_list_t & tags() const
   { return tags_; }
