@@ -3,6 +3,22 @@
 
 # FleCSI Specializations Project
 
+## Build
+
+         mkdir build
+         cd build
+
+         cmake .. \
+           -DCMAKE_BUILD_TYPE=Debug \
+           -DCMAKE_PREFIX_PATH=/path/to/flecsi-tpl-install \
+           -DENABLE_UNIT_TESTS=ON \
+           -DENABLE_MPI=ON \
+           -DENABLE_BOOST_PREPROCESSOR=ON \
+           -DFLECSI_SP_ENABLE_PARMETIS=ON \
+           -DBOOST_INCLUDEDIR=/path/to/boost/include \
+           -DFleCSI_DIR=/path/to/flecsi/lib64/cmake/FleCSI \
+           -DRistra_DIR=/path/to/ristra/lib64/cmake/Ristra
+
 # Release
 
 This software has been approved for open source release and has
