@@ -489,11 +489,36 @@ flecsi_register_task(state_fill_test, flecsi_sp::burton::test, loc,
 flecsi_register_task(state_check_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
 
-////////////////////////////////////////////////////////////////////////////////
-//! \brief test the mesh state
-////////////////////////////////////////////////////////////////////////////////
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief test the classification of wedges and corners
+////////////////////////////////////////////////////////////////////////////////
+void extras_test( utils::client_handle_r__<mesh_t> mesh ) {
+  
+  auto crns_excl = mesh.corners(flecsi::exclusive);
+
+  for (auto cl : mesh.cells(flecsi::exclusive)) {
+    for (auto cn : mesh.corners(cl) ) {
+      auto found = false;
+      for ( auto cn_excl : crns_excl )
+        if ( cn_excl.id() == cn.id() ) {
+          found = true;
+          break;
+        }
+      ASSERT_TRUE( found );
+    }
+  } // for
+
+} // TEST_F
+
+flecsi_register_task(extras_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief test the mesh state at corners and wedges
+////////////////////////////////////////////////////////////////////////////////
 flecsi_register_field(mesh_t, hydro, wedge_data, int, dense, 1, index_spaces_t::wedges);
 flecsi_register_field(mesh_t, hydro, cornr_data, double, dense, 1, index_spaces_t::corners);
 
@@ -611,6 +636,9 @@ void driver(int argc, char ** argv)
 
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  
+  // launch the extras test task
+  flecsi_execute_task(extras_test, flecsi_sp::burton::test, single, mesh_handle);
 
   // now do the same for the corners and wedges
   auto wedge_data_handle = flecsi_get_handle(mesh_handle, hydro, wedge_data, int, dense, 0);
