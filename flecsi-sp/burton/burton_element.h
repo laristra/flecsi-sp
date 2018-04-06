@@ -543,45 +543,121 @@ struct burton_element_t<2,2>
     id_t * entities
   ) {
 
-    auto verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
-    auto edges = primal_conn.get_entity_vec( cell, /* dimension */ 1 );
-    auto num_vertices = verts.size();
+    // general connecitivity that is needed in all cases
+    auto cell_verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
+    auto cell_edges = primal_conn.get_entity_vec( cell, /* dimension */ 1 );
+    auto num_vertices = cell_verts.size();
+
+    // main counter
+    size_t i = 0;
+
+    // a lambda function to locate an edge connected to two points
+    auto _find_edge = [&]( const auto & pa, const auto & pb  ) 
+    {
+      // locate the edge with the two vertices
+      auto edge = std::find_if( 
+        cell_edges.begin(), cell_edges.end(), 
+        [&]( const auto & e ) 
+        { 
+          auto verts = primal_conn.get_entity_vec( e, /* dim */ 0 );
+          assert( verts.size() == 2 && "should be two vertices per edge" );
+          return ( (verts[0] == pa && verts[1] == pb) || 
+                   (verts[0] == pb && verts[1] == pa) );
+        } 
+      );
+      // make sure we found an edge
+      assert( edge != cell_edges.end() && "should have found an edge");
+      // return the edge
+      return edge;
+    };
+
 
     switch (dim) {
       //------------------------------------------------------------------------
       // Corners
       // The right edge is always first
     case 0: {
+    
+      // loop over each edge (pair of vertices)
+      // there is a corner for each vertex
+      auto p1 = std::prev( cell_verts.end() );
+      auto p0 = std::prev( p1 );
+      auto edge0 = _find_edge( *p0, *p1 );
+      for ( auto p2=cell_verts.begin(); p2!=cell_verts.end(); ++p2 ) {
+        // get the next edge
+        auto edge1 = _find_edge( *p1, *p2 );
+        // the first point, this is the right (even) one
+        entities[i++] = *p1;
+        entities[i++] = *edge1;
+        entities[i++] = *edge0;
+        // update the iterators
+        p0 = p1;
+        p1 = p2;
+        edge0 = edge1;
+      } // foreach vertex
 
-      auto vp = num_vertices - 1;
-      for ( auto vn=0, ind=0; vn<num_vertices; vn++ ) {
-        entities[ ind++ ] = verts[vn]; // vertex 0
-        entities[ ind++ ] = edges[vn]; // edge 0, abuts vertex 0
-        entities[ ind++ ] = edges[vp]; // edge 3, abuts vertex 0
-        vp = vn;
-      }
-      return std::vector<size_t>(num_vertices, 3);
+      // rotate the results forward because we were looping over the vertices
+      // in a slightly shifter manner
+      std::rotate( entities, entities+3, entities+num_vertices*3 );
+
+      return std::vector<size_t>( num_vertices, 3 );
     }
       //------------------------------------------------------------------------
       // wedges
       // The right wedge is always first
     case 1: {
 
-      auto corners = domain_conn.get_entity_vec( cell, /* dimension */ 0 );
+      // get connectivity specific to wedges
+      auto cell_corners = domain_conn.get_entity_vec( cell, /* dimension */ 0 ).vec();
+      
+      // sort cell corners for later intersection
+      std::sort( cell_corners.begin(),  cell_corners.end() );
 
-      auto vp = num_vertices - 1;
-      for ( auto vn=0, ind=0; vn<num_vertices; vn++ ) {
-        // wedge 0
-        entities[ ind++ ] =   verts[vn]; // vertex 0
-        entities[ ind++ ] =   edges[vn]; // edge 0, abuts vertex 0
-        entities[ ind++ ] = corners[vn]; // corner 0
-        // wedge 1
-        entities[ ind++ ] =   verts[vn]; // vertex 0
-        entities[ ind++ ] =   edges[vp]; // edge 3, abuts vertex 0
-        entities[ ind++ ] = corners[vn]; // corner 0
-        vp = vn;
-      }
+      // temporary storage for found corners
+      std::vector<id_t> corners;
+      corners.reserve(1);
+
+      // loop over each edge (pair of vertices)
+      // there is a wedge for each vertex -> edge combination
+      auto p1 = std::prev( cell_verts.end() );
+      auto p0 = std::prev( p1 );
+      auto edge0 = _find_edge( *p0, *p1 );
+      for ( auto p2=cell_verts.begin(); p2!=cell_verts.end(); ++p2 ) {
+        // get the next edge
+        auto edge1 = _find_edge( *p1, *p2 );
+        // get the corner of this point, but also associated with this cell
+        auto point_corners =
+          domain_conn.get_entity_vec(  *p1, /* dim */ 0 ).vec();
+        // sort the lists for intersectinos
+        std::sort( point_corners.begin(), point_corners.end() );
+        // get the intersections of the sets
+        corners.clear();
+        std::set_intersection( point_corners.begin(), point_corners.end(),
+                               cell_corners.begin(), cell_corners.end(),
+                               std::back_inserter(corners));
+        assert( corners.size() == 1 );
+        const auto & c1 = corners.front();
+        // the first point, this is the right (even) one
+        entities[i++] = *p1;
+        entities[i++] = *edge1;
+        entities[i++] = c1;
+        // for the next point, this one is the left (odd) one
+        entities[i++] = *p1;
+        entities[i++] = *edge0;
+        entities[i++] = c1;
+        // update the iterators
+        p0 = p1;
+        p1 = p2;
+        edge0 = edge1;
+      } // foreach vertex
+      
+      // rotate the results forward because we were looping over the vertices
+      // in a slightly shifter manner
+      std::rotate( entities, entities+6, entities + 2*num_vertices*3 );
+
+
       return std::vector<size_t>(2*num_vertices, 3);
+
     }
       //------------------------------------------------------------------------
       // Failure
@@ -1316,7 +1392,10 @@ struct burton_element_t<3,3>
   
       // get the higher dimensional entities
       auto cell_faces   = primal_conn.get_entity_vec( cell, /* dim */ 2 );
-      auto cell_corners = domain_conn.get_entity_vec( cell, /* dim */ 0 );
+      auto cell_corners = domain_conn.get_entity_vec( cell, /* dim */ 0 ).vec();
+
+      // sort cell corners for later intersections
+      std::sort( cell_corners.begin(),  cell_corners.end() );
       
       // a counter for the number of wedges
       size_t num_wedges = 0;
@@ -1369,11 +1448,8 @@ struct burton_element_t<3,3>
           // get the corner of this point, but also associated with this cell
           auto point_corners =
             domain_conn.get_entity_vec(  *p1, /* dim */ 0 ).vec();
-          auto cell_corners =
-            domain_conn.get_entity_vec( cell, /* dim */ 0 ).vec();
           // sort the lists for intersectinos
           std::sort( point_corners.begin(), point_corners.end() );
-          std::sort( cell_corners.begin(),  cell_corners.end() );
           // get the intersections of the sets
           std::vector<id_t> corners;
           corners.reserve(1);
