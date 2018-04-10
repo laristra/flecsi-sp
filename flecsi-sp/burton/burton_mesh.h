@@ -111,6 +111,8 @@ public:
 
   //! the index spaces type
   using index_spaces_t = typename types_t::index_spaces_t;
+  //! special subspace for 
+  using index_subspaces_t = typename types_t::index_subspaces_t;
 
   //! \brief The locations of different bits that we set as flags
   using bits = typename config_t::bits;
@@ -123,8 +125,12 @@ public:
   using shape_t = typename config_t::shape_t;
 
   //! the ownership ( exclusive, shared, ghost ) types
-  using ownership_t = flecsi::partition_t;
+  using partition_t = flecsi::partition_t;
 
+  //! other special subsets that we have defined
+  enum class subset_t {
+    overlapping
+  };
 
   //============================================================================
   // Constructors
@@ -167,12 +173,18 @@ public:
       base_t::template num_entities<vertex_t::dimension, vertex_t::domain>();
   }
 
-  auto num_vertices( ownership_t subset ) const
+  auto num_vertices( partition_t subset ) const
   {
     return 
-    base_t::template num_entities<vertex_t::dimension, vertex_t::domain>(
-      subset
-    );
+      base_t::template num_entities<vertex_t::dimension, vertex_t::domain>(
+        subset
+      );
+  }
+
+  auto num_vertices( subset_t ) const
+  {
+    // only return overlapping set right now 
+    return base_t::template num_subentities<index_subspaces_t::overlapping_vertices>();
   }
 
   //! \brief Return all vertices in the burton mesh.
@@ -183,11 +195,17 @@ public:
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(); 
   }
 
-  decltype(auto) vertices( ownership_t subset ) const 
+  decltype(auto) vertices( partition_t subset ) const 
   { 
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(
       subset
     ); 
+  }
+
+  decltype(auto) vertices( subset_t )
+  { 
+    // only returns overlapping set right now
+    return base_t::template subentities<index_subspaces_t::overlapping_vertices>();
   }
 
   //! \brief Return vertices associated with entity instance of type \e E.
@@ -301,16 +319,22 @@ public:
 
   //! \brief Return the number of burton mesh edges.
   //! \return The number of burton mesh edges.
-  size_t num_edges() const
+  auto num_edges() const
   {
     return base_t::template num_entities<edge_t::dimension, edge_t::domain>();
   }
 
-  size_t num_edges(ownership_t subset) const
+  auto num_edges(partition_t subset) const
   {
     return base_t::template num_entities<edge_t::dimension, edge_t::domain>(
       subset
     );
+  }
+
+  auto num_edges( subset_t ) const
+  {
+    // only returns overlapping right now
+    return base_t::template num_subentities<index_subspaces_t::overlapping_edges>();
   }
 
   //! \brief Return all edges in the burton mesh.
@@ -318,13 +342,20 @@ public:
   //!         in range based for loops.
   decltype(auto) edges() const
   { 
-    return base_t::template entities<edge_t::dimension, 0>(); 
+    return base_t::template entities<edge_t::dimension, edge_t::domain>(); 
   }
 
-  decltype(auto) edges( ownership_t subset ) const 
+  decltype(auto) edges( partition_t subset ) const 
   { 
-    return base_t::template entities<edge_t::dimension, 0>(subset); 
+    return base_t::template entities<edge_t::dimension, edge_t::domain>(subset); 
   }
+  
+  decltype(auto) edges( subset_t ) const 
+  { 
+    // only returns overlapping right now
+    return base_t::template subentities<index_subspaces_t::overlapping_edges>();
+  }
+
 
   //! \brief Return edges for entity \e e in domain \e M.
   //!
@@ -382,17 +413,24 @@ public:
 
   //! \brief Return the number of faces in the burton mesh.
   //! \return The number of faces in the burton mesh.
-  size_t num_faces() const
+  auto num_faces() const
   {
     return base_t::template num_entities<face_t::dimension, face_t::domain>();
   } // num_faces
 
-  size_t num_faces(ownership_t subset) const
+  auto num_faces(partition_t subset) const
   {
     return base_t::template num_entities<face_t::dimension, face_t::domain>(
       subset
     );
   } // num_faces
+
+  auto num_faces( subset_t ) const
+  {
+    // only returns overlapping right now
+    return base_t::template num_subentities<index_subspaces_t::overlapping_faces>();
+  }
+
 
   //! \brief Return all faces in the burton mesh.
   //!
@@ -403,12 +441,19 @@ public:
     return base_t::template entities<face_t::dimension, face_t::domain>();
   }
 
-  decltype(auto) faces(ownership_t subset) const
+  decltype(auto) faces(partition_t subset) const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>(
       subset
     );
   }
+  
+  decltype(auto) faces( subset_t ) const 
+  { 
+    // only returns overlapping right now
+    return base_t::template subentities<index_subspaces_t::overlapping_faces>();
+  }
+
 
   //! \brief Return all faces in the burton mesh.
   //! \return Return all faces in the burton mesh as a sequence for use, e.g.,
@@ -480,7 +525,7 @@ public:
     return base_t::template num_entities<cell_t::dimension, cell_t::domain>();
   }
 
-  size_t num_cells(ownership_t subset) const
+  size_t num_cells(partition_t subset) const
   {
     return base_t::template num_entities<cell_t::dimension, cell_t::domain>(
       subset
@@ -496,7 +541,7 @@ public:
     return base_t::template entities<cell_t::dimension, cell_t::domain>();
   }
 
-  decltype(auto) cells(ownership_t subset) const
+  decltype(auto) cells(partition_t subset) const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>(
       subset
@@ -584,7 +629,7 @@ public:
     return base_t::template num_entities<wedge_t::dimension, wedge_t::domain>();
   }
 
-  size_t num_wedges(ownership_t subset) const
+  size_t num_wedges(partition_t subset) const
   {
     return base_t::template num_entities<wedge_t::dimension, wedge_t::domain>(subset);
   }
@@ -598,7 +643,7 @@ public:
     return base_t::template entities<wedge_t::dimension, wedge_t::domain>();
   }
 
-  decltype(auto) wedges(ownership_t subset) const
+  decltype(auto) wedges(partition_t subset) const
   {
     return base_t::template entities<wedge_t::dimension, wedge_t::domain>(subset);
   }
@@ -674,7 +719,7 @@ public:
       base_t::template num_entities<corner_t::dimension, corner_t::domain>();
   }
 
-  size_t num_corners(ownership_t subset) const
+  size_t num_corners(partition_t subset) const
   {
     return 
       base_t::template num_entities<corner_t::dimension, corner_t::domain>(subset);
@@ -689,7 +734,7 @@ public:
     return base_t::template entities<corner_t::dimension, corner_t::domain>();
   }
 
-  decltype(auto) corners(ownership_t subset) const
+  decltype(auto) corners(partition_t subset) const
   {
     return base_t::template entities<corner_t::dimension, corner_t::domain>(subset);
   }

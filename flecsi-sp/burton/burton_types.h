@@ -143,6 +143,23 @@ struct burton_2d_types_base
 
   };
  
+ 
+  //============================================================================
+  //! \brief The burton mesh index sub spaces.
+	//! These are used to define special sets, like all vertices used by owned
+	//! cells.
+  //============================================================================
+  struct index_subspaces_t {
+
+    //! The individual enumeration of the index spaces
+    enum index_subspaces : size_t {
+      overlapping_vertices, // all vertices used by owned cells
+      overlapping_edges,    // all edges used by owned cells
+      overlapping_faces = overlapping_edges
+		};
+
+	};
+
 
   //============================================================================
   // Define basic types.
@@ -166,6 +183,19 @@ struct burton_2d_types_base
   //! Type for burton mesh wedges.
   using wedge_t = burton_wedge_t<num_dimensions>;
 
+  //============================================================================
+	//! setup the index subspaces
+  //============================================================================
+  using index_subspaces = std::tuple<
+    std::tuple<
+			flecsi::topology::index_space_<index_spaces_t::vertices>,
+      flecsi::topology::index_subspace_<index_subspaces_t::overlapping_vertices>
+		>,
+    std::tuple<
+			flecsi::topology::index_space_<index_spaces_t::edges>,
+      flecsi::topology::index_subspace_<index_subspaces_t::overlapping_edges>
+		>
+  >;
 
   //============================================================================
   //! \brief depending upon the dimension/number of verices, create different 
@@ -421,6 +451,21 @@ struct burton_3d_types_base
 
   };
  
+  //============================================================================
+  //! \brief The burton mesh index sub spaces.
+	//! These are used to define special sets, like all vertices used by owned
+	//! cells.
+  //============================================================================
+  struct index_subspaces_t {
+
+    //! The individual enumeration of the index spaces
+    enum index_subspaces : size_t {
+      overlapping_vertices, // all vertices used by owned cells
+      overlapping_edges,    // all edges used by owned cells
+      overlapping_faces     // all faces used by owned cells
+		};
+
+	};
 
   //============================================================================
   // Define basic types.
@@ -443,14 +488,34 @@ struct burton_3d_types_base
 
   //! Type for burton mesh wedges.
   using wedge_t = burton_wedge_t<num_dimensions>;
+	
+  //============================================================================
+	//! setup the index subspaces
+  //============================================================================
+  using index_subspaces = std::tuple<
+    std::tuple<
+			flecsi::topology::index_space_<index_spaces_t::vertices>,
+      flecsi::topology::index_subspace_<index_subspaces_t::overlapping_vertices>
+		>,
+    std::tuple<
+			flecsi::topology::index_space_<index_spaces_t::edges>,
+      flecsi::topology::index_subspace_<index_subspaces_t::overlapping_edges>
+		>,
+    std::tuple<
+			flecsi::topology::index_space_<index_spaces_t::faces>,
+      flecsi::topology::index_subspace_<index_subspaces_t::overlapping_faces>
+		>
+  >;
+
 
   //============================================================================
   //! \brief depending upon the dimension/number of verices, create different 
   //!   types of face entities
   //============================================================================  
-  static
+  template<typename MESH_TOPOLOGY>
+	static
   mesh_entity_base_t *
-  create_face(mesh_topology_base_t* mesh, size_t num_vertices, const id_t & id)
+  create_face(MESH_TOPOLOGY* mesh, size_t num_vertices, const id_t & id)
   {
     auto face_type = shape_t::polygon;
     switch(num_vertices) {
@@ -471,10 +536,10 @@ struct burton_3d_types_base
   //! \tparam M The domain index.
   //! \tparam D The dimensional index.
   //============================================================================
-  template<size_t M, size_t D>
+  template<size_t M, size_t D, typename MESH_TOPOLOGY>
   static constexpr 
   mesh_entity_base_t *
-  create_entity(mesh_topology_base_t* mesh, size_t num_vertices, const id_t & id) 
+  create_entity(MESH_TOPOLOGY* mesh, size_t num_vertices, const id_t & id) 
   {
     switch(M){
       //---------- Primal Mesh ----------//

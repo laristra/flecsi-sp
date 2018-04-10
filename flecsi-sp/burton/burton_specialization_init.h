@@ -10,6 +10,7 @@
 
 // user incldues
 #include <cinch/logging/cinchlog.h>
+#include <ristra/utils/algorithm.h>
 #include <ristra/utils/string_utils.h>
 #include <flecsi/coloring/dcrs_utils.h>
 #include <flecsi/coloring/mpi_communicator.h>
@@ -127,9 +128,7 @@ auto color_entity(
 
   // remove non-unique entries
   std::sort( referenced_entities.begin(), referenced_entities.end() );
-  auto last = 
-    std::unique( referenced_entities.begin(), referenced_entities.end() );
-  referenced_entities.erase( last, referenced_entities.end() );
+	ristra::utils::remove_duplicates( referenced_entities );
     
 
   //----------------------------------------------------------------------------
@@ -444,6 +443,149 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     auto c = mesh.create_cell( elem_fs ); 
   }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper function to create the subspaces
+///
+/// \remarks This is the 2D version
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  typename MESH_TYPE,
+  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 2 ),
+  typename = std::enable_if_t< Enabled >
+>
+void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+{
+  
+  using mesh_t = typename std::decay_t< MESH_TYPE >;
+
+  // Alias the index spaces type
+	using index_spaces = typename mesh_t::index_spaces_t;
+  using index_subspaces = typename mesh_t::index_subspaces_t;
+	
+	// get the type of storage
+  using vertex_t = typename mesh_t::vertex_t;
+  using edge_t = typename mesh_t::edge_t;
+
+  // get the context
+  auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
+	// get the colorings
+	const auto & cell_coloring = context.coloring(index_spaces::cells);
+  // get the entity maps
+  // - lid = local id - the id of the entity local to this processor
+  // - mid = mesh id - the original id of the entity ( usually from file )
+  const auto & cell_mid_to_lid =
+ 		context.reverse_index_map( index_spaces::cells );
+	
+	// storage for the unique set of vertices and edges
+	std::vector<vertex_t*> my_verts;
+	std::vector<edge_t*> my_edges;
+
+  // determine the unique list of ids
+	const auto & cells = mesh.cells();
+
+	auto add_ents = [&](auto && c) {
+		auto cell_lid = cell_mid_to_lid.at( c.id );
+		const auto & cell = cells[cell_lid];
+		for ( auto v : mesh.vertices(cell) ) my_verts.push_back( v );
+		for ( auto e : mesh.edges(cell) ) my_edges.push_back( e );
+	};
+
+  for(auto c : cell_coloring.exclusive) add_ents(c); 
+  for(auto c : cell_coloring.shared) add_ents(c); 
+
+	// sort and remove any duplicates
+	std::sort( my_verts.begin(), my_verts.end() );
+	std::sort( my_edges.begin(), my_edges.end() );
+	std::cout << "ORIGINAL dim="<<0<<" HAVE "<<my_verts.size()<<std::endl;
+	std::cout << "ORIGINAL dim="<<1<<" HAVE "<<my_edges.size()<<std::endl;
+	ristra::utils::remove_duplicates( my_verts );
+	ristra::utils::remove_duplicates( my_edges );
+
+	std::cout << "FOR dim="<<0<<" HAVE "<<my_verts.size()<<std::endl;
+	std::cout << "FOR dim="<<1<<" HAVE "<<my_edges.size()<<std::endl;
+
+	// add them to the index space
+	std::cout << "pushing back to verts" << std::endl;
+	auto & vert_subspace =
+	 	mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+	std::cout << "subspace id " << index_subspaces::overlapping_vertices << std::endl;
+	std::cout << "subspace size " << mesh.get_index_subspace_size_(0)<<std::endl;
+	for ( auto v : my_verts ) {
+		std::cout << "pushing back " <<(*v).id() << std::endl;
+ 		vert_subspace.push_back( v->template global_id<0>() ); 
+	}
+	
+	std::cout << "pushing back to edges" << std::endl;
+	auto & edge_subspace =
+	 	mesh.template get_index_subspace< index_subspaces::overlapping_edges >();
+	for ( auto e : my_edges )
+ 		edge_subspace.push_back( e->template global_id<0>() ); 
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper function to create the subspaces
+///
+/// \remarks This is the 3D version
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  typename MESH_TYPE,
+  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 3 ),
+  typename std::enable_if_t< Enabled >* = nullptr
+>
+void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+{
+  
+  using mesh_t = typename std::decay_t< MESH_TYPE >;
+
+  // Alias the index spaces type
+  using index_subspaces = typename mesh_t::index_subspaces_t;
+	
+	// get the type of storage
+  using vertex_t = typename mesh_t::vertex_t;
+  using edge_t = typename mesh_t::edge_t;
+  using face_t = typename mesh_t::face_t;
+	
+	// storage for the unique set of vertices and edges
+	std::vector<vertex_t*> my_verts;
+	std::vector<edge_t*> my_edges;
+	std::vector<face_t*> my_faces;
+
+  // determine the unique list of ids
+  for(auto c : mesh.cells(flecsi::owned) ) { 
+		for ( auto v : mesh.vertices(c) ) my_verts.push_back( v );
+		for ( auto e : mesh.edges(c) ) my_edges.push_back( e );
+		for ( auto f : mesh.faces(c) ) my_faces.push_back( f );
+  }
+
+	// sort and remove any duplicates
+	std::sort( my_verts.begin(), my_verts.end() );
+	std::sort( my_edges.begin(), my_edges.end() );
+	std::sort( my_faces.begin(), my_faces.end() );
+	ristra::utils::remove_duplicates( my_verts );
+	ristra::utils::remove_duplicates( my_edges );
+	ristra::utils::remove_duplicates( my_faces );
+
+	// add them to the index space
+	auto & vert_subspace =
+	 	mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+	for ( auto v : my_verts )
+ 		vert_subspace.push_back( v->template global_id<0>() ); 
+	
+	auto & edge_subspace =
+	 	mesh.template get_index_subspace< index_subspaces::overlapping_edges >();
+	for ( auto e : my_edges )
+ 		edge_subspace.push_back( e->template global_id<0>() ); 
+	
+	auto & face_subspace =
+	 	mesh.template get_index_subspace< index_subspaces::overlapping_faces >();
+	for ( auto f : my_faces )
+ 		face_subspace.push_back( f->template global_id<0>() ); 
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper to make corners
@@ -1263,6 +1405,35 @@ void partition_mesh( utils::char_array_t filename )
   context.add_adjacency(ai);
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
+  
+	//----------------------------------------------------------------------------
+  // add index subspace mappings
+  //----------------------------------------------------------------------------
+
+    
+	// the master list of all entity ids
+  const auto & cell_entities = entities.at(0).at(num_dims);
+
+	// loop over all dimensions, getting the list of ids that are 
+	// connected to owned cells
+  for ( int to_dim = 0; to_dim<num_dims; ++to_dim ) {
+		std::vector<size_t> ids;
+		// get all exclusive and shared ids.
+		for ( auto c : cell_entities.exclusive ) {
+			const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
+			ids.insert( ids.end(), ents.begin(), ents.end() );
+		}
+		for ( auto c : cell_entities.shared ) {
+			const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
+			ids.insert( ids.end(), ents.begin(), ents.end() );
+		}
+		// get number of unique entries
+		std::sort( ids.begin(), ids.end() );
+		auto last = std::unique( ids.begin(), ids.end() );
+		auto count = std::distance( ids.begin(), last );
+		// subspace id happens to be the same as the dim
+		context.add_index_subspace(to_dim, count);
+	}
 
   //----------------------------------------------------------------------------
   // add intermediate mappings
@@ -1441,8 +1612,12 @@ void initialize_mesh(
  
   // initialize the mesh
   mesh.init(); 
-  if ( rank == 0 )
-  mesh.is_valid();
+ 
+	// create the subspaces
+  create_subspaces( mesh_def, mesh );
+  
+	// check validity
+	mesh.is_valid();
 
   //----------------------------------------------------------------------------
   // Some debug

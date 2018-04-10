@@ -87,6 +87,17 @@ flecsi_register_task(dump_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
+//! \brief Test validity of mesh
+////////////////////////////////////////////////////////////////////////////////
+void validity_test( utils::client_handle_r__<mesh_t> mesh ) {
+  mesh.is_valid();
+}
+
+flecsi_register_task(validity_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
+
+////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh connectivity functions
 ////////////////////////////////////////////////////////////////////////////////
 void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
@@ -394,6 +405,40 @@ flecsi_register_task(normals_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
+//! \brief test the mesh subsets
+////////////////////////////////////////////////////////////////////////////////
+void subset_test( utils::client_handle_r__<mesh_t> mesh ) {
+  
+  std::set< mesh_t::vertex_t* > overlapping_verts;
+  auto & vs = mesh.vertices( mesh_t::subset_t::overlapping );
+
+  for(auto c : mesh.cells(flecsi::owned))
+  {
+    for ( auto v : mesh.vertices(c) ) {
+      overlapping_verts.emplace( v );
+      auto found = false;
+      for ( auto vb : vs ) {
+        if ( vb.id() == v.id() ) {
+          found = true;
+          break;
+        }
+      }
+      ASSERT_TRUE( found );
+    }
+  }
+
+  ASSERT_EQ(
+      overlapping_verts.size(),
+      mesh.num_vertices(mesh_t::subset_t::overlapping)
+  );
+
+} // TEST_F
+
+flecsi_register_task(subset_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
+
+////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh state
 ////////////////////////////////////////////////////////////////////////////////
 flecsi_register_field(mesh_t, hydro, cell_data, real_t, dense, 1, index_spaces_t::cells);
@@ -596,6 +641,9 @@ void driver(int argc, char ** argv)
   // get the mesh handle
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
 
+  // launch the validity test task
+  flecsi_execute_task(validity_test, flecsi_sp::burton::test, single, mesh_handle);
+  
   // launch the dump test task
   flecsi_execute_task(dump_test, flecsi_sp::burton::test, single, mesh_handle);
   
@@ -607,6 +655,9 @@ void driver(int argc, char ** argv)
 
   // launch the normals test task
   flecsi_execute_task(normals_test, flecsi_sp::burton::test, single, mesh_handle);
+  
+  // launch the connectivity test task
+  flecsi_execute_task(subset_test, flecsi_sp::burton::test, single, mesh_handle);
 
   // launch the state test task
   auto cell_data_handle = flecsi_get_handle(mesh_handle, hydro, cell_data, real_t, dense, 0);
