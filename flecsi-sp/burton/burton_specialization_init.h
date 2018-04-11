@@ -499,26 +499,15 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 	// sort and remove any duplicates
 	std::sort( my_verts.begin(), my_verts.end() );
 	std::sort( my_edges.begin(), my_edges.end() );
-	std::cout << "ORIGINAL dim="<<0<<" HAVE "<<my_verts.size()<<std::endl;
-	std::cout << "ORIGINAL dim="<<1<<" HAVE "<<my_edges.size()<<std::endl;
 	ristra::utils::remove_duplicates( my_verts );
 	ristra::utils::remove_duplicates( my_edges );
 
-	std::cout << "FOR dim="<<0<<" HAVE "<<my_verts.size()<<std::endl;
-	std::cout << "FOR dim="<<1<<" HAVE "<<my_edges.size()<<std::endl;
-
 	// add them to the index space
-	std::cout << "pushing back to verts" << std::endl;
 	auto & vert_subspace =
 	 	mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
-	std::cout << "subspace id " << index_subspaces::overlapping_vertices << std::endl;
-	std::cout << "subspace size " << mesh.get_index_subspace_size_(0)<<std::endl;
-	for ( auto v : my_verts ) {
-		std::cout << "pushing back " <<(*v).id() << std::endl;
+	for ( auto v : my_verts )
  		vert_subspace.push_back( v->template global_id<0>() ); 
-	}
 	
-	std::cout << "pushing back to edges" << std::endl;
 	auto & edge_subspace =
 	 	mesh.template get_index_subspace< index_subspaces::overlapping_edges >();
 	for ( auto e : my_edges )
