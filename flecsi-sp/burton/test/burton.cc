@@ -393,10 +393,10 @@ void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
     auto n = f->normal();
     auto fx = f->centroid();
     auto c = mesh.cells(f).front();
-    auto cx = c->centroid();
+    auto cx = c->midpoint();
     auto delta = fx - cx;
     auto dot = dot_product( n, delta );
-    ASSERT_GT( dot, 0 );
+    EXPECT_GT( dot, 0 );
   } // for
 
 } // TEST_F

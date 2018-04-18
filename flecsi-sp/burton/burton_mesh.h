@@ -1035,7 +1035,6 @@ public:
     // simultanesously
     std::stringstream ss;
 
-
     //--------------------------------------------------------------------------
     // make sure face normal points out from first cell
     bool bad_face = false;
@@ -1046,24 +1045,25 @@ public:
     // auto & face_map = context.index_map( index_spaces_t::faces );
     // auto & cell_map = context.index_map( index_spaces_t::cells );
 
-
-    for( auto f : faces() ) {
+    for( auto f : faces( subset_t::overlapping ) ) {
       auto n = f->normal();
       auto fx = f->midpoint();
       auto c = cells(f).front();
       auto cx = c->midpoint();
       auto delta = fx - cx;
       auto dot = dot_product( n, delta );
-      // std::cout << "Checking face with mid " << face_map[ f.id() ] << std::endl;
-      // std::cout << "With cells : ";
-      // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
-      // std::cout << std::endl;
-      // std::cout << "And vertices : ";
-      // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
-      // std::cout << std::endl;
-      // std::cout << "Face has midpoint " << fx << std::endl;
-      // std::cout << std::endl;
       if ( dot < 0 ) {
+        // std::cout << "Checking face with mid " << face_map[ f.id() ] << std::endl;
+        // std::cout << "With cells : ";
+        // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
+        // std::cout << std::endl;
+        // std::cout << "And vertices : ";
+        // for ( auto vt : vertices(f) ) std::cout << vertex_map[ vt.id() ] << ", ";
+        // std::cout << std::endl;
+        // std::cout << "Face has midpoint " << fx << std::endl;
+        // std::cout << "Cell has midpoint " << c->midpoint() << std::endl;
+        // std::cout << "Cell has centroid " << c->centroid() << std::endl;
+        // std::cout << std::endl;
         bad_face = bad_face || true;
         std::cout << "Face " << f.id() << " has opposite normal" << std::endl;
         abort();
