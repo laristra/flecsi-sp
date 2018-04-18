@@ -531,6 +531,7 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   using mesh_t = typename std::decay_t< MESH_TYPE >;
 
   // Alias the index spaces type
+	using index_spaces = typename mesh_t::index_spaces_t;
   using index_subspaces = typename mesh_t::index_subspaces_t;
 	
 	// get the type of storage
@@ -538,17 +539,35 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   using edge_t = typename mesh_t::edge_t;
   using face_t = typename mesh_t::face_t;
 	
+  // get the context
+  auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
+	// get the colorings
+	const auto & cell_coloring = context.coloring(index_spaces::cells);
+  // get the entity maps
+  // - lid = local id - the id of the entity local to this processor
+  // - mid = mesh id - the original id of the entity ( usually from file )
+  const auto & cell_mid_to_lid =
+ 		context.reverse_index_map( index_spaces::cells );
+
 	// storage for the unique set of vertices and edges
 	std::vector<vertex_t*> my_verts;
 	std::vector<edge_t*> my_edges;
 	std::vector<face_t*> my_faces;
 
   // determine the unique list of ids
-  for(auto c : mesh.cells(flecsi::owned) ) { 
-		for ( auto v : mesh.vertices(c) ) my_verts.push_back( v );
-		for ( auto e : mesh.edges(c) ) my_edges.push_back( e );
-		for ( auto f : mesh.faces(c) ) my_faces.push_back( f );
-  }
+	const auto & cells = mesh.cells();
+
+	auto add_ents = [&](auto && c) {
+		auto cell_lid = cell_mid_to_lid.at( c.id );
+		const auto & cell = cells[cell_lid];
+		for ( auto v : mesh.vertices(cell) ) my_verts.push_back( v );
+		for ( auto e : mesh.edges(cell) ) my_edges.push_back( e );
+		for ( auto f : mesh.faces(cell) ) my_faces.push_back( f );
+	};
+
+  for(auto c : cell_coloring.exclusive) add_ents(c); 
+  for(auto c : cell_coloring.shared) add_ents(c); 
 
 	// sort and remove any duplicates
 	std::sort( my_verts.begin(), my_verts.end() );
@@ -1604,9 +1623,6 @@ void initialize_mesh(
  
 	// create the subspaces
   create_subspaces( mesh_def, mesh );
-  
-	// check validity
-	mesh.is_valid();
 
   //----------------------------------------------------------------------------
   // Some debug
