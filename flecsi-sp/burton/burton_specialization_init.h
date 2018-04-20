@@ -599,7 +599,10 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 /// \brief Helper to make corners
 ////////////////////////////////////////////////////////////////////////////////
 template<
-  typename MESH_DEFINITION
+  typename MESH_DEFINITION,
+  typename = std::enable_if_t<
+    std::decay_t<MESH_DEFINITION>::dimension() == 2
+  >
 >
 auto make_corners( const MESH_DEFINITION & mesh_def )
 {
@@ -646,6 +649,118 @@ auto make_corners( const MESH_DEFINITION & mesh_def )
   for ( size_t cell_id=0, corner_id=0; cell_id<num_cells; ++cell_id )
   {
 
+    //-------------------------------------------------------------------------
+    // First assign a corner to each cell vertex
+
+    // clear any temporary storage
+    verts_to_corners.clear();
+    corner_ids.clear();
+    
+    // get the list of cell vertices
+    const auto & verts = cells_to_vertices.at(cell_id);
+    corner_ids.reserve( verts.size() );
+    
+    // loop over each vertex, assigning corner ids
+    for ( auto vertex_id : verts ) {
+      // keep track of this cells corners
+      corner_ids.emplace_back( corner_id );
+      // store all the connectivity
+      verts_to_corners.emplace( vertex_id, corner_id );
+      corners_to_cells[corner_id].emplace_back( cell_id );
+      corners_to_verts[corner_id].emplace_back( vertex_id );
+      // bump the corner counter
+      ++corner_id;
+    }
+
+    //-------------------------------------------------------------------------
+    // Then assign a corner to each cell edge
+
+    // get the list of edges
+    const auto & edges = cells_to_edges.at(cell_id);
+
+    // now loop over edges
+    for ( auto edge_id : edges ) {
+      // get all the edges attahced to this vertex
+      const auto & vs = edges_to_vertices.at( edge_id );
+      assert( vs.size() == 2 );
+      // look into the temporary vertex to corner mapping
+      // to figure out which corner this edge connects to
+      auto c1 = verts_to_corners.at(vs.front());
+      auto c2 = verts_to_corners.at(vs.back());
+      // store the connections
+      corners_to_edges[c1].emplace_back( edge_id );
+      corners_to_edges[c2].emplace_back( edge_id );
+    }
+
+    // store the cell to corner connectivity
+    cells_to_corners[cell_id] = corner_ids;
+
+  }
+
+  return std::make_pair( entities_to_corners, corners_to_entities );
+
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper to make corners
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 3 >* 
+    = nullptr
+>
+auto make_corners( const MESH_DEFINITION & mesh_def )
+{
+  // not sure why this needs to be decayed
+  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
+  using connectivity_t = typename mesh_definition_t::connectivity_t;
+
+  // get the number of dimensions
+  constexpr auto num_dims = mesh_definition_t::dimension();
+
+  // get the connectvitiy from the cells to the vertices.  there is a 
+  // corner per cell, per vertex
+  const auto & cells_to_vertices = mesh_def.entities(num_dims, 0);
+  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
+  const auto & cells_to_faces = mesh_def.entities(num_dims, 2);
+  const auto & edges_to_vertices = mesh_def.entities(1, 0);
+  const auto & faces_to_vertices = mesh_def.entities(2, 0);
+  auto num_cells = cells_to_vertices.size();
+  auto num_verts = mesh_def.num_entities(0);
+
+  // count corners
+  size_t num_corners = 0;
+  for ( const auto & verts : cells_to_vertices )
+    num_corners += verts.size();
+  
+  // create storage
+  std::map<size_t, connectivity_t> entities_to_corners;
+  std::map<size_t, connectivity_t> corners_to_entities;
+
+  // create entries for the connectivities we care about
+  auto & cells_to_corners = entities_to_corners[num_dims];
+  auto & corners_to_verts = corners_to_entities[0];
+  auto & corners_to_edges = corners_to_entities[1];
+  auto & corners_to_faces = corners_to_entities[2];
+  auto & corners_to_cells = corners_to_entities[num_dims];
+  
+  // resize the underlying storage up front
+  cells_to_corners.resize( num_cells );
+  corners_to_verts.resize( num_corners );
+  corners_to_edges.resize( num_corners );
+  corners_to_faces.resize( num_corners );
+  corners_to_cells.resize( num_corners );
+  
+  // some temporary storage
+  std::vector< size_t > corner_ids;
+  std::map< size_t, size_t > verts_to_corners;
+
+  for ( size_t cell_id=0, corner_id=0; cell_id<num_cells; ++cell_id )
+  {
+
+    //-------------------------------------------------------------------------
+    // First assign a corner to each cell vertex
+
     // clear any temporary storage
     verts_to_corners.clear();
     corner_ids.clear();
@@ -666,31 +781,55 @@ auto make_corners( const MESH_DEFINITION & mesh_def )
       ++corner_id;
     }
 
+    //-------------------------------------------------------------------------
+    // Then assign a corner to each cell edge
+
     // get the list of edges
-    const auto & edges = cells_to_edges[cell_id];
+    const auto & edges = cells_to_edges.at(cell_id);
 
     // now loop over edges
     for ( auto edge_id : edges ) {
       // get all the edges attahced to this vertex
-      const auto & vs = edges_to_vertices[ edge_id ];
+      const auto & vs = edges_to_vertices.at( edge_id );
       assert( vs.size() == 2 );
       // look into the temporary vertex to corner mapping
       // to figure out which corner this edge connects to
-      auto c1 = verts_to_corners[vs.front()];
-      auto c2 = verts_to_corners[vs.back()];
+      auto c1 = verts_to_corners.at(vs.front());
+      auto c2 = verts_to_corners.at(vs.back());
       // store the connections
       corners_to_edges[c1].emplace_back( edge_id );
       corners_to_edges[c2].emplace_back( edge_id );
+    }
+
+    //-------------------------------------------------------------------------
+    // Then assign a corner to each cell face
+
+    // get the list of faces
+    const auto & faces = cells_to_faces.at(cell_id);
+
+    // now loop over edges
+    for ( auto face_id : faces ) {
+      // get all the edges attahced to this vertex
+      const auto & vs = faces_to_vertices.at( face_id );
+      // look into the temporary vertex to corner mapping
+      // to figure out which corner this edge connects to
+      for ( auto v : vs ) {
+        auto c = verts_to_corners[v];
+        // store the connections
+        corners_to_faces[c].emplace_back( face_id );
+      }
     }
 
     // store the cell to corner connectivity
     cells_to_corners[cell_id] = corner_ids;
 
   }
+		
 
   return std::make_pair( entities_to_corners, corners_to_entities );
 
 }
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper to make wedges
@@ -715,7 +854,7 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
   // wedge per cell, per vertex
   const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
   const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
-  const auto & edges_to_vertices = mesh_def.entities(1, 0);
+  const auto & edges_to_verts = mesh_def.entities(1, 0);
   
   auto num_verts = mesh_def.num_entities(0);
   auto num_cells = mesh_def.num_entities(num_dims);
@@ -746,6 +885,9 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 
   for ( size_t cell_id=0, wedge_id=0; cell_id<num_cells; ++cell_id )
   {
+    //-------------------------------------------------------------------------
+    // Create a predicate function to find edges given two vertices
+
     // get the edges and vertices connected to this cell
     const auto & edges = cells_to_edges.at(cell_id);
     const auto & verts = cells_to_verts.at(cell_id);
@@ -759,7 +901,7 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
         edges.begin(), edges.end(), 
         [&]( const auto & e ) 
         { 
-          auto verts = edges_to_vertices.at(e);
+          auto verts = edges_to_verts.at(e);
           assert( verts.size() == 2 && "should be two vertices per edge" );
           return ( (verts[0] == pa && verts[1] == pb) || 
                    (verts[0] == pb && verts[1] == pa) );
@@ -768,6 +910,10 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
       assert( edge != edges.end() && "should have found an edge");
       return edge;
     };
+    
+    //-------------------------------------------------------------------------
+    // Now loop over each vertex-pair forming an edge and assign wedges
+
 
     // create some storage for the list of cell wedge ids
     wedge_ids.clear();
@@ -840,9 +986,13 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 
   // get the connectvitiy from the cells to the vertices.  there is a 
   // wedge per cell, per vertex
-  const auto & cells_to_faces = mesh_def.entities(num_dims, num_dims-1);
-  const auto & faces_to_edges = mesh_def.entities(num_dims-1, 1);
-  const auto & edges_to_vertices = mesh_def.entities(1, 0);
+  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
+  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
+  const auto & cells_to_faces = mesh_def.entities(num_dims, 2);
+  const auto & faces_to_verts = mesh_def.entities(2, 0);
+  const auto & faces_to_edges = mesh_def.entities(2, 1);
+  const auto & faces_to_cells = mesh_def.entities(2, 3);
+  const auto & edges_to_verts = mesh_def.entities(1, 0);
   
   auto num_verts = mesh_def.num_entities(0);
   auto num_cells = mesh_def.num_entities(num_dims);
@@ -859,35 +1009,121 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
   std::map<size_t, connectivity_t> entities_to_wedges;
   std::map<size_t, connectivity_t> wedges_to_entities;
 
+  // create entries for the connectivities we care about
   auto & cells_to_wedges = entities_to_wedges[num_dims];
   auto & wedges_to_verts = wedges_to_entities[0];
+  auto & wedges_to_edges = wedges_to_entities[1];
+  auto & wedges_to_faces = wedges_to_entities[2];
   auto & wedges_to_cells = wedges_to_entities[num_dims];
   
+  // resize the underlying storage up front
   cells_to_wedges.resize( num_cells );
   wedges_to_verts.resize( num_wedges );
+  wedges_to_edges.resize( num_wedges );
+  wedges_to_faces.resize( num_wedges );
   wedges_to_cells.resize( num_wedges );
   
   // now make them
-  size_t wedge_id = 0;
-  size_t cell_id = 0;
+  std::vector< size_t > wedge_ids;
 
-  for ( const auto & faces : cells_to_faces ) {
-    std::vector< size_t > wedge_ids;
-    wedge_ids.reserve( (num_dims+1) * faces.size() ); // an estimate for size
-    for ( auto f : faces ) {
-      for ( auto e : faces_to_edges.at(f) ) {
-        // two wedges for each edge ( one attached to each vertex )
-        for ( auto v : edges_to_vertices.at(e) ) {
-          wedge_ids.emplace_back( wedge_id );
-          wedges_to_cells[wedge_id].emplace_back( cell_id );
-          wedges_to_verts[wedge_id].emplace_back( v );
-          ++wedge_id;
-        }
-      }
-    }
+  for ( size_t cell_id=0, wedge_id=0; cell_id<num_cells; ++cell_id )
+  {
+    //-------------------------------------------------------------------------
+    // Create a predicate function to find edges given two vertices
+
+    // get the edges and vertices connected to this cell
+    const auto & cell_faces = cells_to_faces.at(cell_id);
+    const auto & cell_edges = cells_to_edges.at(cell_id);
+
+    //-------------------------------------------------------------------------
+    // Now loop over each vertex-pair forming an edge and assign wedges
+
+
+    // create some storage for the list of cell wedge ids
+    wedge_ids.clear();
+    // harder to estimate the size here, so dont bother.  After a few
+    // iterations sufficient size will be allocated
+    // wedge_ids.reserve( 2*edges.size() );
+
+    for ( auto face_id : cell_faces ) {
+    
+      // copy the vertices/faces of this face
+      auto face_verts = faces_to_verts.at(face_id);
+      const auto & face_edges = faces_to_edges.at(face_id);
+
+      // check if this cell owns this face, if it doesnt, rotate the 
+      // vertices
+      const auto & face_cells = faces_to_cells.at(face_id);
+      if ( face_cells.front() != cell_id )
+        std::reverse( face_verts.begin(), face_verts.end() );
+
+
+      //! create a temporary lambda function for searching for edges
+      //! \param[in] pa,pb  the point indexes of the edge to match
+      //! \return the edge id for that particular point pair
+      auto _find_edge = [&]( const auto & pa, const auto & pb  ) 
+      {
+        auto edge = std::find_if( 
+          face_edges.begin(), face_edges.end(), 
+          [&]( const auto & e ) 
+          { 
+            auto verts = edges_to_verts.at(e);
+            assert( verts.size() == 2 && "should be two vertices per edge" );
+            return ( (verts[0] == pa && verts[1] == pb) || 
+                    (verts[0] == pb && verts[1] == pa) );
+          } 
+        );
+        assert( edge != face_edges.end() && "should have found an edge");
+        return edge;
+      };
+    
+
+
+      // find the first edge that goes from the last vertex to the first
+      auto edge0 = _find_edge( face_verts.front(), face_verts.back() );
+
+      // loop over the vertices in pairs
+      for (
+          auto v1=face_verts.begin(), v0 = std::prev(face_verts.end());
+          v1!=face_verts.end();
+          ++v1
+      ) {
+
+        // get the next vertex, if it goes off the end of the array, then
+        // make it start over
+        auto v2 = std::next(v1);
+        if ( v2==face_verts.end() ) v2 = face_verts.begin();
+
+        // then find the next edge
+        auto edge1 = _find_edge( *v1, *v2 );
+        
+        // there are two wedges attached to this vertex.  set the
+        // connectivity for both
+        wedge_ids.emplace_back( wedge_id );
+        wedges_to_cells[wedge_id].emplace_back( cell_id );
+        wedges_to_faces[wedge_id].emplace_back( face_id );
+        wedges_to_edges[wedge_id].emplace_back( *edge1 );
+        wedges_to_verts[wedge_id].emplace_back( *v1 );
+        ++wedge_id;
+        
+        wedge_ids.emplace_back( wedge_id );
+        wedges_to_cells[wedge_id].emplace_back( cell_id );
+        wedges_to_faces[wedge_id].emplace_back( face_id );
+        wedges_to_edges[wedge_id].emplace_back( *edge0 );
+        wedges_to_verts[wedge_id].emplace_back( *v1 );
+        ++wedge_id;
+   
+        // update the old vertex and edge (saves having to find it again)
+        v0 = v1;
+        edge0 = edge1;
+      } // verts
+
+    } // faces
+
+    // set the wedge connectivity for this cell
     cells_to_wedges[cell_id] = wedge_ids;
-    ++cell_id;
-  }
+
+  } // cells
 
   return std::make_pair( entities_to_wedges, wedges_to_entities );
 
@@ -1537,6 +1773,7 @@ void partition_mesh( utils::char_array_t filename )
   }
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
+
 
   //----------------------------------------------------------------------------
   // output the result

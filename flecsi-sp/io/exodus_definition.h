@@ -63,7 +63,9 @@ build_connectivity(
   cell_to_edge.reserve(cell_to_edge.size() + cell_to_vertex.size());
 
   std::map<std::vector<size_t>, size_t> edges;
-  size_t edgeid = 0;
+  // starting id is not always zero, assume we are building in blocks
+  // of assending edge ids
+  size_t edgeid = edge_to_vertex.size();
 
   // loop over cells, adding all of their edges to the table
   for (const auto & these_verts : cell_to_vertex) {

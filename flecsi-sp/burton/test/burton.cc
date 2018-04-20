@@ -79,7 +79,8 @@ void dump_test( utils::client_handle_r__<mesh_t> mesh ) {
   std::istream_iterator<std::string> expected_begin(std_file);
   std::istream_iterator<std::string> eos;
 
-  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos );
+  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos )
+    << "DUMP TEST FAILED"; 
 
 }
 
@@ -284,7 +285,8 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
   std::istream_iterator<std::string> expected_begin(std_file);
   std::istream_iterator<std::string> eos;
 
-  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos );
+  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos )
+    << "CONNECTIVITY TEST FAILED";
 
 } // TEST_F
 
@@ -377,7 +379,8 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
   std::istream_iterator<std::string> expected_begin(std_file);
   std::istream_iterator<std::string> eos;
 
-  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos );
+  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos )
+    << "GEOMETRY TEST FAILED";
 
 } // TEST_F
 
@@ -423,14 +426,14 @@ void subset_test( utils::client_handle_r__<mesh_t> mesh ) {
           break;
         }
       }
-      ASSERT_TRUE( found );
+      ASSERT_TRUE( found ) << "VERTEX NOT FOUND IN SUBSET";
     }
   }
 
   ASSERT_EQ(
       overlapping_verts.size(),
       mesh.num_vertices(mesh_t::subset_t::overlapping)
-  );
+  ) << "VERTEX SUBSET SIZE MISMATCH";
 
 } // TEST_F
 
@@ -504,26 +507,28 @@ void state_check_test(
   // cells
   for(auto c: mesh.cells(flecsi::owned)) {
     auto id = cells_lid_to_mid.at( c.id() );
-    ASSERT_EQ( cell_data(c), id );
+    ASSERT_EQ( cell_data(c), id ) << "CELL DATA NOT COMMUNICATED PROPERLY";
   }
 
   // faces
   for (auto f: mesh.faces(flecsi::owned)) {
     auto id = faces_lid_to_mid.at( f.id() );
-    ASSERT_EQ( face_data(f).i, id );
-    ASSERT_EQ( face_data(f).x, id );
+    ASSERT_EQ( face_data(f).i, id ) << "FACE DATA NOT COMMUNICATED PROPERLY";
+    ASSERT_EQ( face_data(f).x, id ) << "FACE DATA NOT COMMUNICATED PROPERLY";
   }
 
   // edges
   for (auto e: mesh.edges(flecsi::owned)) {
     auto id = edges_lid_to_mid.at( e.id() );
-    for ( auto & x : edge_data(e) ) ASSERT_EQ(x, id);
+    for ( auto & x : edge_data(e) )
+      ASSERT_EQ(x, id) << "EDGE DATA NOT COMMUNICATED PROPERLY";
   }
 
   // vertices
   for (auto v: mesh.vertices(flecsi::owned)) {
     auto id = verts_lid_to_mid.at( v.id() );
-    for ( auto & x : vert_data(v) ) ASSERT_EQ(x, id);
+    for ( auto & x : vert_data(v) )
+      ASSERT_EQ(x, id) << "VERTEX DATA NOT COMMUNICATED PROPERLY";
   }
 
 } // TEST_F
@@ -552,7 +557,7 @@ void extras_test( utils::client_handle_r__<mesh_t> mesh ) {
           found = true;
           break;
         }
-      ASSERT_TRUE( found );
+      ASSERT_TRUE( found ) << "CORNER NOT FOUND IN SUBSET";
     }
   } // for
 
@@ -604,13 +609,13 @@ void extra_state_check_test(
   // corners
   for(auto c: mesh.corners(flecsi::owned)) {
     auto id = corners_lid_to_mid.at( c.id() );
-    ASSERT_EQ( corner_data(c), id );
+    ASSERT_EQ( corner_data(c), id ) << "CORNER DATA NOT COMMUNICATED PROPERLY";
   }
 
   // wedges
   for (auto w: mesh.wedges(flecsi::owned)) {
     auto id = wedges_lid_to_mid.at( w.id() );
-    ASSERT_EQ( wedge_data(w), id );
+    ASSERT_EQ( wedge_data(w), id ) << "WEDGE DATA NOT COMMUNICATED PROPERLY";
   }
 
 } // TEST_F
