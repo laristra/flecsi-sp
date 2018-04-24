@@ -1099,17 +1099,20 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
         
         // there are two wedges attached to this vertex.  set the
         // connectivity for both
-        wedge_ids.emplace_back( wedge_id );
-        wedges_to_cells[wedge_id].emplace_back( cell_id );
-        wedges_to_faces[wedge_id].emplace_back( face_id );
-        wedges_to_edges[wedge_id].emplace_back( *edge1 );
-        wedges_to_verts[wedge_id].emplace_back( *v1 );
-        ++wedge_id;
-        
+        //
+        // the first point, this is the right (even) one
         wedge_ids.emplace_back( wedge_id );
         wedges_to_cells[wedge_id].emplace_back( cell_id );
         wedges_to_faces[wedge_id].emplace_back( face_id );
         wedges_to_edges[wedge_id].emplace_back( *edge0 );
+        wedges_to_verts[wedge_id].emplace_back( *v1 );
+        ++wedge_id;
+        
+        // for the next point, this one is the left (odd) one
+        wedge_ids.emplace_back( wedge_id );
+        wedges_to_cells[wedge_id].emplace_back( cell_id );
+        wedges_to_faces[wedge_id].emplace_back( face_id );
+        wedges_to_edges[wedge_id].emplace_back( *edge1 );
         wedges_to_verts[wedge_id].emplace_back( *v1 );
         ++wedge_id;
    
