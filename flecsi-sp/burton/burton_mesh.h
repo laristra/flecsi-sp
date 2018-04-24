@@ -998,7 +998,7 @@ public:
       } // is_boundary
     } // for
     
-#if FLECSI_SP_BURTON_MESH_EXTRAS
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
     // set boundary wedges
     for ( auto w : wedges() ) 
       w->set_boundary( edges(w).front()->is_boundary() );
@@ -1037,7 +1037,6 @@ public:
 
     //--------------------------------------------------------------------------
     // make sure face normal points out from first cell
-    bool bad_face = false;
     
     // auto & context = flecsi::execution::context_t::instance();
     // auto rank = context.color();
@@ -1064,19 +1063,16 @@ public:
         // std::cout << "Cell has midpoint " << c->midpoint() << std::endl;
         // std::cout << "Cell has centroid " << c->centroid() << std::endl;
         // std::cout << std::endl;
-        bad_face = bad_face || true;
-        std::cout << "Face " << f.id() << " has opposite normal" << std::endl;
-        abort();
+        ss << "Face " << f.id() << " has opposite normal" << std::endl;
       }
     } 
 
-    if ( bad_face ) return raise_or_return( ss );
+    if ( ss.tellp() != 0 ) return raise_or_return( ss );
 
-#if FLECSI_SP_BURTON_MESH_EXTRAS
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
     //--------------------------------------------------------------------------
     // check all the corners and wedges
-    bool bad_corner = false;
     auto cnrs = corners();
     auto num_corners = cnrs.size();
 
@@ -1091,41 +1087,30 @@ public:
       auto ws = wedges(cn);
 
       if ( cs.size() != 1 ) {
-        #pragma omp critical
         ss << "Corner " << cn.id() << " has " << cs.size() << "/=1 cells" 
            << std::endl;
       }
 
       if ( fs.size() != num_dimensions ) {
-        #pragma omp critical
-        {
-          ss << "Corner " << cn.id() << " has " << fs.size() << "/=" 
-             << num_dimensions << " faces" << std::endl;
-        }
+        ss << "Corner " << cn.id() << " has " << fs.size() << "/=" 
+           << num_dimensions << " faces" << std::endl;
       }
 
       if ( es.size() != num_dimensions ) {
-        #pragma omp critical
-        {
-          ss << "Corner " << cn.id() << " has " << es.size() << "/=" 
-             << num_dimensions << " edges" << std::endl;
-        }
+        ss << "Corner " << cn.id() << " has " << es.size() << "/=" 
+           << num_dimensions << " edges" << std::endl;
       }
 
       if ( vs.size() != 1 ) {
-        #pragma omp critical
-        {
-          ss << "Corner " << cn.id() << " has " << vs.size() << "/=1 vertices"
-             << std::endl;
-        }
+        ss << "Corner " << cn.id() << " has " << vs.size() << "/=1 vertices"
+           << std::endl;
       }
 
       auto cl = cs.front();
       auto vt = vs.front();
       
       if ( ws.size() % 2 != 0 ) {
-        #pragma omp critical
-        {
+        if ( vs.size() != 1 ) {
           ss << "Corner " << cn.id() << " has " << ws.size() << "%2/=0 wedges"
              << std::endl;
         }
@@ -1138,63 +1123,39 @@ public:
         auto vs = vertices( wg );
         auto cns = corners( wg );
         if ( cls.size() != 1 ) {
-          #pragma omp critical
-          {          
-            ss << "Wedge " << wg.id() << " has " << cls.size() 
-               << "/=1 cells" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << cls.size() 
+             << "/=1 cells" << std::endl;
         }
         if ( fs.size() != 1 ) {
-          #pragma omp critical 
-          {           
-            ss << "Wedge " << wg.id() << " has " << fs.size() 
-               << "/=1 faces" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << fs.size() 
+             << "/=1 faces" << std::endl;
         }
         if ( es.size() != 1 ) {
-          #pragma omp critical 
-          {
-            ss << "Wedge " << wg.id() << " has " << es.size() 
-               << "/=1 edges" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << es.size() 
+             << "/=1 edges" << std::endl;
         }
         if ( vs.size() != 1 ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has " << vs.size() 
-               << "/=1 vertices" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << vs.size() 
+             << "/=1 vertices" << std::endl;
         }
         if ( cns.size() != 1 ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has " << cns.size() 
-               << "/=1 corners" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << cns.size() 
+             << "/=1 corners" << std::endl;
         }
         auto vert = vs.front();
         auto cell = cls.front();
         auto corn = cns.front();
         if ( vert != vt ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has incorrect vertex " 
-               << vert.id() << "!=" << vt.id() << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has incorrect vertex " 
+             << vert.id() << "!=" << vt.id() << std::endl;
         }
         if ( cell != cl ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has incorrect cell " 
-               << cell.id() << "!=" << cl.id() << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has incorrect cell " 
+             << cell.id() << "!=" << cl.id() << std::endl;
         }
         if ( corn != cn ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has incorrect corner " 
-               << corn.id() << "!=" << cn.id() << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has incorrect corner " 
+             << corn.id() << "!=" << cn.id() << std::endl;
         }
         auto fc = fs.front();            
         auto fx = fc->midpoint();
@@ -1204,18 +1165,15 @@ public:
         auto n = wg->facet_normal();
         dot = dot_product( n, delta );
         if ( dot < 0 ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has opposite normal" 
-               << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has opposite normal" 
+             << std::endl;
         }
       } // wedges
       
     } // corners
 
 
-    if ( bad_corner ) return raise_or_return( ss );
+    if ( ss.tellp() != 0 ) return raise_or_return( ss );
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -1267,7 +1225,7 @@ public:
       //--------------------------------------------------------------------------
       // compute wedge parameters
 
-#if FLECSI_SP_BURTON_MESH_EXTRAS
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
       #pragma omp for
       for ( counter_t i=0; i<num_corners; ++i ) {
