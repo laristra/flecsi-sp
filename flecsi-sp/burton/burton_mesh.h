@@ -111,6 +111,8 @@ public:
 
   //! the index spaces type
   using index_spaces_t = typename types_t::index_spaces_t;
+  //! special subspace for 
+  using index_subspaces_t = typename types_t::index_subspaces_t;
 
   //! \brief The locations of different bits that we set as flags
   using bits = typename config_t::bits;
@@ -123,8 +125,12 @@ public:
   using shape_t = typename config_t::shape_t;
 
   //! the ownership ( exclusive, shared, ghost ) types
-  using ownership_t = flecsi::partition_t;
+  using partition_t = flecsi::partition_t;
 
+  //! other special subsets that we have defined
+  enum class subset_t {
+    overlapping
+  };
 
   //============================================================================
   // Constructors
@@ -167,12 +173,18 @@ public:
       base_t::template num_entities<vertex_t::dimension, vertex_t::domain>();
   }
 
-  auto num_vertices( ownership_t subset ) const
+  auto num_vertices( partition_t subset ) const
   {
     return 
-    base_t::template num_entities<vertex_t::dimension, vertex_t::domain>(
-      subset
-    );
+      base_t::template num_entities<vertex_t::dimension, vertex_t::domain>(
+        subset
+      );
+  }
+
+  auto num_vertices( subset_t ) const
+  {
+    // only return overlapping set right now 
+    return base_t::template num_subentities<index_subspaces_t::overlapping_vertices>();
   }
 
   //! \brief Return all vertices in the burton mesh.
@@ -183,11 +195,17 @@ public:
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(); 
   }
 
-  decltype(auto) vertices( ownership_t subset ) const 
+  decltype(auto) vertices( partition_t subset ) const 
   { 
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(
       subset
     ); 
+  }
+
+  decltype(auto) vertices( subset_t )
+  { 
+    // only returns overlapping set right now
+    return base_t::template subentities<index_subspaces_t::overlapping_vertices>();
   }
 
   //! \brief Return vertices associated with entity instance of type \e E.
@@ -301,16 +319,22 @@ public:
 
   //! \brief Return the number of burton mesh edges.
   //! \return The number of burton mesh edges.
-  size_t num_edges() const
+  auto num_edges() const
   {
     return base_t::template num_entities<edge_t::dimension, edge_t::domain>();
   }
 
-  size_t num_edges(ownership_t subset) const
+  auto num_edges(partition_t subset) const
   {
     return base_t::template num_entities<edge_t::dimension, edge_t::domain>(
       subset
     );
+  }
+
+  auto num_edges( subset_t ) const
+  {
+    // only returns overlapping right now
+    return base_t::template num_subentities<index_subspaces_t::overlapping_edges>();
   }
 
   //! \brief Return all edges in the burton mesh.
@@ -318,13 +342,20 @@ public:
   //!         in range based for loops.
   decltype(auto) edges() const
   { 
-    return base_t::template entities<edge_t::dimension, 0>(); 
+    return base_t::template entities<edge_t::dimension, edge_t::domain>(); 
   }
 
-  decltype(auto) edges( ownership_t subset ) const 
+  decltype(auto) edges( partition_t subset ) const 
   { 
-    return base_t::template entities<edge_t::dimension, 0>(subset); 
+    return base_t::template entities<edge_t::dimension, edge_t::domain>(subset); 
   }
+  
+  decltype(auto) edges( subset_t ) const 
+  { 
+    // only returns overlapping right now
+    return base_t::template subentities<index_subspaces_t::overlapping_edges>();
+  }
+
 
   //! \brief Return edges for entity \e e in domain \e M.
   //!
@@ -382,17 +413,24 @@ public:
 
   //! \brief Return the number of faces in the burton mesh.
   //! \return The number of faces in the burton mesh.
-  size_t num_faces() const
+  auto num_faces() const
   {
     return base_t::template num_entities<face_t::dimension, face_t::domain>();
   } // num_faces
 
-  size_t num_faces(ownership_t subset) const
+  auto num_faces(partition_t subset) const
   {
     return base_t::template num_entities<face_t::dimension, face_t::domain>(
       subset
     );
   } // num_faces
+
+  auto num_faces( subset_t ) const
+  {
+    // only returns overlapping right now
+    return base_t::template num_subentities<index_subspaces_t::overlapping_faces>();
+  }
+
 
   //! \brief Return all faces in the burton mesh.
   //!
@@ -403,12 +441,19 @@ public:
     return base_t::template entities<face_t::dimension, face_t::domain>();
   }
 
-  decltype(auto) faces(ownership_t subset) const
+  decltype(auto) faces(partition_t subset) const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>(
       subset
     );
   }
+  
+  decltype(auto) faces( subset_t ) const 
+  { 
+    // only returns overlapping right now
+    return base_t::template subentities<index_subspaces_t::overlapping_faces>();
+  }
+
 
   //! \brief Return all faces in the burton mesh.
   //! \return Return all faces in the burton mesh as a sequence for use, e.g.,
@@ -480,7 +525,7 @@ public:
     return base_t::template num_entities<cell_t::dimension, cell_t::domain>();
   }
 
-  size_t num_cells(ownership_t subset) const
+  size_t num_cells(partition_t subset) const
   {
     return base_t::template num_entities<cell_t::dimension, cell_t::domain>(
       subset
@@ -496,7 +541,7 @@ public:
     return base_t::template entities<cell_t::dimension, cell_t::domain>();
   }
 
-  decltype(auto) cells(ownership_t subset) const
+  decltype(auto) cells(partition_t subset) const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>(
       subset
@@ -584,7 +629,7 @@ public:
     return base_t::template num_entities<wedge_t::dimension, wedge_t::domain>();
   }
 
-  size_t num_wedges(ownership_t subset) const
+  size_t num_wedges(partition_t subset) const
   {
     return base_t::template num_entities<wedge_t::dimension, wedge_t::domain>(subset);
   }
@@ -598,7 +643,7 @@ public:
     return base_t::template entities<wedge_t::dimension, wedge_t::domain>();
   }
 
-  decltype(auto) wedges(ownership_t subset) const
+  decltype(auto) wedges(partition_t subset) const
   {
     return base_t::template entities<wedge_t::dimension, wedge_t::domain>(subset);
   }
@@ -674,7 +719,7 @@ public:
       base_t::template num_entities<corner_t::dimension, corner_t::domain>();
   }
 
-  size_t num_corners(ownership_t subset) const
+  size_t num_corners(partition_t subset) const
   {
     return 
       base_t::template num_entities<corner_t::dimension, corner_t::domain>(subset);
@@ -689,7 +734,7 @@ public:
     return base_t::template entities<corner_t::dimension, corner_t::domain>();
   }
 
-  decltype(auto) corners(ownership_t subset) const
+  decltype(auto) corners(partition_t subset) const
   {
     return base_t::template entities<corner_t::dimension, corner_t::domain>(subset);
   }
@@ -953,7 +998,7 @@ public:
       } // is_boundary
     } // for
     
-#if FLECSI_SP_BURTON_MESH_EXTRAS
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
     // set boundary wedges
     for ( auto w : wedges() ) 
       w->set_boundary( edges(w).front()->is_boundary() );
@@ -990,10 +1035,8 @@ public:
     // simultanesously
     std::stringstream ss;
 
-
     //--------------------------------------------------------------------------
     // make sure face normal points out from first cell
-    bool bad_face = false;
     
     // auto & context = flecsi::execution::context_t::instance();
     // auto rank = context.color();
@@ -1001,37 +1044,35 @@ public:
     // auto & face_map = context.index_map( index_spaces_t::faces );
     // auto & cell_map = context.index_map( index_spaces_t::cells );
 
-
-    for( auto f : faces() ) {
+    for( auto f : faces( subset_t::overlapping ) ) {
       auto n = f->normal();
       auto fx = f->midpoint();
       auto c = cells(f).front();
       auto cx = c->midpoint();
       auto delta = fx - cx;
       auto dot = dot_product( n, delta );
-      // std::cout << "Checking face with mid " << face_map[ f.id() ] << std::endl;
-      // std::cout << "With cells : ";
-      // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
-      // std::cout << std::endl;
-      // std::cout << "And vertices : ";
-      // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
-      // std::cout << std::endl;
-      // std::cout << "Face has midpoint " << fx << std::endl;
-      // std::cout << std::endl;
       if ( dot < 0 ) {
-        bad_face = bad_face || true;
-        std::cout << "Face " << f.id() << " has opposite normal" << std::endl;
-        abort();
+        // std::cout << "Checking face with mid " << face_map[ f.id() ] << std::endl;
+        // std::cout << "With cells : ";
+        // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
+        // std::cout << std::endl;
+        // std::cout << "And vertices : ";
+        // for ( auto vt : vertices(f) ) std::cout << vertex_map[ vt.id() ] << ", ";
+        // std::cout << std::endl;
+        // std::cout << "Face has midpoint " << fx << std::endl;
+        // std::cout << "Cell has midpoint " << c->midpoint() << std::endl;
+        // std::cout << "Cell has centroid " << c->centroid() << std::endl;
+        // std::cout << std::endl;
+        ss << "Face " << f.id() << " has opposite normal" << std::endl;
       }
     } 
 
-    if ( bad_face ) return raise_or_return( ss );
+    if ( ss.tellp() != 0 ) return raise_or_return( ss );
 
-#if FLECSI_SP_BURTON_MESH_EXTRAS
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
     //--------------------------------------------------------------------------
     // check all the corners and wedges
-    bool bad_corner = false;
     auto cnrs = corners();
     auto num_corners = cnrs.size();
 
@@ -1046,41 +1087,30 @@ public:
       auto ws = wedges(cn);
 
       if ( cs.size() != 1 ) {
-        #pragma omp critical
         ss << "Corner " << cn.id() << " has " << cs.size() << "/=1 cells" 
            << std::endl;
       }
 
       if ( fs.size() != num_dimensions ) {
-        #pragma omp critical
-        {
-          ss << "Corner " << cn.id() << " has " << fs.size() << "/=" 
-             << num_dimensions << " faces" << std::endl;
-        }
+        ss << "Corner " << cn.id() << " has " << fs.size() << "/=" 
+           << num_dimensions << " faces" << std::endl;
       }
 
       if ( es.size() != num_dimensions ) {
-        #pragma omp critical
-        {
-          ss << "Corner " << cn.id() << " has " << es.size() << "/=" 
-             << num_dimensions << " edges" << std::endl;
-        }
+        ss << "Corner " << cn.id() << " has " << es.size() << "/=" 
+           << num_dimensions << " edges" << std::endl;
       }
 
       if ( vs.size() != 1 ) {
-        #pragma omp critical
-        {
-          ss << "Corner " << cn.id() << " has " << vs.size() << "/=1 vertices"
-             << std::endl;
-        }
+        ss << "Corner " << cn.id() << " has " << vs.size() << "/=1 vertices"
+           << std::endl;
       }
 
       auto cl = cs.front();
       auto vt = vs.front();
       
       if ( ws.size() % 2 != 0 ) {
-        #pragma omp critical
-        {
+        if ( vs.size() != 1 ) {
           ss << "Corner " << cn.id() << " has " << ws.size() << "%2/=0 wedges"
              << std::endl;
         }
@@ -1093,63 +1123,39 @@ public:
         auto vs = vertices( wg );
         auto cns = corners( wg );
         if ( cls.size() != 1 ) {
-          #pragma omp critical
-          {          
-            ss << "Wedge " << wg.id() << " has " << cls.size() 
-               << "/=1 cells" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << cls.size() 
+             << "/=1 cells" << std::endl;
         }
         if ( fs.size() != 1 ) {
-          #pragma omp critical 
-          {           
-            ss << "Wedge " << wg.id() << " has " << fs.size() 
-               << "/=1 faces" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << fs.size() 
+             << "/=1 faces" << std::endl;
         }
         if ( es.size() != 1 ) {
-          #pragma omp critical 
-          {
-            ss << "Wedge " << wg.id() << " has " << es.size() 
-               << "/=1 edges" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << es.size() 
+             << "/=1 edges" << std::endl;
         }
         if ( vs.size() != 1 ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has " << vs.size() 
-               << "/=1 vertices" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << vs.size() 
+             << "/=1 vertices" << std::endl;
         }
         if ( cns.size() != 1 ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has " << cns.size() 
-               << "/=1 corners" << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has " << cns.size() 
+             << "/=1 corners" << std::endl;
         }
         auto vert = vs.front();
         auto cell = cls.front();
         auto corn = cns.front();
         if ( vert != vt ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has incorrect vertex " 
-               << vert.id() << "!=" << vt.id() << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has incorrect vertex " 
+             << vert.id() << "!=" << vt.id() << std::endl;
         }
         if ( cell != cl ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has incorrect cell " 
-               << cell.id() << "!=" << cl.id() << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has incorrect cell " 
+             << cell.id() << "!=" << cl.id() << std::endl;
         }
         if ( corn != cn ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has incorrect corner " 
-               << corn.id() << "!=" << cn.id() << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has incorrect corner " 
+             << corn.id() << "!=" << cn.id() << std::endl;
         }
         auto fc = fs.front();            
         auto fx = fc->midpoint();
@@ -1159,18 +1165,15 @@ public:
         auto n = wg->facet_normal();
         dot = dot_product( n, delta );
         if ( dot < 0 ) {
-          #pragma omp critical
-          {
-            ss << "Wedge " << wg.id() << " has opposite normal" 
-               << std::endl;
-          }
+          ss << "Wedge " << wg.id() << " has opposite normal dot=" << dot
+             << std::endl;
         }
       } // wedges
       
     } // corners
 
 
-    if ( bad_corner ) return raise_or_return( ss );
+    if ( ss.tellp() != 0 ) return raise_or_return( ss );
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -1222,7 +1225,7 @@ public:
       //--------------------------------------------------------------------------
       // compute wedge parameters
 
-#if FLECSI_SP_BURTON_MESH_EXTRAS
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
       #pragma omp for
       for ( counter_t i=0; i<num_corners; ++i ) {

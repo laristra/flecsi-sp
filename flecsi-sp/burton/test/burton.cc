@@ -79,12 +79,25 @@ void dump_test( utils::client_handle_r__<mesh_t> mesh ) {
   std::istream_iterator<std::string> expected_begin(std_file);
   std::istream_iterator<std::string> eos;
 
-  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos );
+  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos )
+    << "DUMP TEST FAILED"; 
 
 }
 
 flecsi_register_task(dump_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief Test validity of mesh
+////////////////////////////////////////////////////////////////////////////////
+void validity_test( utils::client_handle_r__<mesh_t> mesh ) {
+  auto ret = mesh.is_valid( false );
+  EXPECT_TRUE( ret ) << "VALIDITY TEST FAILED";
+}
+
+flecsi_register_task(validity_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh connectivity functions
@@ -273,7 +286,8 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
   std::istream_iterator<std::string> expected_begin(std_file);
   std::istream_iterator<std::string> eos;
 
-  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos );
+  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos )
+    << "CONNECTIVITY TEST FAILED";
 
 } // TEST_F
 
@@ -356,6 +370,38 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   } // for
 
+
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  
+  file << "For each wedge:" << endl;
+
+  for(auto w: mesh.wedges()) {
+
+    file << "---- wedge id: " << w.id()
+      << " with facet normal " << w->facet_normal() 
+      << ", facet area " << w->facet_area()
+      << endl;
+    
+  }
+
+  file << "For each corner:" << endl;
+
+  for (auto c: mesh.corners()) {
+    
+    file << "---- corner id: " << c.id() << endl;
+
+    for (auto w: mesh.wedges(c))  
+      file << "++++ wedge id: " << w->id()
+          << " with facet normal " << w->facet_normal() 
+          << ", facet area " << w->facet_area()
+          << endl;
+
+  }
+
+#endif
+
+
   // close file before comparison
   file.close();
 
@@ -366,7 +412,8 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
   std::istream_iterator<std::string> expected_begin(std_file);
   std::istream_iterator<std::string> eos;
 
-  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos );
+  CINCH_EXPECT_EQUAL_COLLECTIONS( actual_begin, eos, expected_begin, eos )
+    << "GEOMETRY TEST FAILED";
 
 } // TEST_F
 
@@ -382,16 +429,50 @@ void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
     auto n = f->normal();
     auto fx = f->centroid();
     auto c = mesh.cells(f).front();
-    auto cx = c->centroid();
+    auto cx = c->midpoint();
     auto delta = fx - cx;
     auto dot = dot_product( n, delta );
-    ASSERT_GT( dot, 0 );
+    EXPECT_GT( dot, 0 );
   } // for
 
 } // TEST_F
 
 flecsi_register_task(normals_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief test the mesh subsets
+////////////////////////////////////////////////////////////////////////////////
+void subset_test( utils::client_handle_r__<mesh_t> mesh ) {
+  
+  std::set< mesh_t::vertex_t* > overlapping_verts;
+  auto & vs = mesh.vertices( mesh_t::subset_t::overlapping );
+
+  for(auto c : mesh.cells(flecsi::owned))
+  {
+    for ( auto v : mesh.vertices(c) ) {
+      overlapping_verts.emplace( v );
+      auto found = false;
+      for ( auto vb : vs ) {
+        if ( vb.id() == v.id() ) {
+          found = true;
+          break;
+        }
+      }
+      ASSERT_TRUE( found ) << "VERTEX NOT FOUND IN SUBSET";
+    }
+  }
+
+  ASSERT_EQ(
+      overlapping_verts.size(),
+      mesh.num_vertices(mesh_t::subset_t::overlapping)
+  ) << "VERTEX SUBSET SIZE MISMATCH";
+
+} // TEST_F
+
+flecsi_register_task(subset_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh state
@@ -459,26 +540,28 @@ void state_check_test(
   // cells
   for(auto c: mesh.cells(flecsi::owned)) {
     auto id = cells_lid_to_mid.at( c.id() );
-    ASSERT_EQ( cell_data(c), id );
+    ASSERT_EQ( cell_data(c), id ) << "CELL DATA NOT COMMUNICATED PROPERLY";
   }
 
   // faces
   for (auto f: mesh.faces(flecsi::owned)) {
     auto id = faces_lid_to_mid.at( f.id() );
-    ASSERT_EQ( face_data(f).i, id );
-    ASSERT_EQ( face_data(f).x, id );
+    ASSERT_EQ( face_data(f).i, id ) << "FACE DATA NOT COMMUNICATED PROPERLY";
+    ASSERT_EQ( face_data(f).x, id ) << "FACE DATA NOT COMMUNICATED PROPERLY";
   }
 
   // edges
   for (auto e: mesh.edges(flecsi::owned)) {
     auto id = edges_lid_to_mid.at( e.id() );
-    for ( auto & x : edge_data(e) ) ASSERT_EQ(x, id);
+    for ( auto & x : edge_data(e) )
+      ASSERT_EQ(x, id) << "EDGE DATA NOT COMMUNICATED PROPERLY";
   }
 
   // vertices
   for (auto v: mesh.vertices(flecsi::owned)) {
     auto id = verts_lid_to_mid.at( v.id() );
-    for ( auto & x : vert_data(v) ) ASSERT_EQ(x, id);
+    for ( auto & x : vert_data(v) )
+      ASSERT_EQ(x, id) << "VERTEX DATA NOT COMMUNICATED PROPERLY";
   }
 
 } // TEST_F
@@ -489,11 +572,36 @@ flecsi_register_task(state_fill_test, flecsi_sp::burton::test, loc,
 flecsi_register_task(state_check_test, flecsi_sp::burton::test, loc,
     single|flecsi::leaf);
 
-////////////////////////////////////////////////////////////////////////////////
-//! \brief test the mesh state
-////////////////////////////////////////////////////////////////////////////////
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief test the classification of wedges and corners
+////////////////////////////////////////////////////////////////////////////////
+void extras_test( utils::client_handle_r__<mesh_t> mesh ) {
+  
+  auto crns_excl = mesh.corners(flecsi::exclusive);
+
+  for (auto cl : mesh.cells(flecsi::exclusive)) {
+    for (auto cn : mesh.corners(cl) ) {
+      auto found = false;
+      for ( auto cn_excl : crns_excl )
+        if ( cn_excl.id() == cn.id() ) {
+          found = true;
+          break;
+        }
+      ASSERT_TRUE( found ) << "CORNER NOT FOUND IN SUBSET";
+    }
+  } // for
+
+} // TEST_F
+
+flecsi_register_task(extras_test, flecsi_sp::burton::test, loc,
+    single|flecsi::leaf);
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief test the mesh state at corners and wedges
+////////////////////////////////////////////////////////////////////////////////
 flecsi_register_field(mesh_t, hydro, wedge_data, int, dense, 1, index_spaces_t::wedges);
 flecsi_register_field(mesh_t, hydro, cornr_data, double, dense, 1, index_spaces_t::corners);
 
@@ -534,13 +642,13 @@ void extra_state_check_test(
   // corners
   for(auto c: mesh.corners(flecsi::owned)) {
     auto id = corners_lid_to_mid.at( c.id() );
-    ASSERT_EQ( corner_data(c), id );
+    ASSERT_EQ( corner_data(c), id ) << "CORNER DATA NOT COMMUNICATED PROPERLY";
   }
 
   // wedges
   for (auto w: mesh.wedges(flecsi::owned)) {
     auto id = wedges_lid_to_mid.at( w.id() );
-    ASSERT_EQ( wedge_data(w), id );
+    ASSERT_EQ( wedge_data(w), id ) << "WEDGE DATA NOT COMMUNICATED PROPERLY";
   }
 
 } // TEST_F
@@ -571,6 +679,9 @@ void driver(int argc, char ** argv)
   // get the mesh handle
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
 
+  // launch the validity test task
+  flecsi_execute_task(validity_test, flecsi_sp::burton::test, single, mesh_handle);
+  
   // launch the dump test task
   flecsi_execute_task(dump_test, flecsi_sp::burton::test, single, mesh_handle);
   
@@ -582,6 +693,9 @@ void driver(int argc, char ** argv)
 
   // launch the normals test task
   flecsi_execute_task(normals_test, flecsi_sp::burton::test, single, mesh_handle);
+  
+  // launch the connectivity test task
+  flecsi_execute_task(subset_test, flecsi_sp::burton::test, single, mesh_handle);
 
   // launch the state test task
   auto cell_data_handle = flecsi_get_handle(mesh_handle, hydro, cell_data, real_t, dense, 0);
@@ -611,6 +725,9 @@ void driver(int argc, char ** argv)
 
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  
+  // launch the extras test task
+  flecsi_execute_task(extras_test, flecsi_sp::burton::test, single, mesh_handle);
 
   // now do the same for the corners and wedges
   auto wedge_data_handle = flecsi_get_handle(mesh_handle, hydro, wedge_data, int, dense, 0);

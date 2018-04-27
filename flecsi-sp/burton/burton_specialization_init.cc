@@ -60,12 +60,7 @@ void specialization_tlt_init(int argc, char** argv)
   auto mesh_filename = flecsi_sp::utils::to_char_array( mesh_filename_string );
 
   // execute the mpi task to partition the mesh
-#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
-  flecsi_execute_mpi_task(partition_mesh_with_corners_n_wedges,
-      flecsi_sp::burton, mesh_filename);
-#else
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////////

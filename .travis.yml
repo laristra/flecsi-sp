@@ -7,7 +7,7 @@ services:
 
 env:
   matrix:
-    - DISTRO=fedora_mpi BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=fedora_mpich_mpi BUILD_TYPE=Release DOCKERHUB=true
     - DISTRO=ubuntu_mpi BUILD_TYPE=Debug DOCKERHUB=true
 
 script:
@@ -26,8 +26,6 @@ script:
                 --build-arg TRAVIS_COMMIT=${TRAVIS_COMMIT}
                 -t ${TRAVIS_REPO_SLUG}:${DISTRO}${TAG} ${HOME}/docker/ &&
     CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO}${TAG} /bin/bash)
-
-after_success:
   - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master && ${CC} = gcc ]]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker push "${TRAVIS_REPO_SLUG}:${DISTRO}${TAG}";
