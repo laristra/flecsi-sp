@@ -369,6 +369,38 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   } // for
 
+
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  
+  file << "For each wedge:" << endl;
+
+  for(auto w: mesh.wedges()) {
+
+    file << "---- wedge id: " << w.id()
+      << " with facet normal " << w->facet_normal() 
+      << ", facet area " << w->facet_area()
+      << endl;
+    
+  }
+
+  file << "For each corner:" << endl;
+
+  for (auto c: mesh.corners()) {
+    
+    file << "---- corner id: " << c.id() << endl;
+
+    for (auto w: mesh.wedges(c))  
+      file << "++++ wedge id: " << w->id()
+          << " with facet normal " << w->facet_normal() 
+          << ", facet area " << w->facet_area()
+          << endl;
+
+  }
+
+#endif
+
+
   // close file before comparison
   file.close();
 

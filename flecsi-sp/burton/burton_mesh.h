@@ -1165,7 +1165,7 @@ public:
         auto n = wg->facet_normal();
         dot = dot_product( n, delta );
         if ( dot < 0 ) {
-          ss << "Wedge " << wg.id() << " has opposite normal" 
+          ss << "Wedge " << wg.id() << " has opposite normal dot=" << dot
              << std::endl;
         }
       } // wedges
