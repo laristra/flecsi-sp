@@ -91,7 +91,8 @@ flecsi_register_task(dump_test, flecsi_sp::burton::test, loc,
 //! \brief Test validity of mesh
 ////////////////////////////////////////////////////////////////////////////////
 void validity_test( utils::client_handle_r__<mesh_t> mesh ) {
-  mesh.is_valid();
+  auto ret = mesh.is_valid( false );
+  EXPECT_TRUE( ret ) << "VALIDITY TEST FAILED";
 }
 
 flecsi_register_task(validity_test, flecsi_sp::burton::test, loc,
