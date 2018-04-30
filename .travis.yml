@@ -26,7 +26,9 @@ script:
                 --build-arg TRAVIS_COMMIT=${TRAVIS_COMMIT}
                 -t ${TRAVIS_REPO_SLUG}:${DISTRO}${TAG} ${HOME}/docker/ &&
     CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO}${TAG} /bin/bash)
-  - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master && ${CC} = gcc ]]; then
+
+after_success:
+  - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == docker && ${CC} = gcc ]]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker push "${TRAVIS_REPO_SLUG}:${DISTRO}${TAG}";
     fi
