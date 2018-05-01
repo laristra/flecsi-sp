@@ -1237,7 +1237,8 @@ public:
           // get the first wedge normal
           (*wit)->update( this, true );
           // move to next wedge
-          assert( ++wit != ws.end() );
+          ++wit;
+          assert( wit != ws.end() );
           // get the second wedge normal
           (*wit)->update( this, false );
         }
