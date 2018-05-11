@@ -1779,6 +1779,18 @@ void partition_mesh( utils::char_array_t filename )
 
 
   //----------------------------------------------------------------------------
+  // Allow sparse index spaces for any of the main index spaces
+  //----------------------------------------------------------------------------
+
+  for ( int i=0; i<= index_spaces::size; ++i ) {
+    flecsi::execution::context_t::sparse_index_space_info_t isi;
+    isi.max_entries_per_index = 5;
+    isi.reserve_chunk = 8192;
+    //isi.max_exclusive_entries = 8192;
+    context.set_sparse_index_space_info(i, isi);
+  }
+
+  //----------------------------------------------------------------------------
   // output the result
   //----------------------------------------------------------------------------
 
