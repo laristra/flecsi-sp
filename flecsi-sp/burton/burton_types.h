@@ -148,8 +148,8 @@ struct burton_2d_types_base
  
   //============================================================================
   //! \brief The burton mesh index sub spaces.
-	//! These are used to define special sets, like all vertices used by owned
-	//! cells.
+  //! These are used to define special sets, like all vertices used by owned
+  //! cells.
   //============================================================================
   struct index_subspaces_t {
 
@@ -158,9 +158,9 @@ struct burton_2d_types_base
       overlapping_vertices, // all vertices used by owned cells
       overlapping_edges,    // all edges used by owned cells
       overlapping_faces = overlapping_edges
-		};
+    };
 
-	};
+  };
 
 
   //============================================================================
@@ -186,17 +186,17 @@ struct burton_2d_types_base
   using wedge_t = burton_wedge_t<num_dimensions>;
 
   //============================================================================
-	//! setup the index subspaces
+  //! setup the index subspaces
   //============================================================================
   using index_subspaces = std::tuple<
     std::tuple<
-			flecsi::topology::index_space_<index_spaces_t::vertices>,
+      flecsi::topology::index_space_<index_spaces_t::vertices>,
       flecsi::topology::index_subspace_<index_subspaces_t::overlapping_vertices>
-		>,
+    >,
     std::tuple<
-			flecsi::topology::index_space_<index_spaces_t::edges>,
+      flecsi::topology::index_space_<index_spaces_t::edges>,
       flecsi::topology::index_subspace_<index_subspaces_t::overlapping_edges>
-		>
+    >
   >;
 
   //============================================================================
@@ -457,8 +457,8 @@ struct burton_3d_types_base
  
   //============================================================================
   //! \brief The burton mesh index sub spaces.
-	//! These are used to define special sets, like all vertices used by owned
-	//! cells.
+  //! These are used to define special sets, like all vertices used by owned
+  //! cells.
   //============================================================================
   struct index_subspaces_t {
 
@@ -467,9 +467,9 @@ struct burton_3d_types_base
       overlapping_vertices, // all vertices used by owned cells
       overlapping_edges,    // all edges used by owned cells
       overlapping_faces     // all faces used by owned cells
-		};
+    };
 
-	};
+  };
 
   //============================================================================
   // Define basic types.
@@ -492,23 +492,23 @@ struct burton_3d_types_base
 
   //! Type for burton mesh wedges.
   using wedge_t = burton_wedge_t<num_dimensions>;
-	
+  
   //============================================================================
-	//! setup the index subspaces
+  //! setup the index subspaces
   //============================================================================
   using index_subspaces = std::tuple<
     std::tuple<
-			flecsi::topology::index_space_<index_spaces_t::vertices>,
+      flecsi::topology::index_space_<index_spaces_t::vertices>,
       flecsi::topology::index_subspace_<index_subspaces_t::overlapping_vertices>
-		>,
+    >,
     std::tuple<
-			flecsi::topology::index_space_<index_spaces_t::edges>,
+      flecsi::topology::index_space_<index_spaces_t::edges>,
       flecsi::topology::index_subspace_<index_subspaces_t::overlapping_edges>
-		>,
+    >,
     std::tuple<
-			flecsi::topology::index_space_<index_spaces_t::faces>,
+      flecsi::topology::index_space_<index_spaces_t::faces>,
       flecsi::topology::index_subspace_<index_subspaces_t::overlapping_faces>
-		>
+    >
   >;
 
 
@@ -517,7 +517,7 @@ struct burton_3d_types_base
   //!   types of face entities
   //============================================================================  
   template<typename MESH_TOPOLOGY>
-	static
+  static
   mesh_entity_base_t *
   create_face(MESH_TOPOLOGY* mesh, size_t num_vertices, const id_t & id)
   {
