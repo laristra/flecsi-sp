@@ -110,7 +110,7 @@ struct burton_2d_types_base
       edges_to_faces = 7777,
       faces_to_edges = 7777,
       // total number of index spaces
-      size = corners_to_wedges + 1
+      size = wedges + 1
     };
 
     //! Maps an entity dimension to an index space id
@@ -410,7 +410,7 @@ struct burton_3d_types_base
       wedges_to_corners,
       corners_to_wedges,
       // total number of index spaces
-      size
+      size = wedges + 1
     };
 
     //! Maps an entity dimension to an index space id
