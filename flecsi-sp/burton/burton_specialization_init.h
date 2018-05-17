@@ -1785,7 +1785,14 @@ void partition_mesh( utils::char_array_t filename )
   for ( int i=0; i<= index_spaces::size; ++i ) {
     flecsi::execution::context_t::sparse_index_space_info_t isi;
     isi.max_entries_per_index = 5;
-    isi.reserve_chunk = 8192;
+    // figure out the maximum number of entities
+    const auto & coloring = context.coloring( i );
+    auto num_ents =
+      coloring.exclusive.size() +
+      coloring.shared.size() +
+      coloring.ghost.size();
+    // worst case scenario (not sure what we get by allocating all this)
+    isi.reserve_chunk = isi.max_entries_per_index*num_ents;
     //isi.max_exclusive_entries = 8192;
     context.set_sparse_index_space_info(i, isi);
   }
