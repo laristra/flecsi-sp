@@ -1692,19 +1692,14 @@ void partition_mesh( utils::char_array_t filename )
 
   for ( int i=1; i<num_dims; ++i ) {
     // create a new map
-    auto & entity_to_vertex_map =
-      context.intermediate_map( /* dim */ i, /* dom */ 0 );
-    auto & vertex_to_entity_map =
-      context.reverse_intermediate_map( /* dim */ i, /* dom */ 0 );
-    // loop over each entity id and get its list of vertices
-    for ( auto e : entity_ids[i] ) { 
+     std::unordered_map<size_t, std::vector<size_t>>  intermediate_map;
+    for (auto e : entity_ids[i] ) { 
       auto vs = mesh_def.entities( /* dimension */ i, /* domain */ 0, e );
       // sorted for comparison later
       std::sort( vs.begin(), vs.end() );
-      // add all the mappings for this entity
-      entity_to_vertex_map.emplace( e, vs ); 
-      vertex_to_entity_map.emplace( vs, e ); 
+      intermediate_map[e]=vs;
     }
+    context.add_intermediate_map(i,0,intermediate_map);
   }
   
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
