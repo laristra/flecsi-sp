@@ -1691,7 +1691,7 @@ void partition_mesh( utils::char_array_t filename )
   //----------------------------------------------------------------------------
 
   for ( int i=1; i<num_dims; ++i ) {
-    // create a new map
+     // create a new map
     auto & entity_to_vertex_map =
       context.intermediate_map( /* dim */ i, /* dom */ 0 );
     auto & vertex_to_entity_map =

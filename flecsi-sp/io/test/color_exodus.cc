@@ -35,7 +35,7 @@ clog_register_tag(coloring);
 // Define an empty stub for linkage.
 namespace flecsi {
 namespace execution {
-void runtime_driver(int argc, char ** argv) {}
+void driver(int argc, char ** argv) {}
 }
 }
 
