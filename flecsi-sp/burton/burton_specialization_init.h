@@ -1792,7 +1792,7 @@ void partition_mesh( utils::char_array_t filename )
       coloring.shared.size() +
       coloring.ghost.size();
     // worst case scenario (not sure what we get by allocating all this)
-    isi.reserve_chunk = isi.max_entries_per_index*num_ents;
+    isi.exclusive_reserve = isi.max_entries_per_index*num_ents;
     //isi.max_exclusive_entries = 8192;
     context.set_sparse_index_space_info(i, isi);
   }
