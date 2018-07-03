@@ -1794,7 +1794,8 @@ void partition_mesh( utils::char_array_t filename )
     // worst case scenario (not sure what we get by allocating all this)
     isi.exclusive_reserve = isi.max_entries_per_index*num_ents;
     //isi.max_exclusive_entries = 8192;
-    context.set_sparse_index_space_info(i, isi);
+    isi.index_space = i;
+    context.set_sparse_index_space_info(isi);
   }
 
   //----------------------------------------------------------------------------
