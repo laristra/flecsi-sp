@@ -1917,8 +1917,12 @@ flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
 ///////////////////////////////////////////////////////////////////////////////
 flecsi_register_data_client(burton_mesh_t, meshes, mesh0);
 
-} // namespace
-} // namespace
+
+#ifdef BURTON_ENABLE_APPLICATION_TLT_INIT
+void application_tlt_init(int argc, char **argv);
+#endif
+} // namespace burton
+} // namespace flecsi_sp
 
 
 
