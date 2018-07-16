@@ -1843,8 +1843,7 @@ void partition_mesh( utils::char_array_t filename )
   clog(info) << "Finished mesh partitioning." << std::endl;
 
 
-} // somerhing
-
+} // partition_mesh
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1883,26 +1882,26 @@ void initialize_mesh(
   // create the subspaces
   create_subspaces( mesh_def, mesh );
 
-  //----------------------------------------------------------------------------
-  // Some debug
-  //----------------------------------------------------------------------------
+  ////----------------------------------------------------------------------------
+  //// Some debug
+  ////----------------------------------------------------------------------------
+  //
+  //// figure out this ranks file name
+  //auto basename = ristra::utils::basename( filename_string );
+  //auto output_prefix = ristra::utils::remove_extension( basename );
+  //auto output_filename = output_prefix + "-connectivity_rank" +
+  //  ristra::utils::zero_padded(rank) + ".txt";
+  //
+  //// dump to file
+  //if ( rank == 0 )
+  //  std::cout << "Dumping connectivity to: " << output_filename << std::endl;
+  //std::ofstream file( output_filename );
+  //mesh.dump( file );
+  //
+  //// close file
+  //file.close();
 
-  // figure out this ranks file name
-  auto basename = ristra::utils::basename( filename_string );
-  auto output_prefix = ristra::utils::remove_extension( basename );
-  auto output_filename = output_prefix + "-connectivity_rank" +
-    ristra::utils::zero_padded(rank) + ".txt";
-
-  // dump to file
-  if ( rank == 0 )
-    std::cout << "Dumping connectivity to: " << output_filename << std::endl;
-  std::ofstream file( output_filename );
-  mesh.dump( file );
-
-  // close file
-  file.close();
-
-}
+} // initialize_mesh
 
 ///////////////////////////////////////////////////////////////////////////////
 // Task Registration
