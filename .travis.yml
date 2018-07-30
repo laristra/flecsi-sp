@@ -9,7 +9,7 @@ env:
   matrix:
     - DISTRO=fedora_serial MPI=OFF DOCKERHUB=true
     - DISTRO=ubuntu_serial MPI=OFF DOCKERHUB=true
-    - DISTRO=ubuntu_serial MPI=OFF COVERAGE=ON SONARQUBE=ON
+#    - DISTRO=ubuntu_serial MPI=OFF COVERAGE=ON SONARQUBE=ON
 
 script:
   - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
