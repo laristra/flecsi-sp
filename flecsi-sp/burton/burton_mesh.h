@@ -853,6 +853,36 @@ public:
       ristra::compatibility::is_same_v<
         typename std::decay_t<V>::value_type, vertex_t* > &&
       std::remove_pointer_t<typename
+        std::decay_t<V>::value_type>::num_dimensions == 1
+    >** = nullptr ) 
+  {
+    return create_1d_element_from_verts_<cell_t>( std::forward<V>(verts) );
+  }
+
+  //! \brief Create a cell in the burton mesh.
+  //! \param[in] verts The vertices defining the cell.
+  //! \return Pointer to cell created with \e verts.
+  template< typename V >
+  auto create_cell( 
+    std::initializer_list<V*> verts,
+    std::enable_if_t< 
+      ristra::compatibility::is_same_v<V, vertex_t> && V::num_dimensions == 1 
+    >** = nullptr ) 
+  {
+    return create_1d_element_from_verts_<cell_t>( verts );
+  }
+
+
+  //! \brief Create a cell in the burton mesh.
+  //! \param[in] verts The vertices defining the cell.
+  //! \return Pointer to cell created with \e verts.
+  template< typename V >
+  auto create_cell(
+    V && verts,
+    std::enable_if_t< 
+      ristra::compatibility::is_same_v<
+        typename std::decay_t<V>::value_type, vertex_t* > &&
+      std::remove_pointer_t<typename
         std::decay_t<V>::value_type>::num_dimensions == 2
     >* = nullptr ) 
   {
@@ -907,6 +937,7 @@ public:
   auto create_cell(
     F && faces,
     typename std::enable_if_t< 
+      ! ristra::compatibility::is_same_v< face_t, vertex_t > &&
       ristra::compatibility::is_same_v< typename std::decay_t<F>::value_type, face_t* >  &&
       std::remove_pointer_t<typename std::decay_t<F>::value_type>::num_dimensions == 3
     >* = nullptr ) 
@@ -985,16 +1016,18 @@ public:
       f->set_boundary( (cells(f).size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
-        // point flags
-        auto ps = vertices(f);
-        for ( auto p : ps )
-          p->set_boundary( true );
+        if ( num_dimensions >= 2 ) {
+          // point flags are only for 2d and 3d
+          auto ps = vertices(f);
+          for ( auto p : ps )
+            p->set_boundary( true );
+        }
         // edge flags are only for 3d
         if ( num_dimensions == 3 ) {
           auto es = edges(f);
           for ( auto e : es ) 
             e->set_boundary( true );
-        } // dims
+        }
       } // is_boundary
     } // for
     
@@ -1044,6 +1077,9 @@ public:
     // auto & face_map = context.index_map( index_spaces_t::faces );
     // auto & cell_map = context.index_map( index_spaces_t::cells );
 
+    // CRF TODO:  fix normals in 1D
+    if ( num_dimensions > 1 ) {
+
     for( auto f : faces( subset_t::overlapping ) ) {
       auto n = f->normal();
       auto fx = f->midpoint();
@@ -1066,6 +1102,8 @@ public:
         ss << "Face " << f.id() << " has opposite normal" << std::endl;
       }
     } 
+
+    } // if num_dimensions > 1
 
     if ( ss.tellp() != 0 ) return raise_or_return( ss );
 
@@ -1323,6 +1361,28 @@ public:
 
  private:
 
+
+  //! \brief Create a cell in the burton mesh.
+  //! \param[in] verts The vertices defining the cell.
+  //! \return Pointer to cell created with \e verts.
+  template< typename E, typename V >
+  auto create_1d_element_from_verts_( V && verts  )
+  {
+    
+    E * e = nullptr;
+
+    // should be "segment", but that doesn't exist yet
+    auto cell_type = shape_t::none;
+
+    if ( verts.size() != 2 )
+      throw_runtime_error( "must have exactly 2 vertices" );
+
+    e = base_t::template make<E>(cell_type);
+    base_t::template init_entity<E::domain, E::dimension, vertex_t::dimension>(
+      e, std::forward<V>(verts)
+    );
+    return e;
+  } // create_cell
 
   //! \brief Create a cell in the burton mesh.
   //! \param[in] verts The vertices defining the cell.

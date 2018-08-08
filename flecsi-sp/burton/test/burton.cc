@@ -122,6 +122,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
       << " with coordinates " << v->coordinates() << endl;
   } // for
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "Edges in mesh:" << endl;
 
   for(auto e : mesh.edges()) {
@@ -134,6 +135,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
   for(auto f : mesh.faces()) 
     file << "----------- faces id: " << f.id()
        << " with centroid " << f->centroid() << endl;
+#endif
 
   file << "Cells in mesh:" << endl;
 
@@ -165,6 +167,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     for(auto c: mesh.cells(v))
       file << "    ++++ cell id: " << c.id() << endl;
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     file << "    ----Faces:" << endl;
     for(auto f: mesh.faces(v))
       file << "    ++++ face id: " << f.id() << endl;
@@ -172,6 +175,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "    ----Edges:" << endl;
     for(auto e: mesh.edges(v))
       file << "    ++++ edge id: " << e.id() << endl;
+#endif
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
     file << "    ----Corners:" << endl;
@@ -185,6 +189,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   } // for
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each edge:" << endl;
 
   for(auto e : mesh.edges()) {
@@ -215,7 +220,9 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 #endif
 
   } // for
+#endif  // DIMENSION > 1
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each face:" << endl;
 
   for(auto f : mesh.faces()) {
@@ -246,7 +253,9 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 #endif
 
   } // for
+#endif  // DIMENSION > 1
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each cell:" << endl;
 
   for(auto c : mesh.cells()) {
@@ -275,6 +284,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 #endif
 
   } // for
+#endif  // DIMENSION > 1
 
   // close file before comparison
   file.close();
@@ -327,6 +337,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   } // for
   
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each face:" << endl;
 
   for(auto f: mesh.faces()) {
@@ -369,6 +380,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
     } // for
 
   } // for
+#endif  // DIMENSION > 1
 
 
 
@@ -432,7 +444,10 @@ void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
     auto cx = c->midpoint();
     auto delta = fx - cx;
     auto dot = dot_product( n, delta );
+    // CRF TODO:  Fix normals in 1D
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     EXPECT_GT( dot, 0 );
+#endif
   } // for
 
 } // TEST_F

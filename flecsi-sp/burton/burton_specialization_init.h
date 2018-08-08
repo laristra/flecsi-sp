@@ -235,6 +235,94 @@ auto color_entity(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper function to create the cells
 ///
+/// \remarks This is the 1D version
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  typename MESH_TYPE,
+  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 1 ),
+  typename std::enable_if_t< Enabled >** = nullptr
+>
+void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+{
+  
+  //----------------------------------------------------------------------------
+  // Initial compile time setup
+  //----------------------------------------------------------------------------
+ 
+  using mesh_t = typename std::decay_t< MESH_TYPE >;
+
+  // some constant expressions
+  constexpr auto num_dims = mesh_t::num_dimensions;
+  
+  // Alias the index spaces type
+  using index_spaces = typename mesh_t::index_spaces_t;
+
+  // alias some other types
+  using point_t = typename mesh_t::point_t;
+  using vertex_t = typename mesh_t::vertex_t;
+  using cell_t = typename mesh_t::cell_t;
+  
+  //----------------------------------------------------------------------------
+  // Get context information
+  //----------------------------------------------------------------------------
+
+  // get the context
+  const auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
+
+  // get the entity maps
+  // - lid = local id - the id of the entity local to this processor
+  // - mid = mesh id - the original id of the entity ( usually from file )
+  // - gid = global id - the new global id of the entity ( set by flecsi )
+  const auto & vertex_lid_to_mid = context.index_map( index_spaces::vertices );
+  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
+  
+  const auto & vertex_mid_to_lid = context.reverse_index_map( 
+    index_spaces::vertices
+  );
+
+  //----------------------------------------------------------------------------
+  // create the vertices
+  //----------------------------------------------------------------------------
+
+  std::vector< vertex_t * > vertices;
+  vertices.reserve( vertex_lid_to_mid.size() );
+
+  for(auto & vm: vertex_lid_to_mid) { 
+    // get the point
+    const auto & p = mesh_def.template vertex<point_t>( vm.second );
+    // now create it
+    auto v = mesh.create_vertex( p );
+    vertices.emplace_back(v);
+  } // for vertices
+
+  //----------------------------------------------------------------------------
+  // create the cells
+  //----------------------------------------------------------------------------
+
+  // create the cells
+  for(auto & cm: cell_lid_to_mid) { 
+    // get the list of vertices
+    auto vs = 
+      mesh_def.entities( cell_t::dimension, vertex_t::dimension, cm.second );
+    // create a list of vertex pointers
+    std::vector< vertex_t * > elem_vs( vs.size() );
+    // transform the list of vertices to mesh ids
+    std::transform(
+      vs.begin(),
+      vs.end(),
+      elem_vs.begin(),
+      [&](auto v) { return vertices[ vertex_mid_to_lid.at(v) ]; }
+    );
+    // create the cell
+    auto c = mesh.create_cell( elem_vs ); 
+  }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper function to create the cells
+///
 /// \remarks This is the 2D version
 ////////////////////////////////////////////////////////////////////////////////
 template<
@@ -442,6 +530,66 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_fs ); 
   }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper function to create the subspaces
+///
+/// \remarks This is the 1D version
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  typename MESH_TYPE,
+  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 1 ),
+  typename std::enable_if_t< Enabled >** = nullptr
+>
+void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+{
+  
+  using mesh_t = typename std::decay_t< MESH_TYPE >;
+
+  // Alias the index spaces type
+	using index_spaces = typename mesh_t::index_spaces_t;
+  using index_subspaces = typename mesh_t::index_subspaces_t;
+	
+	// get the type of storage
+  using vertex_t = typename mesh_t::vertex_t;
+
+  // get the context
+  auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
+	// get the colorings
+	const auto & cell_coloring = context.coloring(index_spaces::cells);
+  // get the entity maps
+  // - lid = local id - the id of the entity local to this processor
+  // - mid = mesh id - the original id of the entity ( usually from file )
+  const auto & cell_mid_to_lid =
+ 		context.reverse_index_map( index_spaces::cells );
+	
+	// storage for the unique set of vertices
+	std::vector<vertex_t*> my_verts;
+
+  // determine the unique list of ids
+	const auto & cells = mesh.cells();
+
+	auto add_ents = [&](auto && c) {
+		auto cell_lid = cell_mid_to_lid.at( c.id );
+		const auto & cell = cells[cell_lid];
+		for ( auto v : mesh.vertices(cell) ) my_verts.push_back( v );
+	};
+
+  for(auto c : cell_coloring.exclusive) add_ents(c); 
+  for(auto c : cell_coloring.shared) add_ents(c); 
+
+	// sort and remove any duplicates
+	std::sort( my_verts.begin(), my_verts.end() );
+	ristra::utils::remove_duplicates( my_verts );
+
+	// add them to the index space
+	auto & vert_subspace =
+	 	mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+	for ( auto v : my_verts )
+ 		vert_subspace.push_back( v->template global_id<0>() ); 
 }
 
 ////////////////////////////////////////////////////////////////////////////////

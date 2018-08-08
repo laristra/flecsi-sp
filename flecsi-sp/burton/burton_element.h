@@ -88,6 +88,240 @@ class burton_corner_t;
 template< std::size_t NUM_DIMS, std::size_t DIM  >
 struct burton_element_t { };
 
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with 
+//!        one-dimensional mesh cells.
+//! \remark this is a 1d cell
+////////////////////////////////////////////////////////////////////////////////
+template<>
+struct burton_element_t<1,1>
+  : public flecsi::topology::mesh_entity__<1, burton_config_t<1>::num_domains>
+{
+  //============================================================================
+  // Typedefs
+  //============================================================================
+
+  //! the mesh traits
+  using config_t = burton_config_t<1>;
+
+  //! Number of domains in the burton mesh.
+  static constexpr auto num_domains = config_t::num_domains;
+
+  //! Number of domains in the burton mesh.
+  static constexpr auto num_dimensions = config_t::num_dimensions;
+
+  //! The domain of the entity
+  static constexpr auto domain = 0;
+
+  //! Type of floating point.
+  using real_t = typename config_t::real_t;
+
+  //! Type of floating point.
+  using size_t = typename config_t::size_t;
+
+  //! Type containing coordinates of the vertex.
+  using point_t = typename config_t::point_t;
+  //! The point list type.
+  using point_list_t = std::array< point_t, 2 >;
+
+  //! Type vector type.
+  using vector_t = typename config_t::vector_t;
+
+  //! the flecsi id type
+  using id_t = typename config_t::id_t;
+
+  //! The flecsi domain connectivity type.
+  using connectivity_t = typename config_t::connectivity_t;
+
+  //! the shape type
+  using shape_t = config_t::shape_t;
+
+  //============================================================================
+  // Constructors
+  //============================================================================
+
+  //! Constructor
+  burton_element_t(shape_t shape) : shape_(shape)
+  {};
+
+  // Destructor
+  ~burton_element_t() = default;
+
+  // dissallow copying
+  burton_element_t( burton_element_t & ) = delete;
+  burton_element_t & operator=( burton_element_t & ) = delete;
+
+  // dissallow moving
+  burton_element_t( burton_element_t && ) = delete;
+  burton_element_t & operator=( burton_element_t && ) = delete;
+
+
+  //============================================================================
+  // Accessors / Modifiers
+  //============================================================================
+
+  //! the centroid ( = midpoint )
+  const auto & centroid() const 
+  { return midpoint_; };
+
+  //! the edge midpoint
+  const auto & midpoint() const
+  { return midpoint_; };
+
+  //! the area of the element
+  auto area() const
+  { return area_; };
+
+  //! the area of the element
+  auto volume() const
+  { return area_; };
+
+  //! the minimum length in the element ( = area )
+  auto min_length() const
+  { return area_; }
+
+  //! set the region id
+  auto & region()
+  { return region_; }
+
+  //! get the region id
+  auto region() const
+  { return region_; }
+
+
+  //! the element type
+  auto shape() const
+  { return shape_; };
+
+
+  //----------------------------------------------------------------------------
+  //! \brief create_entities is a function that creates entities
+  //!   of topological dimension dim, using vertices v, and puts the vertices
+  //!   in e. See, e.g., burton_quadrilateral_element_t for an implementation of
+  //!   this pure virtual function.
+  //!
+  //! \param[in] cell  The id of the entity in question.
+  //! \param[in] dim The topological dimension of the entity to create.
+  //! \param[in] conn The currently build connectivity of the mesh.
+  //! \param[out] entities Vector to fill with ids of the lower level entities 
+  //!                      that form this entity.
+  //!
+  //! \return A pair with a) the number of vertex collections making up the
+  //!   entity and b) the number of vertices per collection.
+  //----------------------------------------------------------------------------
+  std::vector<size_t>
+  create_entities(
+    const id_t & cell,
+    size_t dim,
+    const connectivity_t& conn,
+    id_t * entities 
+  ) {
+    assert( dim == 1 );
+
+    auto v = conn.get_entity_vec( cell, /* dimension */ 0 );
+    auto num_cell_verts = v.size();
+    assert( num_cell_verts == 2 );
+
+    entities[ 0 ] = v[ 0 ];
+    entities[ 1 ] = v[ 1 ];
+
+    return std::vector<size_t>(1, 2);
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief create_bound_entities binds mesh entities across domains.
+  //!   See, e.g., burton_quadrilateral_element_t for an implementation of
+  //!   this pure virtual function.
+  //!
+  //! \param[in] from_domain  The domain index of the root entity.
+  //! \param[in] to_domain  The domain index of the sub entities.
+  //! \param[in] dim The topological dimension of the entity to create.
+  //! \param[in] cell_id  The id of the entity in question.
+  //! \param[in] primal_conn The currently built connectivity of the primal mesh.
+  //! \param[in] domain_conn The currently built connectivity of the mesh for 
+  //!                        this entities domain.
+  //! \param[out] entities Vector to fill with ids of the lower level entities 
+  //!                      that form this entity.
+  //!
+  //! \return A pair with a) the number of entity collections making up the
+  //!   binding and b) the number of entities per collection.
+  //----------------------------------------------------------------------------
+  static 
+  std::vector<size_t>
+  create_bound_entities(
+    size_t from_domain, 
+    size_t to_domain, 
+    size_t dim, 
+    const id_t & cell,
+    const connectivity_t& primal_conn,
+    const connectivity_t& domain_conn,
+    id_t * entities
+  ) {
+
+    // general connecitivity that is needed in all cases
+    auto cell_verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
+    auto num_vertices = cell_verts.size();
+    assert( num_vertices == 2 );
+
+    // main counter
+    size_t i = 0;
+
+
+    switch (dim) {
+      //------------------------------------------------------------------------
+      // Corners ( = wedges in 1D )
+      // The right edge is always first
+    case 0: {
+    
+      entities[i++] = cell_verts[0];
+      entities[i++] = cell_verts[1];
+      entities[i++] = cell_verts[1];
+      entities[i++] = cell_verts[0];
+
+      return std::vector<size_t>( 2, 2 );
+
+    }
+      //------------------------------------------------------------------------
+      // Failure
+    default:
+      throw_runtime_error("Unknown bound entity type");
+    } // switch
+
+  }
+
+  //----------------------------------------------------------------------------
+  //! \brief update the mesh geometry
+  //----------------------------------------------------------------------------
+  template< typename MESH_TOPOLOGY >
+  void update( const MESH_TOPOLOGY * mesh )
+  {
+    auto vs = mesh->template entities<0, domain>(this);
+
+    const auto & a = vs[0]->coordinates();
+    const auto & b = vs[1]->coordinates();
+    midpoint_ = 0.5 * ( a + b );
+    area_ = std::abs( b[0] - a[0] );
+  }
+
+private:
+
+  //============================================================================
+  // Private Data
+  //============================================================================
+  
+  //! the region tag
+  size_t region_ = 0;
+
+  //! the geometry informtation
+  real_t area_ = 0;
+  point_t midpoint_ = 0;
+
+  // the shape parameter
+  shape_t shape_ = shape_t::none;
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief An interface for managing geometry and state associated with 
 //!        two-dimensional mesh edges.

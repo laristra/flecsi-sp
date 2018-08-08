@@ -33,6 +33,263 @@ struct burton_types_t {};
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief A collection of type information needed to specialize the flecsi
 //!   low-level mesh infrastructure for ALE methods.
+//! \remark This is the one-dimensional version.
+////////////////////////////////////////////////////////////////////////////////
+struct burton_1d_types_base
+{
+
+  //============================================================================
+  // Define local traits to satisfy mesh_topology requirements.
+  //============================================================================
+
+  //! the mesh traites
+  using config_t = burton_config_t<1>;
+
+  //! The dimension of the burton mesh picked up from burton_config_t.
+  static constexpr size_t num_dimensions = config_t::num_dimensions;
+
+  //! The number of domains in burton mesh picked up from burton_config_t.
+  static constexpr size_t num_domains = config_t::num_domains;
+
+  //! the flecsi mesh topology type
+  using mesh_topology_base_t = typename config_t::mesh_topology_base_t;
+
+  //! the base type for the entities
+  using mesh_entity_base_t = typename config_t::mesh_entity_base_t;
+
+  //! the id type
+  using id_t = flecsi::utils::id_t;
+
+  //============================================================================
+  //! \brief The burton mesh index spaces.
+  //============================================================================
+  struct index_spaces_t {
+
+    //! The individual enumeration of the index spaces
+    enum index_spaces : size_t {
+      // the main index spaces
+      vertices,
+      edges = vertices,
+      faces = edges,
+      cells,
+      corners,
+      wedges = corners,
+      // index spaces for connectivity
+      vertices_to_cells,
+      edges_to_cells = vertices_to_cells,
+      faces_to_cells = vertices_to_cells,
+      cells_to_vertices,
+      cells_to_edges = cells_to_vertices,
+      cells_to_faces = cells_to_vertices,
+      // corners
+      cells_to_corners,
+      vertices_to_corners,
+      edges_to_corners = vertices_to_corners,
+      faces_to_corners = vertices_to_corners,
+      corners_to_cells,
+      corners_to_vertices,
+      corners_to_edges = corners_to_vertices,
+      corners_to_faces = corners_to_vertices,
+      // wedges
+      cells_to_wedges = cells_to_corners,
+      vertices_to_wedges = vertices_to_corners,
+      edges_to_wedges = vertices_to_corners,
+      faces_to_wedges = vertices_to_corners,
+      wedges_to_cells = corners_to_cells, 
+      wedges_to_vertices = corners_to_vertices, 
+      wedges_to_edges = corners_to_vertices,
+      wedges_to_faces = corners_to_vertices,
+      // index spaces that are not used
+      vertices_to_edges = 7777,
+      vertices_to_faces = 7777,
+      edges_to_vertices = 7777,
+      edges_to_faces = 7777,
+      faces_to_vertices = 7777,
+      faces_to_edges = 7777,
+      wedges_to_corners = 7777,
+      corners_to_wedges = 7777
+    };
+
+    //! Maps an entity dimension to an index space id
+    static constexpr size_t entity_map[2][2] = {
+      // domain
+      vertices,
+      cells,
+      // domain
+      corners,
+      7777
+    };
+
+
+    //! Maps dimension-to-dimension connectivity to an index space id
+    static constexpr size_t connectivity_map[2][2] = {
+      // row
+      7777,
+      vertices_to_cells,
+      // row
+      cells_to_vertices,
+      7777
+    };
+
+
+  };
+ 
+ 
+  //============================================================================
+  //! \brief The burton mesh index sub spaces.
+	//! These are used to define special sets, like all vertices used by owned
+	//! cells.
+  //============================================================================
+  struct index_subspaces_t {
+
+    //! The individual enumeration of the index spaces
+    enum index_subspaces : size_t {
+      overlapping_vertices, // all vertices used by owned cells
+      overlapping_edges = overlapping_vertices,
+      overlapping_faces = overlapping_vertices
+		};
+
+	};
+
+
+  //============================================================================
+  // Define basic types.
+  //============================================================================
+
+  //! Type for burton mesh vertices.
+  using vertex_t = burton_vertex_t<num_dimensions>;
+
+  //! Type for burton mesh edges (in 1d, same as vertices).
+  using edge_t = vertex_t;
+
+  //! Type for burton mesh faces (in 1d, same as vertices).
+  using face_t = vertex_t;
+
+  //! Type for burton mesh cells.
+  using cell_t = burton_cell_t<num_dimensions>;
+
+  //! Type for burton mesh corners.
+  using corner_t = burton_corner_t<num_dimensions>;
+
+  //! Type for burton mesh wedges.
+  using wedge_t = burton_wedge_t<num_dimensions>;
+
+  //============================================================================
+	//! setup the index subspaces
+  //============================================================================
+  using index_subspaces = std::tuple<
+    std::tuple<
+			flecsi::topology::index_space_<index_spaces_t::vertices>,
+      flecsi::topology::index_subspace_<index_subspaces_t::overlapping_vertices>
+		>
+  >;
+
+  //============================================================================
+  //! \brief depending upon the dimension/number of verices, create different 
+  //!   types of entities
+  //!
+  //! \remark create_entity is called from build_connectivity with an id, and
+  //!   this is used for the primal mesh only.  build_bindings calls
+  //!   calls create_entity without an id, and this is used for the dual mesh.
+  //!
+  //! \tparam M The domain index.
+  //! \tparam D The dimensional index.
+  //============================================================================
+  template<size_t M, size_t D, typename MESH_TOPOLOGY>
+  static constexpr 
+  mesh_entity_base_t *
+  create_entity(MESH_TOPOLOGY* mesh, size_t num_vertices, const id_t & id)
+  {
+    switch(M){
+      //---------- Primal Mesh ----------//
+    case 0:
+      switch(D) {
+      default:
+        throw_logic_error("invalid topological dimension");
+      }
+      //---------- Dual Mesh ----------//
+    case 1:
+      switch(D) {
+      case 0:
+        return mesh->template make<corner_t, corner_t::domain>(id);
+      default:
+        throw_logic_error("invalid topological dimension");
+      }
+      //---------- Error ----------//
+    default:
+      throw_logic_error("invalid domain");
+    }
+    // should never get here
+    return nullptr;
+  }
+  
+};
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief A collection of type information needed to specialize the flecsi
+//!   low-level mesh infrastructure for ALE methods.
+//! \remark This is the one-dimensional version.
+////////////////////////////////////////////////////////////////////////////////
+template<>
+struct burton_types_t<1, false> : public burton_1d_types_base
+{
+
+  //! Definitions of burton mesh entities and their domain.
+  flecsi_register_entity_types(
+    flecsi_entity_type( index_spaces_t::vertices, 0, vertex_t ),
+    flecsi_entity_type( index_spaces_t::cells,    0,   cell_t )
+  );
+
+
+  //! Connectivities are adjacencies of entities within a single domain.
+  flecsi_register_connectivities(
+    flecsi_connectivity( index_spaces_t::vertices_to_cells, 0, vertex_t,   cell_t ),
+    flecsi_connectivity( index_spaces_t::cells_to_vertices, 0,   cell_t, vertex_t )
+  );
+
+  //! Bindings are adjacencies of entities across two domains.
+  flecsi_register_bindings();
+
+};
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief A collection of type information needed to specialize the flecsi
+//!   low-level mesh infrastructure for ALE methods.
+//! \remark This is the one-dimensional version.
+////////////////////////////////////////////////////////////////////////////////
+template<>
+struct burton_types_t<1, true> : public burton_1d_types_base
+{
+
+  //! Definitions of burton mesh entities and their domain.
+  flecsi_register_entity_types(
+    flecsi_entity_type( index_spaces_t::vertices, 0, vertex_t ),
+    flecsi_entity_type( index_spaces_t::cells,    0,   cell_t ),
+    flecsi_entity_type( index_spaces_t::corners,  1, corner_t )
+  );
+
+
+  //! Connectivities are adjacencies of entities within a single domain.
+  flecsi_register_connectivities(
+    flecsi_connectivity( index_spaces_t::vertices_to_cells, 0, vertex_t,   cell_t ),
+    flecsi_connectivity( index_spaces_t::cells_to_vertices, 0,   cell_t, vertex_t )
+  );
+
+  //! Bindings are adjacencies of entities across two domains.
+  flecsi_register_bindings(
+    // corners
+    flecsi_binding( index_spaces_t::cells_to_corners,    0, 1,   cell_t, corner_t ),
+    flecsi_binding( index_spaces_t::vertices_to_corners, 0, 1, vertex_t, corner_t ),
+    flecsi_binding( index_spaces_t::corners_to_cells,    1, 0, corner_t,   cell_t ),
+    flecsi_binding( index_spaces_t::corners_to_vertices, 1, 0, corner_t, vertex_t )
+  );
+
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief A collection of type information needed to specialize the flecsi
+//!   low-level mesh infrastructure for ALE methods.
 //! \remark This is the two-dimensional version.
 ////////////////////////////////////////////////////////////////////////////////
 struct burton_2d_types_base
