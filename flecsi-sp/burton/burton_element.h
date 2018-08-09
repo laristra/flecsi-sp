@@ -271,16 +271,12 @@ struct burton_element_t<1,1>
     switch (dim) {
       //------------------------------------------------------------------------
       // Corners ( = wedges in 1D )
-      // The right edge is always first
     case 0: {
     
       entities[i++] = cell_verts[0];
       entities[i++] = cell_verts[1];
-      entities[i++] = cell_verts[1];
-      entities[i++] = cell_verts[0];
 
-      return std::vector<size_t>( 2, 2 );
-
+      return std::vector<size_t>( 2, 1 );
     }
       //------------------------------------------------------------------------
       // Failure

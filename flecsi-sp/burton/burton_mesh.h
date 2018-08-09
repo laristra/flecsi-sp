@@ -1122,7 +1122,6 @@ public:
       auto fs = faces(cn);
       auto es = edges(cn);
       auto vs = vertices(cn);
-      auto ws = wedges(cn);
 
       if ( cs.size() != 1 ) {
         ss << "Corner " << cn.id() << " has " << cs.size() << "/=1 cells" 
@@ -1144,9 +1143,13 @@ public:
            << std::endl;
       }
 
+      if ( num_dimensions == 1 ) continue;
+
       auto cl = cs.front();
       auto vt = vs.front();
       
+      auto ws = wedges(cn);
+
       if ( ws.size() % 2 != 0 ) {
         if ( vs.size() != 1 ) {
           ss << "Corner " << cn.id() << " has " << ws.size() << "%2/=0 wedges"
@@ -1195,6 +1198,8 @@ public:
           ss << "Wedge " << wg.id() << " has incorrect corner " 
              << corn.id() << "!=" << cn.id() << std::endl;
         }
+        // CRF TODO:  fix normals in 1D
+        if ( num_dimensions > 1 ) {
         auto fc = fs.front();            
         auto fx = fc->midpoint();
         auto cx = cl->midpoint();
@@ -1206,6 +1211,7 @@ public:
           ss << "Wedge " << wg.id() << " has opposite normal dot=" << dot
              << std::endl;
         }
+        } // if num_dimensions > 1
       } // wedges
       
     } // corners
@@ -1228,11 +1234,9 @@ public:
     auto cs = cells();
     auto fs = faces();
     auto es = edges();  
-    auto cnrs = corners();
     auto num_cells = cs.size();
     auto num_faces = fs.size();
     auto num_edges = es.size();
-    auto num_corners = cnrs.size();
 
     #pragma omp parallel
     {
@@ -1265,22 +1269,36 @@ public:
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
-      #pragma omp for
-      for ( counter_t i=0; i<num_corners; ++i ) {
-        auto cn = cnrs[i];
-        auto ws = wedges(cn);
-        // first compute the normals
-        for ( auto wit = ws.begin(); wit != ws.end(); ++wit ) 
-        {
-          // get the first wedge normal
-          (*wit)->update( this, true );
-          // move to next wedge
-          ++wit;
-          assert( wit != ws.end() );
-          // get the second wedge normal
-          (*wit)->update( this, false );
+      if ( num_dimensions == 1 ) {
+        // loop through wedges directly
+        auto ws = wedges();
+        auto num_wedges = ws.size();
+        #pragma omp for
+        for ( counter_t i=0; i<num_wedges; ++i ) {
+          ws[i]->update( this, true );
         }
-      }
+      }  // num_dimensions == 1
+      else {
+        // loop through corners, then wedges per corner
+        auto cnrs = corners();
+        auto num_corners = cnrs.size();
+        #pragma omp for
+        for ( counter_t i=0; i<num_corners; ++i ) {
+          auto cn = cnrs[i];
+          auto ws = wedges(cn);
+          // first compute the normals
+          for ( auto wit = ws.begin(); wit != ws.end(); ++wit )
+          {
+            // get the first wedge normal
+            (*wit)->update( this, true );
+            // move to next wedge
+            ++wit;
+            assert( wit != ws.end() );
+            // get the second wedge normal
+            (*wit)->update( this, false );
+          }
+        }
+      }  // else num_dimensions
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 

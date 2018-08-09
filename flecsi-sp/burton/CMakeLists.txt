@@ -25,11 +25,11 @@ set(burton_SOURCES
 
 # install common files
 install(FILES burton_specialization_init.cc DESTINATION ${FLECSI_SP_SHARE_DIR})
-    
+
 cinch_add_unit(flecsi_sp_burton_1d
   ARGUMENTS
   -m not_used
-  SOURCES 
+  SOURCES
     test/burton.cc
     burton_specialization_init.cc
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
@@ -50,6 +50,33 @@ cinch_add_unit(flecsi_sp_burton_1d
   THREADS 2
   LIBRARIES FleCSI-SP
 )
+
+cinch_add_unit(flecsi_sp_burton_extras_1d
+  ARGUMENTS
+  -m not_used
+  SOURCES
+    test/burton.cc
+    burton_specialization_init.cc
+    ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+    ${FLECSI_SP_RUNTIME_DRIVER}
+  INPUTS
+   test/burton_extras_1d_dump_rank0.out.std
+   test/burton_extras_1d_dump_rank1.out.std
+   test/burton_extras_1d_connectivity_rank0.out.std
+   test/burton_extras_1d_connectivity_rank1.out.std
+   test/burton_extras_1d_geometry_rank0.out.std
+   test/burton_extras_1d_geometry_rank1.out.std
+  DEFINES
+    -DFLECSI_SP_BURTON_MESH_DIMENSION=1
+    -DFLECSI_SP_BURTON_MESH_EXTRAS
+    -DFLECSI_ENABLE_SPECIALIZATION_TLT_INIT
+    -DFLECSI_ENABLE_SPECIALIZATION_SPMD_INIT
+    -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
+  POLICY ${FLECSI_SP_UNIT_POLICY}
+  THREADS 2
+  LIBRARIES FleCSI-SP
+)
+
 
 cinch_add_unit(flecsi_sp_burton_2d
   ARGUMENTS

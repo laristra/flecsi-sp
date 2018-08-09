@@ -171,8 +171,8 @@ struct burton_1d_types_base
   //! Type for burton mesh corners.
   using corner_t = burton_corner_t<num_dimensions>;
 
-  //! Type for burton mesh wedges.
-  using wedge_t = burton_wedge_t<num_dimensions>;
+  //! Type for burton mesh wedges (in 1d, same as corners).
+  using wedge_t = corner_t;
 
   //============================================================================
 	//! setup the index subspaces
