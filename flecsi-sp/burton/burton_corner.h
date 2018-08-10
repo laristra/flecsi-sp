@@ -12,6 +12,7 @@
 // user includes
 #include <flecsi-sp/burton/burton_vertex.h>
 #include <flecsi-sp/burton/burton_element.h>
+#include <ristra/math/general.h>
 
 
 namespace flecsi_sp {
@@ -110,6 +111,21 @@ public:
   //! Physics vector type.
   using vector_t = typename config_t::vector_t;
 
+  //! Coordinate point type.
+  using point_t = typename config_t::point_t;
+
+  //! the base vertex type
+  using vertex_t = burton_vertex_t<num_dimensions>;
+
+  //! the base edge type
+  using edge_t = vertex_t;
+
+  //! the base edge type
+  using face_t = vertex_t;
+
+  //! the base cell type
+  using cell_t = burton_cell_t<num_dimensions>;
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -130,14 +146,30 @@ public:
   //============================================================================
 
   //! \brief update the wedge geometry (in 1D, a no-op)
-  //! \param [in] is_right  This wedge is the right orientation when true.
+  //! \param [in] is_right  Unused in 1D.
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh, bool is_right ) {}
+  void update( const MESH_TOPOLOGY * mesh, bool is_right );
 
   //! \brief Get the cell facet normal for the wedge.
   //! \return Cell facet normal vector.
   const auto & facet_normal() const
   { return facet_normal_; }
+
+  //! \brief the facet area
+  auto facet_area() const
+  { return 1.; }
+
+  //! \brief Get the cell facet centroid
+  const auto & facet_centroid() const
+  { return facet_centroid_; }
+
+  //! \brief Get the cell facet midpoint
+  const auto & facet_midpoint() const
+  { return facet_centroid_; }
+
+  //! return the bitfield flags
+  const auto & flags() const { return flags_; }
+  auto & flags() { return flags_; }
 
   //! \brief Is this wedge on the boundary.
   //! \return true if on boundary.
@@ -155,12 +187,32 @@ public:
 
 private:
 
+  //! "centroid" of the outer facet
+  point_t facet_centroid_ = 0;
   //! the "normal" of the outer facet
-  const vector_t facet_normal_{1.};
+  vector_t facet_normal_ = 0;
   //! the entity flags
   bitfield_t flags_;
 
 };
+
+////////////////////////////////////////////////////////////////////////////////
+// facet normal for 1d wedge
+////////////////////////////////////////////////////////////////////////////////
+template< typename MESH_TOPOLOGY >
+void burton_corner_t<1>::update( const MESH_TOPOLOGY * mesh, bool is_right )
+{
+  // TODO:  This code recomputes the orientation on every update -
+  //        can we do it just once at initialization?
+  using ristra::math::sgn;
+  auto vs = mesh->template entities<vertex_t::dimension, domain, vertex_t::domain>(this);
+  auto cs = mesh->template entities<cell_t::dimension, domain, cell_t::domain>(this);
+  assert( vs.size() == 1 );
+  const auto & v = vs.front()->coordinates();
+  const auto & c = cs.front()->midpoint();
+  facet_normal_ = { sgn(v[0] - c[0]) };
+  facet_centroid_ = v;
+}
 
 
 } // namespace burton

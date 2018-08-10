@@ -12,6 +12,7 @@
 // user includes
 #include <flecsi/topology/mesh_types.h>
 #include <flecsi-sp/burton/burton_config.h>
+#include <ristra/math/general.h>
 #include <ristra/geometry/shapes/geometric_shapes.h>
 #include <ristra/assertions/errors.h>
 
@@ -267,9 +268,18 @@ public:
     return normal_;
   }
 
-  //! "update" (in 1D, a no-op)
+  //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh ) {}
+  void update( const MESH_TOPOLOGY * mesh )
+  {
+    // TODO:  This code recomputes the orientation on every update -
+    //        can we do it just once at initialization?
+    using ristra::math::sgn;
+    auto cs = mesh->template entities<1, domain>(this);
+    const auto & v = this->coordinates();
+    const auto & c = cs[0]->midpoint();
+    normal_ = { sgn(v[0] - c[0]) };
+  }
 
   //============================================================================
   // Private Data
@@ -287,7 +297,7 @@ private:
   bitfield_t flags_;
 
   //! the "normal" vector
-  const vector_t normal_{1.};
+  vector_t normal_ = 0;
 
 }; // class burton_vertex_t
 

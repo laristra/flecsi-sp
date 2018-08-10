@@ -1077,9 +1077,6 @@ public:
     // auto & face_map = context.index_map( index_spaces_t::faces );
     // auto & cell_map = context.index_map( index_spaces_t::cells );
 
-    // CRF TODO:  fix normals in 1D
-    if ( num_dimensions > 1 ) {
-
     for( auto f : faces( subset_t::overlapping ) ) {
       auto n = f->normal();
       auto fx = f->midpoint();
@@ -1102,8 +1099,6 @@ public:
         ss << "Face " << f.id() << " has opposite normal" << std::endl;
       }
     } 
-
-    } // if num_dimensions > 1
 
     if ( ss.tellp() != 0 ) return raise_or_return( ss );
 
@@ -1198,8 +1193,6 @@ public:
           ss << "Wedge " << wg.id() << " has incorrect corner " 
              << corn.id() << "!=" << cn.id() << std::endl;
         }
-        // CRF TODO:  fix normals in 1D
-        if ( num_dimensions > 1 ) {
         auto fc = fs.front();            
         auto fx = fc->midpoint();
         auto cx = cl->midpoint();
@@ -1211,7 +1204,6 @@ public:
           ss << "Wedge " << wg.id() << " has opposite normal dot=" << dot
              << std::endl;
         }
-        } // if num_dimensions > 1
       } // wedges
       
     } // corners
@@ -1242,6 +1234,15 @@ public:
     {
 
       //--------------------------------------------------------------------------
+      // compute cell parameters (in 1D, this must come first)
+
+      if ( num_dimensions == 1 ) {
+        #pragma omp for
+        for ( counter_t i=0; i<num_cells; i++ )
+          cs[i]->update( this );
+      }
+
+      //--------------------------------------------------------------------------
       // compute edge parameters
 
       #pragma omp for nowait
@@ -1258,11 +1259,14 @@ public:
       }
 
       //--------------------------------------------------------------------------
-      // compute cell parameters
+      // compute cell parameters (in 2D and 3D, this must follow
+      // edges and faces)
 
-      #pragma omp for
-      for ( counter_t i=0; i<num_cells; i++ ) 
-        cs[i]->update( this );
+      if ( num_dimensions > 1 ) {
+        #pragma omp for
+        for ( counter_t i=0; i<num_cells; i++ )
+          cs[i]->update( this );
+      }
 
       //--------------------------------------------------------------------------
       // compute wedge parameters

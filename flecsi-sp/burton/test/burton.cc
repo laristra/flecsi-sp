@@ -450,10 +450,7 @@ void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
     auto cx = c->midpoint();
     auto delta = fx - cx;
     auto dot = dot_product( n, delta );
-    // CRF TODO:  Fix normals in 1D
-#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     EXPECT_GT( dot, 0 );
-#endif
   } // for
 
 } // TEST_F
