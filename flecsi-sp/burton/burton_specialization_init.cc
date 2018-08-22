@@ -18,10 +18,13 @@ namespace execution {
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
 ///////////////////////////////////////////////////////////////////////////////
-void specialization_tlt_init(int argc, char** argv) 
+void specialization_tlt_init(int argc, char** argv)
 {
+#ifdef BURTON_ENABLE_APPLICATION_TLT_INIT
+  application_tlt_init(argc, argv);
+#endif // BURTON_ENABLE_APPLICATION_TLT_INIT
   clog(info) << "In specialization top-level-task init" << std::endl;
-  
+
   // get the color
   auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
@@ -29,33 +32,33 @@ void specialization_tlt_init(int argc, char** argv)
   //===========================================================================
   // Parse arguments
   //===========================================================================
-  
+
   auto args = flecsi_sp::burton::process_arguments( argc, argv );
-  
+
   // process the simple ones
   if ( args.count("h") )
     return;
- 
+
   // get the input file
-  auto mesh_filename_string = 
+  auto mesh_filename_string =
     args.count("m") ? args.at("m") : std::string();
 
   // override any inputs if need be
   if ( !mesh_filename_string.empty() ) {
     if ( rank == 0 )
-      std::cout << "Using mesh file \"" << mesh_filename_string << "\"." 
+      std::cout << "Using mesh file \"" << mesh_filename_string << "\"."
                 << std::endl;
   }
   else {
     throw_runtime_error( "No mesh file provided" );
   }
-  
+
   //===========================================================================
   // Partition mesh
   //===========================================================================
-  
+
   clog(info) << "Partitioning mesh" << std::endl;
-  
+
   // need to put the filename into a statically sized character array
   auto mesh_filename = flecsi_sp::utils::to_char_array( mesh_filename_string );
 
@@ -66,24 +69,24 @@ void specialization_tlt_init(int argc, char** argv)
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
 ///////////////////////////////////////////////////////////////////////////////
-void specialization_spmd_init(int argc, char** argv) 
+void specialization_spmd_init(int argc, char** argv)
 {
   clog(info) << "In specialization spimd init" << std::endl;
-  
+
   //===========================================================================
   // Parse arguments
   //===========================================================================
-  
+
   auto args = flecsi_sp::burton::process_arguments( argc, argv );
   // Assume arguments are sanitized
-  
+
   // get the input file
-  auto mesh_filename_string = 
+  auto mesh_filename_string =
     args.count("m") ? args.at("m") : std::string();
-  
+
   // need to put the filename into a statically sized character array
   auto mesh_filename = flecsi_sp::utils::to_char_array( mesh_filename_string );
-  
+
   //===========================================================================
   // Load the mesh
   //===========================================================================
