@@ -61,11 +61,17 @@ build_connectivity(
 
   // resize the new connectivity
   cell_to_edge.reserve(cell_to_edge.size() + cell_to_vertex.size());
+  auto cellid = cell_to_edge.size();
 
+  // invert the face id to vertices map (the one with sorted vertices)
+  size_t edgeid = 0; // starts from zero because cumulative list of edges
   std::map<std::vector<size_t>, size_t> edges;
+  for ( const auto & vs : sorted_edge_to_vertex )
+      edges[vs] = edgeid++;
+  
   // starting id is not always zero, assume we are building in blocks
   // of assending edge ids
-  size_t edgeid = edge_to_vertex.size();
+  edgeid = edge_to_vertex.size();
 
   // loop over cells, adding all of their edges to the table
   for (const auto & these_verts : cell_to_vertex) {
@@ -85,15 +91,27 @@ build_connectivity(
       // sort the vertices
       auto sorted_vs = vs;
       std::sort(sorted_vs.begin(), sorted_vs.end());
+      // if we dont find the edge
       if (edges.find(sorted_vs) == edges.end()) {
-        edges.insert({std::move(sorted_vs), edgeid});
-        these_edges.push_back(edgeid++);
+        // add to the local reverse map  
+        edges.insert({sorted_vs, edgeid});
+        // add to the original sorted and unsorted maps
+        sorted_edge_to_vertex.emplace_back( std::move(sorted_vs) );
         edge_to_vertex.emplace_back(std::move(vs));
-      } else {
+        // add to the list of edges
+        these_edges.push_back(edgeid);
+        // bump counter
+        edgeid++;
+      }
+      // if we do find the edge
+      else {
+        // just add the id to the list of edges  
         these_edges.push_back(edges[sorted_vs]);
       }
     }
 
+    cellid++;
+    
   } // for
 }
 
