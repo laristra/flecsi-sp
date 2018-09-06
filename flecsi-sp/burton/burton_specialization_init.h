@@ -1396,8 +1396,8 @@ void partition_mesh( utils::char_array_t filename )
   // Get the context instance.
   auto & context = flecsi::execution::context_t::instance();
 
-  //actual number of index spaces added to the context
-  size_t num_index_spaces = 0;
+  // keep track of index spaces added
+  std::vector<size_t> registered_index_spaces;
 
   // Gather the coloring info from all colors
   for ( int dom=0; dom<num_domains; ++dom ) {
@@ -1411,12 +1411,14 @@ void partition_mesh( utils::char_array_t filename )
         continue;
       auto coloring_info =
         communicator->gather_coloring_info(entity_color_info.at(dom).at(dim));
+      auto index_space_id = index_spaces::entity_map[dom][dim];
       context.add_coloring(
-        index_spaces::entity_map[dom][dim],
+        index_space_id,
         entities.at(dom).at(dim),
         coloring_info
       );
-      num_index_spaces ++;
+      // add index space to list
+      registered_index_spaces.push_back( index_space_id );
     }
   }
 
@@ -1786,7 +1788,7 @@ void partition_mesh( utils::char_array_t filename )
   // Allow sparse index spaces for any of the main index spaces
   //----------------------------------------------------------------------------
 
-  for ( int i=0; i< num_index_spaces; ++i ) {
+  for ( auto i : registered_index_spaces ) {
     flecsi::execution::context_t::sparse_index_space_info_t isi;
     isi.max_entries_per_index = 5;
     // figure out the maximum number of entities
@@ -1798,7 +1800,7 @@ void partition_mesh( utils::char_array_t filename )
 
     // worst case scenario (not sure what we get by allocating all this)
     isi.exclusive_reserve = communicator->get_max_request_size(
-	isi.max_entries_per_index*num_ents);
+	    isi.max_entries_per_index*num_ents);
     isi.index_space = i;
     context.set_sparse_index_space_info(isi);
   }
