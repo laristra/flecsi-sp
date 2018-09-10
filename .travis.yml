@@ -7,11 +7,10 @@ services:
 
 env:
   matrix:
-    - DISTRO=fedora_mpich_mpi BUILD_TYPE=Release RUNTIME=legion DOCKERHUB=true
-    - DISTRO=ubuntu_mpi BUILD_TYPE=Debug RUNTIME=legion DOCKERHUB=true
-    - DISTRO=fedora_mpich_mpi BUILD_TYPE=Release RUNTIME=mpi DOCKERHUB=false
-    - DISTRO=ubuntu_mpi BUILD_TYPE=Debug RUNTIME=mpi DOCKERHUB=false
-
+    - DISTRO=ubuntu_mpich_mpi RUNTIME=mpi BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=fedora_mpich_mpi RUNTIME=mpi BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=ubuntu_mpich_legion RUNTIME=legion BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=fedora_mpich_legion RUNTIME=legion BUILD_TYPE=Release DOCKERHUB=true
 script:
   - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
   - if [[ ${TRAVIS_BRANCH} != stable ]]; then TAG="${TAG}_master"; fi
