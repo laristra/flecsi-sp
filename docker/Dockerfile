@@ -29,7 +29,7 @@ RUN mkdir build
 WORKDIR build
 
 RUN cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-          -DFLECSI_RUNTIME_MODEL=${RUNTIME} \
+          -DFLECSI_SP_RUNTIME_MODEL=${RUNTIME} \
           -DENABLE_UNIT_TESTS=ON \
           ..
 RUN make -j2 || make VERBOSE=1
