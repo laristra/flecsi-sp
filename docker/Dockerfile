@@ -33,7 +33,7 @@ RUN cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
           -DENABLE_UNIT_TESTS=ON \
           ..
 RUN make -j2 || make VERBOSE=1
-RUN ctest --output-on-failure
+RUN ctest --output-on-failure --verbose
 RUN make install DESTDIR=${PWD}
 
 WORKDIR /home/flecsi
