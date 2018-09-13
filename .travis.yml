@@ -7,9 +7,10 @@ services:
 
 env:
   matrix:
-    - DISTRO=fedora_mpich_mpi BUILD_TYPE=Release DOCKERHUB=true
-    - DISTRO=ubuntu_mpi BUILD_TYPE=Debug DOCKERHUB=true
-
+    - DISTRO=ubuntu_mpich_mpi RUNTIME=mpi BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=fedora_mpich_mpi RUNTIME=mpi BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=ubuntu_mpich_legion RUNTIME=legion BUILD_TYPE=Release DOCKERHUB=true
+    - DISTRO=fedora_mpich_legion RUNTIME=legion BUILD_TYPE=Release DOCKERHUB=true
 script:
   - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
   - if [[ ${TRAVIS_BRANCH} != stable ]]; then TAG="${TAG}_master"; fi
@@ -17,9 +18,10 @@ script:
   - sed -i "1s/fedora_serial/${DISTRO}${TAG}/" ${HOME}/docker/Dockerfile
   - cd ../../
   - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker
-  - docker build --build-arg BUILD_TYPE=${BUILD_TYPE} 
-                --build-arg CC=${CC} --build-arg CXX=${CXX}
-                --build-arg CI=${CI} --build-arg TRAVIS=${TRAVIS} --build-arg TRAVIS_OS_NAME=${DISTRO}
+  - docker build --build-arg BUILD_TYPE=${BUILD_TYPE}
+                 --build-arg RUNTIME=${RUNTIME}
+                 --build-arg CC=${CC} --build-arg CXX=${CXX}
+                 --build-arg CI=${CI} --build-arg TRAVIS=${TRAVIS} --build-arg TRAVIS_OS_NAME=${DISTRO}
                 --build-arg TRAVIS_BRANCH=${TRAVIS_BRANCH} --build-arg TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
                 --build-arg TRAVIS_PULL_REQUEST=${TRAVIS_PULL_REQUEST} --build-arg TRAVIS_JOB_ID=${TRAVIS_JOB_ID}
                 --build-arg TRAVIS_TAG=${TRAVIS_TAG} --build-arg TRAVIS_REPO_SLUG=${TRAVIS_REPO_SLUG}
