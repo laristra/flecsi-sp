@@ -187,7 +187,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     file << "    ----Wedges:" << endl;
     for(auto w: mesh.wedges(v))
-			file << "    ++++ wedge id: " << w.id() << endl;
+      file << "    ++++ wedge id: " << w.id() << endl;
 #endif
 #endif
 
@@ -220,7 +220,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 
     file << "    ----Wedges:" << endl;
     for(auto w: mesh.wedges(e))
-			file << "    ++++ wedge id: " << w.id() << endl;
+      file << "    ++++ wedge id: " << w.id() << endl;
 #endif
 
   } // for
@@ -253,7 +253,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 
     file << "    ----Wedges:" << endl;
     for(auto w: mesh.wedges(f))
-			file << "    ++++ wedge id: " << w.id() << endl;
+      file << "    ++++ wedge id: " << w.id() << endl;
 #endif
 
   } // for
@@ -284,7 +284,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 
     file << "    ----Wedges:" << endl;
     for(auto w: mesh.wedges(c))
-			file << "    ++++ wedge id: " << w.id() << endl;
+      file << "    ++++ wedge id: " << w.id() << endl;
 #endif
 
   } // for
