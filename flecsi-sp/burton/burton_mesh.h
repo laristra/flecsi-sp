@@ -208,6 +208,47 @@ public:
     return base_t::template subentities<index_subspaces_t::overlapping_vertices>();
   }
 
+  //! \brief Return connected \e EOUT entities for \e EIN entity \e e in domain \e M.
+  //!
+  //! \tparam M Domain.
+  //! \tparam EIN Entity type to get EOUTs for.
+  //! \tparam EOUT Entity type to return.
+  //!
+  //! \param[in] e Entity to get EOUTs for.
+  //!
+  //! \return Corners for entity \e e in domain \e M.
+  template<
+    size_t M,
+    class EIN,
+    class EOUT,
+    bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
+    typename std::enable_if_t< Enabled >* = nullptr
+  >
+  decltype(auto) query_entities(const flecsi::topology::domain_entity__<M, EIN> & e) const
+  {
+    // normal case:  EIN and EOUT are different, query topology
+    return
+      base_t::template entities<EOUT::dimension, M, EOUT::domain>(
+        e.entity()
+      );
+  }
+
+  template<
+    size_t M,
+    class EIN,
+    class EOUT,
+    bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
+    typename std::enable_if_t< Enabled >** = nullptr
+  >
+  decltype(auto) query_entities(const flecsi::topology::domain_entity__<M, EIN> & e) const
+  {
+    // degenerate case:  EIN and EOUT are the same, return trivial set
+    using etype = flecsi::topology::domain_entity__<M, EIN>;
+    // TODO:  use index_space instead of array?
+    // TODO:  figure out how to get rid of the const_cast
+    return std::array<etype, 1>{const_cast<etype &>(e)};
+  }
+
   //! \brief Return vertices associated with entity instance of type \e E.
   //!
   //! \tparam E entity type of instance to return vertices for.
@@ -233,10 +274,7 @@ public:
   template <size_t M, class E>
   decltype(auto) vertices(const flecsi::topology::domain_entity__<M, E> & e) const
   {
-    return 
-      base_t::template entities<vertex_t::dimension, M, vertex_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, vertex_t>(e);
   }
 
 
@@ -368,9 +406,7 @@ public:
   template <size_t M, class E>
   decltype(auto) edges(const flecsi::topology::domain_entity__<M, E> & e) const
   {
-    return base_t::template entities<edge_t::dimension, M, edge_t::domain>(
-      e.entity()
-    );
+    return query_entities<M, E, edge_t>(e);
   }
 
   //! \brief Return ids for all edges in the burton mesh.
@@ -487,10 +523,7 @@ public:
   template <size_t M, class E>
   decltype(auto) faces(const flecsi::topology::domain_entity__<M, E> & e) const
   {
-    return 
-      base_t::template entities<face_t::dimension, M, face_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, face_t>(e);
   }
 
   //! \brief Return ids for all faces in the burton mesh.
@@ -580,10 +613,7 @@ public:
   template <size_t M, class E>
   decltype(auto) cells(const flecsi::topology::domain_entity__<M, E> & e) const
   {
-    return 
-      base_t::template entities<cell_t::dimension, M, cell_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, cell_t>(e);
   }
 
   //! \brief Return ids for all cells in the burton mesh.
@@ -680,10 +710,7 @@ public:
   template<size_t M, class E>
   decltype(auto) wedges(const flecsi::topology::domain_entity__<M, E> & e) const
   {
-    return 
-      base_t::template entities<wedge_t::dimension, M, wedge_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, wedge_t>(e);
   }
 
   //! \brief Return ids for all wedges in the burton mesh.
@@ -772,10 +799,7 @@ public:
   template<size_t M, class E>
   decltype(auto) corners(const flecsi::topology::domain_entity__<M, E> & e) const
   {
-    return 
-      base_t::template entities<corner_t::dimension, M, corner_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, corner_t>(e);
   }
 
   //! \brief Return ids for all corners in the burton mesh.
@@ -1016,8 +1040,8 @@ public:
       f->set_boundary( (cells(f).size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
+        // point flags are only for 2d and 3d
         if ( num_dimensions >= 2 ) {
-          // point flags are only for 2d and 3d
           auto ps = vertices(f);
           for ( auto p : ps )
             p->set_boundary( true );
@@ -1327,10 +1351,12 @@ public:
         // tag the face
         f->tag( key );
         bnd_faces.emplace_back( f );
-        // tag the vertices
+        // tag the vertices in 2d or 3d
+        if ( num_dimensions >= 2 ) {
         auto vs = vertices( f );
         bnd_verts.reserve( bnd_verts.size() + vs.size() );
         for ( auto v : vs ) bnd_verts.emplace_back( v );
+        }
         // tag edges in 3d
         if ( num_dimensions == 3 ) {
           auto es = edges( f );
