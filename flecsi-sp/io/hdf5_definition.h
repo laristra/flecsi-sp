@@ -12,7 +12,7 @@
 #include <flecsi/utils/logging.h>
 
 // thirdparty includes
-#include <exodusII.h>
+#include <hdf5II.h>
 
 // system includes
 #include <algorithm>
@@ -154,7 +154,7 @@ intersect(
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
-/// io_base_t provides registrations of the exodus file extensions.
+/// io_base_t provides registrations of the hdf5 file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<int D, typename T>
 class hdf5_base__ {
@@ -218,7 +218,7 @@ public:
   //! \return true if hdf5 is using 64 bit integers
   //============================================================================
   static auto is_int64(int hdf5_id) {
-    return (ex_int64_status(exo_id) & EX_IDS_INT64_API);
+    return (hdf5_int64_status(hdf5_id) & EX_IDS_INT64_API);
   }
 #endif
 
@@ -296,7 +296,7 @@ public:
     // read nodes
     vector<real_t> vertex_coord(num_dims * num_nodes);
 
-    // exodus is kind enough to fetch the data in the real type we ask for
+    // hdf5 is kind enough to fetch the data in the real type we ask for
     auto status = hdf5_get_coord(
         hdf5_id, vertex_coord.data(), vertex_coord.data() + num_nodes,
         vertex_coord.data() + 2 * num_nodes);
@@ -322,7 +322,7 @@ public:
 
     auto num_nodes = vertex_coord.size() / num_dims;
 
-    // exodus is kind enough to fetch the data in the real type we ask for
+    // hdf5 is kind enough to fetch the data in the real type we ask for
     auto status = hdf5_put_coord(
         hdf5_id, vertex_coord.data(), vertex_coord.data() + num_nodes,
         vertex_coord.data() + 2 * num_nodes);
@@ -354,7 +354,7 @@ public:
     // set the node set parameters
     hdf5_index_t num_dist_in_set = 0;
     hdf5_index_t num_nodes_this_set = vertex_list.size();
-    auto status = ex_put_node_set_param(
+    auto status = hdf5_put_node_set_param(
         hdf5_id, node_set_id, num_nodes_this_set, num_dist_in_set);
     if (status)
       clog_fatal(
@@ -362,11 +362,11 @@ public:
           << " hdf5_put_node_set_param() returned " << status);
 
     // copy the vertex ids
-    vector<ex_index_t> node_set;
+    vector<hdf5_index_t> node_set;
     node_set.reserve(vertex_list.size());
 
     for (auto v : vertex_list)
-      node_set.push_back(v + 1); // exodus uses 1-based ids
+      node_set.push_back(v + 1); // hdf5 uses 1-based ids
 
     // write the node set
     status = hdf5_put_node_set(hdf5_id, node_set_id, node_set.data());
@@ -429,7 +429,7 @@ public:
       int hdf5_id,
       size_t blk_id,
       const std::string & name,
-      ex_entity_type entity_type,
+      hdf5_entity_type entity_type,
       const char * entity_description,
       size_t num_entities,
       ENTITY_CONN && entity_conn) {
@@ -444,7 +444,7 @@ public:
     auto num_conn_guess = num_dims * num_dims;
 
     // build the connectivitiy list for the block
-    vector<ex_index_t> entity_nodes;
+    vector<hdf5_index_t> entity_nodes;
     vector<int> entity_node_counts;
     entity_nodes.reserve(num_entities * num_conn_guess);
     entity_node_counts.reserve(num_entities);
@@ -536,7 +536,7 @@ public:
         &num_nodes_per_elem, &num_edges_per_elem, &num_faces_per_elem,
         &num_attr);
     if (status)
-      clog_fatal("Problem reading block, ex_get_block() returned " << status);
+      clog_fatal("Problem reading block, hdf5_get_block() returned " << status);
 
     //------------------------------------------------------------------------
     // polygon data
@@ -553,7 +553,7 @@ public:
       if (status)
         clog_fatal(
             "Problem getting element node numbers, "
-            << "ex_get_entity_count_per_polyhedra() returned " << status);
+            << "hdf5_get_entity_count_per_polyhedra() returned " << status);
 
       // read element definitions
       vector<hdf5_index_t> elem_nodes(num_nodes_this_blk);
@@ -710,33 +710,36 @@ public:
       size_t num_faces,
       CONN_TYPE && face_conn) {
 
+  /* FIXME
     write_block<U>(
-        exoid, blk_id, name, EX_FACE_BLOCK, "nsided", num_faces,
+        hdf5_id, blk_id, name, EX_FACE_BLOCK, "nsided", num_faces,
         std::forward<CONN_TYPE>(face_conn));
+   */
+
   }
 
   //============================================================================
-  //! \brief read the element blocks from an exodus file.
-  //! \param [in] exo_id  The exodus file id.
+  //! \brief read the element blocks from an hdf5 file.
+  //! \param [in] hdf5_id  The hdf5 file id.
   //! \return the status of the file
   //============================================================================
   template<typename U>
   static auto read_element_block(
-      int exoid,
-      ex_entity_id elem_blk_id,
+      int hdf5_id,
+      hdf5_entity_id elem_blk_id,
       connectivity_t & elements) {
 
-    return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, elements);
+    return read_block<U>(hdf5_id, elem_blk_id, EX_ELEM_BLOCK, elements);
   }
 
   //============================================================================
-  //! \brief read the element blocks from an exodus file.
-  //! \param [in] exo_id  The exodus file id.
+  //! \brief read the element blocks from an hdf5 file.
+  //! \param [in] hdf5_id  The hdf5 file id.
   //! \return the status of the file
   //============================================================================
   template<typename U, typename CONN_TYPE>
   static void write_element_block(
-      int exoid,
+      int hdf5_id,
       size_t blk_id,
       const std::string & name,
       size_t num_elems,
@@ -744,7 +747,7 @@ public:
 
     auto entity_desc = (num_dims == 3) ? "nfaced" : "nsided";
     write_block<U>(
-        exoid, blk_id, name, EX_ELEM_BLOCK, entity_desc, num_elems,
+        hdf5_id, blk_id, name, EX_ELEM_BLOCK, entity_desc, num_elems,
         std::forward<CONN_TYPE>(element_conn));
   }
 };
@@ -753,19 +756,19 @@ public:
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
-/// io_base_t provides registrations of the exodus file extensions.
+/// io_base_t provides registrations of the hdf5 file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<int D, typename T>
-class exodus_definition__ {};
+class hdf5_definition__ {};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
-/// io_base_t provides registrations of the exodus file extensions.
+/// io_base_t provides registrations of the hdf5 file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<2, T> : public flecsi::topology::mesh_definition__<2>
+class hdf5_definition__<2, T> : public flecsi::topology::mesh_definition__<2>
 {
 
 public:
@@ -774,7 +777,7 @@ public:
   //============================================================================
 
   //! the instantiated base type
-  using base_t = exodus_base__<2, T>;
+  using base_t = hdf5_base__<2, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition__<2>;
@@ -799,25 +802,25 @@ public:
   //============================================================================
 
   //! \brief Default constructor
-  exodus_definition__() = default;
+  hdf5_definition__() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition__(const std::string & filename) {
+  hdf5_definition__(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  exodus_definition__(const exodus_definition__ &) = delete;
+  hdf5_definition__(const hdf5_definition__ &) = delete;
 
   /// Assignment operator (disabled)
-  exodus_definition__ & operator=(const exodus_definition__ &) = delete;
+  hdf5_definition__ & operator=(const hdf5_definition__ &) = delete;
 
   /// Destructor
-  ~exodus_definition__() = default;
+  ~hdf5_definition__() = default;
 
   //============================================================================
-  //! \brief Implementation of exodus mesh read for burton specialization.
+  //! \brief Implementation of hdf5 mesh read for burton specialization.
   //!
   //! \param[in] name Read burton mesh \e m from \e name.
   //! \param[out] m Populate burton mesh \e m with contents of \e name.
@@ -831,21 +834,21 @@ public:
     //--------------------------------------------------------------------------
     // Open file
 
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::in);
-    if (exoid < 0)
-      clog_fatal("Problem reading exodus file");
+    // open the hdf5 file
+    auto hdf5_id = base_t::open(name, std::ios_base::in);
+    if (hdf5_id < 0)
+      clog_fatal("Problem reading hdf5 file");
 
     // get the initialization parameters
-    auto exo_params = base_t::read_params(exoid);
+    auto exo_params = base_t::read_params(hdf5_id);
 
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
+    // check the integer type used in the hdf5 file
+    auto int64 = base_t::is_int64(hdf5_id);
 
     //--------------------------------------------------------------------------
     // read coordinates
 
-    vertices_ = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    vertices_ = base_t::read_point_coords(hdf5_id, exo_params.num_nodes);
     clog_assert(
         vertices_.size() == dimension() * exo_params.num_nodes,
         "Mismatch in read vertices");
@@ -863,19 +866,19 @@ public:
     // get the element block ids
     if (int64)
       elem_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
+          hdf5_id, EX_ELEM_BLOCK, num_elem_blk);
     else
       elem_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
+          hdf5_id, EX_ELEM_BLOCK, num_elem_blk);
 
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
       if (int64)
         base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            hdf5_id, elem_blk_ids[iblk], cell_vertices_ref);
       else
         base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            hdf5_id, elem_blk_ids[iblk], cell_vertices_ref);
     }
 
     // check some assertions
@@ -923,11 +926,11 @@ public:
 
     //--------------------------------------------------------------------------
     // close the file
-    base_t::close(exoid);
+    base_t::close(hdf5_id);
   }
 
   //============================================================================
-  //! \brief Implementation of exodus mesh write for burton specialization.
+  //! \brief Implementation of hdf5 mesh write for burton specialization.
   //!
   //! \param[in] name Read burton mesh \e m from \e name.
   //! \param[out] m Populate burton mesh \e m with contents of \e name.
@@ -947,8 +950,8 @@ public:
     //--------------------------------------------------------------------------
     // Open file
 
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::out);
+    // open the hdf5 file
+    auto hdf5_id = base_t::open(name, std::ios_base::out);
 
     // write the initialization parameters
     auto exo_params = base_t::make_params();
@@ -963,15 +966,15 @@ public:
     } else
       exo_params.num_elem = num_cells;
 
-    base_t::write_params(exoid, exo_params);
+    base_t::write_params(hdf5_id, exo_params);
 
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
+    // check the integer type used in the hdf5 file
+    auto int64 = base_t::is_int64(hdf5_id);
 
     //--------------------------------------------------------------------------
     // write coordinates
 
-    base_t::write_point_coords(exoid, vertices_);
+    base_t::write_point_coords(hdf5_id, vertices_);
 
     //--------------------------------------------------------------------------
     // element blocks
@@ -989,10 +992,10 @@ public:
 
       if (int64)
         base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_vertices_func);
+            hdf5_id, elem_blk_id++, "cells", num_cells, cell_vertices_func);
       else
         base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_vertices_func);
+            hdf5_id, elem_blk_id++, "cells", num_cells, cell_vertices_func);
 
     } // element block
 
@@ -1013,10 +1016,10 @@ public:
 
       if (int64)
         base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
+            hdf5_id, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
       else
         base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
+            hdf5_id, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
 
     } // sets
 
@@ -1036,16 +1039,16 @@ public:
 
       if (int64)
         base_t::template write_node_set<long long>(
-            exoid, ++node_set_id, set_name, set_nodes);
+            hdf5_id, ++node_set_id, set_name, set_nodes);
       else
         base_t::template write_node_set<int>(
-            exoid, ++node_set_id, set_name, set_nodes);
+            hdf5_id, ++node_set_id, set_name, set_nodes);
 
     } // sets
 
     //--------------------------------------------------------------------------
     // close the file
-    base_t::close(exoid);
+    base_t::close(hdf5_id);
   }
 
   //============================================================================
@@ -1110,10 +1113,10 @@ private:
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
-/// io_base_t provides registrations of the exodus file extensions.
+/// io_base_t provides registrations of the hdf5 file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<3, T> : public flecsi::topology::mesh_definition__<3>
+class hdf5_definition__<3, T> : public flecsi::topology::mesh_definition__<3>
 {
 
 public:
@@ -1122,7 +1125,7 @@ public:
   //============================================================================
 
   //! the instantiated base type
-  using base_t = exodus_base__<3, T>;
+  using base_t = hdf5_base__<3, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition__<3>;
@@ -1147,25 +1150,25 @@ public:
   //============================================================================
 
   //! \brief Default constructor
-  exodus_definition__() = default;
+  hdf5_definition__() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition__(const std::string & filename) {
+  hdf5_definition__(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  exodus_definition__(const exodus_definition__ &) = delete;
+  hdf5_definition__(const hdf5_definition__ &) = delete;
 
   /// Assignment operator (disabled)
-  exodus_definition__ & operator=(const exodus_definition__ &) = delete;
+  hdf5_definition__ & operator=(const hdf5_definition__ &) = delete;
 
   /// Destructor
-  ~exodus_definition__() = default;
+  ~hdf5_definition__() = default;
 
   //============================================================================
-  //! \brief Implementation of exodus mesh read for burton specialization.
+  //! \brief Implementation of hdf5 mesh read for burton specialization.
   //!
   //! \param[in] name Read burton mesh \e m from \e name.
   //! \param[out] m Populate burton mesh \e m with contents of \e name.
@@ -1179,19 +1182,19 @@ public:
     //--------------------------------------------------------------------------
     // Open file
 
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::in);
+    // open the hdf5 file
+    auto hdf5_id = base_t::open(name, std::ios_base::in);
 
     // get the initialization parameters
-    auto exo_params = base_t::read_params(exoid);
+    auto exo_params = base_t::read_params(hdf5_id);
 
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
+    // check the integer type used in the hdf5 file
+    auto int64 = base_t::is_int64(hdf5_id);
 
     //--------------------------------------------------------------------------
     // read coordinates
 
-    vertices_ = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    vertices_ = base_t::read_point_coords(hdf5_id, exo_params.num_nodes);
 
     //--------------------------------------------------------------------------
     // read face blocks
@@ -1204,20 +1207,20 @@ public:
     // get the face block ids
     if (int64)
       face_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
+          hdf5_id, EX_FACE_BLOCK, num_face_blk);
     else
       face_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
+          hdf5_id, EX_FACE_BLOCK, num_face_blk);
 
     // read each block
     for (int iblk = 0; iblk < num_face_blk; iblk++) {
       // first get the vertices
       if (int64)
         base_t::template read_face_block<long long>(
-            exoid, face_blk_ids[iblk], face_vertices_ref);
+            hdf5_id, face_blk_ids[iblk], face_vertices_ref);
       else
         base_t::template read_face_block<int>(
-            exoid, face_blk_ids[iblk], face_vertices_ref);
+            hdf5_id, face_blk_ids[iblk], face_vertices_ref);
       // rotate the vertices so the lowest one is first
       for (auto & vs : face_vertices_ref) {
         auto lowest = std::min_element(vs.begin(), vs.end());
@@ -1240,10 +1243,10 @@ public:
     // get the element block ids
     if (int64)
       elem_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
+          hdf5_id, EX_ELEM_BLOCK, num_elem_blk);
     else
       elem_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
+          hdf5_id, EX_ELEM_BLOCK, num_elem_blk);
 
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
@@ -1254,10 +1257,10 @@ public:
       typename base_t::block_t block_type;
       if (int64)
         block_type = base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], results);
+            hdf5_id, elem_blk_ids[iblk], results);
       else
         block_type = base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], results);
+            hdf5_id, elem_blk_ids[iblk], results);
 
       //--------------------------------
       // make sure the block type isnt unknown
@@ -1381,11 +1384,11 @@ public:
 
     //--------------------------------------------------------------------------
     // close the file
-    base_t::close(exoid);
+    base_t::close(hdf5_id);
   }
 
   //============================================================================
-  //! \brief Implementation of exodus mesh write for burton specialization.
+  //! \brief Implementation of hdf5 mesh write for burton specialization.
   //!
   //! \param[in] name Read burton mesh \e m from \e name.
   //! \param[out] m Populate burton mesh \e m with contents of \e name.
@@ -1405,8 +1408,8 @@ public:
     //--------------------------------------------------------------------------
     // Open file
 
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::out);
+    // open the hdf5 file
+    auto hdf5_id = base_t::open(name, std::ios_base::out);
 
     // write the initialization parameters
     auto exo_params = base_t::make_params();
@@ -1424,15 +1427,15 @@ public:
     } else
       exo_params.num_elem = num_cells;
 
-    base_t::write_params(exoid, exo_params);
+    base_t::write_params(hdf5_id, exo_params);
 
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
+    // check the integer type used in the hdf5 file
+    auto int64 = base_t::is_int64(hdf5_id);
 
     //--------------------------------------------------------------------------
     // write coordinates
 
-    base_t::write_point_coords(exoid, vertices_);
+    base_t::write_point_coords(hdf5_id, vertices_);
 
     //--------------------------------------------------------------------------
     // face blocks
@@ -1446,10 +1449,10 @@ public:
 
     if (int64)
       base_t::template write_face_block<long long>(
-          exoid, 1, "faces", num_faces, face_vertices_func);
+          hdf5_id, 1, "faces", num_faces, face_vertices_func);
     else
       base_t::template write_face_block<int>(
-          exoid, 1, "faces", num_faces, face_vertices_func);
+          hdf5_id, 1, "faces", num_faces, face_vertices_func);
 
     //--------------------------------------------------------------------------
     // element blocks
@@ -1467,10 +1470,10 @@ public:
 
       if (int64)
         base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_faces_func);
+            hdf5_id, elem_blk_id++, "cells", num_cells, cell_faces_func);
       else
         base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_faces_func);
+            hdf5_id, elem_blk_id++, "cells", num_cells, cell_faces_func);
 
     } // element block
 
@@ -1491,10 +1494,10 @@ public:
 
       if (int64)
         base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_faces_func);
+            hdf5_id, elem_blk_id++, set_name, num_cells_set, cell_faces_func);
       else
         base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_faces_func);
+            hdf5_id, elem_blk_id++, set_name, num_cells_set, cell_faces_func);
 
     } // sets
 
@@ -1514,16 +1517,16 @@ public:
 
       if (int64)
         base_t::template write_node_set<long long>(
-            exoid, ++node_set_id, set_name, set_nodes);
+            hdf5_id, ++node_set_id, set_name, set_nodes);
       else
         base_t::template write_node_set<int>(
-            exoid, ++node_set_id, set_name, set_nodes);
+            hdf5_id, ++node_set_id, set_name, set_nodes);
 
     } // sets
 
     //--------------------------------------------------------------------------
     // close the file
-    base_t::close(exoid);
+    base_t::close(hdf5_id);
   }
 
   //============================================================================
