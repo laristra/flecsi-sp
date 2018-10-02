@@ -14,6 +14,7 @@
 
 set(io_HEADERS
   exodus_definition.h
+  hdf5_definition.h
   PARENT_SCOPE
 )
 
