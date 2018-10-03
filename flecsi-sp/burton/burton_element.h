@@ -74,7 +74,7 @@ auto coordinates( const MESH_TOPOLOGY * mesh, const E * ent )
 
 
 
-// forward decares
+// forward declares
 template< std::size_t N >
 class burton_corner_t;
 
@@ -87,6 +87,51 @@ class burton_corner_t;
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t NUM_DIMS, std::size_t DIM  >
 struct burton_element_t { };
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!        multi-dimensional mesh edges, faces, and cells.
+//! \tparam N The total number of dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+struct burton_element_types_t {
+  using edge_t = burton_element_t<N,1>;
+  using face_t = burton_element_t<N,N-1>;
+  using cell_t = burton_element_t<N,N>;
+};
+
+template<>
+struct burton_element_types_t<1> {
+  using edge_t = burton_vertex_t<1>;
+  using face_t = burton_vertex_t<1>;
+  using cell_t = burton_element_t<1,1>;
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!        multi-dimensional mesh edges.
+//! \tparam N The total number of dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+using burton_edge_t = typename burton_element_types_t<N>::edge_t;
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!        multi-dimensional mesh faces.
+//! \tparam N The total number of mesh dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+using burton_face_t = typename burton_element_types_t<N>::face_t;
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!        multi-dimensional mesh cells.
+//! \tparam N The total number of mesh dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+using burton_cell_t = typename burton_element_types_t<N>::cell_t;
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -587,15 +632,8 @@ private:
   real_t length_ = 0;
   point_t midpoint_ = 0;
 
-}; // struct burton_edge_t
+}; // struct burton_element_t<3,1>
 
-////////////////////////////////////////////////////////////////////////////////
-//! \brief An interface for managing geometry and state associated with 
-//!        multi-dimensional mesh edges.
-//! \tparam N The total number of dimensions.
-////////////////////////////////////////////////////////////////////////////////
-template< std::size_t N >
-using burton_edge_t = burton_element_t<N,1>;
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief An interface for managing geometry and state associated with 
@@ -1322,16 +1360,8 @@ private:
   // the shape parameter
   shape_t shape_ = shape_t::none;
 
-}; // class burton_element_t
+}; // struct burton_element_t<3,2>
 
-
-////////////////////////////////////////////////////////////////////////////////
-//! \brief An interface for managing geometry and state associated with 
-//!        three-dimensional mesh faces.
-//! \tparam N The total number of mesh dimensions.
-////////////////////////////////////////////////////////////////////////////////
-template< std::size_t N >
-using burton_face_t = burton_element_t<N,N-1>;
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief An interface for managing geometry and state associated with 
@@ -1810,17 +1840,8 @@ private:
   // the shape parameter
   shape_t shape_ = shape_t::none;
 
-}; // class burton_element_t
+}; // struct burton_element_t<3,3>
 
-
-
-////////////////////////////////////////////////////////////////////////////////
-//! \brief An interface for managing geometry and state associated with 
-//!        three-dimensional mesh cells.
-//! \tparam N The total number of mesh dimensions.
-////////////////////////////////////////////////////////////////////////////////
-template< std::size_t N >
-using burton_cell_t = burton_element_t<N,N>;
 
 } // namespace burton
 } // namespace flecsi_sp

@@ -159,11 +159,11 @@ struct burton_1d_types_base
   //! Type for burton mesh vertices.
   using vertex_t = burton_vertex_t<num_dimensions>;
 
-  //! Type for burton mesh edges (in 1d, same as vertices).
-  using edge_t = vertex_t;
+  //! Type for burton mesh edges.
+  using edge_t = burton_edge_t<num_dimensions>;
 
-  //! Type for burton mesh faces (in 1d, same as vertices).
-  using face_t = vertex_t;
+  //! Type for burton mesh faces.
+  using face_t = burton_face_t<num_dimensions>;
 
   //! Type for burton mesh cells.
   using cell_t = burton_cell_t<num_dimensions>;
