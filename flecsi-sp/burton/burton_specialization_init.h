@@ -18,12 +18,17 @@
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
 #include <flecsi-sp/burton/burton_mesh.h>
+#ifdef FLECSI_SP_USE_HDF5
+#include <flecsi-sp/io/hdf5_definition.h>
+#endif
+#if FLECSI_SP_USE_EXODUS
 #include <flecsi-sp/io/exodus_definition.h>
+#endif
 #include <flecsi-sp/utils/char_array.h>
 #include <flecsi-sp/utils/types.h>
 
-#ifndef FLECSI_SP_ENABLE_EXODUS
-#  error Exodus is needed to build burton specialization.
+#if not defined(FLECSI_SP_USE_EXODUS) && not defined(FLECSI_SP_USE_HDF5)
+#  error Exodus or HDF5 are needed to build burton specialization.
 #endif
 
 // system includes
@@ -1147,7 +1152,13 @@ void partition_mesh( utils::char_array_t filename )
   // make some type aliases
   using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+#ifdef FLECSI_SP_USE_HDF5
+  using io_definition_t = flecsi_sp::io::hdf5_definition__<num_dims, real_t>;
+#elif FLECSI_SP_USE_EXODUS
+  using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+#else
+#error "FLeCSI-SP supports only exodus and HDF5 file formats"
+#endif
   using entity_info_t = flecsi::coloring::entity_info_t;
   using vertex_t = burton_mesh_t::vertex_t;
   using edge_t = burton_mesh_t::edge_t;
@@ -1158,7 +1169,7 @@ void partition_mesh( utils::char_array_t filename )
 
   // load the mesh
   auto filename_string = filename.str();
-  exodus_definition_t mesh_def( filename_string );
+  io_definition_t mesh_def( filename_string );
 
   // Create a communicator instance to get neighbor information.
   auto communicator = std::make_unique<flecsi::coloring::mpi_communicator_t>();
@@ -1871,7 +1882,13 @@ void initialize_mesh(
 
   // alias some types
   using real_t = burton_mesh_t::real_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+#ifdef FLECSI_SP_USE_HDF5
+  using io_definition_t = flecsi_sp::io::hdf5_definition__<num_dims, real_t>;
+#elif FLECSI_SP_USE_EXODUS
+  using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+#else
+#error "FLeCSI-SP supports only exodus and HDF5 file formats"
+#endif
 
   // get the context
   const auto & context = flecsi::execution::context_t::instance();
@@ -1879,7 +1896,7 @@ void initialize_mesh(
 
   // Load the mesh
   auto filename_string = filename.str();
-  exodus_definition_t mesh_def( filename_string );
+  io_definition_t mesh_def( filename_string );
 
   // fill the mesh
   create_cells( mesh_def, mesh );
@@ -1925,7 +1942,7 @@ flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
 flecsi_register_data_client(burton_mesh_t, meshes, mesh0);
 
 
-#ifdef BURTON_ENABLE_APPLICATION_TLT_INIT
+#ifdef BURTON_FLECSI_SP_USE_APPLICATION_TLT_INIT
 void application_tlt_init(int argc, char **argv);
 #endif
 } // namespace burton

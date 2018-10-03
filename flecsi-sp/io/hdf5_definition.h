@@ -12,7 +12,8 @@
 #include <flecsi/utils/logging.h>
 
 // thirdparty includes
-#include <hdf5II.h>
+#include <hdf5.h>
+#include "H5Cpp.h"
 
 // system includes
 #include <algorithm>
@@ -23,6 +24,10 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+
+//flecsi-sp includes
+#include "flecsi-sp/io/io_utils.h"
 
 namespace flecsi_sp {
 namespace io {
@@ -201,7 +206,24 @@ public:
   //============================================================================
   static auto open(const std::string & name, std::ios_base::openmode mode) {
     //FIXME
-  }
+     using namespace H5;
+     if ((mode & std::ios_base::in) == std::ios_base::in) {
+
+       file = new H5File( name, H5F_ACC_RDONLY );
+      // H5File file( name, H5F_ACC_RDONLY );
+       auto hdf5_id = file->getId();
+      if (hdf5_id < 0)
+        clog_fatal(
+            "Problem opening hdf5 file, file.open() returned " << hdf5_id);
+
+      return hdf5_id; 
+    }else if ((mode & std::ios_base::out) == std::ios_base::out) {
+       clog_assert(false, "out mode is not yet implemented for the HDF5_definition_");
+       //H5File file( FILE_NAME, H5F_ACC_TRUNC );
+		}
+   
+    
+  }//open
 
   //============================================================================
   //! \brief close the file once completed reading or writing
@@ -209,6 +231,8 @@ public:
   //============================================================================
   static void close(int hdf5_id) {
     //FIXME
+    //close the file
+    delete file;
   }
 
 #if 0
@@ -221,65 +245,6 @@ public:
     return (hdf5_int64_status(hdf5_id) & EX_IDS_INT64_API);
   }
 #endif
-
-  //============================================================================
-  //! \brief Helper function to make and initialize a set of hdf5 parameters.
-  //! \return the hdf5 parameters
-  //============================================================================
-  static auto make_params() {
-    hdf5_init_params par;
-    strcpy(par.title, "Hdf5 output from flecsi.");
-    par.num_dim = num_dims;
-    par.num_nodes = 0;
-    par.num_edge = 0;
-    par.num_edge_blk = 0;
-    par.num_face = 0;
-    par.num_face_blk = 0;
-    par.num_elem = 0;
-    par.num_elem_blk = 0;
-    par.num_node_sets = 0;
-    par.num_edge_sets = 0;
-    par.num_face_sets = 0;
-    par.num_side_sets = 0;
-    par.num_elem_sets = 0;
-    par.num_node_maps = 0;
-    par.num_edge_maps = 0;
-    par.num_face_maps = 0;
-    par.num_elem_maps = 0;
-    return par;
-  }
-
-  //============================================================================
-  //! \brief read the hdf5 parameters from a file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the hdf5 parameters
-  //============================================================================
-  static auto read_params(int hdf5_id) {
-    hdf5_init_params hdf5_params;
-    //FIXME
-    return hdf5_params;
-  }
-
-  //============================================================================
-  //! \brief write the hdf5_ parameters to a file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \param [in] hdf5_params  The hdf5 parameters
-  //============================================================================
-  static void write_params(int hdf5_id, const hdf5_init_params & hdf5_params) {
-    // verify mesh dimension
-    if (num_dims != hdf5_params.num_dim)
-      clog_fatal(
-          "HDF5 dimension mismatch: Expected dimension ("
-          << num_dims << ") /= HDF5 dimension (" << hdf5_params.num_dim
-          << ")");
-
-    // put the initialization parameters
-    auto status = hdf5_put_init_ext(hdf5_id, &hdf5_params);
-    if (status)
-      clog_fatal(
-          "Problem putting hdf5 file parameters, hdf5_put_init_ext() returned "
-          << status);
-  }
 
   //============================================================================
   //! \brief read the coordinates of the mesh from a file.
@@ -307,7 +272,7 @@ public:
           << " hdf5_get_coord() returned " << status);
 
     return vertex_coord;
-  }
+   }//read_point_coords
 
   //============================================================================
   //! \brief write the coordinates of the mesh from a file.
@@ -331,7 +296,7 @@ public:
       clog_fatal(
           "Problem putting vertex coordinates to hdf5 file, "
           << " hdf5_put_coord() returned " << status);
-  }
+  }//write_point_coords
 
   //============================================================================
   //! \brief read the block ids from an hdf5 file.
@@ -384,374 +349,13 @@ public:
           "Problem writing node set name to hdf5 file, "
           << " hdf5_put_name() returned " << status);
     */
-  }
+  }//write_node_set
 
-  //============================================================================
-  //! \brief read the block ids from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U>
-  static auto
-  read_block_ids(int hdf5_id, hdf5_entity_type obj_type, size_t num_blocks) {
-    // some type aliases
-    using hdf5_index_t = U;
+private:
 
-    // final storage
-    vector<index_t> ids(num_blocks);
+  static H5::H5File *file;
 
-    if (num_blocks > 0) {
-
-      // get the ids first
-      vector<hdf5_index_t> block_ids(num_blocks);
-      auto status = hdf5_get_ids(hdf5_id, obj_type, block_ids.data());
-      if (status)
-        clog_fatal(
-            "Problem reading block ids, hdf5_get_ids() returned " << status);
-
-      // now convert them
-      std::transform(
-          block_ids.begin(), block_ids.end(), ids.begin(),
-          [](auto id) { return id; });
-    }
-
-    // now return them
-    return ids;
-  }
-
-  //============================================================================
-  //! \brief read the element blocks from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U, typename ENTITY_CONN>
-  static void write_block(
-      int hdf5_id,
-      size_t blk_id,
-      const std::string & name,
-      hdf5_entity_type entity_type,
-      const char * entity_description,
-      size_t num_entities,
-      ENTITY_CONN && entity_conn) {
-
-    // some type aliases
-    using hdf5_index_t = U;
-
-    // check if face data is provided instead of node data
-    auto is_face_data = (num_dims == 3 && entity_type == EX_ELEM_BLOCK);
-
-    // guess how many elements are in each connectivity slot
-    auto num_conn_guess = num_dims * num_dims;
-
-    // build the connectivitiy list for the block
-    vector<hdf5_index_t> entity_nodes;
-    vector<int> entity_node_counts;
-    entity_nodes.reserve(num_entities * num_conn_guess);
-    entity_node_counts.reserve(num_entities);
-
-    // temporary storage for each connecitivity slot
-    vector<hdf5_index_t> temp_entity_nodes;
-    temp_entity_nodes.reserve(num_conn_guess);
-
-    for (size_t e = 0; e < num_entities; ++e) {
-      // get the connectivity from the user-provided function
-      std::forward<ENTITY_CONN>(entity_conn)(e, temp_entity_nodes);
-      // store them in the master list ( hdf5 wants 1-index arrays )
-      for (auto i : temp_entity_nodes)
-        entity_nodes.emplace_back(i + 1);
-      entity_node_counts.push_back(temp_entity_nodes.size());
-      // reset temp storage
-      temp_entity_nodes.clear();
-    }
-
-    // the total size needed to hold the element connectivity
-    hdf5_index_t num_nodes_this_blk = entity_nodes.size();
-    hdf5_index_t num_entries_this_blk = entity_node_counts.size();
-
-    // set the block header
-    hdf5_index_t num_attr_per_entry = 0;
-    hdf5_index_t num_nodes_per_entry = is_face_data ? 0 : num_nodes_this_blk;
-    hdf5_index_t num_edges_per_entry = 0;
-    hdf5_index_t num_faces_per_entry = is_face_data ? num_nodes_this_blk : 0;
-    auto status = hdf5_put_block(
-        hdf5_id, entity_type, blk_id, entity_description, num_entries_this_blk,
-        num_nodes_per_entry, num_edges_per_entry, num_faces_per_entry,
-        num_attr_per_entry);
-    if (status)
-      clog_fatal(
-          "Problem writing block to hdf5 file, "
-          << " hdf5_put_block() returned " << status);
-
-    // write the block name
-    status = hdf5_put_name(hdf5_id, entity_type, blk_id, name.c_str());
-    if (status)
-      clog_fatal(
-          "Problem writing block name to hdf5 file, "
-          << " hdf5_put_name() returned " << status);
-
-    // write connectivity
-    auto node_conn = is_face_data ? nullptr : entity_nodes.data();
-    auto elem_edge_conn = nullptr;
-    auto elem_face_conn = is_face_data ? entity_nodes.data() : nullptr;
-    status = hdf5_put_conn(
-        hdf5_id, entity_type, blk_id, node_conn, elem_edge_conn, elem_face_conn);
-    if (status)
-      clog_fatal(
-          "Problem writing block connectivity to hdf5 file, "
-          << " hdf5_put_conn() returned " << status);
-
-    // write counts
-    status = hdf5_put_entity_count_per_polyhedra(
-        hdf5_id, entity_type, blk_id, entity_node_counts.data());
-    if (status)
-      clog_fatal(
-          "Problem writing block counts to hdf5_id file, "
-          << " hdf5_put_entity_count_per_polyhedra() returned " << status);
-
-  }; // write block
-
-  //============================================================================
-  //! \brief read the element blocks from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U>
-  static auto read_block(
-      int hdf5_id,
-      hdf5_entity_id blk_id,
-      hdf5_entity_type entity_type,
-      connectivity_t & entities) {
-    // some type aliases
-    using hdf5_index_t = U;
-
-    // get the info about this block
-    hdf5_index_t num_elem_this_blk = 0;
-    hdf5_index_t num_faces_per_elem = 0;
-    hdf5_index_t num_edges_per_elem = 0;
-    hdf5_index_t num_nodes_per_elem = 0;
-    hdf5_index_t num_attr = 0;
-    char elem_type[MAX_STR_LENGTH];
-    auto status = hdf5_get_block(
-        hdf5_id, entity_type, blk_id, elem_type, &num_elem_this_blk,
-        &num_nodes_per_elem, &num_edges_per_elem, &num_faces_per_elem,
-        &num_attr);
-    if (status)
-      clog_fatal("Problem reading block, hdf5_get_block() returned " << status);
-
-    //------------------------------------------------------------------------
-    // polygon data
-    if (strcasecmp("nsided", elem_type) == 0) {
-
-      // the number of nodes per element is really the number of nodes
-      // in the whole block
-      auto num_nodes_this_blk = num_nodes_per_elem;
-
-      // get the number of nodes per element
-      vector<int> elem_node_counts(num_elem_this_blk);
-      status = hdf5_get_entity_count_per_polyhedra(
-          hdf5_id, entity_type, blk_id, elem_node_counts.data());
-      if (status)
-        clog_fatal(
-            "Problem getting element node numbers, "
-            << "hdf5_get_entity_count_per_polyhedra() returned " << status);
-
-      // read element definitions
-      vector<hdf5_index_t> elem_nodes(num_nodes_this_blk);
-      status = hdf5_get_conn(
-          hdf5_id, entity_type, blk_id, elem_nodes.data(), nullptr, nullptr);
-      if (status)
-        clog_fatal(
-            "Problem getting element connectivity, hdf5_get_elem_conn() "
-            << "returned " << status);
-
-      // storage for element verts
-      vector<index_t> elem_vs;
-      elem_vs.reserve(num_dims * elem_node_counts[0]);
-
-      // create cells in mesh
-      size_t base = 0;
-      for (counter_t e = 0; e < num_elem_this_blk; ++e) {
-        elem_vs.clear();
-        // get the number of nodes
-        num_nodes_per_elem = elem_node_counts[e];
-        // copy local vertices into vector ( hdf5 uses 1 indexed arrays )
-        for (int v = 0; v < num_nodes_per_elem; v++)
-          elem_vs.emplace_back(elem_nodes[base + v] - 1);
-        // add the row
-        entities.push_back(elem_vs);
-        // base offset into elt_conn
-        base += num_nodes_per_elem;
-      }
-
-      return block_t::polygon;
-
-    }
-    //------------------------------------------------------------------------
-    // polygon data
-    else if (strcasecmp("nfaced", elem_type) == 0) {
-
-      // the number of faces per element is really the number of
-      // faces in the whole block ( includes duplicate / overlapping
-      // nodes )
-      auto num_face_this_blk = num_faces_per_elem;
-
-      // get the number of nodes per element
-      vector<int> elem_face_counts(num_face_this_blk);
-      status = hdf5_get_entity_count_per_polyhedra(
-          hdf5_id, entity_type, blk_id, elem_face_counts.data());
-      if (status)
-        clog_fatal(
-            "Problem reading element node info, "
-            << "hdf5_get_entity_count_per_polyhedra() returned " << status);
-
-      // read element definitions
-      vector<hdf5_index_t> elem_faces(num_face_this_blk);
-      status = hdf5_get_conn(
-          hdf5_id, entity_type, blk_id, nullptr, nullptr, elem_faces.data());
-      if (status)
-        clog_fatal(
-            "Problem getting element connectivity, hdf5_get_conn() "
-            << "returned " << status);
-
-      // storage for element faces
-      vector<index_t> elem_fs;
-      elem_fs.reserve(elem_face_counts[0]);
-
-      // create cells in mesh
-      for (counter_t e = 0, base = 0; e < num_elem_this_blk; ++e) {
-        // reset storage
-        elem_fs.clear();
-        // get the number of faces
-        num_faces_per_elem = elem_face_counts[e];
-        // copy local vertices into vector ( hdf5 uses 1 indexed arrays )
-        for (int v = 0; v < num_faces_per_elem; v++)
-          elem_fs.emplace_back(elem_faces[base + v] - 1);
-        // base offset into elt_conn
-        base += num_faces_per_elem;
-        // add vertex list to master list
-        entities.push_back(elem_fs);
-      }
-
-      return block_t::polyhedron;
-
-    }
-    //------------------------------------------------------------------------
-    // fixed element size
-    else {
-
-      // read element definitions
-      vector<hdf5_index_t> elt_conn(num_elem_this_blk * num_nodes_per_elem);
-      status = hdf5_get_elem_conn(hdf5_id, blk_id, elt_conn.data());
-      if (status)
-        clog_fatal(
-            "Problem getting element connectivity, hdf5_get_elem_conn() "
-            << "returned " << status);
-
-      // storage for element verts
-      vector<index_t> elem_vs;
-      elem_vs.reserve(num_nodes_per_elem);
-
-      // create cells in mesh
-      for (counter_t e = 0; e < num_elem_this_blk; ++e) {
-        elem_vs.clear();
-        // base offset into elt_conn
-        auto b = e * num_nodes_per_elem;
-        // copy local vertices into vector ( hdf5 uses 1 indexed arrays )
-        for (int v = 0; v < num_nodes_per_elem; v++)
-          elem_vs.emplace_back(elt_conn[b + v] - 1);
-        // add the row
-        entities.push_back(elem_vs);
-      }
-
-      // return element type
-      if (strcasecmp("tri3", elem_type) == 0)
-        return block_t::tri;
-      else if (
-          strcasecmp("quad4", elem_type) == 0 ||
-          strcasecmp("shell4", elem_type) == 0)
-        return block_t::quad;
-      else if (
-          strcasecmp("tet4", elem_type) == 0 ||
-          strcasecmp("tetra", elem_type) == 0)
-        return block_t::tet;
-      else if (strcasecmp("hex8", elem_type) == 0)
-        return block_t::hex;
-      else {
-        clog_fatal("Unknown block type, " << elem_type);
-        return block_t::unknown;
-      }
-
-    } // element type
-    //------------------------------------------------------------------------
-  }
-
-  //============================================================================
-  //! \brief read the element blocks from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U>
-  static auto
-  read_face_block(int hdf5_id, hdf5_entity_id blk_id, connectivity_t & faces) {
-
-    return read_block<U>(hdf5_id, blk_id, EX_FACE_BLOCK, faces);
-  }
-
-  //============================================================================
-  //! \brief read the element blocks from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U, typename CONN_TYPE>
-  static void write_face_block(
-      int hdf5_id,
-      size_t blk_id,
-      const std::string & name,
-      size_t num_faces,
-      CONN_TYPE && face_conn) {
-
-  /* FIXME
-    write_block<U>(
-        hdf5_id, blk_id, name, EX_FACE_BLOCK, "nsided", num_faces,
-        std::forward<CONN_TYPE>(face_conn));
-   */
-
-  }
-
-  //============================================================================
-  //! \brief read the element blocks from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U>
-  static auto read_element_block(
-      int hdf5_id,
-      hdf5_entity_id elem_blk_id,
-      connectivity_t & elements) {
-
-    return read_block<U>(hdf5_id, elem_blk_id, EX_ELEM_BLOCK, elements);
-  }
-
-  //============================================================================
-  //! \brief read the element blocks from an hdf5 file.
-  //! \param [in] hdf5_id  The hdf5 file id.
-  //! \return the status of the file
-  //============================================================================
-  template<typename U, typename CONN_TYPE>
-  static void write_element_block(
-      int hdf5_id,
-      size_t blk_id,
-      const std::string & name,
-      size_t num_elems,
-      CONN_TYPE && element_conn) {
-
-    auto entity_desc = (num_dims == 3) ? "nfaced" : "nsided";
-    write_block<U>(
-        hdf5_id, blk_id, name, EX_ELEM_BLOCK, entity_desc, num_elems,
-        std::forward<CONN_TYPE>(element_conn));
-  }
 };
-
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        Exodus format.
@@ -840,7 +444,7 @@ public:
       clog_fatal("Problem reading hdf5 file");
 
     // get the initialization parameters
-    auto exo_params = base_t::read_params(hdf5_id);
+    auto hdf5_params = base_t::read_params(hdf5_id);
 
     // check the integer type used in the hdf5 file
     auto int64 = base_t::is_int64(hdf5_id);
@@ -848,9 +452,9 @@ public:
     //--------------------------------------------------------------------------
     // read coordinates
 
-    vertices_ = base_t::read_point_coords(hdf5_id, exo_params.num_nodes);
+    vertices_ = base_t::read_point_coords(hdf5_id, hdf5_params.num_nodes);
     clog_assert(
-        vertices_.size() == dimension() * exo_params.num_nodes,
+        vertices_.size() == dimension() * hdf5_params.num_nodes,
         "Mismatch in read vertices");
 
     auto num_vertices = vertices_.size() / dimension();
@@ -858,11 +462,12 @@ public:
     //--------------------------------------------------------------------------
     // element blocks
 
-    auto num_elem_blk = exo_params.num_elem_blk;
+    auto num_elem_blk = hdf5_params.num_elem_blk;
     vector<index_t> elem_blk_ids;
 
     auto & cell_vertices_ref = entities_[2][0];
-
+//FIXME
+/*
     // get the element block ids
     if (int64)
       elem_blk_ids = base_t::template read_block_ids<long long>(
@@ -880,10 +485,10 @@ public:
         base_t::template read_element_block<int>(
             hdf5_id, elem_blk_ids[iblk], cell_vertices_ref);
     }
-
+*/
     // check some assertions
     clog_assert(
-        cell_vertices_ref.size() == exo_params.num_elem,
+        cell_vertices_ref.size() == hdf5_params.num_elem,
         "Mismatch in read blocks");
 
     //--------------------------------------------------------------------------
@@ -954,19 +559,19 @@ public:
     auto hdf5_id = base_t::open(name, std::ios_base::out);
 
     // write the initialization parameters
-    auto exo_params = base_t::make_params();
+    auto hdf5_params = base_t::make_params();
     auto num_cells = num_entities(dimension());
-    exo_params.num_nodes = num_entities(0);
-    exo_params.num_node_sets = node_sets.size();
-    exo_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
+    hdf5_params.num_nodes = num_entities(0);
+    hdf5_params.num_node_sets = node_sets.size();
+    hdf5_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
 
     if (element_sets.size()) {
       for (const auto & set : element_sets)
-        exo_params.num_elem += set.second.size();
+        hdf5_params.num_elem += set.second.size();
     } else
-      exo_params.num_elem = num_cells;
+      hdf5_params.num_elem = num_cells;
 
-    base_t::write_params(hdf5_id, exo_params);
+    base_t::write_params(hdf5_id, hdf5_params);
 
     // check the integer type used in the hdf5 file
     auto int64 = base_t::is_int64(hdf5_id);
@@ -1186,7 +791,7 @@ public:
     auto hdf5_id = base_t::open(name, std::ios_base::in);
 
     // get the initialization parameters
-    auto exo_params = base_t::read_params(hdf5_id);
+    auto hdf5_params = base_t::read_params(hdf5_id);
 
     // check the integer type used in the hdf5 file
     auto int64 = base_t::is_int64(hdf5_id);
@@ -1194,16 +799,18 @@ public:
     //--------------------------------------------------------------------------
     // read coordinates
 
-    vertices_ = base_t::read_point_coords(hdf5_id, exo_params.num_nodes);
+    vertices_ = base_t::read_point_coords(hdf5_id, hdf5_params.num_nodes);
 
     //--------------------------------------------------------------------------
     // read face blocks
 
-    auto num_face_blk = exo_params.num_face_blk;
+    auto num_face_blk = hdf5_params.num_face_blk;
     vector<index_t> face_blk_ids;
 
     auto & face_vertices_ref = entities_[2][0];
 
+//FIXME
+/*
     // get the face block ids
     if (int64)
       face_blk_ids = base_t::template read_block_ids<long long>(
@@ -1228,10 +835,11 @@ public:
       }
     }
 
+
     //--------------------------------------------------------------------------
     // element blocks
 
-    auto num_elem_blk = exo_params.num_elem_blk;
+    auto num_elem_blk = hdf5_params.num_elem_blk;
     vector<index_t> elem_blk_ids;
 
     auto & cell_faces_ref = entities_[3][2];
@@ -1328,7 +936,7 @@ public:
 
     // check some assertions
     clog_assert(
-        cell_vertices_ref.size() == exo_params.num_elem,
+        cell_vertices_ref.size() == hdf5_params.num_elem,
         "Mismatch in read blocks");
 
     //--------------------------------------------------------------------------
@@ -1384,6 +992,7 @@ public:
 
     //--------------------------------------------------------------------------
     // close the file
+    */
     base_t::close(hdf5_id);
   }
 
@@ -1412,22 +1021,22 @@ public:
     auto hdf5_id = base_t::open(name, std::ios_base::out);
 
     // write the initialization parameters
-    auto exo_params = base_t::make_params();
+    auto hdf5_params = base_t::make_params();
     auto num_faces = num_entities(dimension() - 1);
     auto num_cells = num_entities(dimension());
-    exo_params.num_nodes = num_entities(0);
-    exo_params.num_face = num_faces;
-    exo_params.num_face_blk = 1;
-    exo_params.num_node_sets = node_sets.size();
-    exo_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
+    hdf5_params.num_nodes = num_entities(0);
+    hdf5_params.num_face = num_faces;
+    hdf5_params.num_face_blk = 1;
+    hdf5_params.num_node_sets = node_sets.size();
+    hdf5_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
 
     if (element_sets.size()) {
       for (const auto & set : element_sets)
-        exo_params.num_elem += set.second.size();
+        hdf5_params.num_elem += set.second.size();
     } else
-      exo_params.num_elem = num_cells;
+      hdf5_params.num_elem = num_cells;
 
-    base_t::write_params(hdf5_id, exo_params);
+    base_t::write_params(hdf5_id, hdf5_params);
 
     // check the integer type used in the hdf5 file
     auto int64 = base_t::is_int64(hdf5_id);
