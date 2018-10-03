@@ -23,7 +23,6 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
-#include <numeric>
 
 namespace flecsi_sp {
 namespace io {

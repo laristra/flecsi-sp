@@ -95,8 +95,8 @@ struct burton_1d_types_base
       vertices_to_wedges = vertices_to_corners,
       edges_to_wedges = vertices_to_corners,
       faces_to_wedges = vertices_to_corners,
-      wedges_to_cells = corners_to_cells, 
-      wedges_to_vertices = corners_to_vertices, 
+      wedges_to_cells = corners_to_cells,
+      wedges_to_vertices = corners_to_vertices,
       wedges_to_edges = corners_to_vertices,
       wedges_to_faces = corners_to_vertices,
       // index spaces that are not used
@@ -107,7 +107,9 @@ struct burton_1d_types_base
       faces_to_vertices = 7777,
       faces_to_edges = 7777,
       wedges_to_corners = 7777,
-      corners_to_wedges = 7777
+      corners_to_wedges = 7777,
+      // total number of index spaces
+      size = wedges + 1
     };
 
     //! Maps an entity dimension to an index space id
@@ -133,12 +135,12 @@ struct burton_1d_types_base
 
 
   };
- 
- 
+
+
   //============================================================================
   //! \brief The burton mesh index sub spaces.
-	//! These are used to define special sets, like all vertices used by owned
-	//! cells.
+  //! These are used to define special sets, like all vertices used by owned
+  //! cells.
   //============================================================================
   struct index_subspaces_t {
 
@@ -147,9 +149,9 @@ struct burton_1d_types_base
       overlapping_vertices, // all vertices used by owned cells
       overlapping_edges = overlapping_vertices,
       overlapping_faces = overlapping_vertices
-		};
+    };
 
-	};
+  };
 
 
   //============================================================================
@@ -175,17 +177,17 @@ struct burton_1d_types_base
   using wedge_t = corner_t;
 
   //============================================================================
-	//! setup the index subspaces
+  //! setup the index subspaces
   //============================================================================
   using index_subspaces = std::tuple<
     std::tuple<
-			flecsi::topology::index_space_<index_spaces_t::vertices>,
+      flecsi::topology::index_space_<index_spaces_t::vertices>,
       flecsi::topology::index_subspace_<index_subspaces_t::overlapping_vertices>
-		>
+    >
   >;
 
   //============================================================================
-  //! \brief depending upon the dimension/number of verices, create different 
+  //! \brief depending upon the dimension/number of verices, create different
   //!   types of entities
   //!
   //! \remark create_entity is called from build_connectivity with an id, and
@@ -196,7 +198,7 @@ struct burton_1d_types_base
   //! \tparam D The dimensional index.
   //============================================================================
   template<size_t M, size_t D, typename MESH_TOPOLOGY>
-  static constexpr 
+  static constexpr
   mesh_entity_base_t *
   create_entity(MESH_TOPOLOGY* mesh, size_t num_vertices, const id_t & id)
   {
@@ -222,7 +224,7 @@ struct burton_1d_types_base
     // should never get here
     return nullptr;
   }
-  
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////

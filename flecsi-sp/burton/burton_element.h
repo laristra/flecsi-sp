@@ -271,7 +271,7 @@ struct burton_element_t<1,1>
     entities[ 0 ] = v[ 0 ];
     entities[ 1 ] = v[ 1 ];
 
-    return std::vector<size_t>(1, 2);
+    return std::vector<size_t>(2, 1);
   }
 
   //----------------------------------------------------------------------------

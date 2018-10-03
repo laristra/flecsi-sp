@@ -147,7 +147,7 @@ private:
 //! \tparam N The dimension of the vertex.
 ////////////////////////////////////////////////////////////////////////////////
 template<>
-class burton_vertex_t<1> : public 
+class burton_vertex_t<1> : public
   flecsi::topology::mesh_entity__<0, burton_config_t<1>::num_domains>
 {
 public:
@@ -171,7 +171,7 @@ public:
   //! the flecsi mesh topology storage type
   using mesh_storage_t = typename config_t::mesh_storage_t;
   //! the flecsi mesh topology type
-  using mesh_topology_base_t = 
+  using mesh_topology_base_t =
     flecsi::topology::mesh_topology_base__< mesh_storage_t >;
 
   //! Type containing coordinates of the vertex.
@@ -194,7 +194,7 @@ public:
 
   //! Constructor
   template< typename...ARGS >
-  burton_vertex_t(ARGS &&... args) 
+  burton_vertex_t(ARGS &&... args)
     : coordinates_{ std::forward<ARGS>(args)... }
   {}
 
@@ -258,11 +258,11 @@ public:
   auto length() const
   { return 1.; }
 
-  //! the edge "area"
+  //! the face "area"
   auto area() const
   { return 1.; }
 
-  //! the edge "normal"
+  //! the face "normal"
   const auto & normal() const
   {
     return normal_;
@@ -284,9 +284,9 @@ public:
   //============================================================================
   // Private Data
   //============================================================================
-  
+
 private:
-  
+
   //! the coordinates of the vertex
   point_t coordinates_ = 0;
 

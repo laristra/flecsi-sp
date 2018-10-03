@@ -118,10 +118,10 @@ public:
   using vertex_t = burton_vertex_t<num_dimensions>;
 
   //! the base edge type
-  using edge_t = vertex_t;
+  using edge_t = burton_edge_t<num_dimensions>;
 
   //! the base edge type
-  using face_t = vertex_t;
+  using face_t = burton_face_t<num_dimensions>;
 
   //! the base cell type
   using cell_t = burton_cell_t<num_dimensions>;

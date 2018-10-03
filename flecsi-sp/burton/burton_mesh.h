@@ -1258,7 +1258,8 @@ public:
     {
 
       //--------------------------------------------------------------------------
-      // compute cell parameters (in 1D, this must come first)
+      // compute cell parameters (in 1D, this must come first;
+      // edge/face update requires cell to be up-to-date)
 
       if ( num_dimensions == 1 ) {
         #pragma omp for
@@ -1353,9 +1354,9 @@ public:
         bnd_faces.emplace_back( f );
         // tag the vertices in 2d or 3d
         if ( num_dimensions >= 2 ) {
-        auto vs = vertices( f );
-        bnd_verts.reserve( bnd_verts.size() + vs.size() );
-        for ( auto v : vs ) bnd_verts.emplace_back( v );
+          auto vs = vertices( f );
+          bnd_verts.reserve( bnd_verts.size() + vs.size() );
+          for ( auto v : vs ) bnd_verts.emplace_back( v );
         }
         // tag edges in 3d
         if ( num_dimensions == 3 ) {
