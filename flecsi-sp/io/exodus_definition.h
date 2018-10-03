@@ -809,7 +809,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief This is the three-dimensional mesh reader and writer based on the
+/// \brief This is the multi-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
 /// io_base_t provides registrations of the exodus file extensions.
@@ -820,8 +820,6 @@ class exodus_definition__ {};
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the one-dimensional mesh reader and writer based on the
 ///        Exodus format.
-///        Currently it just places a hardcoded 1D mesh into an Exodus-
-///        like structure.  Seems to work for now.
 ///
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
