@@ -179,6 +179,7 @@ endif()
 if(FLECSI_SP_ENABLE_EXODUS)
   include_directories(${EXODUSII_INCLUDE_DIRS})
   list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
+  add_definitions(-DFLECSI_SP_USE_EXODUS)
 endif()
 
 #------------------------------------------------------------------------------#
