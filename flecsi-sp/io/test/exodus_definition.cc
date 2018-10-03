@@ -29,7 +29,7 @@ void driver(int argc, char ** argv) {}
 ////////////////////////////////////////////////////////////////////////////////
 TEST(exodus_definition_1d, simple) {
 
-  exodus_definition_t<1> simple("not-used");
+  exodus_definition_t<1> simple("uniform_32.exo");
 
 } // TEST
 
@@ -60,7 +60,7 @@ TEST(exodus_definition_3d, simple) {
 ////////////////////////////////////////////////////////////////////////////////
 TEST(exodus_definition_1d, neighbors) {
 
-  exodus_definition_t<1> mesh("not-used");
+  exodus_definition_t<1> mesh("uniform_32.exo");
 
   // Primary partititon
   std::vector<size_t> selected_cells = { 8 };

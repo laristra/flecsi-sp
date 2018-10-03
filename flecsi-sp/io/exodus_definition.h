@@ -888,20 +888,28 @@ public:
   //============================================================================
   void read(const std::string & name) {
 
-    clog(info) << "Ignoring file: " << name
-        << ", hacking a 1D mesh instead" << std::endl;
+    clog(info) << "Reading mesh from: " << name << std::endl;
 
     //--------------------------------------------------------------------------
-    // generate coordinates
+    // Open file
 
-    const int NC = 32;
-    const int NP = NC + 1;
-    vertices_.resize(NP);
-    for (int p = 0; p < NP; ++p) {
-      vertices_[p] = p * (1. / NC);
-    }
+    // open the exodus file
+    auto exoid = base_t::open(name, std::ios_base::in);
+    if (exoid < 0)
+      clog_fatal("Problem reading exodus file");
+
+    // get the initialization parameters
+    auto exo_params = base_t::read_params(exoid);
+
+    // check the integer type used in the exodus file
+    auto int64 = base_t::is_int64(exoid);
+
+    //--------------------------------------------------------------------------
+    // read coordinates
+
+    vertices_ = base_t::read_point_coords(exoid, exo_params.num_nodes);
     clog_assert(
-        vertices_.size() == dimension() * NP,
+        vertices_.size() == dimension() * exo_params.num_nodes,
         "Mismatch in read vertices");
 
     auto num_vertices = vertices_.size() / dimension();
@@ -909,20 +917,32 @@ public:
     //--------------------------------------------------------------------------
     // element blocks
 
+    auto num_elem_blk = exo_params.num_elem_blk;
+    vector<index_t> elem_blk_ids;
+
     auto & cell_vertices_ref = entities_[1][0];
 
-    vector<index_t> elem_vs;
-    elem_vs.reserve(2);
-    for (int c = 0; c < NC; ++c) {
-      elem_vs.clear();
-      elem_vs.emplace_back(c);
-      elem_vs.emplace_back(c+1);
-      cell_vertices_ref.push_back(elem_vs);
+    // get the element block ids
+    if (int64)
+      elem_blk_ids = base_t::template read_block_ids<long long>(
+          exoid, EX_ELEM_BLOCK, num_elem_blk);
+    else
+      elem_blk_ids = base_t::template read_block_ids<int>(
+          exoid, EX_ELEM_BLOCK, num_elem_blk);
+
+    // read each block
+    for (int iblk = 0; iblk < num_elem_blk; iblk++) {
+      if (int64)
+        base_t::template read_element_block<long long>(
+            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+      else
+        base_t::template read_element_block<int>(
+            exoid, elem_blk_ids[iblk], cell_vertices_ref);
     }
 
     // check some assertions
     clog_assert(
-        cell_vertices_ref.size() == NC,
+        cell_vertices_ref.size() == exo_params.num_elem,
         "Mismatch in read blocks");
 
     //--------------------------------------------------------------------------
@@ -931,6 +951,10 @@ public:
     entities_[0][1].reserve(num_vertices);
 
     detail::transpose(entities_[1][0], entities_[0][1]);
+
+    //--------------------------------------------------------------------------
+    // close the file
+    base_t::close(exoid);
   }
 
   //============================================================================

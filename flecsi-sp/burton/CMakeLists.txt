@@ -28,7 +28,7 @@ install(FILES burton_specialization_init.cc DESTINATION ${FLECSI_SP_SHARE_DIR})
 
 cinch_add_unit(flecsi_sp_burton_1d
   ARGUMENTS
-  -m not_used
+  -m ${FLECSI_SP_DATA_DIR}/meshes/1d/uniform/uniform_32.exo
   SOURCES
     test/burton.cc
     burton_specialization_init.cc
@@ -53,7 +53,7 @@ cinch_add_unit(flecsi_sp_burton_1d
 
 cinch_add_unit(flecsi_sp_burton_extras_1d
   ARGUMENTS
-  -m not_used
+  -m ${FLECSI_SP_DATA_DIR}/meshes/1d/uniform/uniform_32.exo
   SOURCES
     test/burton.cc
     burton_specialization_init.cc
