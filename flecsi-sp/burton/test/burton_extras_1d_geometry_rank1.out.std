@@ -50,3 +50,57 @@ For each cell:
 ---- cell id: 16 with centroid ( 0.484375 ) and volume 0.03125
 ++++ vertex id: 16 with coordinates ( 0.46875 )
 ++++ vertex id: 17 with coordinates ( 0.5 )
+For each edge:
+---- edge id: 0 with midpoint ( 0.5625 ), length 1 and normal ( 1 )
+---- edge id: 1 with midpoint ( 0.59375 ), length 1 and normal ( 1 )
+---- edge id: 2 with midpoint ( 0.625 ), length 1 and normal ( 1 )
+---- edge id: 3 with midpoint ( 0.65625 ), length 1 and normal ( 1 )
+---- edge id: 4 with midpoint ( 0.6875 ), length 1 and normal ( 1 )
+---- edge id: 5 with midpoint ( 0.71875 ), length 1 and normal ( 1 )
+---- edge id: 6 with midpoint ( 0.75 ), length 1 and normal ( 1 )
+---- edge id: 7 with midpoint ( 0.78125 ), length 1 and normal ( 1 )
+---- edge id: 8 with midpoint ( 0.8125 ), length 1 and normal ( 1 )
+---- edge id: 9 with midpoint ( 0.84375 ), length 1 and normal ( 1 )
+---- edge id: 10 with midpoint ( 0.875 ), length 1 and normal ( 1 )
+---- edge id: 11 with midpoint ( 0.90625 ), length 1 and normal ( 1 )
+---- edge id: 12 with midpoint ( 0.9375 ), length 1 and normal ( 1 )
+---- edge id: 13 with midpoint ( 0.96875 ), length 1 and normal ( 1 )
+---- edge id: 14 with midpoint ( 1 ), length 1 and normal ( 1 )
+---- edge id: 15 with midpoint ( 0.53125 ), length 1 and normal ( 1 )
+---- edge id: 16 with midpoint ( 0.46875 ), length 1 and normal ( -1 )
+---- edge id: 17 with midpoint ( 0.5 ), length 1 and normal ( 1 )
+For each wedge:
+---- wedge id: 0 with facet normal ( -1 ), facet area 1
+---- wedge id: 1 with facet normal ( 1 ), facet area 1
+---- wedge id: 2 with facet normal ( -1 ), facet area 1
+---- wedge id: 3 with facet normal ( 1 ), facet area 1
+---- wedge id: 4 with facet normal ( -1 ), facet area 1
+---- wedge id: 5 with facet normal ( 1 ), facet area 1
+---- wedge id: 6 with facet normal ( -1 ), facet area 1
+---- wedge id: 7 with facet normal ( 1 ), facet area 1
+---- wedge id: 8 with facet normal ( -1 ), facet area 1
+---- wedge id: 9 with facet normal ( 1 ), facet area 1
+---- wedge id: 10 with facet normal ( -1 ), facet area 1
+---- wedge id: 11 with facet normal ( 1 ), facet area 1
+---- wedge id: 12 with facet normal ( -1 ), facet area 1
+---- wedge id: 13 with facet normal ( 1 ), facet area 1
+---- wedge id: 14 with facet normal ( -1 ), facet area 1
+---- wedge id: 15 with facet normal ( 1 ), facet area 1
+---- wedge id: 16 with facet normal ( -1 ), facet area 1
+---- wedge id: 17 with facet normal ( 1 ), facet area 1
+---- wedge id: 18 with facet normal ( -1 ), facet area 1
+---- wedge id: 19 with facet normal ( 1 ), facet area 1
+---- wedge id: 20 with facet normal ( -1 ), facet area 1
+---- wedge id: 21 with facet normal ( 1 ), facet area 1
+---- wedge id: 22 with facet normal ( -1 ), facet area 1
+---- wedge id: 23 with facet normal ( 1 ), facet area 1
+---- wedge id: 24 with facet normal ( -1 ), facet area 1
+---- wedge id: 25 with facet normal ( 1 ), facet area 1
+---- wedge id: 26 with facet normal ( -1 ), facet area 1
+---- wedge id: 27 with facet normal ( 1 ), facet area 1
+---- wedge id: 28 with facet normal ( -1 ), facet area 1
+---- wedge id: 29 with facet normal ( 1 ), facet area 1
+---- wedge id: 30 with facet normal ( -1 ), facet area 1
+---- wedge id: 31 with facet normal ( 1 ), facet area 1
+---- wedge id: 32 with facet normal ( -1 ), facet area 1
+---- wedge id: 33 with facet normal ( 1 ), facet area 1

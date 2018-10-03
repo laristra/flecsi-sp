@@ -106,3 +106,72 @@ For each vertex:
     ----Cells:
     ++++ cell id: 16
     ++++ cell id: 15
+For each cell:
+^^^^^^^^Cell id: 0
+    ----Vertices:
+    ++++ vertex id: 15
+    ++++ vertex id: 0
+^^^^^^^^Cell id: 1
+    ----Vertices:
+    ++++ vertex id: 0
+    ++++ vertex id: 1
+^^^^^^^^Cell id: 2
+    ----Vertices:
+    ++++ vertex id: 1
+    ++++ vertex id: 2
+^^^^^^^^Cell id: 3
+    ----Vertices:
+    ++++ vertex id: 2
+    ++++ vertex id: 3
+^^^^^^^^Cell id: 4
+    ----Vertices:
+    ++++ vertex id: 3
+    ++++ vertex id: 4
+^^^^^^^^Cell id: 5
+    ----Vertices:
+    ++++ vertex id: 4
+    ++++ vertex id: 5
+^^^^^^^^Cell id: 6
+    ----Vertices:
+    ++++ vertex id: 5
+    ++++ vertex id: 6
+^^^^^^^^Cell id: 7
+    ----Vertices:
+    ++++ vertex id: 6
+    ++++ vertex id: 7
+^^^^^^^^Cell id: 8
+    ----Vertices:
+    ++++ vertex id: 7
+    ++++ vertex id: 8
+^^^^^^^^Cell id: 9
+    ----Vertices:
+    ++++ vertex id: 8
+    ++++ vertex id: 9
+^^^^^^^^Cell id: 10
+    ----Vertices:
+    ++++ vertex id: 9
+    ++++ vertex id: 10
+^^^^^^^^Cell id: 11
+    ----Vertices:
+    ++++ vertex id: 10
+    ++++ vertex id: 11
+^^^^^^^^Cell id: 12
+    ----Vertices:
+    ++++ vertex id: 11
+    ++++ vertex id: 12
+^^^^^^^^Cell id: 13
+    ----Vertices:
+    ++++ vertex id: 12
+    ++++ vertex id: 13
+^^^^^^^^Cell id: 14
+    ----Vertices:
+    ++++ vertex id: 13
+    ++++ vertex id: 14
+^^^^^^^^Cell id: 15
+    ----Vertices:
+    ++++ vertex id: 17
+    ++++ vertex id: 15
+^^^^^^^^Cell id: 16
+    ----Vertices:
+    ++++ vertex id: 16
+    ++++ vertex id: 17
