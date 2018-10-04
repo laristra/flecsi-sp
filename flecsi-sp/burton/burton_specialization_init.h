@@ -34,6 +34,8 @@
 // system includes
 #include <iostream>
 
+#include <ristra/utils/algorithm.h>
+
 namespace flecsi_sp {
 namespace burton {
 
