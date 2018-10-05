@@ -809,7 +809,7 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief This is the three-dimensional mesh reader and writer based on the
+/// \brief This is the multi-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
 /// io_base_t provides registrations of the exodus file extensions.
@@ -818,7 +818,323 @@ template<int D, typename T>
 class exodus_definition__ {};
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief This is the three-dimensional mesh reader and writer based on the
+/// \brief This is the one-dimensional mesh reader and writer based on the
+///        Exodus format.
+///
+/// io_base_t provides registrations of the exodus file extensions.
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+class exodus_definition__<1, T> : public flecsi::topology::mesh_definition__<1>
+{
+
+public:
+  //============================================================================
+  // Typedefs
+  //============================================================================
+
+  //! the instantiated base type
+  using base_t = exodus_base__<1, T>;
+
+  //! the instantiated mesh definition type
+  using mesh_definition_t = flecsi::topology::mesh_definition__<1>;
+
+  //! the number of dimensions
+  using mesh_definition_t::dimension;
+
+  //! the floating point type
+  using real_t = typename base_t::real_t;
+  //! the index type
+  using index_t = typename base_t::index_t;
+
+  //! the vector type
+  template<typename U>
+  using vector = typename base_t::template vector<U>;
+
+  //! the connectivity type
+  using connectivity_t = typename base_t::connectivity_t;
+
+  //============================================================================
+  // Constructors
+  //============================================================================
+
+  //! \brief Default constructor
+  exodus_definition__() = default;
+
+  //! \brief Constructor with filename
+  //! \param [in] filename  The name of the file to load
+  exodus_definition__(const std::string & filename) {
+    read(filename);
+  }
+
+  /// Copy constructor (disabled)
+  exodus_definition__(const exodus_definition__ &) = delete;
+
+  /// Assignment operator (disabled)
+  exodus_definition__ & operator=(const exodus_definition__ &) = delete;
+
+  /// Destructor
+  ~exodus_definition__() = default;
+
+  //============================================================================
+  //! \brief Implementation of exodus mesh read for burton specialization.
+  //!
+  //! \param[in] name Read burton mesh \e m from \e name.
+  //! \param[out] m Populate burton mesh \e m with contents of \e name.
+  //!
+  //! \return Exodus error code. 0 on success.
+  //============================================================================
+  void read(const std::string & name) {
+
+    clog(info) << "Reading mesh from: " << name << std::endl;
+
+    //--------------------------------------------------------------------------
+    // Open file
+
+    // open the exodus file
+    auto exoid = base_t::open(name, std::ios_base::in);
+    if (exoid < 0)
+      clog_fatal("Problem reading exodus file");
+
+    // get the initialization parameters
+    auto exo_params = base_t::read_params(exoid);
+
+    // check the integer type used in the exodus file
+    auto int64 = base_t::is_int64(exoid);
+
+    //--------------------------------------------------------------------------
+    // read coordinates
+
+    vertices_ = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    clog_assert(
+        vertices_.size() == dimension() * exo_params.num_nodes,
+        "Mismatch in read vertices");
+
+    auto num_vertices = vertices_.size() / dimension();
+
+    //--------------------------------------------------------------------------
+    // element blocks
+
+    auto num_elem_blk = exo_params.num_elem_blk;
+    vector<index_t> elem_blk_ids;
+
+    auto & cell_vertices_ref = entities_[1][0];
+
+    // get the element block ids
+    if (int64)
+      elem_blk_ids = base_t::template read_block_ids<long long>(
+          exoid, EX_ELEM_BLOCK, num_elem_blk);
+    else
+      elem_blk_ids = base_t::template read_block_ids<int>(
+          exoid, EX_ELEM_BLOCK, num_elem_blk);
+
+    // read each block
+    for (int iblk = 0; iblk < num_elem_blk; iblk++) {
+      if (int64)
+        base_t::template read_element_block<long long>(
+            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+      else
+        base_t::template read_element_block<int>(
+            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+    }
+
+    // check some assertions
+    clog_assert(
+        cell_vertices_ref.size() == exo_params.num_elem,
+        "Mismatch in read blocks");
+
+    //--------------------------------------------------------------------------
+    // Create the remainder of the connectivities
+
+    entities_[0][1].reserve(num_vertices);
+
+    detail::transpose(entities_[1][0], entities_[0][1]);
+
+    //--------------------------------------------------------------------------
+    // close the file
+    base_t::close(exoid);
+  }
+
+  //============================================================================
+  //! \brief Implementation of exodus mesh write for burton specialization.
+  //!
+  //! \param[in] name Read burton mesh \e m from \e name.
+  //! \param[out] m Populate burton mesh \e m with contents of \e name.
+  //!
+  //! \return Exodus error code. 0 on success.
+  //============================================================================
+  template<typename U = int>
+  void write(
+      const std::string & name,
+      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
+          element_sets = {},
+      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
+          node_sets = {}) const {
+
+    clog(info) << "Writing mesh to: " << name << std::endl;
+
+    //--------------------------------------------------------------------------
+    // Open file
+
+    // open the exodus file
+    auto exoid = base_t::open(name, std::ios_base::out);
+
+    // write the initialization parameters
+    auto exo_params = base_t::make_params();
+    auto num_cells = num_entities(dimension());
+    exo_params.num_nodes = num_entities(0);
+    exo_params.num_node_sets = node_sets.size();
+    exo_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
+
+    if (element_sets.size()) {
+      for (const auto & set : element_sets)
+        exo_params.num_elem += set.second.size();
+    } else
+      exo_params.num_elem = num_cells;
+
+    base_t::write_params(exoid, exo_params);
+
+    // check the integer type used in the exodus file
+    auto int64 = base_t::is_int64(exoid);
+
+    //--------------------------------------------------------------------------
+    // write coordinates
+
+    base_t::write_point_coords(exoid, vertices_);
+
+    //--------------------------------------------------------------------------
+    // element blocks
+
+    const auto & cell_vertices = entities_.at(1).at(0);
+    int elem_blk_id = 1;
+
+    // add the whole element block
+    if (!element_sets.size()) {
+
+      auto cell_vertices_func = [&](auto c, auto & vert_list) {
+        const auto & vs = cell_vertices[c];
+        vert_list.insert(vert_list.end(), vs.begin(), vs.end());
+      };
+
+      if (int64)
+        base_t::template write_element_block<long long>(
+            exoid, elem_blk_id++, "cells", num_cells, cell_vertices_func);
+      else
+        base_t::template write_element_block<int>(
+            exoid, elem_blk_id++, "cells", num_cells, cell_vertices_func);
+
+    } // element block
+
+    // or add the element sets
+    for (const auto & set : element_sets) {
+
+      const auto & set_name = set.first;
+      const auto & set_elements = set.second;
+      auto num_cells_set = set_elements.size();
+
+      if (num_cells_set == 0)
+        continue;
+
+      auto cell_vertices_func = [&](auto c, auto & vert_list) {
+        const auto & vs = cell_vertices[set_elements[c]];
+        vert_list.insert(vert_list.end(), vs.begin(), vs.end());
+      };
+
+      if (int64)
+        base_t::template write_element_block<long long>(
+            exoid, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
+      else
+        base_t::template write_element_block<int>(
+            exoid, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
+
+    } // sets
+
+    //--------------------------------------------------------------------------
+    // Node sets
+
+    int node_set_id = 1;
+
+    for (const auto & set : node_sets) {
+
+      const auto & set_name = set.first;
+      const auto & set_nodes = set.second;
+      auto num_nodes_set = set_nodes.size();
+
+      if (num_nodes_set == 0)
+        continue;
+
+      if (int64)
+        base_t::template write_node_set<long long>(
+            exoid, ++node_set_id, set_name, set_nodes);
+      else
+        base_t::template write_node_set<int>(
+            exoid, ++node_set_id, set_name, set_nodes);
+
+    } // sets
+
+    //--------------------------------------------------------------------------
+    // close the file
+    base_t::close(exoid);
+  }
+
+  //============================================================================
+  // Required Overrides
+  //============================================================================
+
+  /// Return the number of entities of a particular dimension
+  /// \param [in] dim  The entity dimension to query.
+  size_t num_entities(size_t dim) const override {
+    switch (dim) {
+      case 0:
+        return vertices_.size() / dimension();
+      case 1:
+        return entities_.at(dim).at(0).size();
+      default:
+        clog_fatal(
+            "Dimension out of range: 0 < " << dim << " </ " << dimension());
+        return 0;
+    }
+  }
+
+  /// Return the set of vertices of a particular entity.
+  /// \param [in] dimension  The entity dimension to query.
+  /// \param [in] entity_id  The id of the entity in question.
+  const auto & entities(size_t from_dim, size_t to_dim) const {
+    return entities_.at(from_dim).at(to_dim);
+  } // vertices
+
+  /// return the set of vertices of a particular entity.
+  /// \param [in] dimension  the entity dimension to query.
+  /// \param [in] entity_id  the id of the entity in question.
+  std::vector<size_t>
+  entities(size_t from_dim, size_t to_dim, size_t from_id) const override {
+    return entities_.at(from_dim).at(to_dim).at(from_id);
+  } // vertices
+
+  /// Return the vertex coordinates for a certain id.
+  /// \param [in] vertex_id  The id of the vertex to query.
+  template<typename POINT_TYPE>
+  auto vertex(size_t vertex_id) const {
+    auto num_vertices = vertices_.size() / dimension();
+    POINT_TYPE p;
+    for (int i = 0; i < dimension(); ++i)
+      p[i] = vertices_[i * num_vertices + vertex_id];
+    return p;
+  } // vertex
+
+private:
+  //============================================================================
+  // Private data
+  //============================================================================
+
+  //! \brief storage for element verts
+  std::map<index_t, std::map<index_t, connectivity_t>> entities_;
+
+  //! \brief storage for vertex coordinates
+  vector<real_t> vertices_;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief This is the two-dimensional mesh reader and writer based on the
 ///        Exodus format.
 ///
 /// io_base_t provides registrations of the exodus file extensions.

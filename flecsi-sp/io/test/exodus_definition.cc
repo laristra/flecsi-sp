@@ -25,6 +25,15 @@ void driver(int argc, char ** argv) {}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/// \brief This tests the 1d version of the exodus mesh definition
+////////////////////////////////////////////////////////////////////////////////
+TEST(exodus_definition_1d, simple) {
+
+  exodus_definition_t<1> simple("uniform_32.exo");
+
+} // TEST
+
+////////////////////////////////////////////////////////////////////////////////
 /// \brief This tests the 2d version of the exodus mesh definition
 ////////////////////////////////////////////////////////////////////////////////
 TEST(exodus_definition_2d, simple) {
@@ -45,6 +54,30 @@ TEST(exodus_definition_3d, simple) {
 
 } // TEST
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief This excersizes some of the partitioning functionality in 1d
+////////////////////////////////////////////////////////////////////////////////
+TEST(exodus_definition_1d, neighbors) {
+
+  exodus_definition_t<1> mesh("uniform_32.exo");
+
+  // Primary partititon
+  std::vector<size_t> selected_cells = { 8 };
+
+  // The closure captures any cell that is adjacent to a cell in the
+  // set of indices passed to the method. The closure includes the
+  // initial set of indices.
+  
+  // here we include all cells that use a vertex of the original cell
+  auto vertex_neighbors = 
+    flecsi::topology::entity_neighbors<1,1,0>(mesh, selected_cells);
+
+  ASSERT_EQ(
+    vertex_neighbors, 
+    std::set<size_t>({7, 8, 9})
+  );
+} // TEST
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This excersizes some of the partitioning functionality in 2d

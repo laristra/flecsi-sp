@@ -23,6 +23,7 @@ if ( FLECSI_SP_ENABLE_EXODUS )
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
     ${FLECSI_SP_RUNTIME_DRIVER}    
     INPUTS 
+      ${FLECSI_SP_DATA_DIR}/meshes/1d/uniform/uniform_32.exo
       ${FLECSI_SP_DATA_DIR}/meshes/2d/mixed/mixed.exo
       ${FLECSI_SP_DATA_DIR}/meshes/2d/voro/voro.g
       ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-hex.exo
@@ -41,6 +42,7 @@ if ( FLECSI_SP_ENABLE_EXODUS )
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
     ${FLECSI_SP_RUNTIME_DRIVER}
     INPUTS
+      ${FLECSI_SP_DATA_DIR}/meshes/1d/uniform/uniform_32.exo
       ${FLECSI_SP_DATA_DIR}/meshes/2d/mixed/mixed.exo
       ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-hex.exo
     LIBRARIES
