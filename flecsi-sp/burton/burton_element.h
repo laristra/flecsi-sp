@@ -74,10 +74,6 @@ auto coordinates( const MESH_TOPOLOGY * mesh, const E * ent )
 
 
 
-// forward declares
-template< std::size_t N >
-class burton_corner_t;
-
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief This type provides the base for all the primal entities except 
 //!        for vertices.
@@ -1418,9 +1414,6 @@ struct burton_element_t<3,3>
 
   //! the base cell type
   using cell_t = burton_element_t<3,3>;
-
-  //! the base corner type
-  using corner_t = burton_corner_t<num_dimensions>;
 
   //! the shape type
   using shape_t = config_t::shape_t;
