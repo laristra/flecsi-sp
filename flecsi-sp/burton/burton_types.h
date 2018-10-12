@@ -13,9 +13,8 @@
 
 #include <flecsi/topology/mesh.h>
 #include <flecsi-sp/burton/burton_vertex.h>
-#include <flecsi-sp/burton/burton_corner.h>
 #include <flecsi-sp/burton/burton_element.h>
-#include <flecsi-sp/burton/burton_wedge.h>
+#include <flecsi-sp/burton/burton_extras.h>
 #include <flecsi-sp/burton/burton_config.h>
 #include <ristra/geometry/shapes/geometric_shapes.h>
 
@@ -174,7 +173,7 @@ struct burton_1d_types_base
   using corner_t = burton_corner_t<num_dimensions>;
 
   //! Type for burton mesh wedges (in 1d, same as corners).
-  using wedge_t = corner_t;
+  using wedge_t = burton_wedge_t<num_dimensions>;
 
   //============================================================================
   //! setup the index subspaces

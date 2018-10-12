@@ -5,15 +5,14 @@
 
 set(burton_HEADERS
   burton_config.h
-  burton_corner.h
   burton_element.h
+  burton_extras.h
   burton_mesh.h
   burton_mesh_topology.h
   burton_specialization_init.h
   burton_specialization_arguments.h
   burton_types.h
   burton_vertex.h
-  burton_wedge.h
 
   PARENT_SCOPE # THIS NEEDS TO BE HERE
 )
