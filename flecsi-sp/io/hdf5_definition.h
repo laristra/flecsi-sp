@@ -289,10 +289,10 @@ yCells[5]<<" , "<< yCells[6]<<" , "<< yCells[7]<<" , "<<std::endl;
 				xVertex_dataspace );
 
 //      dataset.read( xCells, PredType::NATIVE_DOUBLE,dataspace );
-std::cout<<"xVertex = "<<xVertex[0]<<" , "<<xVertex[1]<<" , "<<
+/*std::cout<<"xVertex = "<<xVertex[0]<<" , "<<xVertex[1]<<" , "<<
 xVertex[2]<<" , "<< xVertex[3]<<" , "<< xVertex[4]<<" , "<<
 xVertex[5]<<" , "<< xVertex[6]<<" , "<< xVertex[7]<<" , "<<std::endl;
-
+*/
       real_t yVertex[num_vertices_];
       for (size_t i=0; i<num_vertices_; i++)
         yVertex[i]=0;
@@ -341,6 +341,184 @@ yVertex[5]<<" , "<< yVertex[6]<<" , "<< yVertex[7]<<" , "<<std::endl;
    {
       error.printError();
    }
+
+     //read connectivity information:
+    try
+	  {
+      //-----------------------------------------------------------------
+      // Open an existing file and dataset for vertivesOnCell.
+      {
+      H5File file(name, H5F_ACC_RDONLY);
+      const H5std_string DATASET_NAME( "verticesOnCell" );
+
+      DataSet vertOnCell_dataset = file.openDataSet(DATASET_NAME);
+
+      //Get the class of the datatype that is used by the dataset.
+      H5T_class_t type_class = vertOnCell_dataset.getTypeClass();
+
+      assert(type_class == H5T_INTEGER);
+      // Get dataspace of the dataset.
+      DataSpace vertOnCell_dataspace = vertOnCell_dataset.getSpace();
+
+      // Get the number of dimensions in the dataspace.
+      int dimension = vertOnCell_dataspace.getSimpleExtentNdims();
+
+      assert (dimension==2);
+
+      // Get the dimension size of each dimension in the dataspace and
+      // display them.
+      hsize_t dims_out[2];
+      int ndims = vertOnCell_dataspace.getSimpleExtentDims( dims_out, NULL);
+
+      assert(num_cells_=dims_out[0]);
+
+      size_t vertOnCell[num_cells_][dims_out[1]];
+      for (size_t i=0; i<num_cells_; i++)
+       for (size_t j=0; j<dims_out[1]; j++) 
+        vertOnCell[i][j]=0;
+
+      vertOnCell_dataset.read( vertOnCell, PredType::NATIVE_INT,
+        vertOnCell_dataspace );
+
+
+      auto & cell_vertices_ref = entities_[2][0];
+
+      for (size_t i=0; i<num_cells_; i++){
+       std::vector<size_t> vert_tmp;
+       for (size_t j=0; j<dims_out[1]; j++){
+				 vert_tmp.push_back(vertOnCell[i][j]);
+       }
+       cell_vertices_ref.push_back(vert_tmp);
+		  }
+      }//scope
+      //-----------------------------------------------------------------
+      // Open an existing file and dataset for edgesOnCell.
+      {//scope
+      H5File file(name, H5F_ACC_RDONLY);
+      const H5std_string DATASET_NAME( "edgesOnCell" );
+
+      DataSet edgesOnCell_dataset = file.openDataSet(DATASET_NAME);
+
+      //Get the class of the datatype that is used by the dataset.
+      H5T_class_t type_class = edgesOnCell_dataset.getTypeClass();
+
+      assert(type_class == H5T_INTEGER);
+      // Get dataspace of the dataset.
+      DataSpace edgesOnCell_dataspace = edgesOnCell_dataset.getSpace();
+
+      // Get the number of dimensions in the dataspace.
+      int dimension = edgesOnCell_dataspace.getSimpleExtentNdims();
+
+      assert (dimension==2);
+
+      // Get the dimension size of each dimension in the dataspace and
+      // display them.
+      hsize_t dims_out[2];
+      int ndims = edgesOnCell_dataspace.getSimpleExtentDims( dims_out, NULL);
+
+      assert(num_cells_=dims_out[0]);
+
+      size_t edgesOnCell[num_cells_][dims_out[1]];
+      for (size_t i=0; i<num_cells_; i++)
+       for (size_t j=0; j<dims_out[1]; j++)
+        edgesOnCell[i][j]=0;
+
+      edgesOnCell_dataset.read( edgesOnCell, PredType::NATIVE_INT,
+        edgesOnCell_dataspace );
+
+
+      auto & cell_edges_ref = entities_[2][1];
+
+      for (size_t i=0; i<num_cells_; i++){
+       std::vector<size_t> edges_tmp;
+       for (size_t j=0; j<dims_out[1]; j++){
+         edges_tmp.push_back(edgesOnCell[i][j]);
+       }
+       cell_edges_ref.push_back(edges_tmp);
+      }
+      }//scope
+
+
+      //-----------------------------------------------------------------
+      // Open an existing file and dataset for verticesOnEdge.
+      {
+      H5File file(name, H5F_ACC_RDONLY);
+      const H5std_string DATASET_NAME( "verticesOnEdge" );
+
+      DataSet verticesOnEdge_dataset = file.openDataSet(DATASET_NAME);
+
+      //Get the class of the datatype that is used by the dataset.
+      H5T_class_t type_class = verticesOnEdge_dataset.getTypeClass();
+
+      assert(type_class == H5T_INTEGER);
+      // Get dataspace of the dataset.
+      DataSpace verticesOnEdge_dataspace = verticesOnEdge_dataset.getSpace();
+
+      // Get the number of dimensions in the dataspace.
+      int dimension = verticesOnEdge_dataspace.getSimpleExtentNdims();
+
+      assert (dimension==2);
+
+      // Get the dimension size of each dimension in the dataspace and
+      // display them.
+      hsize_t dims_out[2];
+      int ndims = verticesOnEdge_dataspace.getSimpleExtentDims( dims_out, NULL);
+
+      num_edges_=dims_out[0];
+
+      size_t verticesOnEdge[num_edges_][dims_out[1]];
+      for (size_t i=0; i<num_edges_; i++)
+       for (size_t j=0; j<dims_out[1]; j++)
+        verticesOnEdge[i][j]=0;
+
+      verticesOnEdge_dataset.read( verticesOnEdge, PredType::NATIVE_INT,
+        verticesOnEdge_dataspace );
+
+      auto & edge_vertices_ref = entities_[1][0];
+
+      for (size_t i=0; i<num_edges_; i++){
+       std::vector<size_t> vert_tmp;
+       for (size_t j=0; j<dims_out[1]; j++){
+         vert_tmp.push_back(verticesOnEdge[i][j]);
+       }
+       edge_vertices_ref.push_back(vert_tmp);
+      }
+      }//scope
+
+      //------------------------------------------------------------------------
+    	// Create the remainder of the connectivities
+
+    	entities_[1][2].reserve(num_edges_);
+    	entities_[0][2].reserve(num_vertices_);
+    	entities_[0][1].reserve(num_vertices_);
+
+    	detail::transpose(entities_[2][1], entities_[1][2]);
+    	detail::transpose(entities_[2][0], entities_[0][2]);
+   	  detail::transpose(entities_[1][0], entities_[0][1]);      
+
+		}//end try
+    
+    //catch failure caused by the H5File operations
+    catch(FileIException error)
+    {
+      error.printErrorStack();
+    }
+    // catch failure caused by the DataSet operations
+   catch( DataSetIException error )
+   {
+      error.printError();
+   }
+   // catch failure caused by the DataSpace operations
+   catch( DataSpaceIException error )
+   {
+      error.printError();
+   }
+   // catch failure caused by the DataSpace operations
+   catch( DataTypeIException error )
+   {
+      error.printError();
+   }
+
 
 
   }
@@ -412,11 +590,6 @@ yVertex[5]<<" , "<< yVertex[6]<<" , "<< yVertex[7]<<" , "<<std::endl;
       p[i] = vertices_[i * num_vertices + vertex_id];
     return p;
   } // vertex
-
-//  size_t dimension()
-//  {
-//    return 2;
-//  }
 
 private:
   //============================================================================
