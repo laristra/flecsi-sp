@@ -32,6 +32,61 @@
 namespace flecsi_sp {
 namespace io {
 
+namespace detail{
+//reading connectivity information
+//template<typename TYPE>
+void read_connectivity(
+  const std::string & file_name,
+	const H5std_string &dataset_name,
+  std::vector<std::vector<size_t>> &connectivity
+)
+{
+      using namespace H5;
+
+      H5File file(file_name, H5F_ACC_RDONLY);
+
+      DataSet conn_dataset = file.openDataSet(dataset_name);
+
+      //Get the class of the datatype that is used by the dataset.
+      H5T_class_t type_class = conn_dataset.getTypeClass();
+
+      assert(type_class == H5T_INTEGER);
+      // Get dataspace of the dataset.
+      DataSpace conn_dataspace = conn_dataset.getSpace();
+
+      // Get the number of dimensions in the dataspace.
+      int dimension = conn_dataspace.getSimpleExtentNdims();
+
+      assert (dimension==2);
+
+      // Get the dimension size of each dimension in the dataspace and
+      // display them.
+      hsize_t dims_out[2];
+      int ndims = conn_dataspace.getSimpleExtentDims( dims_out, NULL);
+
+      size_t num_entities1=dims_out[0];
+      size_t num_entities2=dims_out[1];
+
+      size_t conn[dims_out[0]][dims_out[1]];
+      for (size_t i=0; i<num_entities1; i++)
+       for (size_t j=0; j<num_entities2; j++)
+         conn[i][j]=0;
+
+      conn_dataset.read( conn, PredType::NATIVE_INT, conn_dataspace );
+
+      for (size_t i=0; i<num_entities1; i++){
+       std::vector<size_t> tmp;
+       for (size_t j=0; j<num_entities2; j++){
+         tmp.push_back(conn[i][j]);
+       }
+       connectivity.push_back(tmp);
+      }
+}//read_connectivity
+
+
+
+}//end details
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        Exodus format.
@@ -345,156 +400,30 @@ yVertex[5]<<" , "<< yVertex[6]<<" , "<< yVertex[7]<<" , "<<std::endl;
      //read connectivity information:
     try
 	  {
-      //-----------------------------------------------------------------
-      // Open an existing file and dataset for vertivesOnCell.
-      {
-      H5File file(name, H5F_ACC_RDONLY);
-      const H5std_string DATASET_NAME( "verticesOnCell" );
 
-      DataSet vertOnCell_dataset = file.openDataSet(DATASET_NAME);
+      const H5std_string vertOnCell_NAME( "verticesOnCell" );
+      detail::read_connectivity(name, vertOnCell_NAME, entities_[2][0]);
 
-      //Get the class of the datatype that is used by the dataset.
-      H5T_class_t type_class = vertOnCell_dataset.getTypeClass();
+      const H5std_string edgesOnCell_NAME( "edgesOnCell" );
+      detail::read_connectivity(name, edgesOnCell_NAME, entities_[2][1]);
 
-      assert(type_class == H5T_INTEGER);
-      // Get dataspace of the dataset.
-      DataSpace vertOnCell_dataspace = vertOnCell_dataset.getSpace();
+      const H5std_string vertOnEdge_NAME( "verticesOnEdge" );
+      detail::read_connectivity(name, vertOnEdge_NAME, entities_[1][0]);
 
-      // Get the number of dimensions in the dataspace.
-      int dimension = vertOnCell_dataspace.getSimpleExtentNdims();
+      const H5std_string cellsOnVertex_NAME( "cellsOnVertex" );
+      detail::read_connectivity(name, cellsOnVertex_NAME, entities_[0][2]);
 
-      assert (dimension==2);
+      const H5std_string cellsOnEdge_NAME( "cellsOnEdge" );
+      detail::read_connectivity(name, cellsOnEdge_NAME, entities_[1][2]);
 
-      // Get the dimension size of each dimension in the dataspace and
-      // display them.
-      hsize_t dims_out[2];
-      int ndims = vertOnCell_dataspace.getSimpleExtentDims( dims_out, NULL);
+      const H5std_string edgesOnVertex_NAME( "edgesOnVertex" );
+      detail::read_connectivity(name, edgesOnVertex_NAME, entities_[0][1]);
 
-      assert(num_cells_=dims_out[0]);
+      const H5std_string cellsOnCell_NAME( "cellsOnCell" );
+      detail::read_connectivity(name, cellsOnCell_NAME, entities_[2][2]);
 
-      size_t vertOnCell[num_cells_][dims_out[1]];
-      for (size_t i=0; i<num_cells_; i++)
-       for (size_t j=0; j<dims_out[1]; j++) 
-        vertOnCell[i][j]=0;
-
-      vertOnCell_dataset.read( vertOnCell, PredType::NATIVE_INT,
-        vertOnCell_dataspace );
-
-
-      auto & cell_vertices_ref = entities_[2][0];
-
-      for (size_t i=0; i<num_cells_; i++){
-       std::vector<size_t> vert_tmp;
-       for (size_t j=0; j<dims_out[1]; j++){
-				 vert_tmp.push_back(vertOnCell[i][j]);
-       }
-       cell_vertices_ref.push_back(vert_tmp);
-		  }
-      }//scope
-      //-----------------------------------------------------------------
-      // Open an existing file and dataset for edgesOnCell.
-      {//scope
-      H5File file(name, H5F_ACC_RDONLY);
-      const H5std_string DATASET_NAME( "edgesOnCell" );
-
-      DataSet edgesOnCell_dataset = file.openDataSet(DATASET_NAME);
-
-      //Get the class of the datatype that is used by the dataset.
-      H5T_class_t type_class = edgesOnCell_dataset.getTypeClass();
-
-      assert(type_class == H5T_INTEGER);
-      // Get dataspace of the dataset.
-      DataSpace edgesOnCell_dataspace = edgesOnCell_dataset.getSpace();
-
-      // Get the number of dimensions in the dataspace.
-      int dimension = edgesOnCell_dataspace.getSimpleExtentNdims();
-
-      assert (dimension==2);
-
-      // Get the dimension size of each dimension in the dataspace and
-      // display them.
-      hsize_t dims_out[2];
-      int ndims = edgesOnCell_dataspace.getSimpleExtentDims( dims_out, NULL);
-
-      assert(num_cells_=dims_out[0]);
-
-      size_t edgesOnCell[num_cells_][dims_out[1]];
-      for (size_t i=0; i<num_cells_; i++)
-       for (size_t j=0; j<dims_out[1]; j++)
-        edgesOnCell[i][j]=0;
-
-      edgesOnCell_dataset.read( edgesOnCell, PredType::NATIVE_INT,
-        edgesOnCell_dataspace );
-
-
-      auto & cell_edges_ref = entities_[2][1];
-
-      for (size_t i=0; i<num_cells_; i++){
-       std::vector<size_t> edges_tmp;
-       for (size_t j=0; j<dims_out[1]; j++){
-         edges_tmp.push_back(edgesOnCell[i][j]);
-       }
-       cell_edges_ref.push_back(edges_tmp);
-      }
-      }//scope
-
-
-      //-----------------------------------------------------------------
-      // Open an existing file and dataset for verticesOnEdge.
-      {
-      H5File file(name, H5F_ACC_RDONLY);
-      const H5std_string DATASET_NAME( "verticesOnEdge" );
-
-      DataSet verticesOnEdge_dataset = file.openDataSet(DATASET_NAME);
-
-      //Get the class of the datatype that is used by the dataset.
-      H5T_class_t type_class = verticesOnEdge_dataset.getTypeClass();
-
-      assert(type_class == H5T_INTEGER);
-      // Get dataspace of the dataset.
-      DataSpace verticesOnEdge_dataspace = verticesOnEdge_dataset.getSpace();
-
-      // Get the number of dimensions in the dataspace.
-      int dimension = verticesOnEdge_dataspace.getSimpleExtentNdims();
-
-      assert (dimension==2);
-
-      // Get the dimension size of each dimension in the dataspace and
-      // display them.
-      hsize_t dims_out[2];
-      int ndims = verticesOnEdge_dataspace.getSimpleExtentDims( dims_out, NULL);
-
-      num_edges_=dims_out[0];
-
-      size_t verticesOnEdge[num_edges_][dims_out[1]];
-      for (size_t i=0; i<num_edges_; i++)
-       for (size_t j=0; j<dims_out[1]; j++)
-        verticesOnEdge[i][j]=0;
-
-      verticesOnEdge_dataset.read( verticesOnEdge, PredType::NATIVE_INT,
-        verticesOnEdge_dataspace );
-
-      auto & edge_vertices_ref = entities_[1][0];
-
-      for (size_t i=0; i<num_edges_; i++){
-       std::vector<size_t> vert_tmp;
-       for (size_t j=0; j<dims_out[1]; j++){
-         vert_tmp.push_back(verticesOnEdge[i][j]);
-       }
-       edge_vertices_ref.push_back(vert_tmp);
-      }
-      }//scope
-
-      //------------------------------------------------------------------------
-    	// Create the remainder of the connectivities
-
-    	entities_[1][2].reserve(num_edges_);
-    	entities_[0][2].reserve(num_vertices_);
-    	entities_[0][1].reserve(num_vertices_);
-
-    	detail::transpose(entities_[2][1], entities_[1][2]);
-    	detail::transpose(entities_[2][0], entities_[0][2]);
-   	  detail::transpose(entities_[1][0], entities_[0][1]);      
+      const H5std_string edgesOnEdge_NAME( "edgesOnEdge" );
+      detail::read_connectivity(name, edgesOnEdge_NAME, entities_[1][1]);
 
 		}//end try
     
@@ -596,9 +525,9 @@ private:
   // Private data
   //============================================================================
 
-  size_t num_vertices_;
-  size_t num_cells_;
-  size_t num_edges_;
+  size_t num_vertices_ = 0;
+  size_t num_cells_ = 0;
+//  size_t num_edges_ = 0;
 
   //! \brief storage for element verts
   std::map<index_t, std::map<index_t, connectivity_t>> entities_;
