@@ -72,7 +72,13 @@ void read_connectivity(
        for (size_t j=0; j<num_entities2; j++)
          conn[i][j]=0;
 
-      conn_dataset.read( conn, PredType::NATIVE_INT, conn_dataspace );
+     //conn_dataset.read( conn, H5T_INTEGER, conn_dataspace );
+      conn_dataset.read( conn, PredType::NATIVE_LONG, conn_dataspace );
+
+
+//for (size_t i=0; i<num_entities1; i++)
+//       for (size_t j=0; j<num_entities2; j++)
+//         std::cout<<"IRINA DEBUG "<<conn[i][j]<<std::endl;
 
       for (size_t i=0; i<num_entities1; i++){
        std::vector<size_t> tmp;
@@ -82,6 +88,26 @@ void read_connectivity(
        connectivity.push_back(tmp);
       }
 }//read_connectivity
+
+void dump_connectivity(
+std::vector<std::vector<size_t>> &connectivity
+)
+{
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank ==0){
+    std::cout<<"dump connectivity";
+    for (size_t i=0; i<connectivity.size(); i++)
+    {
+     std::cout<<"conn["<< i <<"] = " <<std::endl;
+     auto &tmp = connectivity[i];
+     for (size_t j=0; j< tmp.size(); j++)
+			std::cout <<tmp[j]<<"   ";
+     std::cout<<std::endl;
+    }//fo
+    
+  }//if 
+}//dump_connectivity
 
 
 
@@ -257,6 +283,7 @@ std::cout<<"xCels = "<<xCells[0]<<" , "<<xCells[1]<<" , "<<
 xCells[2]<<" , "<< xCells[3]<<" , "<< xCells[4]<<" , "<<
 xCells[5]<<" , "<< xCells[6]<<" , "<< xCells[7]<<" , "<<std::endl;
 */
+
       real_t yCells[num_cells_];
       for (size_t i=0; i<num_cells_; i++)
         yCells[i]=0;
@@ -424,6 +451,9 @@ yVertex[5]<<" , "<< yVertex[6]<<" , "<< yVertex[7]<<" , "<<std::endl;
 
       const H5std_string edgesOnEdge_NAME( "edgesOnEdge" );
       detail::read_connectivity(name, edgesOnEdge_NAME, entities_[1][1]);
+
+//debug
+detail::dump_connectivity(entities_[2][0]);
 
 		}//end try
     
