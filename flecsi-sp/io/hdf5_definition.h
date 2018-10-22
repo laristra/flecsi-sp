@@ -44,12 +44,13 @@ void read_connectivity(
       using namespace H5;
 
       H5File file(file_name, H5F_ACC_RDONLY);
-
+      
+      //open dataset
       DataSet conn_dataset = file.openDataSet(dataset_name);
 
       //Get the class of the datatype that is used by the dataset.
       H5T_class_t type_class = conn_dataset.getTypeClass();
-
+      //connectivity type should be Integer
       assert(type_class == H5T_INTEGER);
       // Get dataspace of the dataset.
       DataSpace conn_dataspace = conn_dataset.getSpace();
@@ -76,14 +77,16 @@ void read_connectivity(
       conn_dataset.read( conn, PredType::NATIVE_LONG, conn_dataspace );
 
 
-//for (size_t i=0; i<num_entities1; i++)
-//       for (size_t j=0; j<num_entities2; j++)
-//         std::cout<<"IRINA DEBUG "<<conn[i][j]<<std::endl;
-
+      // Adding connectivity information from the HDF5 array to FleCSI
+      // connectivity
       for (size_t i=0; i<num_entities1; i++){
        std::vector<size_t> tmp;
        for (size_t j=0; j<num_entities2; j++){
-         tmp.push_back(conn[i][j]);
+         //there is no connectivity if  conn[i][j]==0 
+         if (conn[i][j]!=0)
+           //in HDF5 file entitiy ordering starts from 1 where in flecsi we
+           //start orfering from 0
+           tmp.push_back(conn[i][j]-1);
        }
        connectivity.push_back(tmp);
       }
@@ -451,9 +454,6 @@ yVertex[5]<<" , "<< yVertex[6]<<" , "<< yVertex[7]<<" , "<<std::endl;
 
       const H5std_string edgesOnEdge_NAME( "edgesOnEdge" );
       detail::read_connectivity(name, edgesOnEdge_NAME, entities_[1][1]);
-
-//debug
-detail::dump_connectivity(entities_[2][0]);
 
 		}//end try
     
