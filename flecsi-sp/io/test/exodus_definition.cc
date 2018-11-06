@@ -13,7 +13,7 @@
 // some type aliases confined to this test
 template< int D >
 using exodus_definition_t = 
-  flecsi_sp::io::exodus_definition__<D, double>;
+  flecsi_sp::io::exodus_definition_u<D, double>;
 
 // The flecsi library has undefined symbols in it.  It calls 
 // flecsi::execution::driver even though we are not using the execution model.

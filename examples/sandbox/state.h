@@ -7,8 +7,8 @@ template<size_t D>
 using vector_t = std::array<double, D>;
 
 template<size_t M, size_t N>
-using tensor__ = std::array<std::array<double, N>, M>;
-using tensor_t = tensor__<3,3>;	
+using tensor_u = std::array<std::array<double, N>, M>;
+using tensor_t = tensor_u<3,3>;
 
 //----------------------------------------------------------------------------//
 // Eos functions.
@@ -57,7 +57,7 @@ define_function_type(stress_function_t, double, double, double);
 /// Material state structure.
 ///
 template<size_t D>
-struct mat_state__ {
+struct mat_state_u {
 	double volume_fraction;
 	double density;
 	double energy;
@@ -77,13 +77,13 @@ struct mat_state__ {
 	} // stress
 
 	vector<D> velocity;
-}; // struct mat_state__
+}; // struct mat_state_u
 
 ///
 /// Cell state structure.
 ///
 template<size_t D>
-struct cell_state__ {
+struct cell_state_u {
 	double mass;
 	double density;
 	double energy;
@@ -91,7 +91,7 @@ struct cell_state__ {
 	double sound_speed;
 
 	vector<D> velocity;
-}; // struct cell_state__
+}; // struct cell_state_u
 
 #if 0
 struct mat_model_t {
@@ -102,11 +102,11 @@ struct mat_model_t {
 #endif
 
 #ifndef DIMENSION
-	using mat_state_t = mat_state__<3>;
-	using cell_state_t = cell_state__<3>;
+	using mat_state_t = mat_state_u<3>;
+	using cell_state_t = cell_state_u<3>;
 #else
-	using mat_state_t = mat_state__<DIMENSION>;
-	using cell_state_t = cell_state__<DIMENSION>;
+	using mat_state_t = mat_state_u<DIMENSION>;
+	using cell_state_t = cell_state_u<DIMENSION>;
 #endif
 
 #endif // state_h

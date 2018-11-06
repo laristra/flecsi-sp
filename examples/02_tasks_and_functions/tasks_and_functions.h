@@ -115,14 +115,14 @@ struct eos_param_t {
 }; // struct eos_params_t
 
 template<typename P>
-double eos_other__(double r, double e) {
+double eos_other_u(double r, double e) {
   std::cout << "Executing other" << std::endl;
   std::cout << "(r,e): (" << r << "," << e << ")" << std::endl;
   return P::m*r*e;
 } // function1
 
 double eos_other(double r, double e) {
-  return eos_other__<eos_param_t>(r, e);
+  return eos_other_u<eos_param_t>(r, e);
 } // eos_other
 
 register_function(eos_other);

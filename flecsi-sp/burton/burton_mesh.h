@@ -44,7 +44,7 @@ enum data_attributes_t : size_t {
 /// \tparam N The number of dimensions.
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N, bool Extra_Elements = false >
-class burton_mesh__  : public burton_mesh_topology_t<N, Extra_Elements>
+class burton_mesh_u  : public burton_mesh_topology_t<N, Extra_Elements>
 
 {
 public:
@@ -137,24 +137,24 @@ public:
   //============================================================================
 
   //! Default constructor
-  burton_mesh__() = default;
+  burton_mesh_u() = default;
 
   //! \brief Assignment operator (default)
-  burton_mesh__ & operator=(const burton_mesh__ &) = default;
+  burton_mesh_u & operator=(const burton_mesh_u &) = default;
 
   //! \brief Copy constructor
 
-  burton_mesh__(const burton_mesh__ &src) = default;
+  burton_mesh_u(const burton_mesh_u &src) = default;
 
   //! \brief allow move construction
-  burton_mesh__( burton_mesh__ && ) = default;
+  burton_mesh_u( burton_mesh_u && ) = default;
 
   //! \brief Copy constructor for data client handle
-  burton_mesh__(const burton_mesh__& m, bool dummy) : base_t(m, dummy)
+  burton_mesh_u(const burton_mesh_u& m, bool dummy) : base_t(m, dummy)
   {}
 
   //! Destructor
-  virtual ~burton_mesh__() {};
+  virtual ~burton_mesh_u() {};
 
   //============================================================================
   // Accessors
@@ -224,7 +224,7 @@ public:
     bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >* = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity__<M, EIN> & e) const
+  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // normal case:  EIN and EOUT are different, query topology
     return
@@ -240,10 +240,10 @@ public:
     bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >** = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity__<M, EIN> & e) const
+  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // degenerate case:  EIN and EOUT are the same, return trivial set
-    using etype = flecsi::topology::domain_entity__<M, EIN>;
+    using etype = flecsi::topology::domain_entity_u<M, EIN>;
     // TODO:  use index_space instead of array?
     // TODO:  figure out how to get rid of the const_cast
     return std::array<etype, 1>{const_cast<etype &>(e)};
@@ -272,7 +272,7 @@ public:
   //!
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) vertices(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) vertices(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, vertex_t>(e);
   }
@@ -330,7 +330,7 @@ public:
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
   decltype(auto) 
-  vertex_ids(const flecsi::topology::domain_entity__<M, E> & e) const
+  vertex_ids(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entity_ids<vertex_t::dimension, M, vertex_t::domain>(
@@ -404,7 +404,7 @@ public:
   //!
   //! \return Edges for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) edges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) edges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, edge_t>(e);
   }
@@ -521,7 +521,7 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) faces(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, face_t>(e);
   }
@@ -611,7 +611,7 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) cells(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, cell_t>(e);
   }
@@ -708,7 +708,7 @@ public:
   //!
   //! \return Wedges for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) wedges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) wedges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, wedge_t>(e);
   }
@@ -797,7 +797,7 @@ public:
   //!
   //! \return Corners for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) corners(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) corners(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, corner_t>(e);
   }
@@ -1400,7 +1400,7 @@ public:
 
   //! Print some statistics.
   template< std::size_t M >
-  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh);
+  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh_u<M>& mesh);
 
 
 
@@ -1534,7 +1534,7 @@ public:
 //!  \return the stream operator.
 template< std::size_t M >
 inline
-std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
+std::ostream& operator<< (std::ostream& stream, const burton_mesh_u<M>& mesh)
 {
   using std::endl;
   stream << "Burton mesh:" << endl;
@@ -1551,17 +1551,17 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
 #ifndef FLECSI_SP_BURTON_MESH_EXTRAS
 
 #  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
-using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION>;
+using burton_mesh_t = burton_mesh_u<FLECSI_SP_BURTON_MESH_DIMENSION>;
 #  else
-using burton_mesh_t = burton_mesh__<2>;
+using burton_mesh_t = burton_mesh_u<2>;
 #  endif
 
 #else
 
 #  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
-using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
+using burton_mesh_t = burton_mesh_u<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
 #  else
-using burton_mesh_t = burton_mesh__<2,true>;
+using burton_mesh_t = burton_mesh_u<2,true>;
 #  endif
 
 #endif
