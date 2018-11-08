@@ -72,7 +72,7 @@ using burton_wedge_t = typename burton_extras_types_t<N>::wedge_t;
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N >
 class burton_extras_t<N,0>
-  : public flecsi::topology::mesh_entity__<0, burton_config_t<N>::num_domains>
+  : public flecsi::topology::mesh_entity_u<0, burton_config_t<N>::num_domains>
 {
 public:
 
@@ -96,7 +96,7 @@ public:
   using mesh_storage_t = typename config_t::mesh_storage_t;
   //! the flecsi mesh topology type
   using mesh_topology_base_t = 
-    flecsi::topology::mesh_topology_base__< mesh_storage_t >;
+    flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
 
   //============================================================================
   // Constructors
@@ -125,7 +125,7 @@ public:
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 class burton_extras_t<1,0>
-  : public flecsi::topology::mesh_entity__<0, burton_config_t<1>::num_domains>
+  : public flecsi::topology::mesh_entity_u<0, burton_config_t<1>::num_domains>
 {
 public:
 
@@ -149,7 +149,7 @@ public:
   using mesh_storage_t = typename config_t::mesh_storage_t;
   //! the flecsi mesh topology type
   using mesh_topology_base_t =
-    flecsi::topology::mesh_topology_base__< mesh_storage_t >;
+    flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
 
   //! The bitfield.
   using bitfield_t = typename config_t::bitfield_t;
@@ -251,7 +251,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N >
 class burton_extras_t<N,1,typename std::enable_if< N != 1 >::type>
-  : public flecsi::topology::mesh_entity__<1, burton_config_t<N>::num_domains>
+  : public flecsi::topology::mesh_entity_u<1, burton_config_t<N>::num_domains>
 {
 public:
 
@@ -275,7 +275,7 @@ public:
   using mesh_storage_t = typename config_t::mesh_storage_t;
   //! the flecsi mesh topology type
   using mesh_topology_base_t = 
-    flecsi::topology::mesh_topology_base__< mesh_storage_t >;
+    flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
 
   //! The bitfield.
   using bitfield_t = typename config_t::bitfield_t;

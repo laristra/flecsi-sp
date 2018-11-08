@@ -2011,7 +2011,7 @@ void partition_mesh( utils::char_array_t filename )
 /// \brief the main mesh initialization driver
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_mesh(
-  utils::client_handle_w__<burton_mesh_t> mesh,
+  utils::client_handle_w_u<burton_mesh_t> mesh,
   utils::char_array_t filename
 ) {
 
