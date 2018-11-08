@@ -224,7 +224,7 @@ public:
     bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >* = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity__<M, EIN> & e) const
+  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // normal case:  EIN and EOUT are different, query topology
     return
@@ -240,10 +240,10 @@ public:
     bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >** = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity__<M, EIN> & e) const
+  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // degenerate case:  EIN and EOUT are the same, return trivial set
-    using etype = flecsi::topology::domain_entity__<M, EIN>;
+    using etype = flecsi::topology::domain_entity_u<M, EIN>;
     // TODO:  use index_space instead of array?
     // TODO:  figure out how to get rid of the const_cast
     return std::array<etype, 1>{const_cast<etype &>(e)};
@@ -272,7 +272,7 @@ public:
   //!
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) vertices(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) vertices(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, vertex_t>(e);
   }
@@ -330,7 +330,7 @@ public:
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
   decltype(auto) 
-  vertex_ids(const flecsi::topology::domain_entity__<M, E> & e) const
+  vertex_ids(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entity_ids<vertex_t::dimension, M, vertex_t::domain>(
@@ -404,7 +404,7 @@ public:
   //!
   //! \return Edges for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) edges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) edges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, edge_t>(e);
   }
@@ -521,7 +521,7 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) faces(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, face_t>(e);
   }
@@ -611,7 +611,7 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) cells(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, cell_t>(e);
   }
@@ -708,7 +708,7 @@ public:
   //!
   //! \return Wedges for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) wedges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) wedges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, wedge_t>(e);
   }
@@ -797,7 +797,7 @@ public:
   //!
   //! \return Corners for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) corners(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) corners(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, corner_t>(e);
   }
