@@ -62,6 +62,8 @@ void specialization_tlt_init(int argc, char** argv)
   // need to put the filename into a statically sized character array
   auto mesh_filename = flecsi_sp::utils::to_char_array( mesh_filename_string );
 
+
+  flecsi_sp::burton::partition_mesh_dp(mesh_filename);
   // execute the mpi task to partition the mesh
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename);
 }

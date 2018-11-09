@@ -26,6 +26,10 @@
 #  error Exodus is needed to build burton specialization.
 #endif
 
+#define FLECSI_DEPENDENT_PARTITION_MODEL FLECSI_RUNTIME_MODEL_legion
+
+#include <flecsi/execution/dependent_partition.h>
+
 // system includes
 #include <iostream>
 
@@ -1132,6 +1136,75 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 
 }
 
+void partition_mesh_dp( utils::char_array_t filename )
+{
+  // set some compile time constants
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
+  constexpr auto num_domains = burton_mesh_t::num_domains;
+  constexpr auto cell_dim = num_dims;
+  constexpr auto thru_dim = 0;
+
+  // make some type aliases
+  using real_t = burton_mesh_t::real_t;
+  using size_t = burton_mesh_t::size_t;
+  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+  
+  // load the mesh
+  auto filename_string = filename.str();
+  exodus_definition_t mesh_def( filename_string );
+  
+  int num_cells = mesh_def.num_entities(2);
+  int num_vertices = mesh_def.num_entities(0);
+  printf("num_vertices %d\n", num_vertices);
+  
+  flecsi::execution::dependent_partition_t dp;
+  
+  std::vector<int> entity_vector;
+  entity_vector.push_back(mesh_def.dimension());
+  entity_vector.push_back(0);
+  
+  
+  flecsi::execution::space_t cells = dp.load_entity(num_cells, mesh_def.dimension(), 0, entity_vector, mesh_def);
+  
+  flecsi::execution::map_t cell_to_cell = dp.load_cell_to_entity(cells, cells, mesh_def);
+  
+  flecsi::execution::set_t cell_primary = dp.partition_by_color(cells);
+  
+  flecsi::execution::set_t cell_closure = dp.partition_by_image(cells, cells, cell_to_cell, cell_primary);
+  
+  flecsi::execution::set_t cell_ghost = dp.partition_by_difference(cells, cell_closure, cell_primary);
+  
+  flecsi::execution::set_t cell_ghost_closure = dp.partition_by_image(cells, cells, cell_to_cell, cell_ghost);
+  
+  flecsi::execution::set_t cell_shared = dp.partition_by_intersection(cells, cell_ghost_closure, cell_primary);
+  
+  flecsi::execution::set_t cell_exclusive = dp.partition_by_difference(cells, cell_primary, cell_shared);
+  
+  flecsi::execution::space_t vertices = dp.load_entity(num_vertices, 0, 1, entity_vector, mesh_def);
+  
+  flecsi::execution::map_t cell_to_vertex = dp.load_cell_to_entity(cells, vertices, mesh_def);
+
+  flecsi::execution::set_t vertex_alias = dp.partition_by_image(cells, vertices, cell_to_vertex, cell_primary);
+
+  dp.min_reduction_by_color(vertices, vertex_alias);
+
+  flecsi::execution::set_t vertex_primary = dp.partition_by_color(vertices);
+
+  flecsi::execution::set_t vertex_of_ghost_cell = dp.partition_by_image(cells, vertices, cell_to_vertex, cell_ghost);
+
+  flecsi::execution::set_t vertex_ghost = dp.partition_by_difference(vertices, vertex_of_ghost_cell, vertex_primary);
+
+  flecsi::execution::set_t vertex_of_shared_cell = dp.partition_by_image(cells, vertices, cell_to_vertex, cell_shared);
+
+  flecsi::execution::set_t vertex_shared = dp.partition_by_intersection(vertices, vertex_of_shared_cell, vertex_primary);
+
+  flecsi::execution::set_t vertex_exclusive = dp.partition_by_difference(vertices, vertex_primary, vertex_shared);
+  
+  dp.print_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive, 0);
+  
+  dp.print_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive, 0);
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
