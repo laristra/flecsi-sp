@@ -1155,12 +1155,14 @@ void partition_mesh_dp( utils::char_array_t filename )
   
   int num_cells = mesh_def.num_entities(2);
   int num_vertices = mesh_def.num_entities(0);
-  printf("num_vertices %d\n", num_vertices);
+  int num_edges = mesh_def.num_entities(1);
+  printf("num_vertices %d, num_edges %d\n", num_vertices, num_edges);
   
   flecsi::execution::dependent_partition_t dp;
   
   std::vector<int> entity_vector;
   entity_vector.push_back(mesh_def.dimension());
+  entity_vector.push_back(1);
   entity_vector.push_back(0);
   
   
@@ -1200,9 +1202,31 @@ void partition_mesh_dp( utils::char_array_t filename )
 
   flecsi::execution::set_t vertex_exclusive = dp.partition_by_difference(vertices, vertex_primary, vertex_shared);
   
+  flecsi::execution::space_t edges = dp.load_entity(num_edges, 1, 2, entity_vector, mesh_def);
+  
+  flecsi::execution::map_t cell_to_edge = dp.load_cell_to_entity(cells, edges, mesh_def);
+  
+  flecsi::execution::set_t edge_alias = dp.partition_by_image(cells, edges, cell_to_edge, cell_primary);
+  
+  dp.min_reduction_by_color(edges, edge_alias);
+  
+  flecsi::execution::set_t edge_primary = dp.partition_by_color(edges);
+  
+  flecsi::execution::set_t edge_of_ghost_cell = dp.partition_by_image(cells, edges, cell_to_edge, cell_ghost);
+  
+  flecsi::execution::set_t edge_ghost = dp.partition_by_difference(edges, edge_of_ghost_cell, edge_primary);
+  
+  flecsi::execution::set_t edge_of_shared_cell = dp.partition_by_image(cells, edges, cell_to_edge, cell_shared);
+  
+  flecsi::execution::set_t edge_shared = dp.partition_by_intersection(edges, edge_of_shared_cell, edge_primary);
+  
+  flecsi::execution::set_t edge_exclusive = dp.partition_by_difference(edges, edge_primary, edge_shared);
+  
   dp.print_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive, 0);
   
   dp.print_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive, 0);
+  
+  dp.print_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive, 0);
 
 }
 
