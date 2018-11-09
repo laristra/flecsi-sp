@@ -1182,7 +1182,7 @@ void partition_mesh( utils::char_array_t filename )
 
   // Create the dCRS representation for the distributed colorer.
   // This essentialy makes the graph of the dual mesh.
-  auto dcrs = flecsi::coloring::make_dcrs(mesh_def);
+  auto dcrs = flecsi::coloring::make_dcrs(mesh_def, mesh_def.dimension(), mesh_def.dimension()-1);
 
   // Create a colorer instance to generate the primary coloring.
   auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
