@@ -80,7 +80,7 @@ color_cells(const MD & md, const std::string & output_prefix) {
 
   // Create the dCRS representation for the distributed colorer.
   // This essentialy makes the graph of the dual mesh.
-  auto dcrs = flecsi::coloring::make_dcrs(md);
+  auto dcrs = flecsi::coloring::make_dcrs(md, md.dimension(), md.dimension()-1);
 
   // Create a colorer instance to generate the primary coloring.
   auto colorer = std::make_shared<flecsi::coloring::parmetis_colorer_t>();
