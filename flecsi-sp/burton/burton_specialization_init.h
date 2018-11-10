@@ -1166,7 +1166,7 @@ void partition_mesh_dp( utils::char_array_t filename )
   entity_vector.push_back(0);
   
   
-  flecsi::execution::space_t cells = dp.load_entity(num_cells, mesh_def.dimension(), 0, entity_vector, mesh_def);
+  flecsi::execution::space_t cells = dp.load_entity(num_cells, mesh_def.dimension(), 2, entity_vector, mesh_def);
   
   flecsi::execution::map_t cell_to_cell = dp.load_cell_to_entity(cells, cells, mesh_def);
   
@@ -1182,7 +1182,7 @@ void partition_mesh_dp( utils::char_array_t filename )
   
   flecsi::execution::set_t cell_exclusive = dp.partition_by_difference(cells, cell_primary, cell_shared);
   
-  flecsi::execution::space_t vertices = dp.load_entity(num_vertices, 0, 1, entity_vector, mesh_def);
+  flecsi::execution::space_t vertices = dp.load_entity(num_vertices, 0, 0, entity_vector, mesh_def);
   
   flecsi::execution::map_t cell_to_vertex = dp.load_cell_to_entity(cells, vertices, mesh_def);
 
@@ -1202,7 +1202,7 @@ void partition_mesh_dp( utils::char_array_t filename )
 
   flecsi::execution::set_t vertex_exclusive = dp.partition_by_difference(vertices, vertex_primary, vertex_shared);
   
-  flecsi::execution::space_t edges = dp.load_entity(num_edges, 1, 2, entity_vector, mesh_def);
+  flecsi::execution::space_t edges = dp.load_entity(num_edges, 1, 1, entity_vector, mesh_def);
   
   flecsi::execution::map_t cell_to_edge = dp.load_cell_to_entity(cells, edges, mesh_def);
   
@@ -1228,6 +1228,11 @@ void partition_mesh_dp( utils::char_array_t filename )
   
   dp.print_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive, 0);
 
+  //dp.output_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive);
+
+  //dp.output_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive);
+
+  //dp.output_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1483,6 +1488,7 @@ void partition_mesh( utils::char_array_t filename )
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
+
   //----------------------------------------------------------------------------
   // Add the results to the context
   //----------------------------------------------------------------------------
@@ -1496,6 +1502,7 @@ void partition_mesh( utils::char_array_t filename )
   // keep track of index spaces added
   std::vector<size_t> registered_index_spaces;
 
+#if 1
   // Gather the coloring info from all colors
   for ( int dom=0; dom<num_domains; ++dom ) {
     // skip empty slots
@@ -1518,6 +1525,7 @@ void partition_mesh( utils::char_array_t filename )
       registered_index_spaces.push_back( index_space_id );
     }
   }
+#endif
 
   //----------------------------------------------------------------------------
   // add adjacency information
