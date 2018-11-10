@@ -1138,6 +1138,7 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 
 void partition_mesh_dp( utils::char_array_t filename )
 {
+  printf("in DP partition\n");
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
   constexpr auto num_domains = burton_mesh_t::num_domains;
@@ -1153,10 +1154,23 @@ void partition_mesh_dp( utils::char_array_t filename )
   auto filename_string = filename.str();
   exodus_definition_t mesh_def( filename_string );
   
+  // Create a communicator instance to get neighbor information.
+  auto communicator = std::make_unique<flecsi::coloring::mpi_communicator_t>();
+  auto comm_size = communicator->size();
+  auto rank = communicator->rank();
+ 
+  // Alias the index spaces type
+  using index_spaces = burton_mesh_t::index_spaces_t;
+  
+  // Get the context instance.
+  auto & context = flecsi::execution::context_t::instance();
+  
   int num_cells = mesh_def.num_entities(2);
   int num_vertices = mesh_def.num_entities(0);
   int num_edges = mesh_def.num_entities(1);
-  printf("num_vertices %d, num_edges %d\n", num_vertices, num_edges);
+  printf("num_dims %d, num_domains %d, num_cells %d idx %d, num_vertices %d idx %d, num_edges %d idx %d\n", 
+          num_dims, num_domains, num_cells, index_spaces::entity_map[0][num_dims], 
+          num_vertices, index_spaces::entity_map[0][0], num_edges, index_spaces::entity_map[0][1]);
   
   flecsi::execution::dependent_partition_t dp;
   
@@ -1165,8 +1179,9 @@ void partition_mesh_dp( utils::char_array_t filename )
   entity_vector.push_back(1);
   entity_vector.push_back(0);
   
-  
-  flecsi::execution::space_t cells = dp.load_entity(num_cells, mesh_def.dimension(), 2, entity_vector, mesh_def);
+ 
+  int cell_index_space_id = index_spaces::entity_map[0][num_dims];
+  flecsi::execution::space_t cells = dp.load_entity(num_cells, mesh_def.dimension(), cell_index_space_id, entity_vector, mesh_def);
   
   flecsi::execution::map_t cell_to_cell = dp.load_cell_to_entity(cells, cells, mesh_def);
   
@@ -1182,7 +1197,8 @@ void partition_mesh_dp( utils::char_array_t filename )
   
   flecsi::execution::set_t cell_exclusive = dp.partition_by_difference(cells, cell_primary, cell_shared);
   
-  flecsi::execution::space_t vertices = dp.load_entity(num_vertices, 0, 0, entity_vector, mesh_def);
+  int vertex_index_space_id = index_spaces::entity_map[0][0];
+  flecsi::execution::space_t vertices = dp.load_entity(num_vertices, 0, vertex_index_space_id, entity_vector, mesh_def);
   
   flecsi::execution::map_t cell_to_vertex = dp.load_cell_to_entity(cells, vertices, mesh_def);
 
@@ -1202,7 +1218,8 @@ void partition_mesh_dp( utils::char_array_t filename )
 
   flecsi::execution::set_t vertex_exclusive = dp.partition_by_difference(vertices, vertex_primary, vertex_shared);
   
-  flecsi::execution::space_t edges = dp.load_entity(num_edges, 1, 1, entity_vector, mesh_def);
+  int edge_index_space_id = index_spaces::entity_map[0][1];
+  flecsi::execution::space_t edges = dp.load_entity(num_edges, 1, edge_index_space_id, entity_vector, mesh_def);
   
   flecsi::execution::map_t cell_to_edge = dp.load_cell_to_entity(cells, edges, mesh_def);
   
@@ -1221,18 +1238,199 @@ void partition_mesh_dp( utils::char_array_t filename )
   flecsi::execution::set_t edge_shared = dp.partition_by_intersection(edges, edge_of_shared_cell, edge_primary);
   
   flecsi::execution::set_t edge_exclusive = dp.partition_by_difference(edges, edge_primary, edge_shared);
-  
+
+#if 1  
   dp.print_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive, 0);
   
   dp.print_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive, 0);
   
   dp.print_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive, 0);
+#else
+  dp.output_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive);
 
-  //dp.output_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive);
+  dp.output_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive);
 
-  //dp.output_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive);
+  dp.output_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive);
+  
+  //----------------------------------------------------------------------------
+  // add adjacency information
+  //----------------------------------------------------------------------------
 
-  //dp.output_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive);
+  std::vector< std::vector<size_t> > entity_ids(num_dims+1);
+
+  // create a master list of all entities
+  for ( int i=0; i<num_dims+1; ++i ) {
+
+    const auto & these_entities = context.coloring(i);
+    auto & these_ids = entity_ids[i];
+
+    // get the list of exclusive+shared+ghost ids
+    concatenate_ids( these_entities, these_ids );
+    auto num_entities = these_ids.size();
+
+    // sort the entities ( this is needed for the search down below )
+    // hoepefully it doesnt cause any problems
+    std::sort( these_ids.begin(), these_ids.end() );
+    auto last = std::unique( these_ids.begin(), these_ids.end() );
+    if ( last != these_ids.end() )
+      clog_error( "Duplicate ids in master lists" );
+
+  }
+
+  // loop over each dimension and determine the adjacency sizes
+  for ( int from_dim = 0; from_dim<=num_dims; ++from_dim ) {
+
+    // the master list of all entity ids
+    const auto & from_ids = entity_ids[from_dim];
+
+    for ( int to_dim = 0; to_dim<=num_dims; ++to_dim ) {
+
+      // skip the case where both dimensions are the same
+      if ( from_dim == to_dim ) continue;
+
+      // the master list of all entity ids
+      const auto & to_ids = entity_ids[to_dim];
+      const auto to_ids_begin = to_ids.begin();
+      const auto to_ids_end = to_ids.end();
+
+      // populate the adjacency information
+      flecsi::coloring::adjacency_info_t ai;
+      ai.index_space =
+        index_spaces::connectivity_map[ from_dim ][ to_dim ];
+      ai.from_index_space = index_spaces::entity_map[0][ from_dim ];
+      ai.to_index_space = index_spaces::entity_map[0][to_dim ];
+      ai.color_sizes.resize(comm_size);
+
+      // loop over all cells and count the number of adjacencies
+      size_t cnt = 0;
+      for ( auto c : from_ids ) {
+        // get the attached sub entitites
+        const auto & ids = mesh_def.entities(from_dim, to_dim, c);
+        // we need to make sure they are in this colors master
+        // list though
+        for ( auto v : ids ) {
+          auto it = std::lower_bound( to_ids_begin, to_ids_end, v );
+          if ( it != to_ids_end && *it == v )
+            cnt++;
+        }
+      }
+
+      // gather the results
+      ai.color_sizes = communicator->gather_sizes( cnt );
+
+      // add the result to the context
+      context.add_adjacency(ai);
+
+    }
+  }
+  
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  assert(0);
+#endif
+  
+  //----------------------------------------------------------------------------
+  // add index subspace mappings
+  //----------------------------------------------------------------------------
+
+
+  // the master list of all entity ids
+  const auto & cell_entities = context.coloring(num_dims);
+
+  // loop over all dimensions, getting the list of ids that are
+  // connected to owned cells
+  for ( int to_dim = 0; to_dim<num_dims; ++to_dim ) {
+    std::vector<size_t> ids;
+    // get all exclusive and shared ids.
+    for ( auto c : cell_entities.exclusive ) {
+      const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
+      ids.insert( ids.end(), ents.begin(), ents.end() );
+    }
+    for ( auto c : cell_entities.shared ) {
+      const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
+      ids.insert( ids.end(), ents.begin(), ents.end() );
+    }
+    // get number of unique entries
+    std::sort( ids.begin(), ids.end() );
+    auto last = std::unique( ids.begin(), ids.end() );
+    auto count = std::distance( ids.begin(), last );
+    // subspace id happens to be the same as the dim
+    context.add_index_subspace(to_dim, count);
+  }
+
+  //----------------------------------------------------------------------------
+  // add intermediate mappings
+  //
+  // These are needed so that entities that are implicitly created by
+  // mesh.init<>() maintain consistent orderings that match the pre-computed
+  // colorings.
+  //----------------------------------------------------------------------------
+
+  for ( int i=1; i<num_dims; ++i ) {
+     // create a new map
+    auto & entity_to_vertex_map =
+      context.intermediate_map( /* dim */ i, /* dom */ 0 );
+    auto & vertex_to_entity_map =
+      context.reverse_intermediate_map( /* dim */ i, /* dom */ 0 );
+    // loop over each entity id and get its list of vertices
+    for ( auto e : entity_ids[i] ) {
+      auto vs = mesh_def.entities( /* dimension */ i, /* domain */ 0, e );
+      // sorted for comparison later
+      std::sort( vs.begin(), vs.end() );
+      // add all the mappings for this entity
+      entity_to_vertex_map.emplace( e, vs );
+      vertex_to_entity_map.emplace( vs, e );
+    }
+  }
+
+#ifdef FLECSI_SP_BURTON_MESH_EXTRAS
+  assert(0);
+#endif
+  
+  //----------------------------------------------------------------------------
+  // output the result
+  //----------------------------------------------------------------------------
+
+  // figure out this ranks file name
+  auto basename = ristra::utils::basename( filename_string );
+  auto output_prefix = ristra::utils::remove_extension( basename );
+  auto output_filename = output_prefix + "-partition_rank" +
+    ristra::utils::zero_padded(rank) + ".exo";
+
+  // a lamda function to convert sets of entitiy_info_t's to vectors
+  // of ids
+  auto to_vec = [](const auto & list_in)
+  {
+    std::vector<size_t> list_out;
+    list_out.reserve( list_in.size() );
+    for ( auto & e : list_in )
+      list_out.push_back( e.id );
+    return list_out;
+  };
+
+  // get a reference to the vertices
+  const auto & vertex_entities = context.coloring(0);
+
+  // open the exodus file
+  if ( rank == 0 )
+    std::cout << "Writing mesh to: " << output_filename << std::endl;
+
+  using std::make_pair;
+  mesh_def.write(
+    output_filename,
+    {
+      make_pair( "exclusive cells", to_vec(cell_entities.exclusive) ),
+      make_pair( "shared cells", to_vec(cell_entities.shared) ),
+      make_pair( "ghost cells", to_vec(cell_entities.ghost) )
+    },
+    {
+      make_pair( "exclusive vertices", to_vec(vertex_entities.exclusive) ),
+      make_pair( "shared vertices", to_vec(vertex_entities.shared) ),
+      make_pair( "ghost vertices", to_vec(vertex_entities.ghost) )
+    }
+  );
+
+  clog(info) << "Finished mesh partitioning." << std::endl;
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1240,6 +1438,7 @@ void partition_mesh_dp( utils::char_array_t filename )
 ////////////////////////////////////////////////////////////////////////////////
 void partition_mesh( utils::char_array_t filename )
 {
+  printf("in MPI partition\n");
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
   constexpr auto num_domains = burton_mesh_t::num_domains;
