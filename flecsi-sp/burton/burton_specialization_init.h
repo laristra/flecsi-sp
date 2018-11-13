@@ -1239,7 +1239,7 @@ void partition_mesh_dp( utils::char_array_t filename )
   
   flecsi::execution::set_t edge_exclusive = dp.partition_by_difference(edges, edge_primary, edge_shared);
 
-#if 1  
+#if 0  
   dp.print_partition(cells, cell_primary, cell_ghost, cell_shared, cell_exclusive, 0);
   
   dp.print_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive, 0);
@@ -1251,6 +1251,12 @@ void partition_mesh_dp( utils::char_array_t filename )
   dp.output_partition(vertices, vertex_primary, vertex_ghost, vertex_shared, vertex_exclusive);
 
   dp.output_partition(edges, edge_primary, edge_ghost, edge_shared, edge_exclusive);
+  
+  // keep track of index spaces added
+  std::vector<size_t> registered_index_spaces;
+  registered_index_spaces.push_back(vertex_index_space_id);
+  registered_index_spaces.push_back(edge_index_space_id);
+  registered_index_spaces.push_back(cell_index_space_id);
   
   //----------------------------------------------------------------------------
   // add adjacency information
@@ -1385,6 +1391,27 @@ void partition_mesh_dp( utils::char_array_t filename )
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
   assert(0);
 #endif
+  
+  //----------------------------------------------------------------------------
+  // Allow sparse index spaces for any of the main index spaces
+  //----------------------------------------------------------------------------
+
+  for ( auto i : registered_index_spaces ) {
+    flecsi::execution::context_t::sparse_index_space_info_t isi;
+    isi.max_entries_per_index = 5;
+    // figure out the maximum number of entities
+    const auto & coloring = context.coloring( i );
+    auto num_ents =
+      coloring.exclusive.size() +
+      coloring.shared.size() +
+      coloring.ghost.size();
+
+    // worst case scenario (not sure what we get by allocating all this)
+    isi.exclusive_reserve = communicator->get_max_request_size(
+	    isi.max_entries_per_index*num_ents);
+    isi.index_space = i;
+    context.set_sparse_index_space_info(isi);
+  }
   
   //----------------------------------------------------------------------------
   // output the result

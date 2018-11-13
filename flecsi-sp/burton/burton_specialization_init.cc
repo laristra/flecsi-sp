@@ -65,7 +65,7 @@ void specialization_tlt_init(int argc, char** argv)
 
   flecsi_sp::burton::partition_mesh_dp(mesh_filename);
   // execute the mpi task to partition the mesh
-  flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename);
+  //flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
