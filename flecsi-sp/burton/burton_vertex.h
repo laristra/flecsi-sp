@@ -27,7 +27,7 @@ namespace burton {
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N >
 class burton_vertex_t : public 
-  flecsi::topology::mesh_entity__<0, burton_config_t<N>::num_domains>
+  flecsi::topology::mesh_entity_u<0, burton_config_t<N>::num_domains>
 {
 public:
 
@@ -51,7 +51,7 @@ public:
   using mesh_storage_t = typename config_t::mesh_storage_t;
   //! the flecsi mesh topology type
   using mesh_topology_base_t = 
-    flecsi::topology::mesh_topology_base__< mesh_storage_t >;
+    flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
 
   //! Type containing coordinates of the vertex.
   using point_t = typename config_t::point_t;

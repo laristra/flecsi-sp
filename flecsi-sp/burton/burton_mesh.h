@@ -231,7 +231,7 @@ public:
   //!
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) vertices(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) vertices(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entities<vertex_t::dimension, M, vertex_t::domain>(
@@ -292,7 +292,7 @@ public:
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
   decltype(auto) 
-  vertex_ids(const flecsi::topology::domain_entity__<M, E> & e) const
+  vertex_ids(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entity_ids<vertex_t::dimension, M, vertex_t::domain>(
@@ -366,7 +366,7 @@ public:
   //!
   //! \return Edges for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) edges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) edges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return base_t::template entities<edge_t::dimension, M, edge_t::domain>(
       e.entity()
@@ -485,7 +485,7 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) faces(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entities<face_t::dimension, M, face_t::domain>(
@@ -578,7 +578,7 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) cells(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entities<cell_t::dimension, M, cell_t::domain>(
@@ -678,7 +678,7 @@ public:
   //!
   //! \return Wedges for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) wedges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) wedges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entities<wedge_t::dimension, M, wedge_t::domain>(
@@ -770,7 +770,7 @@ public:
   //!
   //! \return Corners for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) corners(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) corners(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entities<corner_t::dimension, M, corner_t::domain>(
