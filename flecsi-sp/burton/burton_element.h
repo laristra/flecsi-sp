@@ -137,7 +137,7 @@ using burton_cell_t = typename burton_element_types_t<N>::cell_t;
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 struct burton_element_t<1,1>
-  : public flecsi::topology::mesh_entity__<1, burton_config_t<1>::num_domains>
+  : public flecsi::topology::mesh_entity_u<1, burton_config_t<1>::num_domains>
 {
   //============================================================================
   // Typedefs
@@ -366,7 +366,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 struct burton_element_t<2,1> :
-    public flecsi::topology::mesh_entity__<1, burton_config_t<2>::num_domains>
+    public flecsi::topology::mesh_entity_u<1, burton_config_t<2>::num_domains>
 {
 
   //============================================================================
@@ -512,7 +512,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 struct burton_element_t<3,1> :
-    public flecsi::topology::mesh_entity__<1, burton_config_t<3>::num_domains>
+    public flecsi::topology::mesh_entity_u<1, burton_config_t<3>::num_domains>
 {
 
   //============================================================================
@@ -638,7 +638,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 struct burton_element_t<2,2>
-  : public flecsi::topology::mesh_entity__<2, burton_config_t<2>::num_domains>
+  : public flecsi::topology::mesh_entity_u<2, burton_config_t<2>::num_domains>
 {
   //============================================================================
   // Typedefs
@@ -1038,7 +1038,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 struct burton_element_t<3,2>
-  : public flecsi::topology::mesh_entity__<2, burton_config_t<3>::num_domains>
+  : public flecsi::topology::mesh_entity_u<2, burton_config_t<3>::num_domains>
 {
   //============================================================================
   // Typedefs
@@ -1366,7 +1366,7 @@ private:
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 struct burton_element_t<3,3>
-  : public flecsi::topology::mesh_entity__<3, burton_config_t<3>::num_domains>
+  : public flecsi::topology::mesh_entity_u<3, burton_config_t<3>::num_domains>
 {
   //============================================================================
   // Typedefs
