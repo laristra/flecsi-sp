@@ -1277,7 +1277,7 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename )
+void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -1943,7 +1943,7 @@ void partition_mesh( utils::char_array_t filename )
 
   for ( auto i : registered_index_spaces ) {
     flecsi::execution::context_t::sparse_index_space_info_t isi;
-    isi.max_entries_per_index = 5;
+    isi.max_entries_per_index = max_entries;
     // figure out the maximum number of entities
     const auto & coloring = context.coloring( i );
     auto num_ents =

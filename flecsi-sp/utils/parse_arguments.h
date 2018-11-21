@@ -43,29 +43,24 @@ static auto parse_arguments(
 
   // if no arguments, set c to -1 to skip while lop
   int c = ( argc > 1 ) ? 0 : -1;
-  int done = 0;
 
-  while (!done && (c != -1)) {
-    auto c = 
-      getopt_long(argc, argv, short_options, long_options, &option_index);
+  while (c != -1) {
+    c = getopt_long(argc, argv, short_options, long_options, &option_index);
     auto c_char = static_cast<char>(c);
     auto c_str = ristra::utils::to_string( c_char );
-    switch (c) {
-      case (-1):
-        break;
-      case 0:
-        key_value_pair[long_options[option_index].name] =
-          optarg ? optarg : "";
-      default:
-         done = 1;
-        break;
-    }
-    if (optarg) key_value_pair[c_str] = optarg;
-    else        key_value_pair[c_str] = "";
-
+    // finished with arguments
+    if ( c == -1 )
+      break;
+    // long options that set a flag 
+    else if (c == 0)
+      key_value_pair[long_options[option_index].name] =
+        optarg ? optarg : "";
+    // standard short/long option
+    else
+      key_value_pair[c_str] = optarg ? optarg : "";
+    // make sure we have not gone past argc
     if (optind > argc)
       throw_runtime_error( "Expected argument after options" );
-
   }
 
   return key_value_pair;
