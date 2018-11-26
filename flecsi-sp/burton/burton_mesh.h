@@ -208,6 +208,47 @@ public:
     return base_t::template subentities<index_subspaces_t::overlapping_vertices>();
   }
 
+  //! \brief Return connected \e EOUT entities for \e EIN entity \e e in domain \e M.
+  //!
+  //! \tparam M Domain.
+  //! \tparam EIN Entity type to get EOUTs for.
+  //! \tparam EOUT Entity type to return.
+  //!
+  //! \param[in] e Entity to get EOUTs for.
+  //!
+  //! \return Corners for entity \e e in domain \e M.
+  template<
+    size_t M,
+    class EIN,
+    class EOUT,
+    bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
+    typename std::enable_if_t< Enabled >* = nullptr
+  >
+  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
+  {
+    // normal case:  EIN and EOUT are different, query topology
+    return
+      base_t::template entities<EOUT::dimension, M, EOUT::domain>(
+        e.entity()
+      );
+  }
+
+  template<
+    size_t M,
+    class EIN,
+    class EOUT,
+    bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
+    typename std::enable_if_t< Enabled >** = nullptr
+  >
+  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
+  {
+    // degenerate case:  EIN and EOUT are the same, return trivial set
+    using etype = flecsi::topology::domain_entity_u<M, EIN>;
+    // TODO:  use index_space instead of array?
+    // TODO:  figure out how to get rid of the const_cast
+    return std::array<etype, 1>{const_cast<etype &>(e)};
+  }
+
   //! \brief Return vertices associated with entity instance of type \e E.
   //!
   //! \tparam E entity type of instance to return vertices for.
@@ -231,12 +272,9 @@ public:
   //!
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) vertices(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) vertices(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
-    return 
-      base_t::template entities<vertex_t::dimension, M, vertex_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, vertex_t>(e);
   }
 
 
@@ -292,7 +330,7 @@ public:
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
   decltype(auto) 
-  vertex_ids(const flecsi::topology::domain_entity__<M, E> & e) const
+  vertex_ids(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return 
       base_t::template entity_ids<vertex_t::dimension, M, vertex_t::domain>(
@@ -366,11 +404,9 @@ public:
   //!
   //! \return Edges for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) edges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) edges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
-    return base_t::template entities<edge_t::dimension, M, edge_t::domain>(
-      e.entity()
-    );
+    return query_entities<M, E, edge_t>(e);
   }
 
   //! \brief Return ids for all edges in the burton mesh.
@@ -485,12 +521,9 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) faces(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
-    return 
-      base_t::template entities<face_t::dimension, M, face_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, face_t>(e);
   }
 
   //! \brief Return ids for all faces in the burton mesh.
@@ -578,12 +611,9 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) cells(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
-    return 
-      base_t::template entities<cell_t::dimension, M, cell_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, cell_t>(e);
   }
 
   //! \brief Return ids for all cells in the burton mesh.
@@ -678,12 +708,9 @@ public:
   //!
   //! \return Wedges for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) wedges(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) wedges(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
-    return 
-      base_t::template entities<wedge_t::dimension, M, wedge_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, wedge_t>(e);
   }
 
   //! \brief Return ids for all wedges in the burton mesh.
@@ -770,12 +797,9 @@ public:
   //!
   //! \return Corners for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) corners(const flecsi::topology::domain_entity__<M, E> & e) const
+  decltype(auto) corners(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
-    return 
-      base_t::template entities<corner_t::dimension, M, corner_t::domain>(
-        e.entity()
-      );
+    return query_entities<M, E, corner_t>(e);
   }
 
   //! \brief Return ids for all corners in the burton mesh.
@@ -853,6 +877,36 @@ public:
       ristra::compatibility::is_same_v<
         typename std::decay_t<V>::value_type, vertex_t* > &&
       std::remove_pointer_t<typename
+        std::decay_t<V>::value_type>::num_dimensions == 1
+    >** = nullptr ) 
+  {
+    return create_1d_element_from_verts_<cell_t>( std::forward<V>(verts) );
+  }
+
+  //! \brief Create a cell in the burton mesh.
+  //! \param[in] verts The vertices defining the cell.
+  //! \return Pointer to cell created with \e verts.
+  template< typename V >
+  auto create_cell( 
+    std::initializer_list<V*> verts,
+    std::enable_if_t< 
+      ristra::compatibility::is_same_v<V, vertex_t> && V::num_dimensions == 1 
+    >** = nullptr ) 
+  {
+    return create_1d_element_from_verts_<cell_t>( verts );
+  }
+
+
+  //! \brief Create a cell in the burton mesh.
+  //! \param[in] verts The vertices defining the cell.
+  //! \return Pointer to cell created with \e verts.
+  template< typename V >
+  auto create_cell(
+    V && verts,
+    std::enable_if_t< 
+      ristra::compatibility::is_same_v<
+        typename std::decay_t<V>::value_type, vertex_t* > &&
+      std::remove_pointer_t<typename
         std::decay_t<V>::value_type>::num_dimensions == 2
     >* = nullptr ) 
   {
@@ -907,6 +961,7 @@ public:
   auto create_cell(
     F && faces,
     typename std::enable_if_t< 
+      ! ristra::compatibility::is_same_v< face_t, vertex_t > &&
       ristra::compatibility::is_same_v< typename std::decay_t<F>::value_type, face_t* >  &&
       std::remove_pointer_t<typename std::decay_t<F>::value_type>::num_dimensions == 3
     >* = nullptr ) 
@@ -985,16 +1040,18 @@ public:
       f->set_boundary( (cells(f).size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
-        // point flags
-        auto ps = vertices(f);
-        for ( auto p : ps )
-          p->set_boundary( true );
+        // point flags are only for 2d and 3d
+        if ( num_dimensions >= 2 ) {
+          auto ps = vertices(f);
+          for ( auto p : ps )
+            p->set_boundary( true );
+        }
         // edge flags are only for 3d
         if ( num_dimensions == 3 ) {
           auto es = edges(f);
           for ( auto e : es ) 
             e->set_boundary( true );
-        } // dims
+        }
       } // is_boundary
     } // for
     
@@ -1084,7 +1141,6 @@ public:
       auto fs = faces(cn);
       auto es = edges(cn);
       auto vs = vertices(cn);
-      auto ws = wedges(cn);
 
       if ( cs.size() != 1 ) {
         ss << "Corner " << cn.id() << " has " << cs.size() << "/=1 cells" 
@@ -1106,9 +1162,13 @@ public:
            << std::endl;
       }
 
+      if ( num_dimensions == 1 ) continue;
+
       auto cl = cs.front();
       auto vt = vs.front();
       
+      auto ws = wedges(cn);
+
       if ( ws.size() % 2 != 0 ) {
         if ( vs.size() != 1 ) {
           ss << "Corner " << cn.id() << " has " << ws.size() << "%2/=0 wedges"
@@ -1190,14 +1250,22 @@ public:
     auto cs = cells();
     auto fs = faces();
     auto es = edges();  
-    auto cnrs = corners();
     auto num_cells = cs.size();
     auto num_faces = fs.size();
     auto num_edges = es.size();
-    auto num_corners = cnrs.size();
 
     #pragma omp parallel
     {
+
+      //--------------------------------------------------------------------------
+      // compute cell parameters (in 1D, this must come first;
+      // edge/face update requires cell to be up-to-date)
+
+      if ( num_dimensions == 1 ) {
+        #pragma omp for
+        for ( counter_t i=0; i<num_cells; i++ )
+          cs[i]->update( this );
+      }
 
       //--------------------------------------------------------------------------
       // compute edge parameters
@@ -1216,33 +1284,50 @@ public:
       }
 
       //--------------------------------------------------------------------------
-      // compute cell parameters
+      // compute cell parameters (in 2D and 3D, this must follow
+      // edges and faces)
 
-      #pragma omp for
-      for ( counter_t i=0; i<num_cells; i++ ) 
-        cs[i]->update( this );
+      if ( num_dimensions > 1 ) {
+        #pragma omp for
+        for ( counter_t i=0; i<num_cells; i++ )
+          cs[i]->update( this );
+      }
 
       //--------------------------------------------------------------------------
       // compute wedge parameters
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
-      #pragma omp for
-      for ( counter_t i=0; i<num_corners; ++i ) {
-        auto cn = cnrs[i];
-        auto ws = wedges(cn);
-        // first compute the normals
-        for ( auto wit = ws.begin(); wit != ws.end(); ++wit ) 
-        {
-          // get the first wedge normal
-          (*wit)->update( this, true );
-          // move to next wedge
-          ++wit;
-          assert( wit != ws.end() );
-          // get the second wedge normal
-          (*wit)->update( this, false );
+      if ( num_dimensions == 1 ) {
+        // loop through wedges directly
+        auto ws = wedges();
+        auto num_wedges = ws.size();
+        #pragma omp for
+        for ( counter_t i=0; i<num_wedges; ++i ) {
+          ws[i]->update( this, true );
         }
-      }
+      }  // num_dimensions == 1
+      else {
+        // loop through corners, then wedges per corner
+        auto cnrs = corners();
+        auto num_corners = cnrs.size();
+        #pragma omp for
+        for ( counter_t i=0; i<num_corners; ++i ) {
+          auto cn = cnrs[i];
+          auto ws = wedges(cn);
+          // first compute the normals
+          for ( auto wit = ws.begin(); wit != ws.end(); ++wit )
+          {
+            // get the first wedge normal
+            (*wit)->update( this, true );
+            // move to next wedge
+            ++wit;
+            assert( wit != ws.end() );
+            // get the second wedge normal
+            (*wit)->update( this, false );
+          }
+        }
+      }  // else num_dimensions
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -1267,10 +1352,12 @@ public:
         // tag the face
         f->tag( key );
         bnd_faces.emplace_back( f );
-        // tag the vertices
-        auto vs = vertices( f );
-        bnd_verts.reserve( bnd_verts.size() + vs.size() );
-        for ( auto v : vs ) bnd_verts.emplace_back( v );
+        // tag the vertices in 2d or 3d
+        if ( num_dimensions >= 2 ) {
+          auto vs = vertices( f );
+          bnd_verts.reserve( bnd_verts.size() + vs.size() );
+          for ( auto v : vs ) bnd_verts.emplace_back( v );
+        }
         // tag edges in 3d
         if ( num_dimensions == 3 ) {
           auto es = edges( f );
@@ -1323,6 +1410,28 @@ public:
 
  private:
 
+
+  //! \brief Create a cell in the burton mesh.
+  //! \param[in] verts The vertices defining the cell.
+  //! \return Pointer to cell created with \e verts.
+  template< typename E, typename V >
+  auto create_1d_element_from_verts_( V && verts  )
+  {
+    
+    E * e = nullptr;
+
+    // should be "segment", but that doesn't exist yet
+    auto cell_type = shape_t::none;
+
+    if ( verts.size() != 2 )
+      throw_runtime_error( "must have exactly 2 vertices" );
+
+    e = base_t::template make<E>(cell_type);
+    base_t::template init_entity<E::domain, E::dimension, vertex_t::dimension>(
+      e, std::forward<V>(verts)
+    );
+    return e;
+  } // create_cell
 
   //! \brief Create a cell in the burton mesh.
   //! \param[in] verts The vertices defining the cell.

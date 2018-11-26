@@ -1,0 +1,315 @@
+Vertices in mesh:
+----------- vertex id: 0 with coordinates ( 0.5625 )
+----------- vertex id: 1 with coordinates ( 0.59375 )
+----------- vertex id: 2 with coordinates ( 0.625 )
+----------- vertex id: 3 with coordinates ( 0.65625 )
+----------- vertex id: 4 with coordinates ( 0.6875 )
+----------- vertex id: 5 with coordinates ( 0.71875 )
+----------- vertex id: 6 with coordinates ( 0.75 )
+----------- vertex id: 7 with coordinates ( 0.78125 )
+----------- vertex id: 8 with coordinates ( 0.8125 )
+----------- vertex id: 9 with coordinates ( 0.84375 )
+----------- vertex id: 10 with coordinates ( 0.875 )
+----------- vertex id: 11 with coordinates ( 0.90625 )
+----------- vertex id: 12 with coordinates ( 0.9375 )
+----------- vertex id: 13 with coordinates ( 0.96875 )
+----------- vertex id: 14 with coordinates ( 1 )
+----------- vertex id: 15 with coordinates ( 0.53125 )
+----------- vertex id: 16 with coordinates ( 0.46875 )
+----------- vertex id: 17 with coordinates ( 0.5 )
+Cells in mesh:
+----------- cell id: 0 with centroid ( 0.546875 )
+----------- cell id: 1 with centroid ( 0.578125 )
+----------- cell id: 2 with centroid ( 0.609375 )
+----------- cell id: 3 with centroid ( 0.640625 )
+----------- cell id: 4 with centroid ( 0.671875 )
+----------- cell id: 5 with centroid ( 0.703125 )
+----------- cell id: 6 with centroid ( 0.734375 )
+----------- cell id: 7 with centroid ( 0.765625 )
+----------- cell id: 8 with centroid ( 0.796875 )
+----------- cell id: 9 with centroid ( 0.828125 )
+----------- cell id: 10 with centroid ( 0.859375 )
+----------- cell id: 11 with centroid ( 0.890625 )
+----------- cell id: 12 with centroid ( 0.921875 )
+----------- cell id: 13 with centroid ( 0.953125 )
+----------- cell id: 14 with centroid ( 0.984375 )
+----------- cell id: 15 with centroid ( 0.515625 )
+----------- cell id: 16 with centroid ( 0.484375 )
+Corners in mesh:
+----------- corner id: 0
+----------- corner id: 1
+----------- corner id: 2
+----------- corner id: 3
+----------- corner id: 4
+----------- corner id: 5
+----------- corner id: 6
+----------- corner id: 7
+----------- corner id: 8
+----------- corner id: 9
+----------- corner id: 10
+----------- corner id: 11
+----------- corner id: 12
+----------- corner id: 13
+----------- corner id: 14
+----------- corner id: 15
+----------- corner id: 16
+----------- corner id: 17
+----------- corner id: 18
+----------- corner id: 19
+----------- corner id: 20
+----------- corner id: 21
+----------- corner id: 22
+----------- corner id: 23
+----------- corner id: 24
+----------- corner id: 25
+----------- corner id: 26
+----------- corner id: 27
+----------- corner id: 28
+----------- corner id: 29
+----------- corner id: 30
+----------- corner id: 31
+----------- corner id: 32
+----------- corner id: 33
+For each vertex:
+^^^^^^^^Vertex id: 0
+    ----Cells:
+    ++++ cell id: 0
+    ++++ cell id: 1
+    ----Corners:
+    ++++ corner id: 1
+    ++++ corner id: 2
+^^^^^^^^Vertex id: 1
+    ----Cells:
+    ++++ cell id: 1
+    ++++ cell id: 2
+    ----Corners:
+    ++++ corner id: 3
+    ++++ corner id: 4
+^^^^^^^^Vertex id: 2
+    ----Cells:
+    ++++ cell id: 2
+    ++++ cell id: 3
+    ----Corners:
+    ++++ corner id: 5
+    ++++ corner id: 6
+^^^^^^^^Vertex id: 3
+    ----Cells:
+    ++++ cell id: 3
+    ++++ cell id: 4
+    ----Corners:
+    ++++ corner id: 7
+    ++++ corner id: 8
+^^^^^^^^Vertex id: 4
+    ----Cells:
+    ++++ cell id: 4
+    ++++ cell id: 5
+    ----Corners:
+    ++++ corner id: 9
+    ++++ corner id: 10
+^^^^^^^^Vertex id: 5
+    ----Cells:
+    ++++ cell id: 5
+    ++++ cell id: 6
+    ----Corners:
+    ++++ corner id: 11
+    ++++ corner id: 12
+^^^^^^^^Vertex id: 6
+    ----Cells:
+    ++++ cell id: 6
+    ++++ cell id: 7
+    ----Corners:
+    ++++ corner id: 13
+    ++++ corner id: 14
+^^^^^^^^Vertex id: 7
+    ----Cells:
+    ++++ cell id: 7
+    ++++ cell id: 8
+    ----Corners:
+    ++++ corner id: 15
+    ++++ corner id: 16
+^^^^^^^^Vertex id: 8
+    ----Cells:
+    ++++ cell id: 8
+    ++++ cell id: 9
+    ----Corners:
+    ++++ corner id: 17
+    ++++ corner id: 18
+^^^^^^^^Vertex id: 9
+    ----Cells:
+    ++++ cell id: 9
+    ++++ cell id: 10
+    ----Corners:
+    ++++ corner id: 19
+    ++++ corner id: 20
+^^^^^^^^Vertex id: 10
+    ----Cells:
+    ++++ cell id: 10
+    ++++ cell id: 11
+    ----Corners:
+    ++++ corner id: 21
+    ++++ corner id: 22
+^^^^^^^^Vertex id: 11
+    ----Cells:
+    ++++ cell id: 11
+    ++++ cell id: 12
+    ----Corners:
+    ++++ corner id: 23
+    ++++ corner id: 24
+^^^^^^^^Vertex id: 12
+    ----Cells:
+    ++++ cell id: 12
+    ++++ cell id: 13
+    ----Corners:
+    ++++ corner id: 25
+    ++++ corner id: 26
+^^^^^^^^Vertex id: 13
+    ----Cells:
+    ++++ cell id: 13
+    ++++ cell id: 14
+    ----Corners:
+    ++++ corner id: 27
+    ++++ corner id: 28
+^^^^^^^^Vertex id: 14
+    ----Cells:
+    ++++ cell id: 14
+    ----Corners:
+    ++++ corner id: 29
+^^^^^^^^Vertex id: 15
+    ----Cells:
+    ++++ cell id: 15
+    ++++ cell id: 0
+    ----Corners:
+    ++++ corner id: 31
+    ++++ corner id: 0
+^^^^^^^^Vertex id: 16
+    ----Cells:
+    ++++ cell id: 16
+    ----Corners:
+    ++++ corner id: 32
+^^^^^^^^Vertex id: 17
+    ----Cells:
+    ++++ cell id: 16
+    ++++ cell id: 15
+    ----Corners:
+    ++++ corner id: 33
+    ++++ corner id: 30
+For each cell:
+^^^^^^^^Cell id: 0
+    ----Vertices:
+    ++++ vertex id: 15
+    ++++ vertex id: 0
+    ----Corners:
+    ++++ corner id: 0
+    ++++ corner id: 1
+^^^^^^^^Cell id: 1
+    ----Vertices:
+    ++++ vertex id: 0
+    ++++ vertex id: 1
+    ----Corners:
+    ++++ corner id: 2
+    ++++ corner id: 3
+^^^^^^^^Cell id: 2
+    ----Vertices:
+    ++++ vertex id: 1
+    ++++ vertex id: 2
+    ----Corners:
+    ++++ corner id: 4
+    ++++ corner id: 5
+^^^^^^^^Cell id: 3
+    ----Vertices:
+    ++++ vertex id: 2
+    ++++ vertex id: 3
+    ----Corners:
+    ++++ corner id: 6
+    ++++ corner id: 7
+^^^^^^^^Cell id: 4
+    ----Vertices:
+    ++++ vertex id: 3
+    ++++ vertex id: 4
+    ----Corners:
+    ++++ corner id: 8
+    ++++ corner id: 9
+^^^^^^^^Cell id: 5
+    ----Vertices:
+    ++++ vertex id: 4
+    ++++ vertex id: 5
+    ----Corners:
+    ++++ corner id: 10
+    ++++ corner id: 11
+^^^^^^^^Cell id: 6
+    ----Vertices:
+    ++++ vertex id: 5
+    ++++ vertex id: 6
+    ----Corners:
+    ++++ corner id: 12
+    ++++ corner id: 13
+^^^^^^^^Cell id: 7
+    ----Vertices:
+    ++++ vertex id: 6
+    ++++ vertex id: 7
+    ----Corners:
+    ++++ corner id: 14
+    ++++ corner id: 15
+^^^^^^^^Cell id: 8
+    ----Vertices:
+    ++++ vertex id: 7
+    ++++ vertex id: 8
+    ----Corners:
+    ++++ corner id: 16
+    ++++ corner id: 17
+^^^^^^^^Cell id: 9
+    ----Vertices:
+    ++++ vertex id: 8
+    ++++ vertex id: 9
+    ----Corners:
+    ++++ corner id: 18
+    ++++ corner id: 19
+^^^^^^^^Cell id: 10
+    ----Vertices:
+    ++++ vertex id: 9
+    ++++ vertex id: 10
+    ----Corners:
+    ++++ corner id: 20
+    ++++ corner id: 21
+^^^^^^^^Cell id: 11
+    ----Vertices:
+    ++++ vertex id: 10
+    ++++ vertex id: 11
+    ----Corners:
+    ++++ corner id: 22
+    ++++ corner id: 23
+^^^^^^^^Cell id: 12
+    ----Vertices:
+    ++++ vertex id: 11
+    ++++ vertex id: 12
+    ----Corners:
+    ++++ corner id: 24
+    ++++ corner id: 25
+^^^^^^^^Cell id: 13
+    ----Vertices:
+    ++++ vertex id: 12
+    ++++ vertex id: 13
+    ----Corners:
+    ++++ corner id: 26
+    ++++ corner id: 27
+^^^^^^^^Cell id: 14
+    ----Vertices:
+    ++++ vertex id: 13
+    ++++ vertex id: 14
+    ----Corners:
+    ++++ corner id: 28
+    ++++ corner id: 29
+^^^^^^^^Cell id: 15
+    ----Vertices:
+    ++++ vertex id: 17
+    ++++ vertex id: 15
+    ----Corners:
+    ++++ corner id: 30
+    ++++ corner id: 31
+^^^^^^^^Cell id: 16
+    ----Vertices:
+    ++++ vertex id: 16
+    ++++ vertex id: 17
+    ----Corners:
+    ++++ corner id: 32
+    ++++ corner id: 33

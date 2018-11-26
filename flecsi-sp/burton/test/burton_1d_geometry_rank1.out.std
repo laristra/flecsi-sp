@@ -1,0 +1,71 @@
+For each cell:
+---- cell id: 0 with centroid ( 0.546875 ) and volume 0.03125
+++++ vertex id: 15 with coordinates ( 0.53125 )
+++++ vertex id: 0 with coordinates ( 0.5625 )
+---- cell id: 1 with centroid ( 0.578125 ) and volume 0.03125
+++++ vertex id: 0 with coordinates ( 0.5625 )
+++++ vertex id: 1 with coordinates ( 0.59375 )
+---- cell id: 2 with centroid ( 0.609375 ) and volume 0.03125
+++++ vertex id: 1 with coordinates ( 0.59375 )
+++++ vertex id: 2 with coordinates ( 0.625 )
+---- cell id: 3 with centroid ( 0.640625 ) and volume 0.03125
+++++ vertex id: 2 with coordinates ( 0.625 )
+++++ vertex id: 3 with coordinates ( 0.65625 )
+---- cell id: 4 with centroid ( 0.671875 ) and volume 0.03125
+++++ vertex id: 3 with coordinates ( 0.65625 )
+++++ vertex id: 4 with coordinates ( 0.6875 )
+---- cell id: 5 with centroid ( 0.703125 ) and volume 0.03125
+++++ vertex id: 4 with coordinates ( 0.6875 )
+++++ vertex id: 5 with coordinates ( 0.71875 )
+---- cell id: 6 with centroid ( 0.734375 ) and volume 0.03125
+++++ vertex id: 5 with coordinates ( 0.71875 )
+++++ vertex id: 6 with coordinates ( 0.75 )
+---- cell id: 7 with centroid ( 0.765625 ) and volume 0.03125
+++++ vertex id: 6 with coordinates ( 0.75 )
+++++ vertex id: 7 with coordinates ( 0.78125 )
+---- cell id: 8 with centroid ( 0.796875 ) and volume 0.03125
+++++ vertex id: 7 with coordinates ( 0.78125 )
+++++ vertex id: 8 with coordinates ( 0.8125 )
+---- cell id: 9 with centroid ( 0.828125 ) and volume 0.03125
+++++ vertex id: 8 with coordinates ( 0.8125 )
+++++ vertex id: 9 with coordinates ( 0.84375 )
+---- cell id: 10 with centroid ( 0.859375 ) and volume 0.03125
+++++ vertex id: 9 with coordinates ( 0.84375 )
+++++ vertex id: 10 with coordinates ( 0.875 )
+---- cell id: 11 with centroid ( 0.890625 ) and volume 0.03125
+++++ vertex id: 10 with coordinates ( 0.875 )
+++++ vertex id: 11 with coordinates ( 0.90625 )
+---- cell id: 12 with centroid ( 0.921875 ) and volume 0.03125
+++++ vertex id: 11 with coordinates ( 0.90625 )
+++++ vertex id: 12 with coordinates ( 0.9375 )
+---- cell id: 13 with centroid ( 0.953125 ) and volume 0.03125
+++++ vertex id: 12 with coordinates ( 0.9375 )
+++++ vertex id: 13 with coordinates ( 0.96875 )
+---- cell id: 14 with centroid ( 0.984375 ) and volume 0.03125
+++++ vertex id: 13 with coordinates ( 0.96875 )
+++++ vertex id: 14 with coordinates ( 1 )
+---- cell id: 15 with centroid ( 0.515625 ) and volume 0.03125
+++++ vertex id: 17 with coordinates ( 0.5 )
+++++ vertex id: 15 with coordinates ( 0.53125 )
+---- cell id: 16 with centroid ( 0.484375 ) and volume 0.03125
+++++ vertex id: 16 with coordinates ( 0.46875 )
+++++ vertex id: 17 with coordinates ( 0.5 )
+For each edge:
+---- edge id: 0 with midpoint ( 0.5625 ), length 1 and normal ( 1 )
+---- edge id: 1 with midpoint ( 0.59375 ), length 1 and normal ( 1 )
+---- edge id: 2 with midpoint ( 0.625 ), length 1 and normal ( 1 )
+---- edge id: 3 with midpoint ( 0.65625 ), length 1 and normal ( 1 )
+---- edge id: 4 with midpoint ( 0.6875 ), length 1 and normal ( 1 )
+---- edge id: 5 with midpoint ( 0.71875 ), length 1 and normal ( 1 )
+---- edge id: 6 with midpoint ( 0.75 ), length 1 and normal ( 1 )
+---- edge id: 7 with midpoint ( 0.78125 ), length 1 and normal ( 1 )
+---- edge id: 8 with midpoint ( 0.8125 ), length 1 and normal ( 1 )
+---- edge id: 9 with midpoint ( 0.84375 ), length 1 and normal ( 1 )
+---- edge id: 10 with midpoint ( 0.875 ), length 1 and normal ( 1 )
+---- edge id: 11 with midpoint ( 0.90625 ), length 1 and normal ( 1 )
+---- edge id: 12 with midpoint ( 0.9375 ), length 1 and normal ( 1 )
+---- edge id: 13 with midpoint ( 0.96875 ), length 1 and normal ( 1 )
+---- edge id: 14 with midpoint ( 1 ), length 1 and normal ( 1 )
+---- edge id: 15 with midpoint ( 0.53125 ), length 1 and normal ( 1 )
+---- edge id: 16 with midpoint ( 0.46875 ), length 1 and normal ( -1 )
+---- edge id: 17 with midpoint ( 0.5 ), length 1 and normal ( 1 )

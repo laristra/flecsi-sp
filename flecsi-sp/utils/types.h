@@ -43,10 +43,10 @@ using sparse_handle_r__ =
 
 // the client handles
 template<typename DC>
-using client_handle_w__ = flecsi::data_client_handle__<DC, flecsi::wo>;
+using client_handle_w__ = flecsi::data_client_handle_u<DC, flecsi::wo>;
 
 template<typename DC>
-using client_handle_r__ = flecsi::data_client_handle__<DC, flecsi::ro>;
+using client_handle_r__ = flecsi::data_client_handle_u<DC, flecsi::ro>;
 
 } // namespace
 } // namespace

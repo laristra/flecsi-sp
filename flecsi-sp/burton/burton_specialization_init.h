@@ -235,12 +235,12 @@ auto color_entity(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper function to create the cells
 ///
-/// \remarks This is the 2D version
+/// \remarks This is the 1D and 2D version
 ////////////////////////////////////////////////////////////////////////////////
 template<
   typename MESH_DEFINITION,
   typename MESH_TYPE,
-  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 2 ),
+  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() < 3 ),
   typename = std::enable_if_t< Enabled >
 >
 void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
@@ -447,6 +447,66 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper function to create the subspaces
 ///
+/// \remarks This is the 1D version
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  typename MESH_TYPE,
+  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 1 ),
+  typename std::enable_if_t< Enabled >** = nullptr
+>
+void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+{
+
+  using mesh_t = typename std::decay_t< MESH_TYPE >;
+
+  // Alias the index spaces type
+  using index_spaces = typename mesh_t::index_spaces_t;
+  using index_subspaces = typename mesh_t::index_subspaces_t;
+
+  // get the type of storage
+  using vertex_t = typename mesh_t::vertex_t;
+
+  // get the context
+  auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
+  // get the colorings
+  const auto & cell_coloring = context.coloring(index_spaces::cells);
+  // get the entity maps
+  // - lid = local id - the id of the entity local to this processor
+  // - mid = mesh id - the original id of the entity ( usually from file )
+  const auto & cell_mid_to_lid =
+     context.reverse_index_map( index_spaces::cells );
+
+  // storage for the unique set of vertices
+  std::vector<vertex_t*> my_verts;
+
+  // determine the unique list of ids
+  const auto & cells = mesh.cells();
+
+  auto add_ents = [&](auto && c) {
+    auto cell_lid = cell_mid_to_lid.at( c.id );
+    const auto & cell = cells[cell_lid];
+    for ( auto v : mesh.vertices(cell) ) my_verts.push_back( v );
+  };
+
+  for(auto c : cell_coloring.exclusive) add_ents(c);
+  for(auto c : cell_coloring.shared) add_ents(c);
+
+  // sort and remove any duplicates
+  std::sort( my_verts.begin(), my_verts.end() );
+  ristra::utils::remove_duplicates( my_verts );
+
+  // add them to the index space
+  auto & vert_subspace =
+     mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+  for ( auto v : my_verts )
+     vert_subspace.push_back( v->template global_id<0>() );
+}
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper function to create the subspaces
+///
 /// \remarks This is the 2D version
 ////////////////////////////////////////////////////////////////////////////////
 template<
@@ -594,6 +654,87 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     face_subspace.push_back( f->template global_id<0>() );
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper to make corners
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 1 >**
+    = nullptr
+>
+auto make_corners( const MESH_DEFINITION & mesh_def )
+{
+  // not sure why this needs to be decayed
+  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
+  using connectivity_t = typename mesh_definition_t::connectivity_t;
+
+  // get the number of dimensions
+  constexpr auto num_dims = mesh_definition_t::dimension();
+
+  // get the connectivity from the cells to the vertices.  there is a
+  // corner per cell, per vertex
+  const auto & cells_to_vertices = mesh_def.entities(num_dims, 0);
+  auto num_cells = cells_to_vertices.size();
+  auto num_verts = mesh_def.num_entities(0);
+
+  // count corners
+  size_t num_corners = 0;
+  for ( const auto & verts : cells_to_vertices )
+    num_corners += verts.size();
+
+  // create storage
+  std::map<size_t, connectivity_t> entities_to_corners;
+  std::map<size_t, connectivity_t> corners_to_entities;
+
+  // create entries for the connectivities we care about
+  auto & cells_to_corners = entities_to_corners[num_dims];
+  auto & corners_to_verts = corners_to_entities[0];
+  auto & corners_to_cells = corners_to_entities[num_dims];
+
+  // resize the underlying storage up front
+  cells_to_corners.resize( num_cells );
+  corners_to_verts.resize( num_corners );
+  corners_to_cells.resize( num_corners );
+
+  // some temporary storage
+  std::vector< size_t > corner_ids;
+  std::map< size_t, size_t > verts_to_corners;
+
+  for ( size_t cell_id=0, corner_id=0; cell_id<num_cells; ++cell_id )
+  {
+
+    //-------------------------------------------------------------------------
+    // First assign a corner to each cell vertex
+
+    // clear any temporary storage
+    verts_to_corners.clear();
+    corner_ids.clear();
+
+    // get the list of cell vertices
+    const auto & verts = cells_to_vertices.at(cell_id);
+    corner_ids.reserve( verts.size() );
+
+    // loop over each vertex, assigning corner ids
+    for ( auto vertex_id : verts ) {
+      // keep track of this cells corners
+      corner_ids.emplace_back( corner_id );
+      // store all the connectivity
+      verts_to_corners.emplace( vertex_id, corner_id );
+      corners_to_cells[corner_id].emplace_back( cell_id );
+      corners_to_verts[corner_id].emplace_back( vertex_id );
+      // bump the corner counter
+      ++corner_id;
+    }
+
+    // store the cell to corner connectivity
+    cells_to_corners[cell_id] = corner_ids;
+
+  }
+
+  return std::make_pair( entities_to_corners, corners_to_entities );
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper to make corners
@@ -1136,7 +1277,7 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename )
+void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -1361,6 +1502,7 @@ void partition_mesh( utils::char_array_t filename )
     + corner_entities.shared.size()
     + corner_entities.ghost.size();
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   auto wedges = make_wedges( mesh_def );
   const auto & cells_to_wedges = wedges.first[num_dims];
   const auto & wedges_to_cells = wedges.second[num_dims];
@@ -1383,6 +1525,7 @@ void partition_mesh( utils::char_array_t filename )
     = wedge_entities.exclusive.size()
     + wedge_entities.shared.size()
     + wedge_entities.ghost.size();
+#endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -1501,8 +1644,10 @@ void partition_mesh( utils::char_array_t filename )
   flecsi::coloring::adjacency_info_t ai;
   auto & adjacency_info = context.adjacency_info();
 
-  auto gathered_wedges = communicator->gather_sizes( num_wedges );
   auto gathered_corners = communicator->gather_sizes( num_corners );
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
+  auto gathered_wedges = communicator->gather_sizes( num_wedges );
+#endif
 
   // cell to corner
   // Same as vertex to cell connectivity
@@ -1522,6 +1667,7 @@ void partition_mesh( utils::char_array_t filename )
   context.add_adjacency(ai);
 #endif
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   // edge to corner
   // each edge goes to two corners, for every cell it touches
   ai.index_space = index_spaces::edges_to_corners;
@@ -1530,6 +1676,7 @@ void partition_mesh( utils::char_array_t filename )
   ai.color_sizes = gathered_wedges;
   if (num_dims==3) for ( auto & i : ai.color_sizes ) i /= 2;
   context.add_adjacency(ai);
+#endif
 
   // vertex to corner
   // same as vertex to cell connectivity
@@ -1557,6 +1704,7 @@ void partition_mesh( utils::char_array_t filename )
   context.add_adjacency(ai);
 #endif
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   // corner to edges
   // twice as many corners connected to an edge as cells
   // FIXME
@@ -1566,6 +1714,7 @@ void partition_mesh( utils::char_array_t filename )
   ai.color_sizes = gathered_wedges;
   if (num_dims==3) for ( auto & i : ai.color_sizes ) i /= 2;
   context.add_adjacency(ai);
+#endif
 
   // corner to vertex
   // each corner goes to one vertex
@@ -1575,6 +1724,7 @@ void partition_mesh( utils::char_array_t filename )
   ai.color_sizes = gathered_corners;
   context.add_adjacency(ai);
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   // cell to wedge
   // In 2d, 2 wedges per cell edge; 4 wedges per cell edge in 3d
   ai.index_space = index_spaces::cells_to_wedges;
@@ -1656,6 +1806,7 @@ void partition_mesh( utils::char_array_t filename )
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
+#endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -1748,6 +1899,7 @@ void partition_mesh( utils::char_array_t filename )
     entities_to_corners.emplace( entity_list, c );
   }
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   //--- WEDGES
 
   // concatenate exclusive shared and ghost
@@ -1780,6 +1932,7 @@ void partition_mesh( utils::char_array_t filename )
     wedges_to_entities.emplace( w, entity_list );
     entities_to_wedges.emplace( entity_list, w );
   }
+#endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -1790,7 +1943,7 @@ void partition_mesh( utils::char_array_t filename )
 
   for ( auto i : registered_index_spaces ) {
     flecsi::execution::context_t::sparse_index_space_info_t isi;
-    isi.max_entries_per_index = 5;
+    isi.max_entries_per_index = max_entries;
     // figure out the maximum number of entities
     const auto & coloring = context.coloring( i );
     auto num_ents =
@@ -1800,7 +1953,7 @@ void partition_mesh( utils::char_array_t filename )
 
     // worst case scenario (not sure what we get by allocating all this)
     isi.exclusive_reserve = communicator->get_max_request_size(
-	    isi.max_entries_per_index*num_ents);
+      isi.max_entries_per_index*num_ents);
     isi.index_space = i;
     context.set_sparse_index_space_info(isi);
   }

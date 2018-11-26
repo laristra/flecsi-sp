@@ -5,6 +5,10 @@ namespace flecsi_sp {
 namespace burton {
 
 // static member initialization
+constexpr size_t burton_1d_types_base::index_spaces_t::entity_map[2][2];
+constexpr size_t burton_1d_types_base::index_spaces_t::connectivity_map[2][2];
+
+// static member initialization
 constexpr size_t burton_2d_types_base::index_spaces_t::entity_map[2][3];
 constexpr size_t burton_2d_types_base::index_spaces_t::connectivity_map[3][3];
 

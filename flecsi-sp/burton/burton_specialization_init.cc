@@ -52,6 +52,12 @@ void specialization_tlt_init(int argc, char** argv)
   else {
     throw_runtime_error( "No mesh file provided" );
   }
+  
+  // get the maximum number of entries
+  std::size_t max_entries =
+    args.count("e") ? std::stoi(args.at("e")) : 5;
+  if ( args.count("e") && rank == 0 )
+      std::cout << "Setting max_entries to \"" << max_entries << "\"." << std::endl;
 
   //===========================================================================
   // Partition mesh
@@ -63,7 +69,8 @@ void specialization_tlt_init(int argc, char** argv)
   auto mesh_filename = flecsi_sp::utils::to_char_array( mesh_filename_string );
 
   // execute the mpi task to partition the mesh
-  flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename);
+  flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename,
+    max_entries);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
