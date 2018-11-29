@@ -10,7 +10,7 @@
 // user includes
 #include <flecsi/utils/logging.h>
 
-#include "H5Cpp.h"
+// #include "H5Cpp.h"
 
 // system includes
 #include <algorithm>
@@ -65,7 +65,7 @@ build_connectivity(
   std::map<std::vector<size_t>, size_t> edges;
   for ( const auto & vs : sorted_edge_to_vertex )
       edges[vs] = edgeid++;
-  
+
   // starting id is not always zero, assume we are building in blocks
   // of assending edge ids
   edgeid = edge_to_vertex.size();
@@ -90,7 +90,7 @@ build_connectivity(
       std::sort(sorted_vs.begin(), sorted_vs.end());
       // if we dont find the edge
       if (edges.find(sorted_vs) == edges.end()) {
-        // add to the local reverse map  
+        // add to the local reverse map
         edges.insert({sorted_vs, edgeid});
         // add to the original sorted and unsorted maps
         sorted_edge_to_vertex.emplace_back( std::move(sorted_vs) );
@@ -102,13 +102,13 @@ build_connectivity(
       }
       // if we do find the edge
       else {
-        // just add the id to the list of edges  
+        // just add the id to the list of edges
         these_edges.push_back(edges[sorted_vs]);
       }
     }
 
     cellid++;
-    
+
   } // for
 }
 

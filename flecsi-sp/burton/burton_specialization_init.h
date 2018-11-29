@@ -18,8 +18,9 @@
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
 #include <flecsi-sp/burton/burton_mesh.h>
-#ifdef FLECSI_SP_USE_HDF5
-#include <flecsi-sp/io/hdf5_definition.h>
+
+#ifdef FLECSI_SP_USE_MPAS
+#include <flecsi-sp/io/mpas_definition.h>
 #endif
 #if FLECSI_SP_USE_EXODUS
 #include <flecsi-sp/io/exodus_definition.h>
@@ -27,8 +28,8 @@
 #include <flecsi-sp/utils/char_array.h>
 #include <flecsi-sp/utils/types.h>
 
-#if not defined(FLECSI_SP_USE_EXODUS) && not defined(FLECSI_SP_USE_HDF5)
-#  error Exodus or HDF5 are needed to build burton specialization.
+#if not defined(FLECSI_SP_USE_EXODUS) && not defined(FLECSI_SP_USE_MPAS)
+#  error Exodus or MPAS are needed to build burton specialization.
 #endif
 
 // system includes
@@ -1154,12 +1155,12 @@ void partition_mesh( utils::char_array_t filename )
   // make some type aliases
   using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
-#ifdef FLECSI_SP_USE_HDF5
-  using io_definition_t = flecsi_sp::io::hdf5_definition__<num_dims, real_t>;
+#ifdef FLECSI_SP_USE_MPAS
+  using io_definition_t = flecsi_sp::io::mpas_definition__<num_dims, real_t>;
 #elif FLECSI_SP_USE_EXODUS
   using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 #else
-#error "FLeCSI-SP supports only exodus and HDF5 file formats"
+#error "FLeCSI-SP supports only exodus and MPAS HDF5 file formats"
 #endif
   using entity_info_t = flecsi::coloring::entity_info_t;
   using vertex_t = burton_mesh_t::vertex_t;
@@ -1884,12 +1885,12 @@ void initialize_mesh(
 
   // alias some types
   using real_t = burton_mesh_t::real_t;
-#ifdef FLECSI_SP_USE_HDF5
-  using io_definition_t = flecsi_sp::io::hdf5_definition__<num_dims, real_t>;
+#ifdef FLECSI_SP_USE_MPAS
+  using io_definition_t = flecsi_sp::io::mpas_definition__<num_dims, real_t>;
 #elif FLECSI_SP_USE_EXODUS
   using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 #else
-#error "FLeCSI-SP supports only exodus and HDF5 file formats"
+#error "FLeCSI-SP supports only exodus and MPAS HDF5 file formats"
 #endif
 
   // get the context
@@ -1949,6 +1950,3 @@ void application_tlt_init(int argc, char **argv);
 #endif
 } // namespace burton
 } // namespace flecsi_sp
-
-
-
