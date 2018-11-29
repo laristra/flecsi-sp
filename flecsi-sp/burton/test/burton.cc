@@ -122,6 +122,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
       << " with coordinates " << v->coordinates() << endl;
   } // for
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "Edges in mesh:" << endl;
 
   for(auto e : mesh.edges()) {
@@ -134,6 +135,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
   for(auto f : mesh.faces()) 
     file << "----------- faces id: " << f.id()
        << " with centroid " << f->centroid() << endl;
+#endif
 
   file << "Cells in mesh:" << endl;
 
@@ -149,11 +151,13 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "----------- corner id: " << c.id() << endl;
   } // for
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "Wedges in mesh:" << endl;
 
   for(auto c : mesh.wedges()) {
     file << "----------- wedge id: " << c.id() << endl;
   } // for
+#endif
 #endif
 
   file << "For each vertex:" << endl;
@@ -165,6 +169,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     for(auto c: mesh.cells(v))
       file << "    ++++ cell id: " << c.id() << endl;
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     file << "    ----Faces:" << endl;
     for(auto f: mesh.faces(v))
       file << "    ++++ face id: " << f.id() << endl;
@@ -172,19 +177,23 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "    ----Edges:" << endl;
     for(auto e: mesh.edges(v))
       file << "    ++++ edge id: " << e.id() << endl;
+#endif
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
     file << "    ----Corners:" << endl;
     for(auto c: mesh.corners(v))
       file << "    ++++ corner id: " << c.id() << endl;
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     file << "    ----Wedges:" << endl;
     for(auto w: mesh.wedges(v))
       file << "    ++++ wedge id: " << w.id() << endl;
 #endif
+#endif
 
   } // for
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each edge:" << endl;
 
   for(auto e : mesh.edges()) {
@@ -215,7 +224,9 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 #endif
 
   } // for
+#endif  // DIMENSION > 1
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each face:" << endl;
 
   for(auto f : mesh.faces()) {
@@ -246,12 +257,14 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 #endif
 
   } // for
+#endif  // DIMENSION > 1
 
   file << "For each cell:" << endl;
 
   for(auto c : mesh.cells()) {
     file << "^^^^^^^^Cell id: " << c.id() << endl;
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     file << "    ----Faces:" << endl;
     for(auto f: mesh.faces(c))
       file << "    ++++ face id: " << f.id() << endl;
@@ -259,6 +272,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "    ----Edges:" << endl;
     for(auto e : mesh.edges(c))
       file << "    ++++ edge id: " << e.id() << endl;
+#endif
 
     file << "    ----Vertices:" << endl;
     for(auto v : mesh.vertices(c))
@@ -269,9 +283,11 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
     for(auto cnr : mesh.corners(c))
       file << "    ++++ corner id: " << cnr.id() << endl;
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     file << "    ----Wedges:" << endl;
     for(auto w: mesh.wedges(c))
       file << "    ++++ wedge id: " << w.id() << endl;
+#endif
 #endif
 
   } // for
@@ -327,6 +343,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
 
   } // for
   
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each face:" << endl;
 
   for(auto f: mesh.faces()) {
@@ -345,6 +362,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
     } // for
 
   } // for
+#endif  // DIMENSION > 1
 
   file << "For each edge:" << endl;
 
@@ -355,18 +373,20 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "---- edge id: " << e.id()
       << " with midpoint " << xc << ", length " << l;
 
-#if FLECSI_SP_BURTON_MESH_DIMENSION == 2
+#if FLECSI_SP_BURTON_MESH_DIMENSION < 3
     auto n = e->normal();
     file << " and normal " << n;
 #endif
     
     file << endl;
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
     for(auto v : mesh.vertices(e)){
       auto xv = v->coordinates();
       file << "++++ vertex id: " << v.id()
         << " with coordinates " << xv << endl;
     } // for
+#endif
 
   } // for
 
@@ -385,6 +405,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
     
   }
 
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   file << "For each corner:" << endl;
 
   for (auto c: mesh.corners()) {
@@ -392,14 +413,15 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
     file << "---- corner id: " << c.id() << endl;
 
     for (auto w: mesh.wedges(c))  
-      file << "++++ wedge id: " << w->id()
+      file << "++++ wedge id: " << w.id()
           << " with facet normal " << w->facet_normal() 
           << ", facet area " << w->facet_area()
           << endl;
 
   }
 
-#endif
+#endif // DIMENSION > 1
+#endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
 
   // close file before comparison

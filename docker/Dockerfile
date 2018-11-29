@@ -4,7 +4,6 @@ ARG CC
 ARG CXX
 ARG CXXFLAGS
 ARG BUILD_TYPE
-ARG RUNTIME
 
 #for coverage
 ARG CI
@@ -29,11 +28,10 @@ RUN mkdir build
 WORKDIR build
 
 RUN cmake -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
-          -DFLECSI_SP_RUNTIME_MODEL=${RUNTIME} \
           -DENABLE_UNIT_TESTS=ON \
           ..
 RUN make -j2 || make VERBOSE=1
-RUN ctest --output-on-failure --verbose
+RUN ctest --output-on-failure
 RUN make install DESTDIR=${PWD}
 
 WORKDIR /home/flecsi
