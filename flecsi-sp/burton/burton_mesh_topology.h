@@ -23,7 +23,7 @@ namespace burton {
 ////////////////////////////////////////////////////////////////////////////////
 template < std::size_t N, bool Extra_Elements >
 using burton_mesh_topology_t = 
-  flecsi::topology::mesh_topology__< burton_types_t<N, Extra_Elements> >;
+  flecsi::topology::mesh_topology_u< burton_types_t<N, Extra_Elements> >;
 
 
 } // namespace
