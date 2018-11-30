@@ -11,6 +11,9 @@
 #include <flecsi/topology/mesh_definition.h>
 #include <flecsi/utils/logging.h>
 
+
+#include <mpi.h>
+
 // thirdparty includes
 extern "C" {
 #include <hdf5.h>
@@ -80,6 +83,7 @@ hid_t open_file(const std::string &name, unsigned flags, hid_t fapl_id) {
       clog_fatal("Couldn't open " << name << " ... not sure why");
     }  // else
   }    // if
+  return file;
 }  // open_file
 
 /*!
@@ -188,10 +192,16 @@ void assert_dataset_typeclass(hid_t dset, H5T_class_t expect_class) {
 void assert_dataset_type(hid_t dset, hid_t expect_type) {
   hid_t dtype_id = H5Dget_type(dset);
 
-  // TODO: get type names for better message
-  clog_assert(H5Tequal(dtype_id, expect_type),
-              "Dataset does not hold expected type!");
+  if(!H5Tequal(dtype_id, expect_type)){
+    const size_t max = 101;
+    char real_name[max-1], expect_name[max-1], dset_name[max-1];
 
+    H5Iget_name(dset, dset_name, max);
+    H5Iget_name(dtype_id, real_name, max);
+    H5Iget_name(expect_type, expect_name, max);
+    clog_fatal("Dataset " << dset_name <<
+               " has type: " << real_name << " but I'm expecting " << expect_name);
+  }
   H5Tclose(dtype_id);
 }  // assert_dataset_type
 
@@ -315,7 +325,7 @@ void read_connectivity(const std::string &file_name,
   hid_t dset = h5::open_dataset(file, dataset_name);
 
   h5::assert_dataset_typeclass(dset, H5T_INTEGER);
-  h5::assert_dataset_type(dset, H5T_NATIVE_LONG);
+  h5::assert_dataset_type(dset, H5T_NATIVE_INT);
 
   // Expecting two-dimensional data
   clog_assert(h5::get_rank(dset) == 2,
@@ -373,7 +383,7 @@ void dump_connectivity(std::vector<std::vector<size_t>> &connectivity) {
 ///        MPAS HDF5 file format.
 ////////////////////////////////////////////////////////////////////////////////
 template <int D, typename T>
-class mpas_base__ {
+class mpas_base_u {
  public:
   //============================================================================
   // Typedefs
@@ -412,24 +422,24 @@ class mpas_base__ {
 ///        MPAS HDF5 file format.
 ////////////////////////////////////////////////////////////////////////////////
 template <int D, typename T>
-class mpas_definition__ {};
+class mpas_definition_u {};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        MPAS HDF5 file format.
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T>
-class mpas_definition__<2, T> : public flecsi::topology::mesh_definition__<2> {
+class mpas_definition_u<2, T> : public flecsi::topology::mesh_definition_u<2> {
  public:
   //============================================================================
   // Typedefs
   //============================================================================
 
   //! the instantiated base type
-  using base_t = mpas_base__<2, T>;
+  using base_t = mpas_base_u<2, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition__<2>;
+  using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
@@ -453,20 +463,20 @@ class mpas_definition__<2, T> : public flecsi::topology::mesh_definition__<2> {
   //============================================================================
 
   //! \brief Default constructor
-  mpas_definition__() = default;
+  mpas_definition_u() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  mpas_definition__(const std::string &filename) { read(filename); }
+  mpas_definition_u(const std::string &filename) { read(filename); }
 
   /// Copy constructor (disabled)
-  mpas_definition__(const mpas_definition__ &) = delete;
+  mpas_definition_u(const mpas_definition_u &) = delete;
 
   /// Assignment operator (disabled)
-  mpas_definition__ &operator=(const mpas_definition__ &) = delete;
+  mpas_definition_u &operator=(const mpas_definition_u &) = delete;
 
   /// Destructor
-  ~mpas_definition__() = default;
+  ~mpas_definition_u() = default;
 
   //============================================================================
   //! \brief Implementation of mpas mesh read for burton specialization.

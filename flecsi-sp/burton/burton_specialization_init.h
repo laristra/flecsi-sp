@@ -1297,7 +1297,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
 #ifdef FLECSI_SP_USE_MPAS
-  using io_definition_t = flecsi_sp::io::mpas_definition__<num_dims, real_t>;
+  using io_definition_t = flecsi_sp::io::mpas_definition_u<num_dims, real_t>;
 #elif FLECSI_SP_USE_EXODUS
   using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 #else
@@ -2039,7 +2039,7 @@ void initialize_mesh(
   // alias some types
   using real_t = burton_mesh_t::real_t;
 #ifdef FLECSI_SP_USE_MPAS
-  using io_definition_t = flecsi_sp::io::mpas_definition__<num_dims, real_t>;
+  using io_definition_t = flecsi_sp::io::mpas_definition_u<num_dims, real_t>;
 #elif FLECSI_SP_USE_EXODUS
   using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 #else
