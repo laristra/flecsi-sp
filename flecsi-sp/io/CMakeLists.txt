@@ -19,7 +19,7 @@ set(io_HEADERS
   PARENT_SCOPE
   )
 
-if ( FLECSI_SP_USE_MPAS )
+if ( FLECSI_SP_ENABLE_MPAS )
   cinch_add_unit(flecsi_sp_mpas_definition
     SOURCES
     test/mpas_definition.cc
