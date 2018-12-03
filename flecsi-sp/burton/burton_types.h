@@ -189,6 +189,8 @@ struct burton_1d_types_base
   //! Type for burton mesh wedges (in 1d, same as corners).
   using wedge_t = burton_wedge_t<num_dimensions>;
 
+  //! Type for burton mesh sides (in 1d, same as corners).
+  using side_t = burton_side_t<num_dimensions>;
   //============================================================================
   //! setup the index subspaces
   //============================================================================
@@ -346,6 +348,7 @@ struct burton_2d_types_base
       cells,
       corners,
       wedges,
+      sides,
       // index spaces for connectivity
       vertices_to_edges,
       vertices_to_faces = vertices_to_edges,
@@ -375,14 +378,30 @@ struct burton_2d_types_base
       wedges_to_edges,
       wedges_to_faces = wedges_to_edges,
       wedges_to_vertices,
+      // sides
+      cells_to_sides,
+      edges_to_sides,
+      faces_to_sides = edges_to_sides,
+      vertices_to_sides,
+      sides_to_cells, 
+      sides_to_edges,
+      sides_to_faces = sides_to_edges,
+      sides_to_vertices,
       // wedges <-> corners
       wedges_to_corners,
       corners_to_wedges,
+      // sides <-> corners
+      sides_to_corners,
+      corners_to_sides,
+      // sides <-> wedges
+      sides_to_wedges,
+      wedges_to_sides,
+      // 
       // index spaces that are not used
       edges_to_faces = 7777,
       faces_to_edges = 7777,
       // total number of index spaces
-      size = wedges + 1
+      size = sides + 1
     };
 
     //! Maps an entity dimension to an index space id
@@ -394,7 +413,7 @@ struct burton_2d_types_base
       // domain
       corners,
       wedges,
-      7777
+      sides
     };
 
 
@@ -457,6 +476,9 @@ struct burton_2d_types_base
   //! Type for burton mesh wedges.
   using wedge_t = burton_wedge_t<num_dimensions>;
 
+  //! Type for burton mesh sides.
+  using side_t = burton_side_t<num_dimensions>;
+
   //============================================================================
   //! setup the index subspaces
   //============================================================================
@@ -503,6 +525,8 @@ struct burton_2d_types_base
         return mesh->template make<corner_t, corner_t::domain>(id);
       case 1:
         return mesh->template make<wedge_t, wedge_t::domain>(id);
+      case 2:
+        return mesh->template make<side_t, side_t::domain>(id);
       default:
         throw_logic_error("invalid topological dimension");
       }
@@ -564,6 +588,7 @@ struct burton_types_t<2, true> : public burton_2d_types_base
     flecsi_entity_type( index_spaces_t::cells,    0,   cell_t ),
     flecsi_entity_type( index_spaces_t::corners,  1, corner_t ),
     flecsi_entity_type( index_spaces_t::wedges,   1,  wedge_t )
+    flecsi_entity_type( index_spaces_t::sides,    2,  side_t )
   );
 
 
@@ -593,10 +618,25 @@ struct burton_types_t<2, true> : public burton_2d_types_base
     flecsi_binding( index_spaces_t::wedges_to_cells,     1, 0,  wedge_t,   cell_t ),
     flecsi_binding( index_spaces_t::wedges_to_edges,     1, 0,  wedge_t,   edge_t ),
     flecsi_binding( index_spaces_t::wedges_to_vertices,  1, 0,  wedge_t, vertex_t ),
+    //sides
+    flecsi_binding( index_spaces_t::cells_to_sides,      0, 1,   cell_t,    side_t),
+    flecsi_binding( index_spaces_t::edges_to_sides,      0, 1,   edge_t,    side_t),
+    flecsi_binding( index_spaces_t::vertices_to_sides,   0, 1, vertex_t,    side_t),
+    flecsi_binding( index_spaces_t::sides_to_cells,      1, 0,   side_t,    cell_t),
+    flecsi_binding( index_spaces_t::sides_to_edges,      1, 0,   side_t,    edge_t),
+    flecsi_binding( index_spaces_t::sides_to_vertices,   1, 0,   side_t,  vertex_t),
+
     // corners <-> wedges
     flecsi_binding( index_spaces_t::wedges_to_corners,   1, 1,  wedge_t, corner_t ),
-    flecsi_binding( index_spaces_t::corners_to_wedges,   1, 1, corner_t,  wedge_t )
-  );
+    flecsi_binding( index_spaces_t::corners_to_wedges,   1, 1, corner_t,  wedge_t ),
+
+    // side <-> corners
+    flecsi_binding( index_spaces_t::sides_to_corners,    1, 1,  side_t,   corner_t),
+    flecsi_binding( index_spaces_t::corners_to_sides,    1, 1,corner_t,     side_t),
+      // sides <-> wedges
+    flecsi_binding( index_spaces_t::sides_to_wedges,     1, 1 , side_t,    wedge_t),
+    flecsi_binding( index_spaces_t::wedges_to_sides,     1, 1, wedge_t,     side_t)
+   );
 
 };
 
@@ -647,6 +687,7 @@ struct burton_3d_types_base
       cells,
       corners,
       wedges,
+      sides,          
       // index spaces for connectivity
       vertices_to_edges,
       vertices_to_faces,
@@ -678,11 +719,26 @@ struct burton_3d_types_base
       wedges_to_faces,
       wedges_to_edges,
       wedges_to_vertices,
+      // sides
+      cells_to_sides,
+      faces_to_sides,
+      edges_to_sides,
+      vertices_to_sides,
+      sides_to_cells,
+      sides_to_faces,
+      sides_to_edges,
+      sides_to_vertices,
       // wedges <-> corners
       wedges_to_corners,
       corners_to_wedges,
+      // sides <-> corners
+      sides_to_corners,
+      corners_to_sides,
+      // sides <-> wedges
+      sides_to_wedges,
+      wedges_to_sides,
       // total number of index spaces
-      size = wedges + 1
+      size = sides + 1
     };
 
     //! Maps an entity dimension to an index space id
@@ -695,7 +751,7 @@ struct burton_3d_types_base
       // domain
       corners,
       wedges,
-      7777,
+      sides,
       7777
     };
 
@@ -835,6 +891,8 @@ struct burton_3d_types_base
         return mesh->template make<corner_t, corner_t::domain>(id);
       case 1:
         return mesh->template make<wedge_t, wedge_t::domain>(id);
+      case 2:
+        return mesh->template make<side_t, wedge_t::domain>(id);
       default:
         throw_logic_error("invalid topological dimension");
       }
@@ -942,9 +1000,24 @@ struct burton_types_t<3, true> : public burton_3d_types_base
     flecsi_binding( index_spaces_t::wedges_to_faces,     1, 0,  wedge_t,   face_t ),
     flecsi_binding( index_spaces_t::wedges_to_edges,     1, 0,  wedge_t,   edge_t ),
     flecsi_binding( index_spaces_t::wedges_to_vertices,  1, 0,  wedge_t, vertex_t ),
+    // sides
+    flecsi_binding( index_spaces_t::cells_to_sides,     0, 1,   cell_t,  side_t ),
+    flecsi_binding( index_spaces_t::faces_to_sides,     0, 1,   face_t,  side_t ),
+    flecsi_binding( index_spaces_t::edges_to_sides,     0, 1,   edge_t,  side_t ),
+    flecsi_binding( index_spaces_t::vertices_to_sides,  0, 1, vertex_t,  side_t ),
+    flecsi_binding( index_spaces_t::sides_to_cells,     1, 0,  side_t,   cell_t ),
+    flecsi_binding( index_spaces_t::sides_to_faces,     1, 0,  side_t,   face_t ),
+    flecsi_binding( index_spaces_t::sides_to_edges,     1, 0,  side_t,   edge_t ),
+    flecsi_binding( index_spaces_t::sides_to_vertices,  1, 0,  side_t, vertex_t ),
     // corners <-> wedges
     flecsi_binding( index_spaces_t::wedges_to_corners,   1, 1,  wedge_t, corner_t ),
-    flecsi_binding( index_spaces_t::corners_to_wedges,   1, 1, corner_t,  wedge_t )
+    flecsi_binding( index_spaces_t::corners_to_wedges,   1, 1, corner_t,  wedge_t ),
+    // sides <-> corners
+    flecsi_binding( index_spaces_t::sides_to_corners,   1, 1,  side_t, corner_t ),
+    flecsi_binding( index_spaces_t::corners_to_sides,   1, 1, corner_t, side_t ),
+    // sids <-> wedges
+    flecsi_binding( index_spaces_t::sides_to_wedges,   1, 1,  side_t, wedge_t ),
+    flecsi_binding( index_spaces_t::wedges_to_sides,   1, 1, wedge_t,  side_t )
   );
 
 };
