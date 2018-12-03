@@ -61,17 +61,11 @@ build_connectivity(
 
   // resize the new connectivity
   cell_to_edge.reserve(cell_to_edge.size() + cell_to_vertex.size());
-  auto cellid = cell_to_edge.size();
 
-  // invert the face id to vertices map (the one with sorted vertices)
-  size_t edgeid = 0; // starts from zero because cumulative list of edges
   std::map<std::vector<size_t>, size_t> edges;
-  for ( const auto & vs : sorted_edge_to_vertex )
-      edges[vs] = edgeid++;
-  
   // starting id is not always zero, assume we are building in blocks
   // of assending edge ids
-  edgeid = edge_to_vertex.size();
+  size_t edgeid = edge_to_vertex.size();
 
   // loop over cells, adding all of their edges to the table
   for (const auto & these_verts : cell_to_vertex) {
@@ -91,27 +85,15 @@ build_connectivity(
       // sort the vertices
       auto sorted_vs = vs;
       std::sort(sorted_vs.begin(), sorted_vs.end());
-      // if we dont find the edge
       if (edges.find(sorted_vs) == edges.end()) {
-        // add to the local reverse map  
-        edges.insert({sorted_vs, edgeid});
-        // add to the original sorted and unsorted maps
-        sorted_edge_to_vertex.emplace_back( std::move(sorted_vs) );
+        edges.insert({std::move(sorted_vs), edgeid});
+        these_edges.push_back(edgeid++);
         edge_to_vertex.emplace_back(std::move(vs));
-        // add to the list of edges
-        these_edges.push_back(edgeid);
-        // bump counter
-        edgeid++;
-      }
-      // if we do find the edge
-      else {
-        // just add the id to the list of edges  
+      } else {
         these_edges.push_back(edges[sorted_vs]);
       }
     }
 
-    cellid++;
-    
   } // for
 }
 
@@ -337,9 +319,51 @@ public:
 
     // put the initialization parameters
     auto status = ex_put_init_ext(exo_id, &exo_params);
+
+
+    
+//    status  = ex_put_init_global( exo_id,
+//                                  2*exo_params.num_nodes,
+//                                  2*exo_params.num_elem,
+//                                  exo_params.num_elem_blk,
+//                                  exo_params.num_node_sets,
+//                                  exo_params.num_side_sets);
+    
     if (status)
       clog_fatal(
           "Problem putting exodus file parameters, ex_put_init_ext() returned "
+          << status);
+  }
+
+  //============================================================================
+  //! \brief write the exodus parameters from a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \param [in] exo_params  The  exodus parameters
+  //============================================================================
+  static void write_global_params(int exo_id,
+                                  const int num_global_nodes,
+                                  const int num_global_elem,
+                                  const ex_init_params & exo_params) {
+      // verify mesh dimension
+    if (num_dims != exo_params.num_dim)
+      clog_fatal(
+          "Exodus dimension mismatch: Expected dimension ("
+          << num_dims << ") /= Exodus dimension (" << exo_params.num_dim
+          << ")");
+
+    std::cout<<"num_global_nodes:  "<< num_global_nodes
+             << " elem: " << num_global_elem<<std::endl;
+    
+    auto  status  = ex_put_init_global( exo_id,
+                                        num_global_nodes,
+                                        num_global_elem,
+                                        exo_params.num_elem_blk,
+                                        exo_params.num_node_sets,
+                                        exo_params.num_side_sets);
+    
+    if (status)
+      clog_fatal(
+          "Problem putting exodus file parameters, ex_put_init_global() returned "
           << status);
   }
 
@@ -529,7 +553,8 @@ public:
 
     // set the block header
     ex_index_t num_attr_per_entry = 0;
-    ex_index_t num_nodes_per_entry = is_face_data ? 0 : num_nodes_this_blk;
+    //ex_index_t num_nodes_per_entry = is_face_data ? 0 : num_nodes_this_blk;
+    ex_index_t num_nodes_per_entry = is_face_data ? 0 : 4;
     ex_index_t num_edges_per_entry = 0;
     ex_index_t num_faces_per_entry = is_face_data ? num_nodes_this_blk : 0;
     auto status = ex_put_block(
@@ -560,12 +585,103 @@ public:
           << " ex_put_conn() returned " << status);
 
     // write counts
-    status = ex_put_entity_count_per_polyhedra(
-        exoid, entity_type, blk_id, entity_node_counts.data());
-    if (status)
-      clog_fatal(
-          "Problem writing block counts to exodus file, "
-          << " ex_put_entity_count_per_polyhedra() returned " << status);
+    //status = ex_put_entity_count_per_polyhedra( exoid,
+    //                                            entity_type,
+    //                                            blk_id,
+    //                                            entity_node_counts.data());
+    //if (status)
+    //  clog_fatal(
+    //      "Problem writing block counts to exodus file, "
+    //      << " ex_put_entity_count_per_polyhedra() returned " << status);
+
+    ///////////////
+
+    // node map/
+
+    // setting up globala_map and importer.
+    auto & context = flecsi::execution::context_t::instance();
+    // mpi rank
+    auto rank = context.color();
+    // total number of PEs.
+
+    const std::map<size_t, flecsi::coloring::index_coloring_t> coloring_map
+        = context.coloring_map();
+
+    int    INDEX_ID=1;
+    auto index_coloring = coloring_map.find(INDEX_ID);
+
+    //std::map<size_t,size_t> gid_to_lid_map;
+    std::vector<int> globalIDs;
+    int numowned(0);
+    
+    auto entries = index_coloring->second.exclusive;
+
+    // exclusive+shared are the set of cells owned by processor.(size of standard map)
+    size_t lid = 0;
+    for (auto entity_itr = entries.begin();
+         entity_itr != entries.end(); ++entity_itr) {
+        flecsi::coloring::entity_info_t entity = *entity_itr;
+
+        globalIDs.push_back(entity.id);
+        numowned++;
+        
+    }
+    
+    entries = index_coloring->second.shared;
+    for (auto entity_itr = entries.begin();
+         entity_itr != entries.end(); ++entity_itr) {
+        flecsi::coloring::entity_info_t entity = *entity_itr;
+
+        globalIDs.push_back(entity.id);
+        numowned++;
+    }
+    entries = index_coloring->second.ghost;
+    for (auto entity_itr = entries.begin();
+         entity_itr != entries.end(); ++entity_itr) {
+        flecsi::coloring::entity_info_t entity = *entity_itr;
+
+        globalIDs.push_back(entity.id);
+        
+    }
+
+    
+    status = ex_put_node_num_map(exoid, globalIDs.data());
+
+    // elem map.
+
+    globalIDs.clear();
+    numowned=0;
+    
+    INDEX_ID=2;
+    index_coloring = coloring_map.find(INDEX_ID);
+    entries = index_coloring->second.exclusive;
+
+    // exclusive+shared are the set of cells owned by processor.(size of standard map)
+    for (auto entity_itr = entries.begin();
+         entity_itr != entries.end(); ++entity_itr) {
+        flecsi::coloring::entity_info_t entity = *entity_itr;
+
+        globalIDs.push_back(entity.id);
+        numowned++;
+        
+    }
+    
+    entries = index_coloring->second.shared;
+    for (auto entity_itr = entries.begin();
+         entity_itr != entries.end(); ++entity_itr) {
+        flecsi::coloring::entity_info_t entity = *entity_itr;
+
+        globalIDs.push_back(entity.id);
+        numowned++;
+    }
+    entries = index_coloring->second.ghost;
+    for (auto entity_itr = entries.begin();
+         entity_itr != entries.end(); ++entity_itr) {
+        flecsi::coloring::entity_info_t entity = *entity_itr;
+
+        globalIDs.push_back(entity.id);
+    }
+    status = ex_put_elem_num_map(exoid, globalIDs.data());
 
   }; // write block
 
@@ -579,7 +695,8 @@ public:
       int exoid,
       ex_entity_id blk_id,
       ex_entity_type entity_type,
-      connectivity_t & entities) {
+      connectivity_t & entities,
+      int &nelms_in_blk) {
     // some type aliases
     using ex_index_t = U;
 
@@ -594,6 +711,9 @@ public:
         exoid, entity_type, blk_id, elem_type, &num_elem_this_blk,
         &num_nodes_per_elem, &num_edges_per_elem, &num_faces_per_elem,
         &num_attr);
+
+    nelms_in_blk = num_elem_this_blk;
+    
     if (status)
       clog_fatal("Problem reading block, ex_get_block() returned " << status);
 
@@ -753,7 +873,9 @@ public:
   static auto
   read_face_block(int exoid, ex_entity_id blk_id, connectivity_t & faces) {
 
-    return read_block<U>(exoid, blk_id, EX_FACE_BLOCK, faces);
+      int nelms(0);
+      
+      return read_block<U>(exoid, blk_id, EX_FACE_BLOCK, faces,nelms);
   }
 
   //============================================================================
@@ -783,9 +905,10 @@ public:
   static auto read_element_block(
       int exoid,
       ex_entity_id elem_blk_id,
-      connectivity_t & elements) {
+      connectivity_t & elements,
+      int &nelms_in_blk) {
 
-    return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, elements);
+      return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, elements,nelms_in_blk);
   }
 
   //============================================================================
@@ -801,7 +924,8 @@ public:
       size_t num_elems,
       CONN_TYPE && element_conn) {
 
-    auto entity_desc = (num_dims == 3) ? "nfaced" : "nsided";
+      //auto entity_desc = (num_dims == 3) ? "nfaced" : "nsided";
+      auto entity_desc = (num_dims == 3) ? "nfaced" : "quad4";
     write_block<U>(
         exoid, blk_id, name, EX_ELEM_BLOCK, entity_desc, num_elems,
         std::forward<CONN_TYPE>(element_conn));
@@ -1244,13 +1368,20 @@ public:
           exoid, EX_ELEM_BLOCK, num_elem_blk);
 
     // read each block
+    cell_to_blk_id_.clear();
+    
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
+        int nelms_in_blk(0);
       if (int64)
         base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            exoid, elem_blk_ids[iblk], cell_vertices_ref,nelms_in_blk);
       else
         base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            exoid, elem_blk_ids[iblk], cell_vertices_ref,nelms_in_blk);
+
+      for(int i=0;i<nelms_in_blk;++i)
+          cell_to_blk_id_.push_back(iblk);
+      
     }
 
     // check some assertions
@@ -1469,6 +1600,11 @@ public:
     return p;
   } // vertex
 
+
+  std::vector<int> &get_cell_to_blk_id()
+  {
+      return cell_to_blk_id_;
+  }
 private:
   //============================================================================
   // Private data
@@ -1479,6 +1615,7 @@ private:
 
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
+  vector<int> cell_to_blk_id_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1621,19 +1758,25 @@ public:
           exoid, EX_ELEM_BLOCK, num_elem_blk);
 
     // read each block
+    cell_to_blk_id_.clear();
+    
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
-
+        int nelms_in_blk(0);
+        
       // read the block info, the actual type may change based on
       // the type of the block
       connectivity_t results;
       typename base_t::block_t block_type;
       if (int64)
         block_type = base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], results);
+            exoid, elem_blk_ids[iblk], results,nelms_in_blk);
       else
         block_type = base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], results);
+            exoid, elem_blk_ids[iblk], results,nelms_in_blk);
 
+      for(int i=0;i<nelms_in_blk;++i)
+          cell_to_blk_id_.push_back(iblk);
+      
       //--------------------------------
       // make sure the block type isnt unknown
       if (block_type == base_t::block_t::unknown) {
@@ -1942,6 +2085,10 @@ public:
     return p;
   } // vertex
 
+  std::vector<int> &get_cell_to_blk_id()
+  {
+      return cell_to_blk_id_;
+  }
 private:
   //============================================================================
   // Private data
@@ -1952,6 +2099,9 @@ private:
 
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
+
+  vector<int> cell_to_blk_id_;
+  
 };
 
 } // namespace io

@@ -845,6 +845,16 @@ public:
       c->region() = region_ids[c.id()];
   }
 
+void set_regions(std::vector<int> &region_ids)
+{
+    for(auto c: cells())
+    {
+        int id = region_ids[c.id()];
+        c->set_region(id);
+    }
+    
+}
+
   //! \brief Return all cells in the regions mesh.
   //!
   //! \return Return all cells in the burton mesh as a sequence for use, e.g.,
@@ -1062,7 +1072,7 @@ public:
 #endif
 
     // identify the cell regions
-    for ( auto c : cells() ) c->region() = 0;
+    //for ( auto c : cells() ) c->region() = 0;
 
     // update the geometry
     update_geometry();

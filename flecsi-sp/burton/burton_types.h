@@ -73,6 +73,7 @@ struct burton_1d_types_base
       cells,
       corners,
       wedges = corners,
+      sides = corners,          
       // index spaces for connectivity
       vertices_to_cells,
       edges_to_cells = vertices_to_cells,
@@ -98,6 +99,15 @@ struct burton_1d_types_base
       wedges_to_vertices = corners_to_vertices,
       wedges_to_edges = corners_to_vertices,
       wedges_to_faces = corners_to_vertices,
+      // sides
+      cells_to_sides = cells_to_corners,
+      vertices_to_sides = vertices_to_corners,
+      edges_to_sides = vertices_to_corners,
+      faces_to_sides = vertices_to_corners,
+      sides_to_cells = corners_to_cells,
+      sides_to_vertices = corners_to_vertices,
+      sides_to_edges = corners_to_vertices,
+      sides_to_faces = corners_to_vertices,
       // index spaces that are not used
       vertices_to_edges = 7777,
       vertices_to_faces = 7777,
@@ -107,8 +117,12 @@ struct burton_1d_types_base
       faces_to_edges = 7777,
       wedges_to_corners = 7777,
       corners_to_wedges = 7777,
+      sides_to_corners = 7777,
+      corners_to_sides = 7777,
+      sides_to_wedges = 7777,
+      corners_to_wedges = 7777,
       // total number of index spaces
-      size = wedges + 1
+      size = sides + 1
     };
 
     //! Maps an entity dimension to an index space id

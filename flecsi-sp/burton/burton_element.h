@@ -724,8 +724,10 @@ struct burton_element_t<2,2>
   { return min_length_; }
 
   //! set the region id
-  auto & region()
-  { return region_; }
+//  auto & region()
+//  { return region_; }
+  void set_region(auto id)
+  { region_=id; }
 
   //! get the region id
   auto region() const
@@ -1460,8 +1462,10 @@ struct burton_element_t<3,3>
 
 
   //! set the region id
-  size_t & region()
-  { return region_; }
+  //size_t & region()
+  //{ return region_; }
+  void set_region(auto id)
+  {  region_=id; }
 
   //! get the region id
   size_t region() const

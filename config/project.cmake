@@ -125,6 +125,9 @@ else()
 endif()
 
   
+# enable wedge/corners??
+OPTION(FLECSI_SP_BURTON_MESH_EXTRAS "use corner/wedges" ON)
+
 #------------------------------------------------------------------------------#
 # Boost is needed for program options
 #------------------------------------------------------------------------------#

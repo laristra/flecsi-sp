@@ -301,8 +301,12 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   // create the cells
   //----------------------------------------------------------------------------
 
+  std::vector<int> &cell_to_blk_id = mesh_def.get_cell_to_blk_id();
+  std::vector<int> region_ids;
   // create the cells
-  for(auto & cm: cell_lid_to_mid) {
+  for(auto & cm: cell_lid_to_mid) { 
+      // region id is unique block id from exodus.
+      region_ids.push_back(cell_to_blk_id[cm.second]);
     // get the list of vertices
     auto vs =
       mesh_def.entities( cell_t::dimension, vertex_t::dimension, cm.second );
@@ -318,6 +322,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_vs );
   }
+  mesh.set_regions(region_ids);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -426,9 +431,17 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   //----------------------------------------------------------------------------
 
   // create the cells
-  for(auto & cm: cell_lid_to_mid) {
-    // get the list of faces
-    auto fs =
+
+  std::vector<int> &cell_to_blk_id = mesh_def.get_cell_to_blk_id();
+  std::vector<int> region_ids;
+  
+  for(auto & cm: cell_lid_to_mid) { 
+
+      // region id is unique block id from exodus.
+      region_ids.push_back(cell_to_blk_id[cm.second]);
+      
+      // get the list of faces
+    auto fs = 
       mesh_def.entities( cell_t::dimension, face_t::dimension, cm.second );
     // create a list of face pointers
     std::vector< face_t * > elem_fs( fs.size() );
@@ -442,6 +455,8 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_fs );
   }
+  mesh.set_regions(region_ids);
+  
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1943,7 +1958,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   for ( auto i : registered_index_spaces ) {
     flecsi::execution::context_t::sparse_index_space_info_t isi;
-    isi.max_entries_per_index = max_entries;
+    //THIS IS MAXIMUM NUMBER OF MATERIALS>>> set to 10 right now.
+    auto MAX_NUMBER_OF_MATERIALS=10;
+    
+    isi.max_entries_per_index = MAX_NUMBER_OF_MATERIALS;
     // figure out the maximum number of entities
     const auto & coloring = context.coloring( i );
     auto num_ents =
@@ -1961,7 +1979,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //----------------------------------------------------------------------------
   // output the result
   //----------------------------------------------------------------------------
-
+#if 0
   // figure out this ranks file name
   auto basename = ristra::utils::basename( filename_string );
   auto output_prefix = ristra::utils::remove_extension( basename );
@@ -2002,9 +2020,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   );
 
   clog(info) << "Finished mesh partitioning." << std::endl;
+#endif
 
+} // somerhing
 
-} // partition_mesh
 
 
 ////////////////////////////////////////////////////////////////////////////////
