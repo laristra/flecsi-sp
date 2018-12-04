@@ -38,12 +38,14 @@ template< std::size_t N >
 struct burton_extras_types_t {
   using corner_t = burton_extras_t<N,0>;
   using wedge_t = burton_extras_t<N,1>;
+  using side_t = burton_extras_t<N,2>;
 };
 
 template<>
 struct burton_extras_types_t<1> {
   using corner_t = burton_extras_t<1,0>;
   using wedge_t = burton_extras_t<1,0>;
+  using side_t = burton_extras_t<1,0>;
 };
 
 
@@ -63,6 +65,13 @@ using burton_corner_t = typename burton_extras_types_t<N>::corner_t;
 template< std::size_t N >
 using burton_wedge_t = typename burton_extras_types_t<N>::wedge_t;
 
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!        multi-dimensional mesh sides.
+//! \tparam N The total number of mesh dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+using burton_side_t = typename burton_extras_types_t<N>::side_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief An interface for managing geometry and state associated with
@@ -70,6 +79,7 @@ using burton_wedge_t = typename burton_extras_types_t<N>::wedge_t;
 //!
 //! \tparam N The total number of mesh dimensions.
 ////////////////////////////////////////////////////////////////////////////////
+
 template< std::size_t N >
 class burton_extras_t<N,0>
   : public flecsi::topology::mesh_entity_u<0, burton_config_t<N>::num_domains>
@@ -391,6 +401,58 @@ public:
   vector_t internal_facet_normal_ = 0;
   //! the area of edge that connects mp and e.
   real_t internal_facet_area_ = 0;
+
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!   two- or three-dimensional mesh sides.
+//!
+//! \tparam N The total number of mesh dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+class burton_extras_t<N,2,typename std::enable_if< N != 1 >::type>
+  : public flecsi::topology::mesh_entity_u<2, burton_config_t<N>::num_domains>
+{
+public:
+
+  //============================================================================
+  // Typedefs
+  //============================================================================
+
+  //! the mesh traits
+  using config_t = burton_config_t<N>;
+
+  //! Number of domains in the burton mesh.
+  static constexpr auto num_domains = config_t::num_domains;
+
+  //! Number of domains in the burton mesh.
+  static constexpr auto num_dimensions = config_t::num_dimensions;
+
+  //! The domain of the entity
+  static constexpr auto domain = 1;
+
+  //! the flecsi mesh topology storage type
+  using mesh_storage_t = typename config_t::mesh_storage_t;
+  //! the flecsi mesh topology type
+  using mesh_topology_base_t = 
+    flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
+
+  //============================================================================
+  // Constructors
+  //============================================================================
+
+  //! default constructor
+  burton_extras_t() = default;
+
+  // dissallow copying
+  burton_extras_t( burton_extras_t & ) = delete;
+  burton_extras_t & operator=( burton_extras_t & ) = delete;
+
+  // dissallow moving
+  burton_extras_t( burton_extras_t && ) = delete;
+  burton_extras_t & operator=( burton_extras_t && ) = delete;
 
 };
 
