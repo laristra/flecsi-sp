@@ -65,6 +65,7 @@ cinch_add_unit(flecsi_sp_x3d_definition
   ${FLECSI_SP_RUNTIME_DRIVER}
   INPUTS
   ${FLECSI_SP_DATA_DIR}/meshes/2d/uniform/uniform_32.x3d.00001
+  ${FLECSI_SP_DATA_DIR}/meshes/3d/spun/spun_uniform_32.x3d
   DEFINES
   -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
   POLICY ${FLECSI_SP_UNIT_POLICY}

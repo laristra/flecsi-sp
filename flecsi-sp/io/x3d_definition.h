@@ -93,9 +93,12 @@
 #include <initializer_list>
 #include <ios>
 #include <iostream>
+#include <iterator>
 #include <limits>
 #include <map>
+#include <memory>
 #include <string>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -347,7 +350,11 @@ class x3d_base__ {
       // max(size_t)
       neighbor_list.emplace_back(node-1);
       // The remainder of the line contains unused fields, so skip it.
-      std::getline(f, token);
+      // std::getline only will not work here in 3D where one can have more than
+      // three nodes per face, and the line is too long, and gets split.  There
+      // should be 5 more unused columns.
+      f >> token >> token >> token >> token >> token;
+      std::getline(f, token);  // to get \n from previous line
     }
     // end of faces block
     std::getline(f, token);
@@ -735,6 +742,267 @@ class x3d_definition__<2, T> : public flecsi::topology::mesh_definition_u<2> {
 
   //! \brief storage for vertex coordinates
   matrix<real_t> vertices_;
-};
+};  // x3d_definition__<2, T>
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief The three-dimensional mesh definition based on the X3D format
+////////////////////////////////////////////////////////////////////////////////
+template<typename T>
+class x3d_definition__<3, T> : public flecsi::topology::mesh_definition_u<3> {
+ public:
+  //============================================================================
+  // Typedefs
+  //============================================================================
+  //! the instantiated base type
+  using base_t = x3d_base__<3, T>;
+
+  //! the instantiated mesh definition type
+  using mesh_definition_t = flecsi::topology::mesh_definition_u<3>;
+
+  //! the number of dimensions
+  using mesh_definition_t::dimension;
+
+  //! the floating point type
+  using real_t = typename base_t::real_t;
+
+  //! the index type
+  using index_t = typename base_t::index_t;
+
+  //! the vector type
+  template<typename U>
+  using vector = typename base_t::template vector<U>;
+
+  //! \brief the data type for an index vector
+  using index_vector_t = typename base_t::index_vector_t;
+
+  //! matrix type
+  template<typename U>
+  using matrix = typename base_t::template sparse_matrix<U>;
+
+  //! the connectivity type
+  using connectivity_t = typename base_t::connectivity_t;
+
+  //============================================================================
+  // Constructors
+  //============================================================================
+  //! \brief Default constructor
+  x3d_definition__() = default;
+
+  //! \brief Constructor with filename
+  //! \param [in] filename The name of the file to load
+  explicit x3d_definition__(const std::string & filename) {
+    read(filename);
+  }
+
+  /// Copy constructor (disabled)
+  x3d_definition__(const x3d_definition__ &) = delete;
+
+  /// Assignment opeartor (disabled)
+  x3d_definition__ & operator=(const x3d_definition__ &) = delete;
+
+  /// Destructor
+  ~x3d_definition__() = default;
+
+  //============================================================================
+  //! \brief Implementation of the X3D mesh reader.  Populates private data
+  //! describing connectivity and vertex positions.
+  //! \param [in] name Read mesh from \e name
+  //============================================================================
+  void read(const std::string & name) {
+    clog(info) << "Reading X3D mesh from: " << name << std::endl;
+
+    // Open the X3D file
+    std::fstream file(name, std::ios_base::in);
+    if (!file.is_open()) {
+      clog_fatal("Error opening file: " << name);
+    }
+
+    // Verify and read header
+    auto params = base_t::verify_and_read_header(file);
+
+    // sanity checks
+    if (dimension() != params.numdim)
+      clog_fatal("Expected dimension " << dimension() <<
+                 " in file " << name << " but received " <<
+                 params.numdim);
+    if (params.process != 1)
+      clog_fatal("X3D reader does not support distributed X3D files.");
+
+    // material information -- currently we do nothing with this
+    base_t::get_material_names(file, params.materials);
+    base_t::get_material_eosid(file, params.materials);
+    base_t::get_material_opacid(file, params.materials);
+
+    // connectivities
+    auto & cell_faces_ref = entities_[3][2];
+    auto & cell_edges_ref = entities_[3][1];
+    auto & cell_vertices_ref = entities_[3][0];
+    auto & face_edges_ref = entities_[2][1];
+    auto & face_vertices_ref = entities_[2][0];
+    auto & edge_vertices_ref = entities_[1][0];
+
+    // read coordinates
+    vertices_ = base_t::get_node_coords(file, params.nodes, params.numdim);
+
+    // read faces to vertices connectivity
+    // NOTE: each internal face is listed twice in this list from the X3D format
+    //       and the last entry contains the items to deduplicate
+    face_vertices_ref = base_t::get_face_connectivity(file, params.faces);
+
+    // read cells to face connectivity
+    cell_faces_ref = base_t::get_cell_connectivity(file, params.elements);
+
+    // Now we fix up the duplicated faces and correct the IDs in the
+    // cell connectivity
+    dedupe_and_fixup(face_vertices_ref, cell_faces_ref);
+
+    // build cell to node connectivity from cell-to-face and face-to-node
+    detail::intersect(cell_faces_ref, face_vertices_ref, cell_vertices_ref);
+
+    // build face to edge and edge to node connectivity from face to node
+    auto edge_vertices_sorted = std::make_unique<connectivity_t>();
+    detail::build_connectivity(
+        face_vertices_ref, face_edges_ref, edge_vertices_ref,
+        *edge_vertices_sorted, [](const auto & vs, auto & edge_vs) {
+          using list_type = std::decay_t<decltype(*edge_vs.begin())>;
+          for (auto v0 = std::prev(vs.end()), v1 = vs.begin(); v1 != vs.end();
+               v0 = v1, ++v1)
+            edge_vs.emplace_back(list_type{*v0, *v1});
+        });
+
+    // build cell to edge connectivity from cell to face and face to edge
+    detail::intersect(cell_faces_ref, face_edges_ref, cell_edges_ref);
+
+    // and all the inversions
+    // params.faces no longer the correct size
+    entities_[0][1].reserve(params.nodes);
+    entities_[0][2].reserve(params.nodes);
+    entities_[0][3].reserve(params.nodes);
+    entities_[1][2].reserve(edge_vertices_ref.size());
+    entities_[1][3].reserve(edge_vertices_ref.size());
+    entities_[2][3].reserve(face_vertices_ref.size());
+
+    detail::transpose(edge_vertices_ref, entities_[0][1]);
+    detail::transpose(face_vertices_ref, entities_[0][2]);
+    detail::transpose(cell_vertices_ref, entities_[0][3]);
+    detail::transpose(face_edges_ref, entities_[1][2]);
+    detail::transpose(cell_edges_ref, entities_[1][3]);
+    detail::transpose(cell_faces_ref, entities_[2][3]);
+
+    // cleanup
+    file.close();
+  }  // read
+
+  //////////////////////////////////////////////////////////////////////////////
+  // Required overrides from mesh_definition_u
+  //////////////////////////////////////////////////////////////////////////////
+  //! \brief Return the number of entities of a particular dimension
+  //! \param [in] dim The entity dimension to query.
+  size_t num_entities(size_t dim) const override {
+    switch (dim) {
+      case 0:
+        return vertices_.size();
+      default:
+        return entities_.at(dim).at(0).size();
+    }
+  }  // num_entities
+
+  //! \brief Return the set of entities of dimension \em to_dim
+  //! that define entity \em id of dimension \em from_dim.
+  //! \param [in] from_dim The dimension of the entity for which the definition
+  //! is being requested.
+  //! \param [in] to_dim The dimension of the entities of the definition.
+  //! \param [in] from_id The id of the entitiy for which the definition is
+  //! being requested.
+  std::vector<size_t>
+  entities(size_t from_dim, size_t to_dim, size_t from_id) const override {
+    return entities_.at(from_dim).at(to_dim).at(from_id);
+  }  // entities
+
+  //! \brief Return the set of entities of dimension \em to_dim that define
+  //! entities of dimension \em from_dim.
+  //! \param [in] from_dim The dimension of the entities for which the
+  //! definition is being requested.
+  //! \param [in] to_dim The dimension of the entities of the definition.
+  const auto & entities(size_t from_dim, size_t to_dim) const {
+    return entities_.at(from_dim).at(to_dim);
+  }  // entities
+
+  //! \brief Coordinates of a particular vertex.
+  //! \tparam POINT_TYPE The data type that holds the coordinates; uses []
+  //! \param [in] vertex_id The id of the vertex to query.
+  //! \return POINT_TYPE object filled with coordinates.
+  template<typename POINT_TYPE>
+  auto vertex(const size_t vertex_id) const {
+    POINT_TYPE p;
+    for (int d = 0; d < dimension(); ++d)
+      p[d] = vertices_[vertex_id][d];
+    return p;
+  }  // vertex
+
+  //! \brief THIS METHOD REQUIRED BY partition_mesh BUT IS A NO-OP
+  template<typename U = int>
+  void write(
+      const std::string & name,
+      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
+      element_sets = {},
+      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
+      node_sets = {}) const {
+    clog(info) << "X3D WON'T BE WRITING A MESH TO: " << name << std::endl;
+  }
+
+ private:
+  //! \brief Remove duplicated physical faces and correct cell-face IDs.
+  //! \param [inout] edge_vertices The list of vertices for each edge, including
+  //! duplicates.
+  //! \param [inout] cell_edges The list of edges for each cell.
+  //!
+  //! On return, edge_vertices is stripped up duplicate edges and the list of
+  //! duplicate edges.  Similarly, cell_edges has had all of its entries updated
+  //! to mirror the ID's of only the remaining edges after deduplication.
+  void dedupe_and_fixup(connectivity_t & edge_vertices,
+                        connectivity_t & cell_edges) {
+    // last entry contains the duplicates
+    // a value in this vector of max(size_t) indicates a domain boundary
+    auto dupes = edge_vertices.back();
+    edge_vertices.pop_back();
+    auto boundary = std::numeric_limits<size_t>::max();
+    size_t pos(0), offset(0);
+    // Lookup table for mapping original edge IDs to the new IDs created after
+    // removal and accounting for duplicates.
+    index_vector_t edge_LUT;
+    edge_LUT.reserve(edge_vertices.size());
+    // This is pretty brute force and expensive...
+    for (auto d : dupes) {
+      // a non-boundary face that has already been encountered
+      if ((d < boundary) && (d < pos)) {
+        // we've encountered this before, so point to it
+        // note this might have been offset previously
+        edge_LUT.push_back(edge_LUT[d]);
+        // get rid of the duplicate
+        edge_vertices.erase(edge_vertices.begin() + pos - offset);
+        // keep track of how many times we have done this
+        ++offset;
+      } else {
+        // valid face
+        edge_LUT.push_back(pos - offset);
+      }
+      ++pos;
+    }  // dupes
+    // We've eliminated duplicate faces, so now fix the cell connectivity.
+    // Again, brute force checking everything...
+    for (auto & edges : cell_edges) {
+      for (auto & e : edges)
+        e = edge_LUT[e];
+    }
+  }  // dedupe_and_fixup
+
+  //! \brief storage for element vertices
+  std::map<index_t, std::map<index_t, connectivity_t>> entities_;
+
+  //! \brief storage for vertex coordinates
+  matrix<real_t> vertices_;
+};  // x3d_definition__<3, T>
+
 }  // namespace io
 }  // namespace flecsi_sp
