@@ -120,7 +120,7 @@ struct burton_1d_types_base
       sides_to_corners = 7777,
       corners_to_sides = 7777,
       sides_to_wedges = 7777,
-      corners_to_wedges = 7777,
+      wedges_to_sides = 7777,
       // total number of index spaces
       size = sides + 1
     };
@@ -587,7 +587,7 @@ struct burton_types_t<2, true> : public burton_2d_types_base
     flecsi_entity_type( index_spaces_t::edges,    0,   edge_t ),
     flecsi_entity_type( index_spaces_t::cells,    0,   cell_t ),
     flecsi_entity_type( index_spaces_t::corners,  1, corner_t ),
-    flecsi_entity_type( index_spaces_t::wedges,   1,  wedge_t )
+    flecsi_entity_type( index_spaces_t::wedges,   1,  wedge_t ),
     flecsi_entity_type( index_spaces_t::sides,    2,  side_t )
   );
 
@@ -820,6 +820,9 @@ struct burton_3d_types_base
 
   //! Type for burton mesh wedges.
   using wedge_t = burton_wedge_t<num_dimensions>;
+
+  //! Type for burton mesh sides
+  using side_t = burton_side_t<num_dimensions>;
   
   //============================================================================
   //! setup the index subspaces
@@ -892,7 +895,7 @@ struct burton_3d_types_base
       case 1:
         return mesh->template make<wedge_t, wedge_t::domain>(id);
       case 2:
-        return mesh->template make<side_t, wedge_t::domain>(id);
+        return mesh->template make<side_t, side_t::domain>(id);
       default:
         throw_logic_error("invalid topological dimension");
       }

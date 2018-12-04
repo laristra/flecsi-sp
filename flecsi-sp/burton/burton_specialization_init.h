@@ -1559,7 +1559,7 @@ auto make_sides( const MESH_DEFINITION & mesh_def )
 
   } // cells
 
-  return std::make_pair( entities_to_sides, wedges_to_entities );
+  return std::make_pair( entities_to_sides, sides_to_entities );
 
 }
 
@@ -2108,16 +2108,16 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
 
 
+  /// sides entries.
+  // only dim>1
 
-
-#if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   // cell to side
   ai.index_space = index_spaces::cells_to_sides;
   ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
   ai.color_sizes = gathered_sides;
   context.add_adjacency(ai);
-
+  
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // face to side
   ai.index_space = index_spaces::faces_to_sides;
