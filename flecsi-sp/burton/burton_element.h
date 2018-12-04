@@ -813,7 +813,8 @@ struct burton_element_t<2,2>
     auto cell_verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
     auto cell_edges = primal_conn.get_entity_vec( cell, /* dimension */ 1 );
     auto num_vertices = cell_verts.size();
-
+    auto num_edges = cell_edges.size();
+    
     // main counter
     size_t i = 0;
 
@@ -925,6 +926,50 @@ struct burton_element_t<2,2>
       return std::vector<size_t>(2*num_vertices, 3);
 
     }
+      //------------------------------------------------------------------------
+      // sides
+    case 2: {
+
+      // get connectivity specific to sides
+      // list of wedges associated to this cell.
+      auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
+      
+      // sort cell wedges for later intersection
+      std::sort( cell_wedges.begin(),  cell_wedges.end() );
+
+      // temporary storage for found wedges
+      std::vector<id_t> wedges;
+      wedges.reserve(2);
+
+      // loop over each edge (pair of vertices)
+      for(auto e1 = cell_edges.begin(); e1 != cell_edges.end();++e1)
+      {
+          auto edge_wedges = domain_conn.get_entity_vec(*e1,/*dimension*/1).vec();
+          
+          // sort cell wedges for later intersection
+          std::sort( edge_wedges.begin(),  edge_wedges.end() );
+
+          wedges.clear();
+          std::set_intersection( edge_wedges.begin(), edge_wedges.end(),
+                                 cell_wedges.begin(), cell_wedges.end(),
+                                 std::back_inserter(wedges));
+
+          // it should have two wedges per edges..
+          assert(wedges.size()==2);
+          auto edge_verts = primal_conn.get_entity_vec( *e1, /* dimension */ 0 );
+
+          for( auto v:edge_verts) 
+              entities[i++]=v;
+          entities[i++]=*e1;
+          for(auto we: wedges)
+          {
+              entities[i++]= we;
+          }//we
+      }//e1
+
+      return std::vector<size_t>(num_edges, 5);
+    }
+        
       //------------------------------------------------------------------------
       // Failure
     default:

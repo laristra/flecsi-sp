@@ -1838,6 +1838,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     = side_entities.exclusive.size()
     + side_entities.shared.size()
     + side_entities.ghost.size();
+
+  std::cout<<"num_sides: " << num_sides<<std::endl;
+  
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -1940,7 +1943,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
             cnt++;
         }
       }
-
+      std::cout<<"from_dim: "<<  from_dim
+               <<" to_dim: "<< to_dim
+               << " cnt: " << cnt<<std::endl;
+      
       // gather the results
       ai.color_sizes = communicator->gather_sizes( cnt );
 
@@ -1961,6 +1967,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   auto gathered_wedges = communicator->gather_sizes( num_wedges );
   auto gathered_sides = communicator->gather_sizes( num_sides );
+  auto gathered_sides2 = communicator->gather_sizes( 2*num_sides );
+  auto gathered_sides4 = communicator->gather_sizes( 4*num_sides );
 #endif
 
   // cell to corner
@@ -2115,6 +2123,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::cells_to_sides;
   ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  // side belongs to unique cell.
   ai.color_sizes = gathered_sides;
   context.add_adjacency(ai);
   
@@ -2131,6 +2140,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::edges_to_sides;
   ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  // side belongs to a unique edge.
   ai.color_sizes = gathered_sides;
   context.add_adjacency(ai);
 
@@ -2139,7 +2149,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::vertices_to_sides;
   ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
-  ai.color_sizes = gathered_sides;
+  ai.color_sizes = gathered_sides4;
   context.add_adjacency(ai);
 
   // side to cell
@@ -2168,12 +2178,12 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.color_sizes = gathered_sides;
   context.add_adjacency(ai);
 
-  // wedge to vertex
-  // each wedge goes to two vertex
-  ai.index_space = index_spaces::sids_to_vertices;
+  // side to vertex
+  // each side goes to two vertex
+  ai.index_space = index_spaces::sides_to_vertices;
   ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
   ai.to_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
-  ai.color_sizes = gathered_sides;
+  ai.color_sizes = gathered_sides2;
   context.add_adjacency(ai);
 
 
@@ -2200,7 +2210,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::sides_to_corners;
   ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  ai.color_sizes = gathered_sides;
+  ai.color_sizes = gathered_sides2;
   context.add_adjacency(ai);
 
   // corner to  side
@@ -2208,24 +2218,24 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::corners_to_sides;
   ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
-  ai.color_sizes = gathered_sides;
+  ai.color_sizes = gathered_sides2;
   context.add_adjacency(ai);
 
 
   // side to wedge
   // each side belongs to two wedges
-  ai.index_space = index_spaces::sides_to_corners;
+  ai.index_space = index_spaces::sides_to_wedges;
   ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  ai.color_sizes = gathered_sides;
+  ai.color_sizes = gathered_sides2;
   context.add_adjacency(ai);
 
   // wedge to  side
-  // eaceh wedge goes to one side
-  ai.index_space = index_spaces::corners_to_sides;
+  // each wedge goes to one side
+  ai.index_space = index_spaces::wedges_to_sides;
   ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
-  ai.color_sizes = gathered_sides;
+  ai.color_sizes = gathered_sides2;
   context.add_adjacency(ai);
 
 #endif // DIMENSION > 1
@@ -2373,8 +2383,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     std::decay_t< decltype(sides_to_entities) >::mapped_type entity_list;
     // loop over all dimensions
     for ( int dim=0; dim<=num_dims; ++dim ) {
-      // alias the wedge to entity mapping
-      const auto & side_to_entities = wedges.second[dim];
+      // alias the side to entity mapping
+      const auto & side_to_entities = sides.second[dim];
       const auto & entities = side_to_entities.at(s);
       // resize storage
       entity_list.reserve( entity_list.size() + entities.size() );

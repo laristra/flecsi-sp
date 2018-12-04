@@ -588,7 +588,7 @@ struct burton_types_t<2, true> : public burton_2d_types_base
     flecsi_entity_type( index_spaces_t::cells,    0,   cell_t ),
     flecsi_entity_type( index_spaces_t::corners,  1, corner_t ),
     flecsi_entity_type( index_spaces_t::wedges,   1,  wedge_t ),
-    flecsi_entity_type( index_spaces_t::sides,    2,  side_t )
+    flecsi_entity_type( index_spaces_t::sides,    1,  side_t )
   );
 
 
@@ -963,7 +963,8 @@ struct burton_types_t<3, true> : public burton_3d_types_base
     flecsi_entity_type( index_spaces_t::faces, 0, face_t ),
     flecsi_entity_type( index_spaces_t::cells, 0, cell_t ),
     flecsi_entity_type( index_spaces_t::corners, 1, corner_t ),
-    flecsi_entity_type( index_spaces_t::wedges, 1, wedge_t )
+    flecsi_entity_type( index_spaces_t::wedges, 1, wedge_t ),
+    flecsi_entity_type( index_spaces_t::sides, 1, side_t )
   );
 
 

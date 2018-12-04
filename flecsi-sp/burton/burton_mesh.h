@@ -1138,6 +1138,8 @@ void set_regions(std::vector<int> &region_ids)
   {
 
     base_t::template init<0>();
+    std::cout<<"done init()"<<std::endl;
+    
     base_t::template init_bindings<1>();
 
     // now set the boundary flags.
