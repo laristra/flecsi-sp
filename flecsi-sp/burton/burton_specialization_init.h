@@ -1967,6 +1967,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   auto gathered_wedges = communicator->gather_sizes( num_wedges );
   auto gathered_sides = communicator->gather_sizes( num_sides );
+  // Not quite correct, needs way to properly compute necessarily size for connectivity.
   auto gathered_sides2 = communicator->gather_sizes( 2*num_sides );
   auto gathered_sides4 = communicator->gather_sizes( 4*num_sides );
 #endif
