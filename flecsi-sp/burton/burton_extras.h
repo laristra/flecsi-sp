@@ -361,6 +361,19 @@ public:
   const auto & facet_midpoint() const
   { return facet_centroid_; }
   
+  //! \brief Get the cell facet centroid
+  const auto & internal_facet_centroid() const
+  { return internal_facet_centroid_; }
+
+  //! \brief Get the cell facet centroid
+  const auto & internal_facet_midpoint() const
+  { return internal_facet_centroid_; }
+
+
+  //! \brief Get the corner-midpoint
+  const auto & corner_midpoint() const
+  { return corner_midpoint_; }
+
   //! return the bitfield flags
   const auto & flags() const { return flags_; }
   auto & flags() { return flags_; }
@@ -401,7 +414,12 @@ public:
   vector_t internal_facet_normal_ = 0;
   //! the area of edge that connects mp and e.
   real_t internal_facet_area_ = 0;
+  //! centroid of the internal facet
+  point_t internal_facet_centroid_ = 0;
 
+  //! this is midpoint between cell mid-point and vertex.
+  point_t corner_midpoint_=0;
+  
 };
 
 
@@ -497,14 +515,14 @@ void burton_extras_t<2,1>::update( const MESH_TOPOLOGY * mesh, bool is_right )
 
   if ( is_right )
   {
-      facet_normal_ = { e[1] - v[1], v[0] - e[0] };
-      internal_facet_normal_ = {  mp[1]-e[1], e[0] - mp[0] };
+    facet_normal_ = { e[1] - v[1], v[0] - e[0] };
+    internal_facet_normal_ = {  mp[1]-e[1], e[0] - mp[0] };
   }
   else
   {
       
-      facet_normal_ = { v[1] - e[1], e[0] - v[0] };
-      internal_facet_normal_ = { e[1] - mp[1], mp[0] - e[0] };
+    facet_normal_ = { v[1] - e[1], e[0] - v[0] };
+    internal_facet_normal_ = { e[1] - mp[1], mp[0] - e[0] };
   }
 
   facet_area_ = abs(facet_normal_);
@@ -515,6 +533,9 @@ void burton_extras_t<2,1>::update( const MESH_TOPOLOGY * mesh, bool is_right )
 
   internal_facet_area_ = abs(internal_facet_normal_);
   internal_facet_normal_ /= internal_facet_area_;
+  internal_facet_centroid_ = 0.5 * ( e + mp );
+
+  corner_midpoint_ = 0.5*( mp + v );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -545,6 +566,8 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
   facet_centroid_ =
     ristra::geometry::shapes::triangle<num_dimensions>::centroid( v, f, e );
   set_boundary( fs.front()->is_boundary() );
+
+  // NOTE internal facet values are not defined....
 }
 
 
