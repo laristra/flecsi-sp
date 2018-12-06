@@ -17,7 +17,7 @@ set(io_HEADERS
   PARENT_SCOPE
 )
 
-if ( FLECSI_SP_ENABLE_EXODUS )
+if ( FLECSI_SP_ENABLE_EXODUS AND FLECSI_SP_ENABLE_PARMETIS )
   cinch_add_unit(flecsi_sp_exodus_definition
     SOURCES test/exodus_definition.cc
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
