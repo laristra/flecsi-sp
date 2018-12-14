@@ -579,6 +579,7 @@ public:
   static void write(
     const std::string &name,
     mesh_t &m,
+    double time,
     std::vector<T * > &var_vec,
     std::vector<std::string> &varname
   ) {
@@ -695,6 +696,12 @@ public:
     
     write_fields( exoid, m, var_vec, varname );
     
+
+    // -------------
+    // set the time
+    int time_step(1);
+    auto status = ex_put_time(exoid, time_step, &time );
+    assert(status == 0);
 
     //--------------------------------------------------------------------------
     // final step
