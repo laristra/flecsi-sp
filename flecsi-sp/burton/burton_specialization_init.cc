@@ -94,7 +94,7 @@ void specialization_spmd_init(int argc, char** argv)
   // get a mesh handle and call the initialization task
   auto mesh_handle = flecsi_get_client_handle(
       flecsi_sp::burton::burton_mesh_t, meshes, mesh0);
-  flecsi_execute_task(initialize_mesh, flecsi_sp::burton, single,
+  flecsi_execute_task(initialize_mesh, flecsi_sp::burton, index,
       mesh_handle, mesh_filename);
 }
 

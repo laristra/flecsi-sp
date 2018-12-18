@@ -47,7 +47,7 @@ void field_write_test(
 } // TEST_F
 
 flecsi_register_task(field_write_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief read from the field
@@ -70,7 +70,7 @@ void field_read_test(
 } // TEST_F
 
 flecsi_register_task(field_read_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 } // namespace
 } // namespace
@@ -92,8 +92,8 @@ void driver(int argc, char ** argv)
   auto face_field_handle = flecsi_get_handle(mesh_handle, hydro, face_field, integer_t, dense, 0);
 
   // test the field communication
-  flecsi_execute_task(field_write_test, flecsi_sp::burton::test, single, mesh_handle, face_field_handle);
-  flecsi_execute_task(field_read_test, flecsi_sp::burton::test, single, mesh_handle, face_field_handle);
+  flecsi_execute_task(field_write_test, flecsi_sp::burton::test, index, mesh_handle, face_field_handle);
+  flecsi_execute_task(field_read_test, flecsi_sp::burton::test, index, mesh_handle, face_field_handle);
 
 } // driver
 

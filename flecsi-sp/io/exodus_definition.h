@@ -824,7 +824,7 @@ class exodus_definition__ {};
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<2, T> : public flecsi::topology::mesh_definition__<2>
+class exodus_definition__<2, T> : public flecsi::topology::mesh_definition_u<2>
 {
 
 public:
@@ -836,7 +836,7 @@ public:
   using base_t = exodus_base__<2, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition__<2>;
+  using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
@@ -1172,7 +1172,7 @@ private:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<3, T> : public flecsi::topology::mesh_definition__<3>
+class exodus_definition__<3, T> : public flecsi::topology::mesh_definition_u<3>
 {
 
 public:
@@ -1184,7 +1184,7 @@ public:
   using base_t = exodus_base__<3, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition__<3>;
+  using mesh_definition_t = flecsi::topology::mesh_definition_u<3>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
