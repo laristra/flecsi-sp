@@ -239,7 +239,7 @@ class hdf5_definition__ {};
 /// io_base_t provides registrations of the hdf5 file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class hdf5_definition__<2, T> : public flecsi::topology::mesh_definition__<2>
+class hdf5_definition__<2, T> : public flecsi::topology::mesh_definition_u<2>
 {
 
 public:
@@ -251,7 +251,7 @@ public:
   using base_t = hdf5_base__<2, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition__<2>;
+  using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
@@ -368,7 +368,7 @@ std::cout<< "vertices_["<<i<<"] = "<<vertices_[i]<<std::endl;
     //catch failure caused by the H5File operations
     catch(FileIException error)
     {
-      error.printErrorStack();
+      //error.printErrorStack();
     }
     // catch failure caused by the DataSet operations
    catch( DataSetIException error )
