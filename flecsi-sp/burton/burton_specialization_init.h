@@ -21,16 +21,19 @@
 
 #ifdef FLECSI_SP_USE_MPAS
 #include <flecsi-sp/io/mpas_definition.h>
-#endif
-#if FLECSI_SP_USE_EXODUS
+
+#elif FLECSI_SP_USE_EXO
 #include <flecsi-sp/io/exodus_definition.h>
+
+#else
+// Probably redundant, since CMake should catch this, but let's be safe
+#  error Exodus or MPAS are needed to build burton specialization.
 #endif
+
+
 #include <flecsi-sp/utils/char_array.h>
 #include <flecsi-sp/utils/types.h>
 
-#if not defined(FLECSI_SP_USE_EXODUS) && not defined(FLECSI_SP_USE_MPAS)
-#  error Exodus or MPAS are needed to build burton specialization.
-#endif
 
 // system includes
 #include <iostream>
@@ -1296,13 +1299,15 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // make some type aliases
   using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
+
 #ifdef FLECSI_SP_USE_MPAS
-  using io_definition_t = flecsi_sp::io::mpas_definition_u<num_dims, real_t>;
-#elif FLECSI_SP_USE_EXODUS
+  using io_definition_t = flecsi_sp::io::mpas_definition_u<real_t>;
+#elif FLECSI_SP_USE_EXO
   using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 #else
-#error "FLeCSI-SP supports only exodus and MPAS HDF5 file formats"
+#error FLeCSI-SP supports only exodus and MPAS HDF5 file formats
 #endif
+
   using entity_info_t = flecsi::coloring::entity_info_t;
   using vertex_t = burton_mesh_t::vertex_t;
   using edge_t = burton_mesh_t::edge_t;
@@ -2039,8 +2044,8 @@ void initialize_mesh(
   // alias some types
   using real_t = burton_mesh_t::real_t;
 #ifdef FLECSI_SP_USE_MPAS
-  using io_definition_t = flecsi_sp::io::mpas_definition_u<num_dims, real_t>;
-#elif FLECSI_SP_USE_EXODUS
+  using io_definition_t = flecsi_sp::io::mpas_definition_u<real_t>;
+#elif FLECSI_SP_USE_EXO
   using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
 #else
 #error "FLeCSI-SP supports only exodus and MPAS HDF5 file formats"

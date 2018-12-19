@@ -196,6 +196,10 @@ void assert_dataset_type(hid_t dset, hid_t expect_type) {
     const size_t max = 101;
     char real_name[max-1], expect_name[max-1], dset_name[max-1];
 
+    // TODO: Even for well-known types, these calls will sometimes (often?)
+    //  fail.  If debugability of this sort of thing becomes very important,
+    //  it'll likely be worth wrapping this function with one that can infer
+    //  and stringify names of common types (e.g. H5T_NATIVE_DOUBLE)
     H5Iget_name(dset, dset_name, max);
     H5Iget_name(dtype_id, real_name, max);
     H5Iget_name(expect_type, expect_name, max);
@@ -382,7 +386,7 @@ void dump_connectivity(std::vector<std::vector<size_t>> &connectivity) {
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        MPAS HDF5 file format.
 ////////////////////////////////////////////////////////////////////////////////
-template <int D, typename T>
+template <typename T>
 class mpas_base_u {
  public:
   //============================================================================
@@ -413,30 +417,24 @@ class mpas_base_u {
   using connectivity_t = sparse_matrix<index_t>;
 
   //! the number of dimensions
-  static constexpr size_t num_dims = D;
+  static constexpr size_t num_dims = 2;
 
   enum class block_t { tri, quad, polygon, tet, hex, polyhedron, unknown };
 };
-////////////////////////////////////////////////////////////////////////////////
-/// \brief This is the three-dimensional mesh reader and writer based on the
-///        MPAS HDF5 file format.
-////////////////////////////////////////////////////////////////////////////////
-template <int D, typename T>
-class mpas_definition_u {};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
 ///        MPAS HDF5 file format.
 ////////////////////////////////////////////////////////////////////////////////
 template <typename T>
-class mpas_definition_u<2, T> : public flecsi::topology::mesh_definition_u<2> {
+class mpas_definition_u : public flecsi::topology::mesh_definition_u<2> {
  public:
   //============================================================================
   // Typedefs
   //============================================================================
 
   //! the instantiated base type
-  using base_t = mpas_base_u<2, T>;
+  using base_t = mpas_base_u<T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;

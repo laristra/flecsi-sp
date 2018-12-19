@@ -19,7 +19,7 @@ set(io_HEADERS
   PARENT_SCOPE
   )
 
-if ( FLECSI_SP_ENABLE_MPAS )
+if ( FLECSI_SP_BURTON_BACKEND STREQUAL "MPAS" )
   cinch_add_unit(flecsi_sp_mpas_definition
     SOURCES
     test/mpas_definition.cc
@@ -34,7 +34,7 @@ if ( FLECSI_SP_ENABLE_MPAS )
     ${FLECSI_SP_LIBRARIES}
   )
 endif()
-if ( FLECSI_SP_ENABLE_EXODUS )
+if ( FLECSI_SP_BURTON_BACKEND STREQUAL "EXO" )
   cinch_add_unit(flecsi_sp_exodus_definition
     SOURCES test/exodus_definition.cc
     ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}

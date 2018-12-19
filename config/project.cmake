@@ -42,7 +42,7 @@ set(FLECSI_SP_TOOLS_DIR "${PROJECT_SOURCE_DIR}/tools")
 set(FLECSI_SP_SHARE_DIR "${CMAKE_INSTALL_PREFIX}/share/FleCSI-SP")
 
 # the default test init driver
-set(FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER 
+set(FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER
   ${FLECSI_SP_TOOLS_DIR}/driver_initialization.cc)
 
 #------------------------------------------------------------------------------#
@@ -76,10 +76,10 @@ if ( FLECSI_SP_RUNTIME_MODEL STREQUAL "mpi" )
 elseif ( FLECSI_SP_RUNTIME_MODEL STREQUAL "legion" )
   set( FLECSI_SP_UNIT_POLICY LEGION )
 else()
-  MESSAGE( FATAL_ERROR 
+  MESSAGE( FATAL_ERROR
     "Unknown FLECSI_SP_RUNTIME_MODEL being used: ${FLECSI_SP_RUNTIME_MODEL}" )
 endif()
-  
+
 
 #------------------------------------------------------------------------------#
 # Ristra Library
@@ -107,7 +107,7 @@ endif()
 # double or single precision
 OPTION (FLECSI_SP_DOUBLE_PRECISION "Use double precision reals"  ON)
 
-if( FLECSI_SP_DOUBLE_PRECISION ) 
+if( FLECSI_SP_DOUBLE_PRECISION )
   message(STATUS "Note: Double precision build activated.")
   SET (FLECSI_SP_TEST_TOLERANCE 1.0e-14 CACHE STRING "The testing tolerance")
 else()
@@ -118,13 +118,13 @@ endif()
 # size of integer ids to use
 option( FLECSI_SP_USE_64BIT_IDS "Type of integer to use for ids" ON )
 
-if( FLECSI_SP_USE_64BIT_IDS ) 
+if( FLECSI_SP_USE_64BIT_IDS )
   message(STATUS "Note: using 64 bit integer ids.")
 else()
   message(STATUS "Note: using 32 bit integer ids.")
 endif()
 
-  
+
 #------------------------------------------------------------------------------#
 # Boost is needed for program options
 #------------------------------------------------------------------------------#
@@ -153,34 +153,57 @@ cinch_load_extras()
 
 find_package(Legion)
 
-if (Legion_FOUND) 
+if (Legion_FOUND)
   include_directories(${Legion_INCLUDE_DIRS})
 endif()
 
 find_package(MPI)
 
-if (MPI_FOUND) 
+if (MPI_FOUND)
   set(MPI_LANGUAGE C CACHE STRING "" FORCE)
   include_directories(${MPI_C_INCLUDE_PATH})
 endif()
 
+
 #------------------------------------------------------------------------------#
-# Exodus II
+# Burton Mesh backing filetype
 #------------------------------------------------------------------------------#
 
-find_package(EXODUSII QUIET)
+# Possible options for burton mesh backend
+set(FLECSI_SP_BURTON_BACKENDS "EXO;MPAS")
 
-option(FLECSI_SP_ENABLE_EXODUS "Enable I/O with exodus." ${EXODUSII_FOUND})
+set(FLECSI_SP_BURTON_BACKEND "EXO" CACHE STRING
+  "Which underlying mesh file structure to use")
 
-if(FLECSI_SP_ENABLE_EXODUS AND NOT EXODUSII_FOUND)
-  message(FATAL_ERROR "Exodus requested, but not found")
-endif()
+# Set the possible strings to use (only really useful with a GUI/TUI)
+# TODO: Should the value be tested? If so, where?
+set_property(CACHE FLECSI_SP_BURTON_BACKEND PROPERTY STRINGS
+  ${FLECSI_SP_BURTON_BACKENDS})
 
-if(FLECSI_SP_ENABLE_EXODUS)
+
+if(FLECSI_SP_BURTON_BACKEND STREQUAL "EXO")
+  find_package(EXODUSII REQUIRED)
   include_directories(${EXODUSII_INCLUDE_DIRS})
   list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
   add_definitions(-DFLECSI_SP_USE_EXODUS)
+
+elseif(FLECSI_SP_BURTON_BACKEND STREQUAL "MPAS")
+  # Note: If the CXX interface is ever needed, add COMPONENTS CXX here.
+  find_package(HDF5 REQUIRED)
+  include_directories(${HDF5_INCLUDE_DIRS})
+  list(APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES})
+
+else()
+  # This will obviously be a problem if there's such a thing as a Burton-less
+  # FleCSI-SP build
+  message (FATAL_ERROR
+    "Unknown or unset FLECSI_SP_BURTON_BACKEND: ${FLECSI_SP_BURTON_BACKEND}")
 endif()
+
+# Is this stringification a bad CMAKE practice?
+add_definitions("-DFLECSI_SP_USE_${FLECSI_SP_BURTON_BACKEND}")
+
+
 
 #------------------------------------------------------------------------------#
 # ParMETIS
