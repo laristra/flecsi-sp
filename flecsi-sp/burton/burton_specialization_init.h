@@ -2094,7 +2094,7 @@ void initialize_mesh(
 ///////////////////////////////////////////////////////////////////////////////
 flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
 flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clent Registration happens here because the specialization initialization

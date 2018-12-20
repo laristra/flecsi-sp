@@ -85,7 +85,7 @@ void dump_test( utils::client_handle_r__<mesh_t> mesh ) {
 }
 
 flecsi_register_task(dump_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Test validity of mesh
@@ -96,7 +96,7 @@ void validity_test( utils::client_handle_r__<mesh_t> mesh ) {
 }
 
 flecsi_register_task(validity_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -308,7 +308,7 @@ void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
 } // TEST_F
 
 flecsi_register_task(connectivity_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh geometry functions
@@ -440,7 +440,7 @@ void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
 } // TEST_F
 
 flecsi_register_task(geometry_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh normal functions
@@ -460,7 +460,7 @@ void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
 } // TEST_F
 
 flecsi_register_task(normals_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh subsets
@@ -493,7 +493,7 @@ void subset_test( utils::client_handle_r__<mesh_t> mesh ) {
 } // TEST_F
 
 flecsi_register_task(subset_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -589,10 +589,10 @@ void state_check_test(
 } // TEST_F
 
 flecsi_register_task(state_fill_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 flecsi_register_task(state_check_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -619,7 +619,7 @@ void extras_test( utils::client_handle_r__<mesh_t> mesh ) {
 } // TEST_F
 
 flecsi_register_task(extras_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh state at corners and wedges
@@ -676,10 +676,10 @@ void extra_state_check_test(
 } // TEST_F
 
 flecsi_register_task(extra_state_fill_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 flecsi_register_task(extra_state_check_test, flecsi_sp::burton::test, loc,
-    single|flecsi::leaf);
+    index|flecsi::leaf);
 
 #endif
 
@@ -702,22 +702,22 @@ void driver(int argc, char ** argv)
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
 
   // launch the validity test task
-  flecsi_execute_task(validity_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(validity_test, flecsi_sp::burton::test, index, mesh_handle);
   
   // launch the dump test task
-  flecsi_execute_task(dump_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(dump_test, flecsi_sp::burton::test, index, mesh_handle);
   
   // launch the connectivity test task
-  flecsi_execute_task(connectivity_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(connectivity_test, flecsi_sp::burton::test, index, mesh_handle);
 
   // launch the geometry test task
-  flecsi_execute_task(geometry_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(geometry_test, flecsi_sp::burton::test, index, mesh_handle);
 
   // launch the normals test task
-  flecsi_execute_task(normals_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(normals_test, flecsi_sp::burton::test, index, mesh_handle);
   
   // launch the connectivity test task
-  flecsi_execute_task(subset_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(subset_test, flecsi_sp::burton::test, index, mesh_handle);
 
   // launch the state test task
   auto cell_data_handle = flecsi_get_handle(mesh_handle, hydro, cell_data, real_t, dense, 0);
@@ -728,7 +728,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
       state_fill_test,
       flecsi_sp::burton::test,
-      single,
+      index,
       mesh_handle,
       cell_data_handle,
       face_data_handle,
@@ -738,7 +738,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
       state_check_test,
       flecsi_sp::burton::test,
-      single,
+      index,
       mesh_handle,
       cell_data_handle,
       face_data_handle,
@@ -749,7 +749,7 @@ void driver(int argc, char ** argv)
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
   
   // launch the extras test task
-  flecsi_execute_task(extras_test, flecsi_sp::burton::test, single, mesh_handle);
+  flecsi_execute_task(extras_test, flecsi_sp::burton::test, index, mesh_handle);
 
   // now do the same for the corners and wedges
   auto wedge_data_handle = flecsi_get_handle(mesh_handle, hydro, wedge_data, int, dense, 0);
@@ -758,7 +758,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
       extra_state_fill_test,
       flecsi_sp::burton::test,
-      single,
+      index,
       mesh_handle,
       wedge_data_handle,
       corner_data_handle );
@@ -766,7 +766,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
       extra_state_check_test,
       flecsi_sp::burton::test,
-      single,
+      index,
       mesh_handle,
       wedge_data_handle,
       corner_data_handle );
