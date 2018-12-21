@@ -13,7 +13,7 @@ namespace utils {
 // the dense handle type
 template<typename T>
 using dense_handle_w__ =
-  flecsi::dense_accessor<T, flecsi::wo, flecsi::wo, flecsi::ro>;
+  flecsi::dense_accessor<T, flecsi::wo, flecsi::wo, flecsi::na>;
 
 template<typename T>
 using dense_handle_rw__ =
@@ -30,7 +30,7 @@ using sparse_mutator__ =
 
 template<typename T>
 using sparse_handle_w__ =
-  flecsi::sparse_accessor<T, flecsi::wo, flecsi::wo, flecsi::ro>;
+  flecsi::sparse_accessor<T, flecsi::wo, flecsi::wo, flecsi::na>;
 
 template<typename T>
 using sparse_handle_rw__ =
