@@ -1,5 +1,5 @@
 ![logo](doc/flecsi.png)
-[![Build Status](https://travis-ci.org/laristra/flecsi-sp.svg?branch=master)](https://travis-ci.org/laristra/flecsi-sp)
+[![Build Status](https://travis-ci.com/laristra/flecsi-sp.svg?branch=master)](https://travis-ci.com/laristra/flecsi-sp)
 
 # FleCSI Specializations Project
 
