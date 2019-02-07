@@ -192,7 +192,7 @@ elseif(FLECSI_SP_BURTON_BACKEND STREQUAL "MPAS")
   find_package(HDF5 REQUIRED)
   include_directories(${HDF5_INCLUDE_DIRS})
   list(APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES})
-
+  add_definitions(-DFLECSI_SP_USE_MPAS)
 else()
   # This will obviously be a problem if there's such a thing as a Burton-less
   # FleCSI-SP build
