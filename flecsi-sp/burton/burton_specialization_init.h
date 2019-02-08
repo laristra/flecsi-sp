@@ -18,17 +18,8 @@
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
 #include <flecsi-sp/burton/burton_mesh.h>
-
-#ifdef FLECSI_SP_USE_MPAS
 #include <flecsi-sp/io/mpas_definition.h>
-
-#elif FLECSI_SP_USE_EXO
 #include <flecsi-sp/io/exodus_definition.h>
-
-#else
-// Probably redundant, since CMake should catch this, but let's be safe
-#  error Exodus or MPAS are needed to build burton specialization.
-#endif
 
 
 #include <flecsi-sp/utils/char_array.h>
@@ -68,7 +59,6 @@ auto concatenate_ids( COLOR_INFO && entities )
     entity_ids.push_back(i.id);
 
   return entity_ids;
-
 }
 
 template< typename COLOR_INFO, typename ENTITY_IDS >
@@ -1435,7 +1425,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   } // scope
 
   // Populate ghost cell information.
-  for(auto i: std::get<1>(cell_nn_info)) {
+  for(auto i : std::get<1>(cell_nn_info)) {
     cells.ghost.insert(i);
     // Collect all colors with whom we require communication
     // to receive ghost information.
@@ -1454,42 +1444,35 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   // Create a map version for lookups below.
   std::unordered_map<size_t, entity_info_t> shared_cells_map;
-  for(auto i: cells.shared)
+  for (auto i : cells.shared)
     shared_cells_map[i.id] = i;
 
   // Get the rank and offset information for all relevant neighbor
   // dependencies. This information will be necessary for determining
   // shared vertices.
   auto cell_all_info =
-    communicator->get_primary_info(cells.primary, two_halo_cells);
+      communicator->get_primary_info(cells.primary, two_halo_cells);
 
   // Create a map version of the remote info for lookups below.
   std::unordered_map<size_t, entity_info_t> remote_info_map;
-  for(auto i: std::get<1>(cell_all_info))
+  for (auto i : std::get<1>(cell_all_info))
     remote_info_map[i.id] = i;
 
   // Get the intersection of our nearest neighbors with the nearest
   // neighbors of other ranks. This map of sets will only be populated
   // with intersections that are non-empty
   auto closure_intersection_map =
-    communicator->get_intersection_info(halo_cells);
+      communicator->get_intersection_info(halo_cells);
 
   //----------------------------------------------------------------------------
   // Identify exclusive, shared, and ghost for other entities
   //----------------------------------------------------------------------------
 
-  for ( int i=0; i<num_dims; ++i ) {
-    color_entity(
-      communicator.get(),
-      cells_plus_halo,
-      remote_info_map,
-      shared_cells_map,
-      closure_intersection_map,
-      mesh_def.entities(num_dims, i),
-      mesh_def.entities(i, num_dims),
-      entities[0][i],
-      entity_color_info[0][i]
-    );
+  for (int i = 0; i < num_dims; ++i) {
+    color_entity(communicator.get(), cells_plus_halo, remote_info_map,
+                 shared_cells_map, closure_intersection_map,
+                 mesh_def.entities(num_dims, i), mesh_def.entities(i, num_dims),
+                 entities[0][i], entity_color_info[0][i]);
   }
 
   //----------------------------------------------------------------------------
@@ -1498,52 +1481,36 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
-  auto corners = make_corners( mesh_def );
-  const auto & cells_to_corners = corners.first[num_dims];
-  const auto & corners_to_cells = corners.second[num_dims];
+  auto corners = make_corners(mesh_def);
+  const auto &cells_to_corners = corners.first[num_dims];
+  const auto &corners_to_cells = corners.second[num_dims];
 
-  color_entity(
-    communicator.get(),
-    cells_plus_halo,
-    remote_info_map,
-    shared_cells_map,
-    closure_intersection_map,
-    cells_to_corners,
-    corners_to_cells,
-    entities[ corner_t::domain ][ corner_t::dimension ],
-    entity_color_info[ corner_t::domain ][ corner_t::dimension ]
-  );
+  color_entity(communicator.get(), cells_plus_halo, remote_info_map,
+               shared_cells_map, closure_intersection_map, cells_to_corners,
+               corners_to_cells,
+               entities[corner_t::domain][corner_t::dimension],
+               entity_color_info[corner_t::domain][corner_t::dimension]);
 
-  const auto & corner_entities =
-    entities.at( corner_t::domain ).at( corner_t::dimension );
-  auto num_corners
-    = corner_entities.exclusive.size()
-    + corner_entities.shared.size()
-    + corner_entities.ghost.size();
+  const auto &corner_entities =
+      entities.at(corner_t::domain).at(corner_t::dimension);
+  auto num_corners = corner_entities.exclusive.size() +
+                     corner_entities.shared.size() +
+                     corner_entities.ghost.size();
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
-  auto wedges = make_wedges( mesh_def );
-  const auto & cells_to_wedges = wedges.first[num_dims];
-  const auto & wedges_to_cells = wedges.second[num_dims];
+  auto wedges = make_wedges(mesh_def);
+  const auto &cells_to_wedges = wedges.first[num_dims];
+  const auto &wedges_to_cells = wedges.second[num_dims];
 
-  color_entity(
-    communicator.get(),
-    cells_plus_halo,
-    remote_info_map,
-    shared_cells_map,
-    closure_intersection_map,
-    cells_to_wedges,
-    wedges_to_cells,
-    entities[ wedge_t::domain ][ wedge_t::dimension ],
-    entity_color_info[ wedge_t::domain ][ wedge_t::dimension ]
-  );
+  color_entity(communicator.get(), cells_plus_halo, remote_info_map,
+               shared_cells_map, closure_intersection_map, cells_to_wedges,
+               wedges_to_cells, entities[wedge_t::domain][wedge_t::dimension],
+               entity_color_info[wedge_t::domain][wedge_t::dimension]);
 
-  const auto & wedge_entities =
-    entities.at( wedge_t::domain ).at( wedge_t::dimension );
-  auto num_wedges
-    = wedge_entities.exclusive.size()
-    + wedge_entities.shared.size()
-    + wedge_entities.ghost.size();
+  const auto &wedge_entities =
+      entities.at(wedge_t::domain).at(wedge_t::dimension);
+  auto num_wedges = wedge_entities.exclusive.size() +
+                    wedge_entities.shared.size() + wedge_entities.ghost.size();
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -1556,31 +1523,28 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   using index_spaces = burton_mesh_t::index_spaces_t;
 
   // Get the context instance.
-  auto & context = flecsi::execution::context_t::instance();
+  auto &context = flecsi::execution::context_t::instance();
 
   // keep track of index spaces added
   std::vector<size_t> registered_index_spaces;
 
   // Gather the coloring info from all colors
-  for ( int dom=0; dom<num_domains; ++dom ) {
+  for (int dom = 0; dom < num_domains; ++dom) {
     // skip empty slots
-    if ( entities.count(dom) == 0 || entity_color_info.count(dom) == 0 )
+    if (entities.count(dom) == 0 || entity_color_info.count(dom) == 0)
       continue;
-    for ( int dim=0; dim<num_dims+1; ++dim ) {
+    for (int dim = 0; dim < num_dims + 1; ++dim) {
       // skip empty slots
-      if ( entities.at(dom).count(dim) == 0 ||
-           entity_color_info.at(dom).count(dim) == 0 )
+      if (entities.at(dom).count(dim) == 0 ||
+          entity_color_info.at(dom).count(dim) == 0)
         continue;
       auto coloring_info =
-        communicator->gather_coloring_info(entity_color_info.at(dom).at(dim));
+          communicator->gather_coloring_info(entity_color_info.at(dom).at(dim));
       auto index_space_id = index_spaces::entity_map[dom][dim];
-      context.add_coloring(
-        index_space_id,
-        entities.at(dom).at(dim),
-        coloring_info
-      );
+      context.add_coloring(index_space_id, entities.at(dom).at(dim),
+                           coloring_info);
       // add index space to list
-      registered_index_spaces.push_back( index_space_id );
+      registered_index_spaces.push_back(index_space_id);
     }
   }
 
@@ -1588,71 +1552,69 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // add adjacency information
   //----------------------------------------------------------------------------
 
-  std::vector< std::vector<size_t> > entity_ids(num_dims+1);
+  std::vector<std::vector<size_t>> entity_ids(num_dims + 1);
 
   // create a master list of all entities
-  for ( int i=0; i<num_dims+1; ++i ) {
+  for (int i = 0; i < num_dims + 1; ++i) {
 
-    const auto & these_entities = entities.at(0).at(i);
-    auto & these_ids = entity_ids[i];
+    const auto &these_entities = entities.at(0).at(i);
+    auto &these_ids = entity_ids[i];
 
     // get the list of exclusive+shared+ghost ids
-    concatenate_ids( these_entities, these_ids );
+    concatenate_ids(these_entities, these_ids);
     auto num_entities = these_ids.size();
 
     // sort the entities ( this is needed for the search down below )
     // hoepefully it doesnt cause any problems
-    std::sort( these_ids.begin(), these_ids.end() );
-    auto last = std::unique( these_ids.begin(), these_ids.end() );
-    if ( last != these_ids.end() )
-      clog_error( "Duplicate ids in master lists" );
-
+    std::sort(these_ids.begin(), these_ids.end());
+    auto last = std::unique(these_ids.begin(), these_ids.end());
+    if (last != these_ids.end())
+      clog_error("Duplicate ids in master lists");
   }
 
   // loop over each dimension and determine the adjacency sizes
-  for ( int from_dim = 0; from_dim<=num_dims; ++from_dim ) {
+  for (int from_dim = 0; from_dim <= num_dims; ++from_dim) {
 
     // the master list of all entity ids
-    const auto & from_ids = entity_ids[from_dim];
+    const auto &from_ids = entity_ids[from_dim];
 
-    for ( int to_dim = 0; to_dim<=num_dims; ++to_dim ) {
+    for (int to_dim = 0; to_dim <= num_dims; ++to_dim) {
 
       // skip the case where both dimensions are the same
-      if ( from_dim == to_dim ) continue;
+      if (from_dim == to_dim)
+        continue;
 
       // the master list of all entity ids
-      const auto & to_ids = entity_ids[to_dim];
+      const auto &to_ids = entity_ids[to_dim];
       const auto to_ids_begin = to_ids.begin();
       const auto to_ids_end = to_ids.end();
 
       // populate the adjacency information
       flecsi::coloring::adjacency_info_t ai;
-      ai.index_space =
-        index_spaces::connectivity_map[ from_dim ][ to_dim ];
-      ai.from_index_space = index_spaces::entity_map[0][ from_dim ];
-      ai.to_index_space = index_spaces::entity_map[0][to_dim ];
+      ai.index_space = index_spaces::connectivity_map[from_dim][to_dim];
+      ai.from_index_space = index_spaces::entity_map[0][from_dim];
+      ai.to_index_space = index_spaces::entity_map[0][to_dim];
       ai.color_sizes.resize(comm_size);
 
       // loop over all cells and count the number of adjacencies
       size_t cnt = 0;
-      for ( auto c : from_ids ) {
+      for (auto c : from_ids) {
         // get the attached sub entitites
-        const auto & ids = mesh_def.entities(from_dim, to_dim, c);
+        const auto &ids = mesh_def.entities(from_dim, to_dim, c);
         // we need to make sure they are in this colors master
         // list though
-        for ( auto v : ids ) {
-          auto it = std::lower_bound( to_ids_begin, to_ids_end, v );
-          if ( it != to_ids_end && *it == v )
+        for (auto v : ids) {
+          auto it = std::lower_bound(to_ids_begin, to_ids_end, v);
+          if (it != to_ids_end && *it == v)
             cnt++;
         }
       }
 
       // gather the results
-      ai.color_sizes = communicator->gather_sizes( cnt );
+      ai.color_sizes = communicator->gather_sizes(cnt);
 
       // add the result to the context
       context.add_adjacency(ai);
-
     }
   }
 
@@ -1661,28 +1623,33 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //--- CORNERS and WEDGES
 
   flecsi::coloring::adjacency_info_t ai;
-  auto & adjacency_info = context.adjacency_info();
+  auto &adjacency_info = context.adjacency_info();
 
-  auto gathered_corners = communicator->gather_sizes( num_corners );
+  auto gathered_corners = communicator->gather_sizes(num_corners);
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
-  auto gathered_wedges = communicator->gather_sizes( num_wedges );
+  auto gathered_wedges = communicator->gather_sizes(num_wedges);
 #endif
 
   // cell to corner
   // Same as vertex to cell connectivity
   ai.index_space = index_spaces::cells_to_corners;
-  ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.color_sizes = gathered_corners;
   context.add_adjacency(ai);
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // face to corner
   ai.index_space = index_spaces::faces_to_corners;
-  ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[face_t::domain][face_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.color_sizes = gathered_wedges;
-  for ( auto & i : ai.color_sizes ) i /= 2;
+  for (auto &i : ai.color_sizes)
+    i /= 2;
   context.add_adjacency(ai);
 #endif
 
@@ -1690,36 +1657,47 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // edge to corner
   // each edge goes to two corners, for every cell it touches
   ai.index_space = index_spaces::edges_to_corners;
-  ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[edge_t::domain][edge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.color_sizes = gathered_wedges;
-  if (num_dims==3) for ( auto & i : ai.color_sizes ) i /= 2;
+  if (num_dims == 3)
+    for (auto &i : ai.color_sizes)
+      i /= 2;
   context.add_adjacency(ai);
 #endif
 
   // vertex to corner
   // same as vertex to cell connectivity
   ai.index_space = index_spaces::vertices_to_corners;
-  ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.color_sizes = gathered_corners;
   context.add_adjacency(ai);
 
   // corner to cell
   // each corner goes to one cell
   ai.index_space = index_spaces::corners_to_cells;
-  ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.color_sizes = gathered_corners;
   context.add_adjacency(ai);
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // corner to face
   ai.index_space = index_spaces::corners_to_faces;
-  ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.color_sizes = gathered_wedges;
-  for ( auto & i : ai.color_sizes ) i /= 2;
+  for (auto &i : ai.color_sizes)
+    i /= 2;
   context.add_adjacency(ai);
 #endif
 
@@ -1728,18 +1706,24 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // twice as many corners connected to an edge as cells
   // FIXME
   ai.index_space = index_spaces::corners_to_edges;
-  ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.color_sizes = gathered_wedges;
-  if (num_dims==3) for ( auto & i : ai.color_sizes ) i /= 2;
+  if (num_dims == 3)
+    for (auto &i : ai.color_sizes)
+      i /= 2;
   context.add_adjacency(ai);
 #endif
 
   // corner to vertex
   // each corner goes to one vertex
   ai.index_space = index_spaces::corners_to_vertices;
-  ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.color_sizes = gathered_corners;
   context.add_adjacency(ai);
 
@@ -1747,40 +1731,51 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // cell to wedge
   // In 2d, 2 wedges per cell edge; 4 wedges per cell edge in 3d
   ai.index_space = index_spaces::cells_to_wedges;
-  ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 2
   // face to wedge
   ai.index_space = index_spaces::faces_to_wedges;
-  ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[face_t::domain][face_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 #endif
 
   // edge to wedge
   ai.index_space = index_spaces::edges_to_wedges;
-  ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[edge_t::domain][edge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
   // vertex to wedge
-  // For every edge connected to a vertex, there is one wedge in 2d, and two wedges in 3d.
+  // For every edge connected to a vertex, there is one wedge in 2d, and two
+  // wedges in 3d.
   ai.index_space = index_spaces::vertices_to_wedges;
-  ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
   // wedge to cell
   // each wedge goes to one cell
   ai.index_space = index_spaces::wedges_to_cells;
-  ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[cell_t::domain][cell_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
@@ -1788,8 +1783,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // wedge to face
   // each wedge goes to once face
   ai.index_space = index_spaces::wedges_to_faces;
-  ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 #endif
@@ -1797,32 +1794,40 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // wedge to edges
   // each wedge goes to one edge
   ai.index_space = index_spaces::wedges_to_edges;
-  ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
   // wedge to vertex
   // each wedge goes to one vertex
   ai.index_space = index_spaces::wedges_to_vertices;
-  ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
   // wedge to corner
   // each wedge goes to one corner
   ai.index_space = index_spaces::wedges_to_corners;
-  ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
   // corner to  wedge
   // eaceh corner goes to its contained wedges only
   ai.index_space = index_spaces::corners_to_wedges;
-  ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.from_index_space =
+      index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.to_index_space =
+      index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 #endif // DIMENSION > 1
@@ -1833,27 +1838,26 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // add index subspace mappings
   //----------------------------------------------------------------------------
 
-
   // the master list of all entity ids
-  const auto & cell_entities = entities.at(0).at(num_dims);
+  const auto &cell_entities = entities.at(0).at(num_dims);
 
   // loop over all dimensions, getting the list of ids that are
   // connected to owned cells
-  for ( int to_dim = 0; to_dim<num_dims; ++to_dim ) {
+  for (int to_dim = 0; to_dim < num_dims; ++to_dim) {
     std::vector<size_t> ids;
     // get all exclusive and shared ids.
-    for ( auto c : cell_entities.exclusive ) {
-      const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
-      ids.insert( ids.end(), ents.begin(), ents.end() );
+    for (auto c : cell_entities.exclusive) {
+      const auto &ents = mesh_def.entities(num_dims, to_dim, c.id);
+      ids.insert(ids.end(), ents.begin(), ents.end());
     }
-    for ( auto c : cell_entities.shared ) {
-      const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
-      ids.insert( ids.end(), ents.begin(), ents.end() );
+    for (auto c : cell_entities.shared) {
+      const auto &ents = mesh_def.entities(num_dims, to_dim, c.id);
+      ids.insert(ids.end(), ents.begin(), ents.end());
     }
     // get number of unique entries
-    std::sort( ids.begin(), ids.end() );
-    auto last = std::unique( ids.begin(), ids.end() );
-    auto count = std::distance( ids.begin(), last );
+    std::sort(ids.begin(), ids.end());
+    auto last = std::unique(ids.begin(), ids.end());
+    auto count = std::distance(ids.begin(), last);
     // subspace id happens to be the same as the dim
     context.add_index_subspace(to_dim, count);
   }
@@ -1866,20 +1870,20 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // colorings.
   //----------------------------------------------------------------------------
 
-  for ( int i=1; i<num_dims; ++i ) {
-     // create a new map
-    auto & entity_to_vertex_map =
-      context.intermediate_map( /* dim */ i, /* dom */ 0 );
-    auto & vertex_to_entity_map =
-      context.reverse_intermediate_map( /* dim */ i, /* dom */ 0 );
+  for (int i = 1; i < num_dims; ++i) {
+    // create a new map
+    auto &entity_to_vertex_map =
+        context.intermediate_map(/* dim */ i, /* dom */ 0);
+    auto &vertex_to_entity_map =
+        context.reverse_intermediate_map(/* dim */ i, /* dom */ 0);
     // loop over each entity id and get its list of vertices
-    for ( auto e : entity_ids[i] ) {
-      auto vs = mesh_def.entities( /* dimension */ i, /* domain */ 0, e );
+    for (auto e : entity_ids[i]) {
+      auto vs = mesh_def.entities(/* dimension */ i, /* domain */ 0, e);
       // sorted for comparison later
-      std::sort( vs.begin(), vs.end() );
+      std::sort(vs.begin(), vs.end());
       // add all the mappings for this entity
-      entity_to_vertex_map.emplace( e, vs );
-      vertex_to_entity_map.emplace( vs, e );
+      entity_to_vertex_map.emplace(e, vs);
+      vertex_to_entity_map.emplace(vs, e);
     }
   }
 
@@ -1888,91 +1892,88 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //--- CORNERS
 
   // concatenate exclusive shared and ghost
-  auto corner_ids = concatenate_ids( corner_entities );
+  auto corner_ids = concatenate_ids(corner_entities);
 
   // get the intermediate binding maps from the context
-  auto & corners_to_entities =
-    context.intermediate_binding_map( /* dim */ 0, /* dom */ 1 );
-  auto & entities_to_corners =
-    context.reverse_intermediate_binding_map( /* dim */ 0, /* dom */ 1 );
+  auto &corners_to_entities =
+      context.intermediate_binding_map(/* dim */ 0, /* dom */ 1);
+  auto &entities_to_corners =
+      context.reverse_intermediate_binding_map(/* dim */ 0, /* dom */ 1);
 
   // loop over each list of entities
-  for ( auto c : corner_ids ) {
+  for (auto c : corner_ids) {
     // create a temporary list
-    std::decay_t< decltype(corners_to_entities) >::mapped_type entity_list;
+    std::decay_t<decltype(corners_to_entities)>::mapped_type entity_list;
     // loop over all dimensions
-    for ( int dim=0; dim<=num_dims; ++dim ) {
+    for (int dim = 0; dim <= num_dims; ++dim) {
       // alias the corner to entity mapping
-      const auto & corner_to_entities = corners.second[dim];
-      const auto & entities = corner_to_entities.at(c);
+      const auto &corner_to_entities = corners.second[dim];
+      const auto &entities = corner_to_entities.at(c);
       // resize storage
-      entity_list.reserve( entity_list.size() + entities.size() );
+      entity_list.reserve(entity_list.size() + entities.size());
       // add the entities to the list
-      for ( auto e : entities )
-        entity_list.emplace_back( /* dom */ 0, dim, e );
+      for (auto e : entities)
+        entity_list.emplace_back(/* dom */ 0, dim, e);
     }
     // sorted for comparison later
-    std::sort( entity_list.begin(), entity_list.end() );
+    std::sort(entity_list.begin(), entity_list.end());
     // add all the mappings for this corner
-    corners_to_entities.emplace( c, entity_list );
-    entities_to_corners.emplace( entity_list, c );
+    corners_to_entities.emplace(c, entity_list);
+    entities_to_corners.emplace(entity_list, c);
   }
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   //--- WEDGES
 
   // concatenate exclusive shared and ghost
-  auto wedge_ids = concatenate_ids( wedge_entities );
+  auto wedge_ids = concatenate_ids(wedge_entities);
 
   // get the intermediate binding maps from the context
-  auto & wedges_to_entities =
-    context.intermediate_binding_map( /* dim */ 1, /* dom */ 1 );
-  auto & entities_to_wedges =
-    context.reverse_intermediate_binding_map( /* dim */ 1, /* dom */ 1 );
+  auto &wedges_to_entities =
+      context.intermediate_binding_map(/* dim */ 1, /* dom */ 1);
+  auto &entities_to_wedges =
+      context.reverse_intermediate_binding_map(/* dim */ 1, /* dom */ 1);
 
   // loop over each list of entities
-  for ( auto w : wedge_ids ) {
+  for (auto w : wedge_ids) {
     // create a temporary list
-    std::decay_t< decltype(wedges_to_entities) >::mapped_type entity_list;
+    std::decay_t<decltype(wedges_to_entities)>::mapped_type entity_list;
     // loop over all dimensions
-    for ( int dim=0; dim<=num_dims; ++dim ) {
+    for (int dim = 0; dim <= num_dims; ++dim) {
       // alias the wedge to entity mapping
-      const auto & wedge_to_entities = wedges.second[dim];
-      const auto & entities = wedge_to_entities.at(w);
+      const auto &wedge_to_entities = wedges.second[dim];
+      const auto &entities = wedge_to_entities.at(w);
       // resize storage
-      entity_list.reserve( entity_list.size() + entities.size() );
+      entity_list.reserve(entity_list.size() + entities.size());
       // add the entities to the list
-      for ( auto e : entities )
-        entity_list.emplace_back( /* dom */ 0, dim, e );
+      for (auto e : entities)
+        entity_list.emplace_back(/* dom */ 0, dim, e);
     }
     // sorted for comparison later
-    std::sort( entity_list.begin(), entity_list.end() );
+    std::sort(entity_list.begin(), entity_list.end());
     // add all the mappings for this corner
-    wedges_to_entities.emplace( w, entity_list );
-    entities_to_wedges.emplace( entity_list, w );
+    wedges_to_entities.emplace(w, entity_list);
+    entities_to_wedges.emplace(entity_list, w);
   }
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
-
   //----------------------------------------------------------------------------
   // Allow sparse index spaces for any of the main index spaces
   //----------------------------------------------------------------------------
 
-  for ( auto i : registered_index_spaces ) {
+  for (auto i : registered_index_spaces) {
     flecsi::execution::context_t::sparse_index_space_info_t isi;
     isi.max_entries_per_index = max_entries;
     // figure out the maximum number of entities
-    const auto & coloring = context.coloring( i );
-    auto num_ents =
-      coloring.exclusive.size() +
-      coloring.shared.size() +
-      coloring.ghost.size();
+    const auto &coloring = context.coloring(i);
+    auto num_ents = coloring.exclusive.size() + coloring.shared.size() +
+                    coloring.ghost.size();
 
     // worst case scenario (not sure what we get by allocating all this)
     isi.exclusive_reserve = communicator->get_max_request_size(
-      isi.max_entries_per_index*num_ents);
+        isi.max_entries_per_index * num_ents);
     isi.index_space = i;
     context.set_sparse_index_space_info(isi);
   }
@@ -1982,57 +1983,47 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //----------------------------------------------------------------------------
 
   // figure out this ranks file name
-  auto basename = ristra::utils::basename( filename_string );
-  auto output_prefix = ristra::utils::remove_extension( basename );
+  auto basename = ristra::utils::basename(filename_string);
+  auto output_prefix = ristra::utils::remove_extension(basename);
   auto output_filename = output_prefix + "-partition_rank" +
-    ristra::utils::zero_padded(rank) + ".exo";
+                         ristra::utils::zero_padded(rank) + ".exo";
 
   // a lamda function to convert sets of entitiy_info_t's to vectors
   // of ids
-  auto to_vec = [](const auto & list_in)
-  {
+  auto to_vec = [](const auto &list_in) {
     std::vector<size_t> list_out;
-    list_out.reserve( list_in.size() );
-    for ( auto & e : list_in )
-      list_out.push_back( e.id );
+    list_out.reserve(list_in.size());
+    for (auto &e : list_in)
+      list_out.push_back(e.id);
     return list_out;
   };
 
   // get a reference to the vertices
-  const auto & vertices = entities[0][0];
+  const auto &vertices = entities[0][0];
 
   // open the exodus file
-  if ( rank == 0 )
+  if (rank == 0)
     std::cout << "Writing mesh to: " << output_filename << std::endl;
 
   using std::make_pair;
-  mesh_def.write(
-    output_filename,
-    {
-      make_pair( "exclusive cells", to_vec(cells.exclusive) ),
-      make_pair( "shared cells", to_vec(cells.shared) ),
-      make_pair( "ghost cells", to_vec(cells.ghost) )
-    },
-    {
-      make_pair( "exclusive vertices", to_vec(vertices.exclusive) ),
-      make_pair( "shared vertices", to_vec(vertices.shared) ),
-      make_pair( "ghost vertices", to_vec(vertices.ghost) )
-    }
-  );
+  mesh_def.write(output_filename,
+                 {make_pair("exclusive cells", to_vec(cells.exclusive)),
+                  make_pair("shared cells", to_vec(cells.shared)),
+                  make_pair("ghost cells", to_vec(cells.ghost))},
+                 {make_pair("exclusive vertices", to_vec(vertices.exclusive)),
+                  make_pair("shared vertices", to_vec(vertices.shared)),
+                  make_pair("ghost vertices", to_vec(vertices.ghost))});
 
   clog(info) << "Finished mesh partitioning." << std::endl;
 
-
 } // partition_mesh
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main mesh initialization driver
 ////////////////////////////////////////////////////////////////////////////////
-void initialize_mesh(
-  utils::client_handle_w__<burton_mesh_t> mesh,
-  utils::char_array_t filename
-) {
+template<typename io_def_t>
+void initialize_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
+                     utils::char_array_t filename) {
 
   //----------------------------------------------------------------------------
   // Fill the mesh information
@@ -2052,40 +2043,40 @@ void initialize_mesh(
 #endif
 
   // get the context
-  const auto & context = flecsi::execution::context_t::instance();
+  const auto &context = flecsi::execution::context_t::instance();
   auto rank = context.color();
 
   // Load the mesh
   auto filename_string = filename.str();
-  io_definition_t mesh_def( filename_string );
+  io_def_t mesh_def(filename_string);
 
   // fill the mesh
-  create_cells( mesh_def, mesh );
+  create_cells(mesh_def, mesh);
 
   // initialize the mesh
   mesh.init();
 
   // create the subspaces
-  create_subspaces( mesh_def, mesh );
+  create_subspaces(mesh_def, mesh);
 
   ////----------------------------------------------------------------------------
   //// Some debug
   ////----------------------------------------------------------------------------
   //
   //// figure out this ranks file name
-  //auto basename = ristra::utils::basename( filename_string );
-  //auto output_prefix = ristra::utils::remove_extension( basename );
-  //auto output_filename = output_prefix + "-connectivity_rank" +
+  // auto basename = ristra::utils::basename( filename_string );
+  // auto output_prefix = ristra::utils::remove_extension( basename );
+  // auto output_filename = output_prefix + "-connectivity_rank" +
   //  ristra::utils::zero_padded(rank) + ".txt";
   //
   //// dump to file
-  //if ( rank == 0 )
+  // if ( rank == 0 )
   //  std::cout << "Dumping connectivity to: " << output_filename << std::endl;
-  //std::ofstream file( output_filename );
-  //mesh.dump( file );
+  // std::ofstream file( output_filename );
+  // mesh.dump( file );
   //
   //// close file
-  //file.close();
+  // file.close();
 
 } // initialize_mesh
 
@@ -2094,14 +2085,13 @@ void initialize_mesh(
 ///////////////////////////////////////////////////////////////////////////////
 flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
 flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
-    index|flecsi::leaf);
+                     index | flecsi::leaf);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clent Registration happens here because the specialization initialization
 // needs to know which mesh to access
 ///////////////////////////////////////////////////////////////////////////////
 flecsi_register_data_client(burton_mesh_t, meshes, mesh0);
-
 
 #ifdef BURTON_FLECSI_SP_USE_APPLICATION_TLT_INIT
 void application_tlt_init(int argc, char **argv);
