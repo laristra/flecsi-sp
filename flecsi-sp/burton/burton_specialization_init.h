@@ -1278,7 +1278,8 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
+template<typename io_def_t>
+void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -1287,16 +1288,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   constexpr auto thru_dim = 0;
 
   // make some type aliases
-  using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
-
-#ifdef FLECSI_SP_USE_MPAS
-  using io_definition_t = flecsi_sp::io::mpas_definition_u<real_t>;
-#elif FLECSI_SP_USE_EXO
-  using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
-#else
-#error FLeCSI-SP supports only exodus and MPAS HDF5 file formats
-#endif
 
   using entity_info_t = flecsi::coloring::entity_info_t;
   using vertex_t = burton_mesh_t::vertex_t;
@@ -1308,7 +1300,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   // load the mesh
   auto filename_string = filename.str();
-  io_definition_t mesh_def( filename_string );
+  io_def_t mesh_def( filename_string );
 
   // Create a communicator instance to get neighbor information.
   auto communicator = std::make_unique<flecsi::coloring::mpi_communicator_t>();
@@ -2034,13 +2026,6 @@ void initialize_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
 
   // alias some types
   using real_t = burton_mesh_t::real_t;
-#ifdef FLECSI_SP_USE_MPAS
-  using io_definition_t = flecsi_sp::io::mpas_definition_u<real_t>;
-#elif FLECSI_SP_USE_EXO
-  using io_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
-#else
-#error "FLeCSI-SP supports only exodus and MPAS HDF5 file formats"
-#endif
 
   // get the context
   const auto &context = flecsi::execution::context_t::instance();
