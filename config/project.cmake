@@ -166,44 +166,17 @@ endif()
 
 
 #------------------------------------------------------------------------------#
-# Burton Mesh backing filetype
+# Burton Mesh backends
 #------------------------------------------------------------------------------#
 
-# Possible options for burton mesh backend
-set(FLECSI_SP_BURTON_BACKENDS "EXO;MPAS")
+find_package(EXODUSII REQUIRED)
+include_directories(${EXODUSII_INCLUDE_DIRS})
+list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
 
-set(FLECSI_SP_BURTON_BACKEND "EXO" CACHE STRING
-  "Which underlying mesh file structure to use")
-
-# Set the possible strings to use (only really useful with a GUI/TUI)
-# TODO: Should the value be tested? If so, where?
-set_property(CACHE FLECSI_SP_BURTON_BACKEND PROPERTY STRINGS
-  ${FLECSI_SP_BURTON_BACKENDS})
-
-
-if(FLECSI_SP_BURTON_BACKEND STREQUAL "EXO")
-  find_package(EXODUSII REQUIRED)
-  include_directories(${EXODUSII_INCLUDE_DIRS})
-  list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
-  add_definitions(-DFLECSI_SP_USE_EXODUS)
-
-elseif(FLECSI_SP_BURTON_BACKEND STREQUAL "MPAS")
-  # Note: If the CXX interface is ever needed, add COMPONENTS CXX here.
-  find_package(HDF5 REQUIRED)
-  include_directories(${HDF5_INCLUDE_DIRS})
-  list(APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES})
-
-else()
-  # This will obviously be a problem if there's such a thing as a Burton-less
-  # FleCSI-SP build
-  message (FATAL_ERROR
-    "Unknown or unset FLECSI_SP_BURTON_BACKEND: ${FLECSI_SP_BURTON_BACKEND}")
-endif()
-
-# Is this stringification a bad CMAKE practice?
-add_definitions("-DFLECSI_SP_USE_${FLECSI_SP_BURTON_BACKEND}")
-
-
+# Note: If the CXX interface is ever needed, add COMPONENTS CXX here.
+find_package(HDF5 REQUIRED)
+include_directories(${HDF5_INCLUDE_DIRS})
+list(APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES})
 
 #------------------------------------------------------------------------------#
 # ParMETIS

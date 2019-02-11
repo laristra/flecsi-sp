@@ -2065,11 +2065,54 @@ void initialize_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
 
 } // initialize_mesh
 
+
+/*!
+ * Simple wrapper for templated partitioning function
+ */
+void partition_mpas_mesh(utils::char_array_t filename,
+                         std::size_t max_entries) {
+  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
+  partition_mesh<io::mpas_definition_u<real_t>>(filename, max_entries);
+}
+
+/*!
+ * Simple wrapper for templated partitioning function
+ */
+void partition_exo_mesh(utils::char_array_t filename,
+                         std::size_t max_entries) {
+  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
+  constexpr auto num_dims = flecsi_sp::burton::burton_mesh_t::num_dimensions;
+  partition_mesh<io::exodus_definition__<num_dims, real_t>>(filename, max_entries);
+}
+
+/*!
+ * Simple wrapper for templated partitioning function
+ */
+void initialize_mpas_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
+                          utils::char_array_t filename) {
+  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
+  initialize_mesh<io::mpas_definition_u<real_t>>(mesh, filename);
+}
+
+/*!
+ * Simple wrapper for templated partitioning function
+ */
+void initialize_exo_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
+                         utils::char_array_t filename) {
+  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
+  constexpr auto num_dims = flecsi_sp::burton::burton_mesh_t::num_dimensions;
+  initialize_mesh<io::exodus_definition__<num_dims, real_t>>(mesh, filename);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Task Registration
 ///////////////////////////////////////////////////////////////////////////////
-flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
-flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
+
+flecsi_register_mpi_task(partition_mpas_mesh, flecsi_sp::burton);
+flecsi_register_mpi_task(partition_exo_mesh, flecsi_sp::burton);
+flecsi_register_task(initialize_mpas_mesh, flecsi_sp::burton, loc,
+                     index | flecsi::leaf);
+flecsi_register_task(initialize_exo_mesh, flecsi_sp::burton, loc,
                      index | flecsi::leaf);
 
 ///////////////////////////////////////////////////////////////////////////////
