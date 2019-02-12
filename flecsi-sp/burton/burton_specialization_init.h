@@ -1314,6 +1314,7 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
   std::map< size_t, std::map< size_t,  flecsi::coloring::coloring_info_t > >
     entity_color_info;
 
+  clog_info("Cell coloring");
   //----------------------------------------------------------------------------
   // Cell Coloring
   //----------------------------------------------------------------------------
@@ -1332,6 +1333,7 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
   // Create the primary coloring.
   cells.primary = colorer->color(dcrs);
 
+  clog_info("Cell closure");
   //----------------------------------------------------------------------------
   // Cell Closure.  However many layers of ghost cells are needed are found
   // here.
@@ -1375,6 +1377,7 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
   auto two_halo_cells =
     flecsi::utils::set_union(halo_cells, second_halo_cells);
 
+  clog_info("Find exclusive, shared, ...");
   //----------------------------------------------------------------------------
   // Find exclusive, shared, and ghost cells..
   //----------------------------------------------------------------------------
@@ -1540,6 +1543,7 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
     }
   }
 
+  clog_info("add adjacency information");
   //----------------------------------------------------------------------------
   // add adjacency information
   //----------------------------------------------------------------------------
@@ -1970,6 +1974,8 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
     context.set_sparse_index_space_info(isi);
   }
 
+  clog_info("output the result");
+
   //----------------------------------------------------------------------------
   // output the result
   //----------------------------------------------------------------------------
@@ -2066,48 +2072,24 @@ void initialize_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
 } // initialize_mesh
 
 
-/*!
- * Simple wrapper for templated partitioning function
- */
-void partition_mpas_mesh(utils::char_array_t filename,
-                         std::size_t max_entries) {
-  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
-  partition_mesh<io::mpas_definition_u<real_t>>(filename, max_entries);
-}
+// Some aliases for mesh partitioning/initialization functions
+using exo_def_t =
+    io::exodus_definition__<flecsi_sp::burton::burton_mesh_t::num_dimensions,
+                            flecsi_sp::burton::burton_mesh_t::real_t>;
+using mpas_def_t =
+    io::mpas_definition_u<flecsi_sp::burton::burton_mesh_t::real_t>;
 
-/*!
- * Simple wrapper for templated partitioning function
- */
-void partition_exo_mesh(utils::char_array_t filename,
-                         std::size_t max_entries) {
-  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
-  constexpr auto num_dims = flecsi_sp::burton::burton_mesh_t::num_dimensions;
-  partition_mesh<io::exodus_definition__<num_dims, real_t>>(filename, max_entries);
-}
+auto &partition_mpas_mesh = partition_mesh<mpas_def_t>;
+auto &partition_exo_mesh = partition_mesh<exo_def_t>;
+auto &initialize_mpas_mesh = initialize_mesh<mpas_def_t>;
+auto &initialize_exo_mesh = initialize_mesh<exo_def_t>;
 
-/*!
- * Simple wrapper for templated partitioning function
- */
-void initialize_mpas_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
-                          utils::char_array_t filename) {
-  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
-  initialize_mesh<io::mpas_definition_u<real_t>>(mesh, filename);
-}
-
-/*!
- * Simple wrapper for templated partitioning function
- */
-void initialize_exo_mesh(utils::client_handle_w__<burton_mesh_t> mesh,
-                         utils::char_array_t filename) {
-  using real_t = flecsi_sp::burton::burton_mesh_t::real_t;
-  constexpr auto num_dims = flecsi_sp::burton::burton_mesh_t::num_dimensions;
-  initialize_mesh<io::exodus_definition__<num_dims, real_t>>(mesh, filename);
-}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Task Registration
 ///////////////////////////////////////////////////////////////////////////////
 
+flecsi_register_mpi_task(part_mpas, flecsi_sp::burton);
 flecsi_register_mpi_task(partition_mpas_mesh, flecsi_sp::burton);
 flecsi_register_mpi_task(partition_exo_mesh, flecsi_sp::burton);
 flecsi_register_task(initialize_mpas_mesh, flecsi_sp::burton, loc,
