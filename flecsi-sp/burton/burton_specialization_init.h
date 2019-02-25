@@ -2089,7 +2089,6 @@ auto &initialize_exo_mesh = initialize_mesh<exo_def_t>;
 // Task Registration
 ///////////////////////////////////////////////////////////////////////////////
 
-flecsi_register_mpi_task(part_mpas, flecsi_sp::burton);
 flecsi_register_mpi_task(partition_mpas_mesh, flecsi_sp::burton);
 flecsi_register_mpi_task(partition_exo_mesh, flecsi_sp::burton);
 flecsi_register_task(initialize_mpas_mesh, flecsi_sp::burton, loc,
