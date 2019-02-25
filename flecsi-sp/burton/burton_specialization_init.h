@@ -1899,7 +1899,7 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
   // loop over each list of entities
   for (auto c : corner_ids) {
     // create a temporary list
-    std::decay_t<decltype(corners_to_entities)>::mapped_type entity_list;
+    typename std::decay_t<decltype(corners_to_entities)>::mapped_type entity_list;
     // loop over all dimensions
     for (int dim = 0; dim <= num_dims; ++dim) {
       // alias the corner to entity mapping
@@ -1933,7 +1933,7 @@ void partition_mesh(utils::char_array_t filename, std::size_t max_entries )
   // loop over each list of entities
   for (auto w : wedge_ids) {
     // create a temporary list
-    std::decay_t<decltype(wedges_to_entities)>::mapped_type entity_list;
+    typename std::decay_t<decltype(wedges_to_entities)>::mapped_type entity_list;
     // loop over all dimensions
     for (int dim = 0; dim <= num_dims; ++dim) {
       // alias the wedge to entity mapping

@@ -12,7 +12,6 @@
 
 #include <flecsi/topology/mesh_definition.h>
 #include <flecsi/utils/logging.h>
-#include <flecsi-sp/io/io_utils.h>
 
 // thirdparty includes
 #include <exodusII.h>

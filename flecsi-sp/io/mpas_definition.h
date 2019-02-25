@@ -31,7 +31,6 @@ extern "C" {
 #include <vector>
 
 // flecsi-sp includes
-#include "flecsi-sp/io/io_utils.h"
 
 namespace flecsi_sp {
 namespace io {
