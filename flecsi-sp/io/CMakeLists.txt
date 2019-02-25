@@ -16,7 +16,6 @@ set(io_HEADERS
   detail.h
   exodus_definition.h
   mpas_definition.h
-  io_utils.h
   x3d_definition.h
   PARENT_SCOPE
 )
