@@ -87,3 +87,4 @@ cinch_add_unit(flecsi_sp_x3d_definition
   LIBRARIES
   ${FLECSI_SP_LIBRARIES}
   )
+endif()
