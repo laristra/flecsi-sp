@@ -133,7 +133,7 @@ find_package(Boost COMPONENTS program_options QUIET)
 
 # this option overrides what will get set in cinch_load_extras()
 option(
-  ENABLE_BOOST_PROGRAM_OPTIONS
+  ENABLE_BOOST
   "Enable Boost program options for command-line flags"
   ${Boost_FOUND}
 )

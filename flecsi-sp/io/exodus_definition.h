@@ -8,6 +8,8 @@
 /// \file
 
 // user includes
+#include <flecsi-sp/io/detail.h>
+
 #include <flecsi/topology/mesh_definition.h>
 #include <flecsi/utils/logging.h>
 #include <flecsi-sp/io/io_utils.h>
@@ -17,8 +19,10 @@
 
 // system includes
 #include <algorithm>
+#include <cstddef>
 #include <cstring>
 #include <fstream>
+#include <ios>
 #include <map>
 #include <memory>
 #include <string>
@@ -27,7 +31,6 @@
 
 namespace flecsi_sp {
 namespace io {
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
@@ -155,7 +158,7 @@ public:
   //============================================================================
   static auto make_params() {
     ex_init_params exopar;
-    strcpy(exopar.title, "Exodus II output from flecsi.");
+    std::strcpy(exopar.title, "Exodus II output from flecsi.");
     exopar.num_dim = num_dims;
     exopar.num_nodes = 0;
     exopar.num_edge = 0;
