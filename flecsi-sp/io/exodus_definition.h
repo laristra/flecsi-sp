@@ -616,6 +616,8 @@ public:
         return block_t::tet;
       else if (strcasecmp("hex8", elem_type) == 0)
         return block_t::hex;
+      else if (strcasecmp("HEX", elem_type) == 0)
+        return block_t::hex;
       else {
         clog_fatal("Unknown block type, " << elem_type);
         return block_t::unknown;

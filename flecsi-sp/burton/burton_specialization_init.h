@@ -424,7 +424,30 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   //----------------------------------------------------------------------------
   // create the cells
   //----------------------------------------------------------------------------
+#ifdef FLECSI_SP_BURTON_USE_EXODUS_ORDERING
+  std::cout<<"using exodus order"<<std::endl;
+  
+  // create the cells using exodus ordering.
+  for(auto & cm: cell_lid_to_mid) {
+    // get the list of faces
+    auto vs =
+      mesh_def.entities( cell_t::dimension, vertex_t::dimension, cm.second );
+    // create a list of face pointers
+    std::vector< vertex_t * > elem_vs( vs.size() );
+    // transform the list  mesh ids to face pointers
+    std::transform(
+      vs.begin(),
+      vs.end(),
+      elem_vs.begin(),
+      [&](auto v) { return vertices[ vertex_mid_to_lid.at(v) ]; }
+    );
+    // create the cell
+    auto c = mesh.create_cell( elem_vs );
+  }
 
+#else
+  std::cout<<"NOT using exodus order"<<std::endl;
+  // more flexible, polygon mesh.
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
     // get the list of faces
@@ -442,6 +465,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_fs );
   }
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
