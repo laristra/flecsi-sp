@@ -23,6 +23,13 @@
 #include <ristra/geometry/shapes/triangle.h>
 #include <ristra/math/general.h>
 
+#ifndef __CUDAC__
+#define FLECSI_DEC inline
+#else
+#include <Kokkos_Core.hpp>
+#define FLECSI_DEC __host__ __device__ inline
+#endif 
+
 namespace flecsi_sp {
 namespace burton {
 
@@ -424,7 +431,7 @@ struct burton_element_t<2,1> :
   //============================================================================
 
   //! the list of vertices
-  auto vertices() const;
+  FLECSI_DEC auto vertices() const;
 
   //! the edge midpoint
   const auto & midpoint() const

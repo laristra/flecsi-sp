@@ -22,7 +22,11 @@
 #include <string>
 #include <sstream>
 
-
+#ifndef __CUDACC__
+#define FLECSI_FUNC 
+#else
+#define FLECSI_FUNC __device__ __host__ inline
+#endif
 namespace flecsi_sp {
 namespace burton {
 
@@ -190,19 +194,24 @@ public:
   //! \brief Return all vertices in the burton mesh.
   //! \return Return all vertices in the burton mesh as a sequence for use,
   //!   e.g., in range based for loops.
-  decltype(auto) vertices() const 
+  FLECSI_FUNC decltype(auto) vertices() const 
   { 
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(); 
   }
 
-  decltype(auto) vertices( partition_t subset ) const 
+  FLECSI_FUNC decltype(auto) vertices( partition_t subset ) const 
   { 
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(
       subset
     ); 
   }
 
-  decltype(auto) vertices( subset_t )
+  FLECSI_FUNC decltype(auto) vertices( subset_t )
+  { 
+    // only returns overlapping set right now
+    return base_t::template subentities<index_subspaces_t::overlapping_vertices>();
+  }
+  FLECSI_FUNC decltype(auto) vertices( subset_t ) const
   { 
     // only returns overlapping set right now
     return base_t::template subentities<index_subspaces_t::overlapping_vertices>();
@@ -258,7 +267,7 @@ public:
   //! \return Return vertices associated with entity instance \e e as a
   //!    sequence.
   template <class E>
-  decltype(auto) vertices(E * e) const
+  FLECSI_FUNC decltype(auto) vertices(E * e) const
   {
     return base_t::template entities<vertex_t::dimension, vertex_t::domain>(e);
   }
@@ -272,7 +281,7 @@ public:
   //!
   //! \return Vertices for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) vertices(const flecsi::topology::domain_entity_u<M, E> & e) const
+  FLECSI_FUNC decltype(auto) vertices(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, vertex_t>(e);
   }
@@ -290,7 +299,7 @@ public:
     typename P,
     typename = typename std::enable_if_t< ristra::utils::is_callable_v<P> >
   >
-  decltype(auto) vertices( P && p ) const
+  FLECSI_FUNC decltype(auto) vertices( P && p ) const
   {
     
     auto vs = vertices();
@@ -369,7 +378,7 @@ public:
     );
   }
 
-  auto num_edges( subset_t ) const
+  FLECSI_FUNC auto num_edges( subset_t ) const
   {
     // only returns overlapping right now
     return base_t::template num_subentities<index_subspaces_t::overlapping_edges>();
