@@ -233,7 +233,7 @@ public:
     bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >* = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
+  FLECSI_FUNC decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // normal case:  EIN and EOUT are different, query topology
     return
@@ -792,7 +792,7 @@ public:
   //!
   //! \return Return corners associated with entity instance \e e as a sequence.
   template <class E>
-  decltype(auto) corners(E * e) const
+  FLECSI_FUNC decltype(auto) corners(E * e) const
   {
     return base_t::template entities<corner_t::dimension, corner_t::domain>(e);
   }
@@ -806,7 +806,7 @@ public:
   //!
   //! \return Corners for entity \e e in domain \e M.
   template<size_t M, class E>
-  decltype(auto) corners(const flecsi::topology::domain_entity_u<M, E> & e) const
+  FLECSI_FUNC decltype(auto) corners(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, corner_t>(e);
   }

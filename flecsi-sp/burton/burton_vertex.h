@@ -89,34 +89,34 @@ public:
 
   //! \brief Get the coordinates at a vertex from the state handle.
   //! \return coordinates of vertex.
-  const point_t & coordinates() const noexcept
+  FLECSI_FUNC const point_t & coordinates() const noexcept
   { return coordinates_; }
 
   //! \brief Get the coordinates at a vertex from the state handle.
   //! \return coordinates of vertex.
   //! \remark this is the non const version
-  point_t & coordinates() noexcept
+  FLECSI_FUNC point_t & coordinates() noexcept
   { return coordinates_; }
 
   //! return the bitfield flags
-  const auto & flags() const { return flags_; }
-  auto & flags() { return flags_; }
+  FLECSI_FUNC const auto & flags() const { return flags_; }
+  FLECSI_FUNC auto & flags() { return flags_; }
 
   //! return true if this is on a boundary
-  bool is_boundary() const
+  FLECSI_FUNC bool is_boundary() const
   { return flags_.test( config_t::bits::boundary ); }
 
   //! \brief set whether this element is on the boundary
   //! \param [in] is_boundary  True if on the boundary.
-  void set_boundary( bool is_boundary )
+  FLECSI_FUNC void set_boundary( bool is_boundary )
   { flags_.set(config_t::bits::boundary, is_boundary); }
 
   //! get all entity tags
-  const tag_list_t & tags() const
+  FLECSI_FUNC const tag_list_t & tags() const
   { return tags_; }
 
   //! tag entity
-  void tag(const tag_t & tag)
+  FLECSI_FUNC void tag(const tag_t & tag)
   { tags_.push_back(tag); }
 
   //============================================================================
