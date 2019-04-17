@@ -555,16 +555,43 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
   auto e = es.front()->midpoint();
   auto v = vs.front()->coordinates();
   auto f = fs.front()->midpoint();
+
+  auto cs = mesh->template entities<cell_t::dimension, domain, cell_t::domain>(this);
+  const auto & mp = cs.front()->centroid();
+  
   if ( is_right )
+  {
+    
     facet_normal_ =
       ristra::geometry::shapes::triangle<num_dimensions>::normal( v, f, e );
-  else 
+
+    internal_facet_normal_ =
+      ristra::geometry::shapes::triangle<num_dimensions>::normal( f, mp, e );
+  }
+  else
+  {
     facet_normal_ =
       ristra::geometry::shapes::triangle<num_dimensions>::normal( v, e, f );
+
+    internal_facet_normal_ =
+      ristra::geometry::shapes::triangle<num_dimensions>::normal( f, e, mp );
+  }
+  
   facet_area_ = abs(facet_normal_);
   facet_normal_ /= facet_area_;
+
+  internal_facet_area_ = abs(internal_facet_normal_);
+  internal_facet_normal_ /= internal_facet_area_;
+
   facet_centroid_ =
     ristra::geometry::shapes::triangle<num_dimensions>::centroid( v, f, e );
+
+  internal_facet_centroid_ =
+    ristra::geometry::shapes::triangle<num_dimensions>::centroid( f, e, mp );
+
+  volume_ = 
+    ristra::geometry::shapes::tetrahedron::volume( v, f, e, mp );
+
   set_boundary( fs.front()->is_boundary() );
 
   // NOTE internal facet values are not defined....
