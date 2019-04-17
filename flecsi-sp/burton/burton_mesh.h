@@ -1394,6 +1394,25 @@ public:
   }
 #endif
 
+  auto cell_vertex_neighbors(
+    const flecsi::topology::domain_entity_u<0, cell_t> & c0) const
+  { 
+ 
+    std::vector<cell_t*> cs;
+
+    auto vs = vertices(c0);
+    for ( auto v : vs )
+      for ( auto c : cells(v) )
+        if ( c != c0 ) 
+          cs.emplace_back(c);
+    
+    std::sort( cs.begin(), cs.end() );
+    auto last = std::unique( cs.begin(), cs.end() );
+    cs.erase( last, cs.end() );
+    return cs;
+  }
+
+
   //============================================================================
   // Operators
   //============================================================================
