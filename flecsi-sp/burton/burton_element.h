@@ -765,7 +765,7 @@ struct burton_element_t<2,2>
     auto num_cell_verts = v.size();
 
     size_t ind=0;
-    for ( auto i=0; i<num_cell_verts-1; i++ ) {
+    for ( int i=0; i<static_cast<int>(num_cell_verts)-1; i++ ) {
       auto vp = v[i];
       auto vn = v[i+1];
       entities[ ind++ ] = vp;
@@ -1188,7 +1188,7 @@ struct burton_element_t<3,2>
     auto num_cell_verts = v.size();
 
     size_t ind=0;
-    for ( auto i=0; i<num_cell_verts-1; i++ ) {
+    for ( int i=0; i<static_cast<int>(num_cell_verts)-1; i++ ) {
       auto vp = v[i];
       auto vn = v[i+1];
       entities[ ind++ ] = vp;
