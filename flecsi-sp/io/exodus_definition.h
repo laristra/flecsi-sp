@@ -1142,6 +1142,11 @@ public:
     return entities_.at(from_dim).at(to_dim).at(from_id);
   } // vertices
 
+  std::vector<std::vector<size_t>> 
+  entities_weifix(size_t from_dim, size_t to_dim) const override {
+    assert(0);
+    return entities_.at(from_dim).at(to_dim);
+  }
   /// Return the vertex coordinates for a certain id.
   /// \param [in] vertex_id  The id of the vertex to query.
   template<typename POINT_TYPE>
@@ -1615,6 +1620,11 @@ public:
     return entities_.at(from_dim).at(to_dim).at(from_id);
   } // vertices
 
+  std::vector<std::vector<size_t>>
+  entities_weifix(size_t from_dim, size_t to_dim) const override{
+    assert(0);
+    return entities_.at(from_dim).at(to_dim);
+  } // vertices
   /// Return the vertex coordinates for a certain id.
   /// \param [in] vertex_id  The id of the vertex to query.
   template<typename POINT_TYPE>
