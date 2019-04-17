@@ -1782,6 +1782,77 @@ struct burton_element_t<3,3>
       return std::vector<size_t>( num_wedges, 4 );
     }
       //------------------------------------------------------------------------
+      // sides
+    case 2: {
+
+      // get the cell entities
+      auto cell_verts = primal_conn.get_entity_vec( cell, /* dim */ 0 );
+      auto cell_edges = primal_conn.get_entity_vec( cell, /* dim */ 1 ).vec();
+      auto cell_faces = primal_conn.get_entity_vec( cell, /* dim */ 2 ).vec();
+
+      // get connectivity specific to sides
+      // list of wedges associated to this cell.
+      auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
+      
+      // sort cell wedges for later intersection
+      std::sort( cell_wedges.begin(),  cell_wedges.end() );
+
+      // temporary storage for found wedges
+      std::vector<id_t> wedges;
+      wedges.reserve(2);
+
+      // loop over each edge (pair of vertices)
+      for(auto e1 = cell_edges.begin(); e1 != cell_edges.end();++e1)
+      {
+          auto edge_wedges = domain_conn.get_entity_vec(*e1,/*dimension*/1).vec();
+          
+          // sort cell wedges for later intersection
+          std::sort( edge_wedges.begin(),  edge_wedges.end() );
+
+          // wedges contain list of wedge, that shares edge. e1
+          wedges.clear();
+          std::set_intersection( edge_wedges.begin(), edge_wedges.end(),
+                                 cell_wedges.begin(), cell_wedges.end(),
+                                 std::back_inserter(wedges));
+
+          // it should have 4 wedges per edges..
+          assert(wedges.size()==4);
+
+          // find intersection shares faces.
+          auto edge_faces = primal_conn.get_entity_vec(*e1,/*dimension*/2).vec();
+          assert(edge_faces.size()==1);
+          
+
+
+          auto edge_verts  = primal_conn.get_entity_vec( *e1, /* dimension */ 0 );
+
+          // 2 entries 
+          for( auto v:edge_verts) 
+              entities[i++]=v;
+
+          //1 entries
+          entities[i++]=*e1;
+
+          // 1 entries
+          for(auto f: edge_faces)
+            entities[i++]=f;
+          
+          for(auto we: wedges)
+          {
+            auto wedge_faces = primal_conn.get_entity_vec(we,/*dimension*/ 2).vec();
+            assert(wedge_faces.size()==1);
+
+            //2 entries
+            if(edge_faces[0] == wedge_faces[0])
+              entities[i++]= we;
+          }//we
+      }//e1
+
+      auto num_edges = cell_edges.size();
+      return std::vector<size_t>(num_edges, 6);
+    }
+        
+      //------------------------------------------------------------------------
       // failure
     default:
       throw_runtime_error("Unknown bound entity type");
