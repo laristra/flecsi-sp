@@ -15,10 +15,11 @@
 set(io_HEADERS
   io_exodus.h
   exodus_definition.h
+  x3d_definition.h
   PARENT_SCOPE
 )
 
-if ( FLECSI_SP_ENABLE_EXODUS )
+if ( FLECSI_SP_ENABLE_EXODUS AND FLECSI_SP_ENABLE_PARMETIS )
   cinch_add_unit(flecsi_sp_exodus_definition
     SOURCES test/exodus_definition.cc
     INPUTS 
@@ -45,3 +46,17 @@ if ( FLECSI_SP_ENABLE_EXODUS )
 
 endif()
 
+# X3D testing
+cinch_add_unit(flecsi_sp_x3d_definition
+  SOURCES test/x3d_definition.cc
+  ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+  ${FLECSI_SP_RUNTIME_DRIVER}
+  INPUTS
+  ${FLECSI_SP_DATA_DIR}/meshes/2d/uniform/uniform_32.x3d.00001
+  ${FLECSI_SP_DATA_DIR}/meshes/3d/spun/spun_uniform_32.x3d
+  DEFINES
+  -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
+  POLICY ${FLECSI_SP_UNIT_POLICY}
+  LIBRARIES
+  ${FLECSI_SP_LIBRARIES}
+  )

@@ -3,6 +3,11 @@
 # All rights reserved
 #~----------------------------------------------------------------------------~#
 
+# burton requires parmetis
+if (NOT FLECSI_SP_ENABLE_PARMETIS)
+  return()
+endif()
+
 set(burton_HEADERS
   burton_config.h
   burton_element.h
