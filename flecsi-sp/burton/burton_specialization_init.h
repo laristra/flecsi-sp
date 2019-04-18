@@ -1444,9 +1444,17 @@ auto make_sides( const MESH_DEFINITION & mesh_def )
   auto num_cells = mesh_def.num_entities(num_dims);
 
   // count wedges
+  size_t num_sides1 = 0;
+  for ( const auto & edges : cells_to_edges )
+      num_sides1 += edges.size();
+
+  // count wedges
   size_t num_sides = 0;
   for ( const auto & faces : cells_to_faces )
-      num_sides += faces.size();
+    for ( auto f : faces ) {
+      const auto & edges = faces_to_edges.at(f);
+      num_sides += edges.size();
+    }
 
   // create storage
   std::map<size_t, connectivity_t> entities_to_sides;
@@ -1465,7 +1473,7 @@ auto make_sides( const MESH_DEFINITION & mesh_def )
   sides_to_edges.resize( num_sides );
   sides_to_faces.resize( num_sides );
   sides_to_cells.resize( num_sides );
-
+  
   // now make them
   std::vector< size_t > side_ids;
 
@@ -2116,8 +2124,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
 
 
-
-  /// sides entries.
+  //////////////////////////////////////////////////////////////////////////////////
+  // sides entries.
   // only dim>1
 
   // cell to side
@@ -2133,6 +2141,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::faces_to_sides;
   ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  //a side belongs to a unique face.
   ai.color_sizes = gathered_sides;
   context.add_adjacency(ai);
 #endif
@@ -2150,7 +2159,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::vertices_to_sides;
   ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  // each side has 2 vertices.
   ai.color_sizes = gathered_sides4;
+  //ai.color_sizes = gathered_sides2;
   context.add_adjacency(ai);
 
   // side to cell
@@ -2158,7 +2169,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.index_space = index_spaces::sides_to_cells;
   ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
   ai.to_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  
   ai.color_sizes = gathered_sides;
+  
   context.add_adjacency(ai);
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 2

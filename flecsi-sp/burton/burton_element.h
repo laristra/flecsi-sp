@@ -1785,6 +1785,10 @@ struct burton_element_t<3,3>
       // sides
     case 2: {
 
+      /////////////////////////////////////////////////////
+      // loop over each edge (pair of vertices of the face)
+      auto num_sides(0);
+      
       // get the cell entities
       auto cell_verts = primal_conn.get_entity_vec( cell, /* dim */ 0 );
       auto cell_edges = primal_conn.get_entity_vec( cell, /* dim */ 1 ).vec();
@@ -1795,61 +1799,81 @@ struct burton_element_t<3,3>
       auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
       
       // sort cell wedges for later intersection
+      // somehow, sort is important.
+      // without sort, the intersection fails..
       std::sort( cell_wedges.begin(),  cell_wedges.end() );
 
       // temporary storage for found wedges
       std::vector<id_t> wedges;
       wedges.reserve(2);
 
-      // loop over each edge (pair of vertices)
-      for(auto e1 = cell_edges.begin(); e1 != cell_edges.end();++e1)
+      std::vector<id_t> faces;
+      faces.reserve(1);
+
+      // loop over each face.
+      for( auto f = cell_faces.begin(); f != cell_faces.end();++f)
       {
-          auto edge_wedges = domain_conn.get_entity_vec(*e1,/*dimension*/1).vec();
+        auto face_edges = primal_conn.get_entity_vec( *f, /* dim */ 1 ).vec();
+
+        // list of wedges that attached to this face.
+        auto face_wedges = domain_conn.get_entity_vec(*f, 1).vec();
+        std::sort(face_wedges.begin(), face_wedges.end());
+        
+        std::vector<id_t> cell_face_wedges;
+        // find intersection, wedges that belongs to this cell and face.
+        cell_face_wedges.clear();
+        std::set_intersection( face_wedges.begin(), face_wedges.end(),
+                               cell_wedges.begin(), cell_wedges.end(),
+                               std::back_inserter(cell_face_wedges));
+
+        std::sort(cell_face_wedges.begin(), cell_face_wedges.end());
+        assert(cell_face_wedges.size() == face_edges.size()*2);
+        
+        
+        // loop over edges that belongs to this face.
+        for(auto e = face_edges.begin(); e != face_edges.end();++e)
+        {
+          // wedges attached to edge, e.
+          auto edge_wedges = domain_conn.get_entity_vec(*e,/*dimension*/1).vec();
+          std::sort(edge_wedges.begin(),edge_wedges.end());
           
-          // sort cell wedges for later intersection
-          std::sort( edge_wedges.begin(),  edge_wedges.end() );
-
-          // wedges contain list of wedge, that shares edge. e1
-          wedges.clear();
-          std::set_intersection( edge_wedges.begin(), edge_wedges.end(),
-                                 cell_wedges.begin(), cell_wedges.end(),
-                                 std::back_inserter(wedges));
-
-          // it should have 4 wedges per edges..
-          assert(wedges.size()==4);
-
-          // find intersection shares faces.
-          auto edge_faces = primal_conn.get_entity_vec(*e1,/*dimension*/2).vec();
-          assert(edge_faces.size()==1);
           
+          // find intersection, that belongs this cell/face/edge.
+          std::vector<id_t> cell_face_edge_wedges;
+          // find intersection, wedges that belongs to this cell and face.
+          cell_face_edge_wedges.clear();
+          std::set_intersection( cell_face_wedges.begin(), cell_face_wedges.end(),
+                                 edge_wedges.begin(), edge_wedges.end(),
+                                 std::back_inserter(cell_face_edge_wedges));
+          assert(cell_face_edge_wedges.size() == 2);
 
+          // now attach the entities.
+          // sides consists of:
+          // 2 vertices,
+          // 1 edge,
+          // 1 face,
+          // 2 wedges,
+          // 
+          auto edge_verts  = primal_conn.get_entity_vec( *e, /* dimension */ 0 ).vec();
 
-          auto edge_verts  = primal_conn.get_entity_vec( *e1, /* dimension */ 0 );
-
-          // 2 entries 
-          for( auto v:edge_verts) 
-              entities[i++]=v;
-
-          //1 entries
-          entities[i++]=*e1;
-
-          // 1 entries
-          for(auto f: edge_faces)
-            entities[i++]=f;
+          // 2 vertex entries 
+          for( auto v=edge_verts.begin(); v != edge_verts.end();++v) 
+              entities[i++]=*v;
           
-          for(auto we: wedges)
-          {
-            auto wedge_faces = primal_conn.get_entity_vec(we,/*dimension*/ 2).vec();
-            assert(wedge_faces.size()==1);
+          //1 edge entries
+          entities[i++]=*e;
 
-            //2 entries
-            if(edge_faces[0] == wedge_faces[0])
-              entities[i++]= we;
-          }//we
-      }//e1
+          // 1 face entries
+          entities[i++]=*f;
 
-      auto num_edges = cell_edges.size();
-      return std::vector<size_t>(num_edges, 6);
+          // 2 wedges.
+          for(auto we: cell_face_edge_wedges)
+            entities[i++]= we;
+
+          num_sides++;
+        }//e
+      }//f
+      return std::vector<size_t>(num_sides, 6);
     }
         
       //------------------------------------------------------------------------
