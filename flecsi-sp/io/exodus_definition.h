@@ -1121,9 +1121,9 @@ public:
   /// Return the set of vertices of a particular entity.
   /// \param [in] dimension  The entity dimension to query.
   /// \param [in] entity_id  The id of the entity in question.
-  const auto & entities(size_t from_dim, size_t to_dim) const {
-    return entities_.at(from_dim).at(to_dim);
-  } // vertices
+//  const auto & entities(size_t from_dim, size_t to_dim) const {
+//    return entities_.at(from_dim).at(to_dim);
+//  } // vertices
 
   /// return the set of vertices of a particular entity.
   /// \param [in] dimension  the entity dimension to query.
@@ -1131,6 +1131,12 @@ public:
   std::vector<size_t>
   entities(size_t from_dim, size_t to_dim, size_t from_id) const override {
     return entities_.at(from_dim).at(to_dim).at(from_id);
+  } // vertices
+
+
+  std::vector<std::vector<size_t>>
+  entities(size_t from_dim, size_t to_dim) const override {
+    return entities_.at(from_dim).at(to_dim);
   } // vertices
 
   /// Return the vertex coordinates for a certain id.
@@ -1476,9 +1482,9 @@ public:
   /// Return the set of vertices of a particular entity.
   /// \param [in] dimension  The entity dimension to query.
   /// \param [in] entity_id  The id of the entity in question.
-  const auto & entities(size_t from_dim, size_t to_dim) const {
-    return entities_.at(from_dim).at(to_dim);
-  } // vertices
+//  const auto & entities(size_t from_dim, size_t to_dim) const {
+//    return entities_.at(from_dim).at(to_dim);
+//  } // vertices
 
   /// return the set of vertices of a particular entity.
   /// \param [in] dimension  the entity dimension to query.
@@ -1488,6 +1494,12 @@ public:
     return entities_.at(from_dim).at(to_dim).at(from_id);
   } // vertices
 
+
+  std::vector<std::vector<size_t>>
+  entities(size_t from_dim, size_t to_dim) const override {
+    return entities_.at(from_dim).at(to_dim);
+  } // vertices
+  
   /// Return the vertex coordinates for a certain id.
   /// \param [in] vertex_id  The id of the vertex to query.
   template<typename POINT_TYPE>
@@ -1961,9 +1973,9 @@ public:
   /// Return the set of vertices of a particular entity.
   /// \param [in] dimension  The entity dimension to query.
   /// \param [in] entity_id  The id of the entity in question.
-  const auto & entities(size_t from_dim, size_t to_dim) const {
-    return entities_.at(from_dim).at(to_dim);
-  } // vertices
+//  const auto & entities(size_t from_dim, size_t to_dim) const {
+//    return entities_.at(from_dim).at(to_dim);
+//  } // vertices
 
   /// return the set of vertices of a particular entity.
   /// \param [in] dimension  the entity dimension to query.
@@ -1971,6 +1983,11 @@ public:
   std::vector<size_t>
   entities(size_t from_dim, size_t to_dim, size_t from_id) const override {
     return entities_.at(from_dim).at(to_dim).at(from_id);
+  } // vertices
+
+  std::vector<std::vector<size_t>>
+  entities(size_t from_dim, size_t to_dim) const override {
+    return entities_.at(from_dim).at(to_dim);
   } // vertices
 
   /// Return the vertex coordinates for a certain id.
