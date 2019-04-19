@@ -38,12 +38,14 @@ template< std::size_t N >
 struct burton_extras_types_t {
   using corner_t = burton_extras_t<N,0>;
   using wedge_t = burton_extras_t<N,1>;
+  using side_t = burton_extras_t<N,2>;
 };
 
 template<>
 struct burton_extras_types_t<1> {
   using corner_t = burton_extras_t<1,0>;
   using wedge_t = burton_extras_t<1,0>;
+  using side_t = burton_extras_t<1,0>;
 };
 
 
@@ -63,6 +65,13 @@ using burton_corner_t = typename burton_extras_types_t<N>::corner_t;
 template< std::size_t N >
 using burton_wedge_t = typename burton_extras_types_t<N>::wedge_t;
 
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!        multi-dimensional mesh sides.
+//! \tparam N The total number of mesh dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+using burton_side_t = typename burton_extras_types_t<N>::side_t;
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief An interface for managing geometry and state associated with
@@ -334,6 +343,15 @@ public:
   auto facet_area() const
   { return facet_area_; }
 
+  //! \brief Get the cell facet normal for the wedge.
+  //! \return Cell facet normal vector.
+  const auto & internal_facet_normal() const
+  { return internal_facet_normal_; }
+
+  //! \brief the facet area
+  auto internal_facet_area() const
+  { return internal_facet_area_; }
+
   //! \brief Get the cell facet centroid
   const auto & facet_centroid() const
   { return facet_centroid_; }
@@ -342,6 +360,19 @@ public:
   const auto & facet_midpoint() const
   { return facet_centroid_; }
   
+  //! \brief Get the cell facet centroid
+  const auto & internal_facet_centroid() const
+  { return internal_facet_centroid_; }
+
+  //! \brief Get the cell facet centroid
+  const auto & internal_facet_midpoint() const
+  { return internal_facet_centroid_; }
+
+
+  //! \brief Get the corner-midpoint
+  const auto & corner_midpoint() const
+  { return corner_midpoint_; }
+
   //! return the bitfield flags
   const auto & flags() const { return flags_; }
   auto & flags() { return flags_; }
@@ -356,6 +387,10 @@ public:
   void set_boundary( bool is_boundary )
   { flags_.set(config_t::bits::boundary, is_boundary); }
 
+  auto volume() const
+  {
+      return volume_;
+  }
   //============================================================================
   // Private Data
   //============================================================================
@@ -371,6 +406,70 @@ public:
   //! the entity flags
   bitfield_t flags_;
 
+  //! volume of wedge.
+  real_t volume_=0;
+
+  //! the normal of edge that connects mp and e
+  vector_t internal_facet_normal_ = 0;
+  //! the area of edge that connects mp and e.
+  real_t internal_facet_area_ = 0;
+  //! centroid of the internal facet
+  point_t internal_facet_centroid_ = 0;
+
+  //! this is midpoint between cell mid-point and vertex.
+  point_t corner_midpoint_=0;
+  
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief An interface for managing geometry and state associated with
+//!   two- or three-dimensional mesh sides.
+//!
+//! \tparam N The total number of mesh dimensions.
+////////////////////////////////////////////////////////////////////////////////
+template< std::size_t N >
+class burton_extras_t<N,2,typename std::enable_if< N != 1 >::type>
+  : public flecsi::topology::mesh_entity_u<2, burton_config_t<N>::num_domains>
+{
+public:
+
+  //============================================================================
+  // Typedefs
+  //============================================================================
+
+  //! the mesh traits
+  using config_t = burton_config_t<N>;
+
+  //! Number of domains in the burton mesh.
+  static constexpr auto num_domains = config_t::num_domains;
+
+  //! Number of domains in the burton mesh.
+  static constexpr auto num_dimensions = config_t::num_dimensions;
+
+  //! The domain of the entity
+  static constexpr auto domain = 1;
+
+  //! the flecsi mesh topology storage type
+  using mesh_storage_t = typename config_t::mesh_storage_t;
+  //! the flecsi mesh topology type
+  using mesh_topology_base_t = 
+    flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
+
+  //============================================================================
+  // Constructors
+  //============================================================================
+
+  //! default constructor
+  burton_extras_t() = default;
+
+  // dissallow copying
+  burton_extras_t( burton_extras_t & ) = delete;
+  burton_extras_t & operator=( burton_extras_t & ) = delete;
+
+  // dissallow moving
+  burton_extras_t( burton_extras_t && ) = delete;
+  burton_extras_t & operator=( burton_extras_t && ) = delete;
 
 };
 
@@ -400,19 +499,42 @@ template< typename MESH_TOPOLOGY >
 void burton_extras_t<2,1>::update( const MESH_TOPOLOGY * mesh, bool is_right )
 {
   using ristra::math::abs;
+  auto cs = mesh->template entities<cell_t::dimension, domain, cell_t::domain>(this);
   auto vs = mesh->template entities<vertex_t::dimension, domain, vertex_t::domain>(this);
   auto es = mesh->template entities<edge_t::dimension, domain, edge_t::domain>(this);
+  assert( cs.size() == 1 );
   assert( vs.size() == 1 );
   assert( es.size() == 1 );
+
+  //const auto & mp = cs.front()->midpoint();
+  const auto & mp = cs.front()->centroid();
+
   const auto & e = es.front()->midpoint();
   const auto & v = vs.front()->coordinates();
+
   if ( is_right )
+  {
     facet_normal_ = { e[1] - v[1], v[0] - e[0] };
+    internal_facet_normal_ = {  mp[1]-e[1], e[0] - mp[0] };
+  }
   else
+  {
+      
     facet_normal_ = { v[1] - e[1], e[0] - v[0] };
+    internal_facet_normal_ = { e[1] - mp[1], mp[0] - e[0] };
+  }
+
   facet_area_ = abs(facet_normal_);
   facet_normal_ /= facet_area_;
   facet_centroid_ = 0.5 * ( e + v );
+
+  volume_ = std::abs((mp[0]*(e[1]-v[1])+e[0]*(v[1]-mp[1])+v[0]*(mp[1]-e[1]))/2);
+
+  internal_facet_area_ = abs(internal_facet_normal_);
+  internal_facet_normal_ /= internal_facet_area_;
+  internal_facet_centroid_ = 0.5 * ( e + mp );
+
+  corner_midpoint_ = 0.5*( mp + v );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -432,17 +554,46 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
   auto e = es.front()->midpoint();
   auto v = vs.front()->coordinates();
   auto f = fs.front()->midpoint();
+
+  auto cs = mesh->template entities<cell_t::dimension, domain, cell_t::domain>(this);
+  const auto & mp = cs.front()->centroid();
+  
   if ( is_right )
+  {
+    
     facet_normal_ =
       ristra::geometry::shapes::triangle<num_dimensions>::normal( v, f, e );
-  else 
+
+    internal_facet_normal_ =
+      ristra::geometry::shapes::triangle<num_dimensions>::normal( f, mp, e );
+  }
+  else
+  {
     facet_normal_ =
       ristra::geometry::shapes::triangle<num_dimensions>::normal( v, e, f );
+
+    internal_facet_normal_ =
+      ristra::geometry::shapes::triangle<num_dimensions>::normal( f, e, mp );
+  }
+  
   facet_area_ = abs(facet_normal_);
   facet_normal_ /= facet_area_;
+
+  internal_facet_area_ = abs(internal_facet_normal_);
+  internal_facet_normal_ /= internal_facet_area_;
+
   facet_centroid_ =
     ristra::geometry::shapes::triangle<num_dimensions>::centroid( v, f, e );
+
+  internal_facet_centroid_ =
+    ristra::geometry::shapes::triangle<num_dimensions>::centroid( f, e, mp );
+
+  volume_ = 
+    ristra::geometry::shapes::tetrahedron::volume( v, f, e, mp );
+
   set_boundary( fs.front()->is_boundary() );
+
+  // NOTE internal facet values are not defined....
 }
 
 

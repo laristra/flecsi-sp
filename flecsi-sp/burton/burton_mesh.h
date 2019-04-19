@@ -109,6 +109,10 @@ public:
   //! Corner type.
   using corner_t = typename types_t::corner_t;
 
+  //! Side type.
+  using side_t = typename types_t::side_t;
+
+
   //! the index spaces type
   using index_spaces_t = typename types_t::index_spaces_t;
   //! special subspace for 
@@ -822,6 +826,97 @@ public:
   {
     return 
       base_t::template entity_ids<corner_t::dimension, corner_t::domain>(e);
+  }
+
+
+  //============================================================================
+  // Side Interface
+  //============================================================================
+
+  //! \brief Return number of sides in the burton mesh.
+  //! \return The number of sides in the burton mesh.
+  size_t num_sides() const
+  {
+    return 
+      base_t::template num_entities<side_t::dimension, side_t::domain>();
+  }
+
+  size_t num_sides(partition_t subset) const
+  {
+    return 
+      base_t::template num_entities<side_t::dimension, side_t::domain>(subset);
+  }
+
+  //! \brief Return all sides in the burton mesh.
+  //!
+  //! \return Return all sides in the burton mesh as a sequence for use, e.g.,
+  //!   in range based for loops.
+  decltype(auto) sides() const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>();
+  }
+
+  decltype(auto) sides(partition_t subset) const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>(subset);
+  }
+
+  //! \brief Return all sides in the burton mesh.
+  //! \return Return all sides in the burton mesh as a sequence for use, e.g.,
+  //!   in range based for loops.
+  decltype(auto) sides() // FIXME const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>();
+  }
+
+
+  //! \brief Return sides associated with entity instance of type \e E.
+  //!
+  //! \tparam E entity type of instance to return sides for.
+  //!
+  //! \param[in] e instance of entity to return sides for.
+  //!
+  //! \return Return sides associated with entity instance \e e as a sequence.
+  template <class E>
+  decltype(auto) sides(E * e) const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>(e);
+  }
+
+  //! \brief Return sides for entity \e e in domain \e M.
+  //!
+  //! \tparam M Domain.
+  //! \tparam E Entity type to get sides for.
+  //!
+  //! \param[in] e Entity to get sides for.
+  //!
+  //! \return Sides for entity \e e in domain \e M.
+  template<size_t M, class E>
+  decltype(auto) sides(const flecsi::topology::domain_entity_u<M, E> & e) const
+  {
+    return query_entities<M, E, side_t>(e);
+  }
+
+  //! \brief Return ids for all sides in the burton mesh.
+  //! \return Ids for all sides in the burton mesh.
+  decltype(auto) side_ids() const
+  {
+    return base_t::template entity_ids<side_t::dimension, side_t::domain>();
+  }
+
+  //! \brief Return side ids associated with entity instance of type \e E.
+  //!
+  //! \tparam E entity type of instance to return side ids for.
+  //!
+  //! \param[in] e instance of entity to return side ids for.
+  //!
+  //! \return Return side ids associated with entity instance \e e as a
+  //!   sequence.
+  template <class E>
+  decltype(auto) side_ids(E * e) const
+  {
+    return 
+      base_t::template entity_ids<side_t::dimension, side_t::domain>(e);
   }
 
 
