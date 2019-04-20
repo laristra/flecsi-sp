@@ -1327,7 +1327,8 @@ public:
   /// Return the set of vertices of a particular entity.
   /// \param [in] dimension  The entity dimension to query.
   /// \param [in] entity_id  The id of the entity in question.
-  const std::vector<std::vector<size_t>> & entities(size_t from_dim, size_t to_dim) const override {
+  const std::vector<std::vector<size_t>>
+  entities(size_t from_dim, size_t to_dim) const override {
     return entities_.at(from_dim).at(to_dim);
   } // vertices
 
