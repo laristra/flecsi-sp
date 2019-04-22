@@ -392,7 +392,7 @@ void remap_test(
   real_t total_density = 0.0;
   std::vector<real_t> total_velocity(num_dims, 0.0);
 
-  for (auto c: mesh.cells()) {
+  for (auto c: mesh.cells(flecsi::owned)) {
     for (int dim=0; dim<num_dims; ++dim) {
       total_velocity[dim] += c->volume() * velocity[c + dim * mesh.num_cells()];
     }
@@ -626,7 +626,7 @@ void modify(
   // in any direction. These vertices are then used
   // for the new mesh.
 
-  double spacing = 0; //1/std::pow(num_verts, 0.5);
+  double spacing = 1/std::pow(num_verts, 0.5);
   for (auto v : vs ) {
     auto vertex = v->coordinates();
     
