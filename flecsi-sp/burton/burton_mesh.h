@@ -1132,21 +1132,21 @@ public:
 
     // now set the boundary flags.
     for ( auto f : faces() ) {
-      f->set_boundary( (cells(f).size() == 1) );
+	    auto cs = cells(f);
+      f->set_boundary( (cs.size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
-        if ( num_dimensions >= 2 ) {
+        if constexpr ( num_dimensions >= 2 ) {
 	        // cell flags
-	        auto cs = cells(f);
 	        for ( auto c : cs )
-	        c->set_touching_boundary( true );
+	          c->set_touching_boundary( true );
           // point flags are only for 2d and 3d
           auto ps = vertices(f);
           for ( auto p : ps )
             p->set_boundary( true );
         }
         // edge flags are only for 3d
-        if ( num_dimensions == 3 ) {
+        if constexpr ( num_dimensions == 3 ) {
           auto es = edges(f);
           for ( auto e : es ) 
             e->set_boundary( true );

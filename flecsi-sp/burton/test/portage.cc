@@ -307,9 +307,9 @@ void remap_test(
 
   // Give the target cell volumes to the target state wrapper and reset mesh
   // to the coordinates and cell volumes of the source mesh
-  std::vector< real_t > original_coords(mesh.num_vertices() * mesh.num_dimensions);
+  std::vector< real_t > original_coords(mesh.num_vertices() * num_dims);
   for (auto vt: mesh.vertices()){
-    for ( int dim=0; dim < mesh.num_dimensions; ++dim) {
+    for ( int dim=0; dim < num_dims; ++dim) {
       original_coords[vt->id() * num_dims + dim] = old_coords(vt)[dim];
     }
   }
@@ -610,9 +610,10 @@ void modify(
   utils::dense_handle_w__<vector_t> coord0
 )
 {
+  constexpr auto num_dims = mesh_t::num_dimensions;
 
   // Loop over vertices
-  auto vs = mesh.vertices();
+  const auto & vs = mesh.vertices();
   auto num_verts = vs.size();
 
   std::mt19937 mt_rand(0);
@@ -625,26 +626,21 @@ void modify(
   // in any direction. These vertices are then used
   // for the new mesh.
 
-  double spacing = 1/std::pow(num_verts, 0.5);
-  double perturbation;
-  for ( int i=0; i<num_verts; i++) {
-    auto vertex = vs[i]->coordinates();
-    for ( int j=0; j < mesh.num_dimensions; j++) {
+  double spacing = 0; //1/std::pow(num_verts, 0.5);
+  for (auto v : vs ) {
+    auto vertex = v->coordinates();
+    
+    for ( int j=0; j < num_dims; j++) {
       if ( vertex[j] < 0.5 && vertex[j] > 0) {
-        perturbation = spacing * real_rand();
-        //perturbation = 0.0;
-        vertex[j] = vertex[j] - perturbation;
+        auto perturbation = spacing * real_rand();
+        vertex[j] -= perturbation;
       } else if (vertex[j] <= 0 && vertex[j]> -0.5) {
-        perturbation = spacing * real_rand();
-        //perturbation = 0.0;
-        vertex[j] = vertex[j] + perturbation;
-      } else {
-        vertex[j] = vertex[j];
+        auto perturbation = spacing * real_rand();
+        vertex[j] += perturbation;
       }
     }
     
-    auto vt = vs[i];
-    coord0(vt) = vertex;
+    coord0(v) = vertex;
   }
 } 
 
@@ -792,7 +788,8 @@ void driver(int argc, char ** argv)
           single,
           mesh_handle,
           xn);
-  
+
+#if 1
   flecsi_execute_mpi_task(
           remap_test, 
           flecsi_sp::burton::test, 
@@ -802,6 +799,14 @@ void driver(int argc, char ** argv)
           xn0,
           xn,
           b);
+#else
+  flecsi_execute_task(
+          restore,
+          flecsi_sp::burton::test,
+          single,
+          mesh_handle,
+          xn);
+#endif
 
   time_cnt++;
   flecsi_execute_task(

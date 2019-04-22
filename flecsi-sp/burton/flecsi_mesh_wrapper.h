@@ -629,13 +629,13 @@ public:
      if (kind == entity_kind_t::NODE)
      {
        const auto & local_to_global_id_map = 
-	 context.index_map( mesh_t::index_spaces_t::vertices );
+       context.index_map( mesh_t::index_spaces_t::vertices );
        return local_to_global_id_map.at(id);
      }    
      else if (kind == entity_kind_t::CELL)
      { 
        const auto & local_to_global_id_map = 
-	 context.index_map( mesh_t::index_spaces_t::cells );
+       context.index_map( mesh_t::index_spaces_t::cells );
        return local_to_global_id_map.at(id);
      }
      else
@@ -1111,7 +1111,7 @@ public:
       auto index = v * space_dimension();
       auto coords = v->coordinates();
       for ( int i = 0; i < space_dimension(); i++){
-	coords[i] = coordinates_[index + i];
+        coords[i] = coordinates_[index + i];
       }
 
       point_list->emplace_back( make_point(coords) );
