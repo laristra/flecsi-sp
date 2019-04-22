@@ -17,6 +17,9 @@ project(FleCSI-SP)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
+# cmake module path
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake")
+
 #------------------------------------------------------------------------------#
 # Set header suffix regular expression
 #------------------------------------------------------------------------------#
@@ -198,6 +201,24 @@ endif()
 if(FLECSI_SP_ENABLE_PARMETIS)
   include_directories(${PARMETIS_INCLUDE_DIRS})
   list(APPEND FLECSI_SP_LIBRARIES ${PARMETIS_LIBRARIES})
+endif()
+
+#------------------------------------------------------------------------------#
+# Portage
+#------------------------------------------------------------------------------#
+
+find_package(PORTAGE QUIET)
+
+option(FLECSI_SP_ENABLE_PORTAGE "Enable Portage Support" ${PORTAGE_FOUND})
+
+if(FLECSI_SP_ENABLE_PORTAGE)
+  if(NOT Boost_FOUND)
+    message( FATAL_ERROR "Boost is needed for Portage" )
+  endif()
+  message( STATUS "Portage location: ${PORTAGE_INCLUDE_DIRS}" )
+  include_directories(${PORTAGE_INCLUDE_DIRS})
+  MESSAGE(STATUS ${PORTAGE_LIBRARIES} )
+  list( APPEND FLECSI_SP_LIBRARIES ${PORTAGE_LIBRARIES} )
 endif()
 
 #------------------------------------------------------------------------------#

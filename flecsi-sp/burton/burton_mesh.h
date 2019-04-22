@@ -1135,8 +1135,12 @@ public:
       f->set_boundary( (cells(f).size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
-        // point flags are only for 2d and 3d
         if ( num_dimensions >= 2 ) {
+	        // cell flags
+	        auto cs = cells(f);
+	        for ( auto c : cs )
+	        c->set_touching_boundary( true );
+          // point flags are only for 2d and 3d
           auto ps = vertices(f);
           for ( auto p : ps )
             p->set_boundary( true );

@@ -679,6 +679,10 @@ struct burton_element_t<2,2>
   //! the shape type
   using shape_t = config_t::shape_t;
 
+  //! a bitfield type
+  using bitfield_t = typename config_t::bitfield_t;
+
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -730,6 +734,16 @@ struct burton_element_t<2,2>
   //! get the region id
   auto region() const
   { return region_; }
+
+
+  //! is this a cell that has a face on the boundary
+  bool is_touching_boundary() const
+  { return flags_.test( config_t::bits::boundary ); }
+
+  //! \brief set whether this element is touching the boundary
+  //! \param [in] is_boundary  True if touching the boundary.
+  void set_touching_boundary( bool is_touching_boundary )
+  { flags_.set(config_t::bits::boundary, is_touching_boundary); }
 
 
   //! the element type
@@ -1061,7 +1075,10 @@ private:
   //============================================================================
   // Private Data
   //============================================================================
-  
+
+  //! the entity flags
+  bitfield_t flags_;
+
   //! the region tag
   size_t region_ = 0;
 
@@ -1463,6 +1480,10 @@ struct burton_element_t<3,3>
   //! the shape type
   using shape_t = config_t::shape_t;
 
+  //! The bitfield.
+  using bitfield_t = typename config_t::bitfield_t;
+
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -1516,6 +1537,14 @@ struct burton_element_t<3,3>
   auto type() const
   { return shape_; };
 
+  //! is this a cell that has a face on the boundary
+  bool is_touching_boundary() const
+  { return flags_.test( config_t::bits::boundary ); }
+
+  //! \brief set whether this element is touching the boundary
+  //! \param [in] is_boundary  True if touching the boundary.
+  void set_touching_boundary( bool is_touching_boundary )
+  { flags_.set(config_t::bits::boundary, is_touching_boundary); }
 
   //----------------------------------------------------------------------------
   //! \brief create_entities is a function that creates entities
@@ -1960,7 +1989,10 @@ struct burton_element_t<3,3>
   //============================================================================
   
 private:
-  
+
+  //! the entity flags
+  bitfield_t flags_;  
+
   //! the region tag
   size_t region_ = 0;
 
