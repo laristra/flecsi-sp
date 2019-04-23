@@ -302,10 +302,10 @@ void remap_test(
 
   // Create temporary vectors for the data to be remapped
   std::vector< double > density(mesh.num_cells(), 0);
-  std::vector< double > remap_density(mesh.num_cells());
+  std::vector< double > remap_density(mesh.num_cells(), 0);
 
   std::vector< double > velocity(mesh.num_cells()*num_dims, 0);
-  std::vector< double > remap_velocity(mesh.num_cells()*num_dims);
+  std::vector< double > remap_velocity(mesh.num_cells()*num_dims, 0);
 
   // Fill the temporary vectors with the data that needs to be remapped
   for (int dim=0; dim < num_dims; ++dim) {
@@ -394,8 +394,8 @@ void remap_test(
   //
 
   // Checking conservation for remap test
-  real_t total_density = 0.0;
-  std::vector<real_t> total_velocity(num_dims, 0.0);
+  real_t total_density{0};
+  vector_t total_velocity{0};
 
   for (auto c: mesh.cells(flecsi::owned)) {
     for (int dim=0; dim<num_dims; ++dim) {
@@ -409,8 +409,8 @@ void remap_test(
   mesh.update_geometry();
 
   // Check conservation for remap test
-  real_t total_remap_density = 0.0;
-  std::vector<real_t> total_remap_velocity(num_dims, 0.0);
+  real_t total_remap_density{0};
+  vector_t total_remap_velocity{0};
 
   std::vector<real_t> expected(mesh.num_cells());
 
@@ -467,10 +467,17 @@ void remap_test(
       printf("L2 Norm: %.20f, Total Volume: %f \n", L2_sum, total_vol_sum);
     }
 
+    real_t total_density_sum{0}, total_remap_density_sum{0};
+    vector_t total_velocity_sum{0}, total_remap_velocity_sum{0};
+    ret = MPI_Allreduce( &total_density, &total_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+    ret = MPI_Allreduce( &total_remap_density, &total_remap_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+    ret = MPI_Allreduce( total_velocity.data(), total_velocity_sum.data(), total_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
+    ret = MPI_Allreduce( total_remap_velocity.data(), total_remap_velocity_sum.data(), total_remap_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
+
     auto epsilon = config::test_tolerance;
-    EXPECT_NEAR( total_density, total_remap_density, epsilon);
+    EXPECT_NEAR( total_density_sum, total_remap_density_sum, epsilon);
     for ( int i=0; i<num_dims; ++i)
-      EXPECT_NEAR( total_velocity[i], total_remap_velocity[i], epsilon);
+      EXPECT_NEAR( total_velocity_sum[i], total_remap_velocity_sum[i], epsilon);
     
     // std::ofstream outputfile_norm;
     // outputfile_norm.open("cosine_1stOrder_L1.dat", std::ios::app);
