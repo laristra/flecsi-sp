@@ -96,9 +96,9 @@ static auto zero_padded(
 /// \param [in] d  the bulk density
 ////////////////////////////////////////////////////////////////////////////////
 void output( 
-  utils::client_handle_r__<mesh_t> mesh, 
+  utils::client_handle_r<mesh_t> mesh, 
   size_t iteration,
-  utils::dense_handle_r__<real_t> d
+  utils::dense_handle_r<real_t> d
 ) {
   clog(info) << "OUTPUT MESH TASK" << std::endl;
 
@@ -235,10 +235,10 @@ auto make_remapper(
 /// \param [in] coord0     the set of coordinates to be applied
 ////////////////////////////////////////////////////////////////////////////////
 void remap_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_rw__<real_t> density_handle,
-  utils::sparse_handle_rw__<vector_t> velocity_handle,
-  utils::dense_handle_r__<vector_t> new_vertex_coords
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_rw<real_t> density_handle,
+  utils::sparse_handle_rw<vector_t> velocity_handle,
+  utils::dense_handle_r<vector_t> new_vertex_coords
 ) {
   
   constexpr auto num_dims = mesh_t::num_dimensions;
@@ -468,9 +468,9 @@ void remap_test(
 /// \param [in] mat_state  a densely populated set of data
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_flat(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
 ) {
 
   int m = 0;
@@ -481,9 +481,9 @@ void initialize_flat(
 }
 
 void initialize_linear(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
 ) {
 
   real_t val;
@@ -499,9 +499,9 @@ void initialize_linear(
 }
 
 void initialize_cubic(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
 ) {
 
   int m = 0;
@@ -516,9 +516,9 @@ void initialize_cubic(
 }
 
 void initialize_cosine(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
 ) {
 
   int m = 0;
@@ -534,9 +534,9 @@ void initialize_cosine(
 }
 
 void initialize_step(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
 ) {
 
   int m = 0;
@@ -559,8 +559,8 @@ void initialize_step(
 //! \param [out] coord0  storage for the mesh coordinates
 ////////////////////////////////////////////////////////////////////////////////
 void modify( 
-  utils::client_handle_r__<mesh_t>  mesh,
-  utils::dense_handle_w__<vector_t> coord
+  utils::client_handle_r<mesh_t>  mesh,
+  utils::dense_handle_w<vector_t> coord
 )
 {
   constexpr auto num_dims = mesh_t::num_dimensions;
@@ -604,8 +604,8 @@ void modify(
 //! \param [in] coord0  the mesh coordinates to restore
 ////////////////////////////////////////////////////////////////////////////////
 void restore( 
-  utils::client_handle_r__<mesh_t>  mesh,
-  utils::dense_handle_r__<vector_t> coord
+  utils::client_handle_r<mesh_t>  mesh,
+  utils::dense_handle_r<vector_t> coord
 )
 {
 

@@ -44,7 +44,7 @@ enum data_attributes_t : size_t {
 /// \tparam N The number of dimensions.
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N, bool Extra_Elements = false >
-class burton_mesh__  : public burton_mesh_topology_t<N, Extra_Elements>
+class burton_mesh  : public burton_mesh_topology_t<N, Extra_Elements>
 
 {
 public:
@@ -141,24 +141,24 @@ public:
   //============================================================================
 
   //! Default constructor
-  burton_mesh__() = default;
+  burton_mesh() = default;
 
   //! \brief Assignment operator (default)
-  burton_mesh__ & operator=(const burton_mesh__ &) = default;
+  burton_mesh & operator=(const burton_mesh &) = default;
 
   //! \brief Copy constructor
 
-  burton_mesh__(const burton_mesh__ &src) = default;
+  burton_mesh(const burton_mesh &src) = default;
 
   //! \brief allow move construction
-  burton_mesh__( burton_mesh__ && ) = default;
+  burton_mesh( burton_mesh && ) = default;
 
   //! \brief Copy constructor for data client handle
-  burton_mesh__(const burton_mesh__& m, bool dummy) : base_t(m, dummy)
+  burton_mesh(const burton_mesh& m, bool dummy) : base_t(m, dummy)
   {}
 
   //! Destructor
-  virtual ~burton_mesh__() {};
+  virtual ~burton_mesh() {};
 
   //============================================================================
   // Accessors
@@ -1518,7 +1518,7 @@ public:
 
   //! Print some statistics.
   template< std::size_t M >
-  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh);
+  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh<M>& mesh);
 
 
 
@@ -1652,7 +1652,7 @@ public:
 //!  \return the stream operator.
 template< std::size_t M >
 inline
-std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
+std::ostream& operator<< (std::ostream& stream, const burton_mesh<M>& mesh)
 {
   using std::endl;
   stream << "Burton mesh:" << endl;
@@ -1669,17 +1669,17 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
 #ifndef FLECSI_SP_BURTON_MESH_EXTRAS
 
 #  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
-using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION>;
+using burton_mesh_t = burton_mesh<FLECSI_SP_BURTON_MESH_DIMENSION>;
 #  else
-using burton_mesh_t = burton_mesh__<2>;
+using burton_mesh_t = burton_mesh<2>;
 #  endif
 
 #else
 
 #  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
-using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
+using burton_mesh_t = burton_mesh<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
 #  else
-using burton_mesh_t = burton_mesh__<2,true>;
+using burton_mesh_t = burton_mesh<2,true>;
 #  endif
 
 #endif

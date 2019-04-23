@@ -1570,7 +1570,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // make some type aliases
   using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+  using exodus_definition_t = flecsi_sp::io::exodus_definition<num_dims, real_t>;
   using entity_info_t = flecsi::coloring::entity_info_t;
   using vertex_t = burton_mesh_t::vertex_t;
   using edge_t = burton_mesh_t::edge_t;
@@ -2473,7 +2473,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 /// \brief the main mesh initialization driver
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_mesh(
-  utils::client_handle_w__<burton_mesh_t> mesh,
+  utils::client_handle_w<burton_mesh_t> mesh,
   utils::char_array_t filename
 ) {
 
@@ -2486,7 +2486,7 @@ void initialize_mesh(
 
   // alias some types
   using real_t = burton_mesh_t::real_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+  using exodus_definition_t = flecsi_sp::io::exodus_definition<num_dims, real_t>;
 
   // get the context
   const auto & context = flecsi::execution::context_t::instance();

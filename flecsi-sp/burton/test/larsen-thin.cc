@@ -32,8 +32,8 @@ flecsi_register_field(mesh_t, hydro, face_field, integer_t, dense, 1, index_spac
 //! \brief write to the field
 ////////////////////////////////////////////////////////////////////////////////
 void field_write_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<integer_t> face_field
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<integer_t> face_field
 ) {
 
   const auto & context = flecsi::execution::context_t::instance();
@@ -53,8 +53,8 @@ flecsi_register_task(field_write_test, flecsi_sp::burton::test, loc,
 //! \brief read from the field
 ////////////////////////////////////////////////////////////////////////////////
 void field_read_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_r__<integer_t> face_field
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_r<integer_t> face_field
 ) {
   
   const auto & context = flecsi::execution::context_t::instance();

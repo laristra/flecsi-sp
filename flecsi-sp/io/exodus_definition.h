@@ -38,7 +38,7 @@ namespace io {
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<int D, typename T>
-class exodus_base__ {
+class exodus_base {
 
 public:
   //============================================================================
@@ -696,7 +696,7 @@ public:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<int D, typename T>
-class exodus_definition__ {};
+class exodus_definition {};
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the one-dimensional mesh reader and writer based on the
@@ -705,7 +705,7 @@ class exodus_definition__ {};
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<1, T> : public flecsi::topology::mesh_definition_u<1>
+class exodus_definition<1, T> : public flecsi::topology::mesh_definition_u<1>
 {
 
 public:
@@ -714,7 +714,7 @@ public:
   //============================================================================
 
   //! the instantiated base type
-  using base_t = exodus_base__<1, T>;
+  using base_t = exodus_base<1, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition_u<1>;
@@ -739,22 +739,22 @@ public:
   //============================================================================
 
   //! \brief Default constructor
-  exodus_definition__() = default;
+  exodus_definition() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition__(const std::string & filename) {
+  exodus_definition(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  exodus_definition__(const exodus_definition__ &) = delete;
+  exodus_definition(const exodus_definition &) = delete;
 
   /// Assignment operator (disabled)
-  exodus_definition__ & operator=(const exodus_definition__ &) = delete;
+  exodus_definition & operator=(const exodus_definition &) = delete;
 
   /// Destructor
-  ~exodus_definition__() = default;
+  ~exodus_definition() = default;
 
   //============================================================================
   //! \brief Implementation of exodus mesh read for burton specialization.
@@ -1021,7 +1021,7 @@ private:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<2, T> : public flecsi::topology::mesh_definition_u<2>
+class exodus_definition<2, T> : public flecsi::topology::mesh_definition_u<2>
 {
 
 public:
@@ -1030,7 +1030,7 @@ public:
   //============================================================================
 
   //! the instantiated base type
-  using base_t = exodus_base__<2, T>;
+  using base_t = exodus_base<2, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;
@@ -1055,22 +1055,22 @@ public:
   //============================================================================
 
   //! \brief Default constructor
-  exodus_definition__() = default;
+  exodus_definition() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition__(const std::string & filename) {
+  exodus_definition(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  exodus_definition__(const exodus_definition__ &) = delete;
+  exodus_definition(const exodus_definition &) = delete;
 
   /// Assignment operator (disabled)
-  exodus_definition__ & operator=(const exodus_definition__ &) = delete;
+  exodus_definition & operator=(const exodus_definition &) = delete;
 
   /// Destructor
-  ~exodus_definition__() = default;
+  ~exodus_definition() = default;
 
   //============================================================================
   //! \brief Implementation of exodus mesh read for burton specialization.
@@ -1370,7 +1370,7 @@ private:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition__<3, T> : public flecsi::topology::mesh_definition_u<3>
+class exodus_definition<3, T> : public flecsi::topology::mesh_definition_u<3>
 {
 
 public:
@@ -1379,7 +1379,7 @@ public:
   //============================================================================
 
   //! the instantiated base type
-  using base_t = exodus_base__<3, T>;
+  using base_t = exodus_base<3, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition_u<3>;
@@ -1404,22 +1404,22 @@ public:
   //============================================================================
 
   //! \brief Default constructor
-  exodus_definition__() = default;
+  exodus_definition() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition__(const std::string & filename) {
+  exodus_definition(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  exodus_definition__(const exodus_definition__ &) = delete;
+  exodus_definition(const exodus_definition &) = delete;
 
   /// Assignment operator (disabled)
-  exodus_definition__ & operator=(const exodus_definition__ &) = delete;
+  exodus_definition & operator=(const exodus_definition &) = delete;
 
   /// Destructor
-  ~exodus_definition__() = default;
+  ~exodus_definition() = default;
 
   //============================================================================
   //! \brief Implementation of exodus mesh read for burton specialization.
