@@ -83,7 +83,7 @@ flecsi_register_field(
   node_coordinates,
   mesh_t::vector_t,
   dense,
-  2,
+  1,
   index_spaces_t::vertices
 );
 
@@ -197,7 +197,6 @@ auto make_remapper(
   }
   std::cout << " Inside make_remapper" << std::endl;
 
-
   constexpr int dim = mesh_wrapper_a_t::mesh_t::num_dimensions;
 
   if constexpr( dim == 2) {
@@ -209,7 +208,7 @@ auto make_remapper(
       mesh_t::num_dimensions,
       flecsi_mesh_t<mesh_t>,
       flecsi_state_t<mesh_t>,
-      flecsi_new_mesh_t<mesh_t>,
+      flecsi_mesh_t<mesh_t>,
       flecsi_state_t<mesh_t> > remapper(
                 mesh_wrapper_a,
                 state_wrapper_a,
@@ -226,7 +225,7 @@ auto make_remapper(
       mesh_t::num_dimensions,
       flecsi_mesh_t<mesh_t>,
       flecsi_state_t<mesh_t>,
-      flecsi_new_mesh_t<mesh_t>,
+      flecsi_mesh_t<mesh_t>,
       flecsi_state_t<mesh_t> > remapper(
                 mesh_wrapper_a,
                 state_wrapper_a,
@@ -249,8 +248,7 @@ void remap_test(
   utils::client_handle_r__<mesh_t> mesh,
   utils::sparse_handle_rw__<real_t> density_handle,
   utils::sparse_handle_rw__<vector_t> velocity_handle,
-  utils::dense_handle_r__<vector_t> old_coords,
-  utils::dense_handle_r__<vector_t> coord0,
+  utils::dense_handle_r__<vector_t> new_vertex_coords,
   utils::dense_handle_r__<real_t> b
 ) {
   
@@ -261,15 +259,52 @@ void remap_test(
   auto comm_rank = context.color();
   auto comm_size = context.colors();
 
+  //---------------------------------------------------------------------------
+  // Compute some source and target mesh quantities.
+
+  // Apply the new coordinates to the mesh and update its geometry.
+  // Here we save some info we need.
+  std::vector< real_t > target_cell_volume(mesh.num_cells());
+  std::vector< vector_t > target_cell_centroid(mesh.num_cells());
+  // update coordinates
+  for ( auto v : mesh.vertices() )
+    std::swap(v->coordinates(), new_vertex_coords(v));
+  // compute new target mesh quantities
+  for ( auto c: mesh.cells() ) {
+    c->update(&mesh);
+    target_cell_volume[c] = c->volume();
+    target_cell_centroid[c] = c->centroid();
+  }
+
+  // Store the cell volumes for the source mesh 
+  std::vector< real_t > source_volume(mesh.num_cells());
+  // update coordinates back to old mesh
+  for ( auto v : mesh.vertices() )
+    std::swap(v->coordinates(), new_vertex_coords(v));
+  // re-compute source mesh quantities
+  for ( auto c: mesh.cells() ) {
+    c->update(&mesh);
+    source_volume[c] = c->volume();
+  }
+
+
+  //---------------------------------------------------------------------------
+  // Set up portage mesh/data wrappers
+
   // Create the mesh wrapper objects
   flecsi_mesh_t<mesh_t> mesh_wrapper_a(mesh);
-  flecsi_new_mesh_t<mesh_t> mesh_wrapper_b(mesh, coord0);
+  flecsi_mesh_t<mesh_t> mesh_wrapper_b(mesh);
+
+  mesh_wrapper_b.set_new_coordinates(
+    &new_vertex_coords(0),
+    target_cell_volume.data(),
+    target_cell_centroid.data() );
 
   // Create temporary vectors for the data to be remapped
-  std::vector< double > density(mesh.num_cells());
+  std::vector< double > density(mesh.num_cells(), 0);
   std::vector< double > remap_density(mesh.num_cells());
 
-  std::vector< double > velocity(mesh.num_cells()*num_dims);
+  std::vector< double > velocity(mesh.num_cells()*num_dims, 0);
   std::vector< double > remap_velocity(mesh.num_cells()*num_dims);
 
   // Fill the temporary vectors with the data that needs to be remapped
@@ -286,37 +321,6 @@ void remap_test(
       density[c] = density_handle(c,m);
     }
   }
-
-  // Vectors to contain the cell volumes
-  std::vector< real_t > target_volume(mesh.num_cells());
-  std::vector< real_t > source_volume(mesh.num_cells());
-
-  // Store the cell volumes for the source mesh
-  for ( auto c: mesh.cells() ) {
-    source_volume[c] = {c->volume()};
-  }
-
-  // Change the coordinates and calculate the cell volumes for the target mesh
-  mesh_wrapper_b.change_coordinates();
-  mesh.update_geometry();
-
-  // Store the cell volumes for the target mesh
-  for ( auto c: mesh.cells() ) {
-    target_volume[c] = {c->volume()};
-  }
-
-  // Give the target cell volumes to the target state wrapper and reset mesh
-  // to the coordinates and cell volumes of the source mesh
-  std::vector< real_t > original_coords(mesh.num_vertices() * num_dims);
-  for (auto vt: mesh.vertices()){
-    for ( int dim=0; dim < num_dims; ++dim) {
-      original_coords[vt->id() * num_dims + dim] = old_coords(vt)[dim];
-    }
-  }
-
-  mesh_wrapper_b.set_volumes(target_volume);
-  mesh_wrapper_b.change_coordinates(original_coords);
-  mesh.update_geometry();
 
   // Create a vector of strings that correspond to the names of the variables
   //   that will be remapped
@@ -349,7 +353,6 @@ void remap_test(
   }
   std::cout << " Before make_remapper" << std::endl;
 
-
   auto remapper = make_remapper(
              mesh_wrapper_a,
              state_wrapper_a,
@@ -357,9 +360,11 @@ void remap_test(
              state_wrapper_b,
              var_names);
   
+
   // Assign the remap varaible names for the portage driver
   remapper.set_remap_var_names(var_names);
-  remapper.set_limiter( Portage::Limiter_type::BARTH_JESPERSEN );
+  //remapper.set_limiter( Portage::Limiter_type::BARTH_JESPERSEN );
+  remapper.set_limiter( Portage::Limiter_type::NOLIMITER );
 
   std::cout << " After make_remapper" << std::endl;
   for ( auto v: var_names) {
@@ -400,7 +405,7 @@ void remap_test(
   }
   
   // Apply the new coordinates to the mesh and update its geometry
-  mesh_wrapper_b.change_coordinates();
+  for ( auto v : mesh.vertices() ) v->coordinates() = new_vertex_coords(v);
   mesh.update_geometry();
 
   // Check conservation for remap test
@@ -576,29 +581,6 @@ void initialize_step(
   }
 }
 
-
-////////////////////////////////////////////////////////////////////////////////
-//! \brief save the coordinates & solution
-//!
-//! \param [in] mesh the mesh object
-//! \param [out] coord0  storage for the mesh coordinates
-////////////////////////////////////////////////////////////////////////////////
-void save( 
-  utils::client_handle_r__<mesh_t>  mesh,
-  utils::dense_handle_w__<vector_t> coord0
-)
-{
-
-  // Loop over vertices
-  auto vs = mesh.vertices();
-  auto num_verts = vs.size();
-  for ( mesh_t::counter_t i=0; i<num_verts; i++ ) {
-    auto vt = vs[i];
-    coord0(vt) = vt->coordinates();
-  }
-} 
-
-
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief modify the coordinates & solution
 //!
@@ -607,7 +589,7 @@ void save(
 ////////////////////////////////////////////////////////////////////////////////
 void modify( 
   utils::client_handle_r__<mesh_t>  mesh,
-  utils::dense_handle_w__<vector_t> coord0
+  utils::dense_handle_w__<vector_t> coord
 )
 {
   constexpr auto num_dims = mesh_t::num_dimensions;
@@ -640,7 +622,7 @@ void modify(
       }
     }
     
-    coord0(v) = vertex;
+    coord(v) = vertex;
   }
 } 
 
@@ -652,7 +634,7 @@ void modify(
 ////////////////////////////////////////////////////////////////////////////////
 void restore( 
   utils::client_handle_r__<mesh_t>  mesh,
-  utils::dense_handle_r__<vector_t> coord0
+  utils::dense_handle_r__<vector_t> coord
 )
 {
 
@@ -662,7 +644,7 @@ void restore(
 
   for ( mesh_t::counter_t i=0; i<num_verts; i++ ) {
     auto vt = vs[i];
-    vt->coordinates() = coord0(vt);
+    vt->coordinates() = coord(vt);
   }
 
 }// TEST_F
@@ -684,8 +666,6 @@ flecsi_register_task(initialize_step, flecsi_sp::burton::test, loc,
   single|flecsi::leaf);
 
 flecsi_register_task(restore, flecsi_sp::burton::test, loc,
-         single|flecsi::leaf);
-flecsi_register_task(save, flecsi_sp::burton::test, loc,
          single|flecsi::leaf);
 flecsi_register_task(modify, flecsi_sp::burton::test, loc,
          single|flecsi::leaf);
@@ -714,8 +694,7 @@ void driver(int argc, char ** argv)
   auto a = flecsi_get_handle(mesh_handle, hydro, remap_data, real_t, dense, 0);
   auto b = flecsi_get_handle(mesh_handle, hydro, remap_data, real_t, dense, 1);
 
-  auto xn0 = flecsi_get_handle(mesh_handle, hydro, node_coordinates, vector_t, dense, 0);
-  auto xn  = flecsi_get_handle(mesh_handle, hydro, node_coordinates, vector_t, dense, 1);
+  auto xn = flecsi_get_handle(mesh_handle, hydro, node_coordinates, vector_t, dense, 0);
   auto density_handle = flecsi_get_handle(mesh_handle, hydro, density, real_t, sparse, 0);
   auto density_mutator = flecsi_get_mutator(mesh_handle, hydro, density, real_t, sparse, 0, 1);
   auto velocity_handle = flecsi_get_handle(mesh_handle, hydro, velocity, vector_t, sparse, 0);
@@ -776,13 +755,6 @@ void driver(int argc, char ** argv)
             mesh_handle, time_cnt, a);
 
   flecsi_execute_task(
-          save,
-          flecsi_sp::burton::test,
-          single,
-          mesh_handle,
-          xn0);
-  
-  flecsi_execute_task(
           modify,
           flecsi_sp::burton::test,
           single,
@@ -796,7 +768,6 @@ void driver(int argc, char ** argv)
           mesh_handle,
           density_handle,
           velocity_handle,
-          xn0,
           xn,
           b);
 #else
