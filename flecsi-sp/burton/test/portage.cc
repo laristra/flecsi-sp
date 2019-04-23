@@ -50,19 +50,9 @@ namespace test {
 flecsi_register_field(
   mesh_t,      
   hydro,
-  remap_data,
-  real_t,
-  dense,
-  2,
-  index_spaces_t::cells
-);
-
-flecsi_register_field(
-  mesh_t,      
-  hydro,
   density,
   real_t,
-  sparse,
+  dense,
   1,
   index_spaces_t::cells
 );
@@ -246,13 +236,13 @@ auto make_remapper(
 ////////////////////////////////////////////////////////////////////////////////
 void remap_test(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::sparse_handle_rw__<real_t> density_handle,
+  utils::dense_handle_rw__<real_t> density_handle,
   utils::sparse_handle_rw__<vector_t> velocity_handle,
-  utils::dense_handle_r__<vector_t> new_vertex_coords,
-  utils::dense_handle_r__<real_t> b
+  utils::dense_handle_r__<vector_t> new_vertex_coords
 ) {
   
   constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto epsilon = config::test_tolerance;
   
   // get the context
   auto & context = flecsi::execution::context_t::instance();
@@ -301,7 +291,6 @@ void remap_test(
     target_cell_centroid.data() );
 
   // Create temporary vectors for the data to be remapped
-  std::vector< double > density(mesh.num_cells(), 0);
   std::vector< double > remap_density(mesh.num_cells(), 0);
 
   std::vector< double > velocity(mesh.num_cells()*num_dims, 0);
@@ -316,12 +305,6 @@ void remap_test(
     }
   }
 
-  for (auto c: mesh.cells()) {
-    for ( auto m : density_handle.entries(c) ) {
-      density[c] = density_handle(c,m);
-    }
-  }
-
   // Create a vector of strings that correspond to the names of the variables
   //   that will be remapped
   std::vector<std::string> var_names;
@@ -333,7 +316,7 @@ void remap_test(
   // Add the fields that need to be remapped to the state wrappers
   // Special care is taken to handle each dimension of the velocity field
   var_names.push_back(std::string{"density"});
-  state_wrapper_a.add_field( "density", density.data(), "CELL" );
+  state_wrapper_a.add_field( "density", &density_handle(0), "CELL" );
   state_wrapper_b.add_field( "density", remap_density.data(), "CELL" );
 
   static char coordinate[] = {'x', 'y', 'z'};    
@@ -379,111 +362,102 @@ void remap_test(
   Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
   remapper.run(&mpiexecutor);
 
-  for (auto c: mesh.cells()) {
-    for ( auto m : velocity_handle.entries(c) ) {
-      density_handle(c,m) = remap_density[c];
-      auto & vel = velocity_handle(c,m);
-      for (int dim=0; dim < num_dims; ++dim) {
-        vel[dim] = remap_velocity[c + dim * mesh.num_cells()];
-      }
-    }
-  }
-
-  //
-  // Below only necessary for testing
-  //
+  //---------------------------------------------------------------------------
+  // Swap old for new data
 
   // Checking conservation for remap test
   real_t total_density{0};
   vector_t total_velocity{0};
 
   for (auto c: mesh.cells(flecsi::owned)) {
-    for (int dim=0; dim<num_dims; ++dim) {
-      total_velocity[dim] += c->volume() * velocity[c + dim * mesh.num_cells()];
+    total_density +=  c->volume() *  density_handle(c);
+    density_handle(c) = remap_density[c];
+    for ( auto m : velocity_handle.entries(c) ) {
+      auto & vel = velocity_handle(c,m);
+      for (int dim=0; dim < num_dims; ++dim) {
+        total_velocity[dim] += c->volume() * vel[dim];
+        vel[dim] = remap_velocity[c + dim * mesh.num_cells()];
+      }
     }
-    total_density +=  c->volume() *  density[c];
   }
-  
+
   // Apply the new coordinates to the mesh and update its geometry
   for ( auto v : mesh.vertices() ) v->coordinates() = new_vertex_coords(v);
   mesh.update_geometry();
+  
+  //---------------------------------------------------------------------------
+  // Post process
 
   // Check conservation for remap test
   real_t total_remap_density{0};
   vector_t total_remap_velocity{0};
+  // Calculate the L1 and L2 norms
+  real_t total_vol = 0.0;
+  real_t L1 = 0.0;
+  real_t L2 = 0.0;
 
-  std::vector<real_t> expected(mesh.num_cells());
+  for (auto c : mesh.cells(flecsi::owned) ) {
 
-  for (auto c : mesh.cells() ) {
+    // remapped sums
+    auto actual = density_handle(c);
+    total_remap_density += c->volume() * density_handle(c);
     for ( auto m : velocity_handle.entries(c) ) {
-      total_remap_density += c->volume() * density_handle(c,m);
-      b(c) = density_handle(c,m);
       const auto & vel = velocity_handle(c,m);
       for (int dim=0; dim<num_dims; ++dim) {
         total_remap_velocity[dim] += c->volume() * vel[dim];
       }
-      real_t sum{0};
+
+      // expected answer
+      real_t sum{0}, expected;
 #ifdef CUBIC
       for ( int i=0; i < num_dims; ++i)
         sum += ((c->centroid())[i]+0.5);
-      expected[c] = pow(sum,3.0);
+      expected = pow(sum,3.0);
 #elif LINEAR
       for ( int i=0; i < num_dims; ++i)
         sum += ((c->centroid())[i]+0.5);
-      expected[c] = sum * 2.0;
+      expected = sum * 2.0;
 #elif COSINE
       real_t arg = 10.0 * std::sqrt( pow((c->centroid())[0], 2) + pow((c->centroid())[1], 2) );
-      expected[c] = 1.0 + (std::cos(arg) / 3.0);
+      expected = 1.0 + (std::cos(arg) / 3.0);
 #else
-      expected[c] = 1.0;
+      expected = 1.0;
+      EXPECT_NEAR( expected, actual, epsilon );
 #endif
-      }
+
+      // L1,L2 errors
+      auto each_error = std::abs(actual - expected);
+      L1 +=  c->volume() * each_error; // L1
+      L2 +=  c->volume() * std::pow(each_error, 2); // L2
+      total_vol += c->volume();
     }
+  }
 
-    // Calculate the L1 and L2 norms
-    real_t L1 = 0.0;
-    real_t L2 = 0.0;
-    real_t total_vol = 0.0;
+  // output L1, L2 errors for debug
+  real_t total_vol_sum{0}, L1_sum{0}, L2_sum{0};
+  int ret;
+  ret = MPI_Allreduce( &total_vol, &total_vol_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( &L1, &L1_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( &L2, &L2_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  L1_sum = L1_sum/total_vol_sum; // L1
+  L2_sum = pow(L2_sum/total_vol_sum, 0.5); // L2
 
-    for (auto c: mesh.cells(flecsi::owned) ) {
-      for ( auto m : density_handle.entries(c) ) {
-        auto each_error = std::abs(density_handle(c,m) - expected[c]);
-        L1 +=  c->volume() * each_error; // L1
-        L2 +=  c->volume() * std::pow(each_error, 2); // L2
-        total_vol += c->volume();
-      }
-    }
+  if ( comm_rank == 0 ) {
+    printf("L1 Norm: %.20f, Total Volume: %f \n", L1_sum, total_vol_sum);
+    printf("L2 Norm: %.20f, Total Volume: %f \n", L2_sum, total_vol_sum);
+  }
 
-    real_t total_vol_sum{0}, L1_sum{0}, L2_sum{0};
-    int ret;
-    ret = MPI_Allreduce( &total_vol, &total_vol_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
-    ret = MPI_Allreduce( &L1, &L1_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
-    ret = MPI_Allreduce( &L2, &L2_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
-    L1_sum = L1_sum/total_vol_sum; // L1
-    L2_sum = pow(L2_sum/total_vol_sum, 0.5); // L2
+  // Verify conservation
+  real_t total_density_sum{0}, total_remap_density_sum{0};
+  vector_t total_velocity_sum{0}, total_remap_velocity_sum{0};
+  ret = MPI_Allreduce( &total_density, &total_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( &total_remap_density, &total_remap_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( total_velocity.data(), total_velocity_sum.data(), total_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( total_remap_velocity.data(), total_remap_velocity_sum.data(), total_remap_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
 
-    if ( comm_rank == 0 ) {
-      printf("L1 Norm: %.20f, Total Volume: %f \n", L1_sum, total_vol_sum);
-      printf("L2 Norm: %.20f, Total Volume: %f \n", L2_sum, total_vol_sum);
-    }
-
-    real_t total_density_sum{0}, total_remap_density_sum{0};
-    vector_t total_velocity_sum{0}, total_remap_velocity_sum{0};
-    ret = MPI_Allreduce( &total_density, &total_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
-    ret = MPI_Allreduce( &total_remap_density, &total_remap_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
-    ret = MPI_Allreduce( total_velocity.data(), total_velocity_sum.data(), total_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
-    ret = MPI_Allreduce( total_remap_velocity.data(), total_remap_velocity_sum.data(), total_remap_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
-
-    auto epsilon = config::test_tolerance;
-    EXPECT_NEAR( total_density_sum, total_remap_density_sum, epsilon);
-    for ( int i=0; i<num_dims; ++i)
-      EXPECT_NEAR( total_velocity_sum[i], total_remap_velocity_sum[i], epsilon);
-    
-    // std::ofstream outputfile_norm;
-    // outputfile_norm.open("cosine_1stOrder_L1.dat", std::ios::app);
-    // outputfile_norm << pow(mesh.num_cells(),0.5) << " " << L1 << std::endl; //L1
-    // //    outputfile_norm << pow(mesh.num_cells(),0.5) << " " << L2 << std::endl; //L2
-    // outputfile_norm.close();
+  EXPECT_NEAR( total_density_sum, total_remap_density_sum, epsilon);
+  for ( int i=0; i<num_dims; ++i)
+    EXPECT_NEAR( total_velocity_sum[i], total_remap_velocity_sum[i], epsilon);
 
 }
 
@@ -495,24 +469,21 @@ void remap_test(
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_flat(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::sparse_mutator__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity,
-  utils::dense_handle_rw__<real_t> a
+  utils::dense_handle_w__<real_t> density,
+  utils::sparse_mutator__<vector_t> velocity
 ) {
 
   int m = 0;
   for (auto c: mesh.cells()){
-    density(c,m) = 1.0;
+    density(c) = 1.0;
     velocity(c,m) = 1.0;
-    a(c) = 1.0;
   }
 }
 
 void initialize_linear(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::sparse_mutator__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity,
-  utils::dense_handle_rw__<real_t> a
+  utils::dense_handle_w__<real_t> density,
+  utils::sparse_mutator__<vector_t> velocity
 ) {
 
   real_t val;
@@ -522,17 +493,15 @@ void initialize_linear(
     for ( int i=0; i < mesh_t::num_dimensions; i++)
       sum += ((c->centroid())[i]+0.5);
     val = sum * 2.0;
-    density(c,m) = val;
+    density(c) = val;
     velocity(c,m) = val;
-    a(c) = val;
   }
 }
 
 void initialize_cubic(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::sparse_mutator__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity,
-  utils::dense_handle_rw__<real_t> a
+  utils::dense_handle_w__<real_t> density,
+  utils::sparse_mutator__<vector_t> velocity
 ) {
 
   int m = 0;
@@ -541,17 +510,15 @@ void initialize_cubic(
     for ( int i=0; i < mesh_t::num_dimensions; i++)
       sum += pow((c->centroid())[i]+0.5, 3.0);
     auto val = sum;
-    density(c,m) = val;
+    density(c) = val;
     velocity(c,m) = val;
-    a(c) = val;
   }
 }
 
 void initialize_cosine(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::sparse_mutator__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity,
-  utils::dense_handle_rw__<real_t> a
+  utils::dense_handle_w__<real_t> density,
+  utils::sparse_mutator__<vector_t> velocity
 ) {
 
   int m = 0;
@@ -561,17 +528,15 @@ void initialize_cosine(
       sum += pow((c->centroid())[i], 2);
     auto arg = 10.0 * std::sqrt( sum );
     auto val = 1.0 + (std::cos(arg) / 3.0);
-    density(c,m) = val;
+    density(c) = val;
     velocity(c,m) = val;
-    a(c) = val;
   }
 }
 
 void initialize_step(
   utils::client_handle_r__<mesh_t> mesh,
-  utils::sparse_mutator__<real_t> density,
-  utils::sparse_mutator__<vector_t> velocity,
-  utils::dense_handle_rw__<real_t> a
+  utils::dense_handle_w__<real_t> density,
+  utils::sparse_mutator__<vector_t> velocity
 ) {
 
   int m = 0;
@@ -582,9 +547,8 @@ void initialize_step(
     } else {
       val = 1;
     }
-    density(c,m) = val;
+    density(c) = val;
     velocity(c,m) = val;
-    a(c) = val;
   }
 }
 
@@ -698,12 +662,8 @@ void driver(int argc, char ** argv)
 
   size_t time_cnt{0};
 
-  auto a = flecsi_get_handle(mesh_handle, hydro, remap_data, real_t, dense, 0);
-  auto b = flecsi_get_handle(mesh_handle, hydro, remap_data, real_t, dense, 1);
-
   auto xn = flecsi_get_handle(mesh_handle, hydro, node_coordinates, vector_t, dense, 0);
-  auto density_handle = flecsi_get_handle(mesh_handle, hydro, density, real_t, sparse, 0);
-  auto density_mutator = flecsi_get_mutator(mesh_handle, hydro, density, real_t, sparse, 0, 1);
+  auto density_handle = flecsi_get_handle(mesh_handle, hydro, density, real_t, dense, 0);
   auto velocity_handle = flecsi_get_handle(mesh_handle, hydro, velocity, vector_t, sparse, 0);
   auto velocity_mutator = flecsi_get_mutator(mesh_handle, hydro, velocity, vector_t, sparse, 0, 1);
 
@@ -713,45 +673,40 @@ void driver(int argc, char ** argv)
           flecsi_sp::burton::test,
           single,
           mesh_handle,
-          density_mutator,
-          velocity_mutator,
-          a);
+          density_handle,
+          velocity_mutator);
 #elif LINEAR
   flecsi_execute_task(
           initialize_linear,
           flecsi_sp::burton::test,
           single,
           mesh_handle,
-          density_mutator,
-          velocity_mutator,
-          a);
+          density_handle,
+          velocity_mutator);
 #elif STEP
   flecsi_execute_task(
           initialize_step,
           flecsi_sp::burton::test,
           single,
           mesh_handle,
-          density_mutator,
-          velocity_mutator,
-          a);
+          density_handle,
+          velocity_mutator);
 #elif COSINE
   flecsi_execute_task(
           initialize_cosine,
           flecsi_sp::burton::test,
           single,
           mesh_handle,
-          density_mutator,
-          velocity_mutator,
-          a);
+          density_handle,
+          velocity_mutator);
 #else
   flecsi_execute_task(
           initialize_flat,
           flecsi_sp::burton::test,
           single,
           mesh_handle,
-          density_mutator,
-          velocity_mutator,
-          a);
+          density_handle,
+          velocity_mutator);
 #endif
   
   time_cnt++;
@@ -759,7 +714,7 @@ void driver(int argc, char ** argv)
             output,
             flecsi_sp::burton::test,
             single,
-            mesh_handle, time_cnt, a);
+            mesh_handle, time_cnt, density_handle);
 
   flecsi_execute_task(
           modify,
@@ -775,8 +730,7 @@ void driver(int argc, char ** argv)
           mesh_handle,
           density_handle,
           velocity_handle,
-          xn,
-          b);
+          xn);
 #else
   flecsi_execute_task(
           restore,
@@ -791,7 +745,7 @@ void driver(int argc, char ** argv)
             output,
             flecsi_sp::burton::test,
             single,
-            mesh_handle, time_cnt, b);
+            mesh_handle, time_cnt, density_handle);
 
 } // driver
 
