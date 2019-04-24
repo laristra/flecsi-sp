@@ -27,6 +27,9 @@
 // is exodus enabled?
 #cmakedefine FLECSI_SP_ENABLE_EXODUS
 
+// is exodus enabled?
+#cmakedefine FLECSI_SP_ENABLE_PORTAGE
+
 //----------------------------------------------------------------------------//
 // Configuration
 //----------------------------------------------------------------------------//
