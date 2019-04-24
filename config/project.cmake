@@ -217,7 +217,6 @@ if(FLECSI_SP_ENABLE_PORTAGE)
   endif()
   message( STATUS "Portage location: ${PORTAGE_INCLUDE_DIRS}" )
   include_directories(${PORTAGE_INCLUDE_DIRS})
-  MESSAGE(STATUS ${PORTAGE_LIBRARIES} )
   list( APPEND FLECSI_SP_LIBRARIES ${PORTAGE_LIBRARIES} )
 endif()
 
