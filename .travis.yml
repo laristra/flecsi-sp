@@ -12,7 +12,7 @@ env:
 
 script:
   - if [[ ${CC} != gcc ]]; then TAG="_${CC}"; fi
-  - if [[ ${TRAVIS_BRANCH} != stable ]]; then TAG="${TAG}_master"; fi
+  - if [[ ${TRAVIS_BRANCH} != stable ]]; then TAG="${TAG}_${TRAVIS_BRANCH//[^a-zA-Z0-9]/_}"; fi
   - cp -vr docker ${HOME}/docker
   - sed -i "1s/fedora_serial/${DISTRO}${TAG}/" ${HOME}/docker/Dockerfile
   - cd ../../
@@ -26,7 +26,7 @@ script:
                 --build-arg TRAVIS_COMMIT=${TRAVIS_COMMIT}
                 -t ${TRAVIS_REPO_SLUG}:${DISTRO}${TAG} ${HOME}/docker/ &&
     CON=$(docker run -d ${TRAVIS_REPO_SLUG}:${DISTRO}${TAG} /bin/bash)
-  - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == master && ${CC} = gcc ]]; then
+  - if [[ ${DOCKERHUB} = true && ${DOCKER_USERNAME} && ${DOCKER_PASSWORD} && ${TRAVIS_PULL_REQUEST} == false && ${TRAVIS_BRANCH} == release/0.1 && ${CC} = gcc ]]; then
       docker login -u="$DOCKER_USERNAME" -p="$DOCKER_PASSWORD";
       docker push "${TRAVIS_REPO_SLUG}:${DISTRO}${TAG}";
     fi
