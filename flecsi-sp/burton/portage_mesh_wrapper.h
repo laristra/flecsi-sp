@@ -80,7 +80,7 @@ Wonton::Point<3> make_3d_point( T && a )
 ///  \brief Implements a mesh wrapper for Portage mesh queries.
 ////////////////////////////////////////////////////////////////////////////////
 template< typename M >
-class flecsi_mesh_t : public Wonton::AuxMeshTopology<flecsi_mesh_t<M>> 
+class portage_mesh_wrapper_t : public Wonton::AuxMeshTopology<portage_mesh_wrapper_t<M>> 
 {
 
 public:
@@ -90,7 +90,7 @@ public:
   //============================================================================
 
   //! \brief the auxiliary class
-  using portage_mesh_aux_t = Wonton::AuxMeshTopology<flecsi_mesh_t<M>>;
+  using portage_mesh_aux_t = Wonton::AuxMeshTopology<portage_mesh_wrapper_t<M>>;
 
   //! \brief The mesh type
   using mesh_t = M;
@@ -137,7 +137,7 @@ public:
 
   //!  \brief Constructor for creating a serial, 3D Cartesian mesh.
   //!  \param[in] mesh The minimum coordinates of the domain.
-  explicit flecsi_mesh_t(mesh_t & mesh) :
+  explicit portage_mesh_wrapper_t(mesh_t & mesh) :
     cells_(mesh.cells()), faces_(mesh.faces()),
     vertices_(mesh.vertices()), mesh_(&mesh)
   {
@@ -152,13 +152,13 @@ public:
   }
 
   //! Default constructor deleted
-  flecsi_mesh_t() = default;
+  portage_mesh_wrapper_t() = default;
 
   //! Default copy constructor
-  flecsi_mesh_t(const flecsi_mesh_t &) = default;
+  portage_mesh_wrapper_t(const portage_mesh_wrapper_t &) = default;
 
   //! Default assignment operator
-  flecsi_mesh_t & operator=(const flecsi_mesh_t &) = default;
+  portage_mesh_wrapper_t & operator=(const portage_mesh_wrapper_t &) = default;
 
   void set_new_coordinates(
     const vector_t * node_coordinates,

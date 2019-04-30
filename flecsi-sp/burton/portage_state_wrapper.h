@@ -28,7 +28,7 @@ namespace burton {
 /// \brief Provides access to data stored in Flecsi_State
 ////////////////////////////////////////////////////////////////////////////////
 template< typename M >
-class flecsi_state_t {
+class portage_state_wrapper_t {
 
   //============================================================================
   // Typedefs
@@ -69,27 +69,27 @@ public:
   //!  \brief Default constructor.
   //!  \param[in] mesh The minimum coordinates of the domain.
   //!  \param[in] mesh The minimum coordinates of the domain.
-  explicit flecsi_state_t(mesh_t & mesh) : mesh_(&mesh)
+  explicit portage_state_wrapper_t(mesh_t & mesh) : mesh_(&mesh)
     {}
 
   //! Default constructor deleted
-  flecsi_state_t() = default;
+  portage_state_wrapper_t() = default;
 
   //! Default copy constructor
-  flecsi_state_t(const flecsi_state_t &) = default;
+  portage_state_wrapper_t(const portage_state_wrapper_t &) = default;
 
   //! Default assignment operator
-  flecsi_state_t & operator=(const flecsi_state_t &) = default;
+  portage_state_wrapper_t & operator=(const portage_state_wrapper_t &) = default;
 
   //============================================================================
   // Public Members
   //============================================================================
 
   //! \brief Add a field that needs to be remapped to the variable map
-  void add_field( std::string var_name, double* data, std::string type_name) {
+  void add_cell_field( std::string var_name, double* data) {
 
     var_map.insert( std::pair <std::string, double*> (var_name, data));
-    type_map.insert( std::pair < std::string, std::string> (var_name, type_name));
+    type_map.insert( std::pair < std::string, std::string> (var_name, "CELL"));
 
   }
 

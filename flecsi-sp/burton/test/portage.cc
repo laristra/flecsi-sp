@@ -11,8 +11,8 @@
 #include <cinchtest.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi-sp/burton/burton_mesh.h>
-#include <flecsi-sp/burton/flecsi_mesh_wrapper.h>
-#include <flecsi-sp/burton/flecsi_state_wrapper.h>
+#include <flecsi-sp/burton/portage_mesh_wrapper.h>
+#include <flecsi-sp/burton/portage_state_wrapper.h>
 #include <flecsi-sp/utils/types.h>
 
 #include <portage/driver/mmdriver.h>
@@ -196,10 +196,10 @@ auto make_remapper(
       Portage::IntersectR2D,
       Portage::Interpolate_2ndOrder,
       mesh_t::num_dimensions,
-      flecsi_mesh_t<mesh_t>,
-      flecsi_state_t<mesh_t>,
-      flecsi_mesh_t<mesh_t>,
-      flecsi_state_t<mesh_t> > remapper(
+      portage_mesh_wrapper_t<mesh_t>,
+      portage_state_wrapper_t<mesh_t>,
+      portage_mesh_wrapper_t<mesh_t>,
+      portage_state_wrapper_t<mesh_t> > remapper(
                 mesh_wrapper_a,
                 state_wrapper_a,
                 mesh_wrapper_b,
@@ -213,10 +213,10 @@ auto make_remapper(
       Portage::IntersectR3D,
       Portage::Interpolate_2ndOrder,
       mesh_t::num_dimensions,
-      flecsi_mesh_t<mesh_t>,
-      flecsi_state_t<mesh_t>,
-      flecsi_mesh_t<mesh_t>,
-      flecsi_state_t<mesh_t> > remapper(
+      portage_mesh_wrapper_t<mesh_t>,
+      portage_state_wrapper_t<mesh_t>,
+      portage_mesh_wrapper_t<mesh_t>,
+      portage_state_wrapper_t<mesh_t> > remapper(
                 mesh_wrapper_a,
                 state_wrapper_a,
                 mesh_wrapper_b,
@@ -282,8 +282,8 @@ void remap_test(
   // Set up portage mesh/data wrappers
 
   // Create the mesh wrapper objects
-  flecsi_mesh_t<mesh_t> mesh_wrapper_a(mesh);
-  flecsi_mesh_t<mesh_t> mesh_wrapper_b(mesh);
+  portage_mesh_wrapper_t<mesh_t> mesh_wrapper_a(mesh);
+  portage_mesh_wrapper_t<mesh_t> mesh_wrapper_b(mesh);
 
   mesh_wrapper_b.set_new_coordinates(
     &new_vertex_coords(0),
@@ -310,22 +310,22 @@ void remap_test(
   std::vector<std::string> var_names;
 
   // Create the state wrapper objects
-  flecsi_state_t<mesh_t> state_wrapper_a(mesh);
-  flecsi_state_t<mesh_t> state_wrapper_b(mesh);
+  portage_state_wrapper_t<mesh_t> state_wrapper_a(mesh);
+  portage_state_wrapper_t<mesh_t> state_wrapper_b(mesh);
 
   // Add the fields that need to be remapped to the state wrappers
   // Special care is taken to handle each dimension of the velocity field
   var_names.push_back(std::string{"density"});
-  state_wrapper_a.add_field( "density", &density_handle(0), "CELL" );
-  state_wrapper_b.add_field( "density", remap_density.data(), "CELL" );
+  state_wrapper_a.add_cell_field( "density", &density_handle(0) );
+  state_wrapper_b.add_cell_field( "density", remap_density.data() );
 
   static char coordinate[] = {'x', 'y', 'z'};    
   for ( int dim=0; dim<num_dims; ++dim ) {
     std::string name = "vel_";
     name += coordinate[dim];
     var_names.emplace_back(name);
-    state_wrapper_a.add_field( name, velocity.data() + mesh.num_cells()*dim, "CELL" );
-    state_wrapper_b.add_field( name, remap_velocity.data() + mesh.num_cells()*dim, "CELLL" );
+    state_wrapper_a.add_cell_field( name, velocity.data() + mesh.num_cells()*dim );
+    state_wrapper_b.add_cell_field( name, remap_velocity.data() + mesh.num_cells()*dim );
   }
 
   
