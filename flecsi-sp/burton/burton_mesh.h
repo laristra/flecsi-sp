@@ -1082,7 +1082,7 @@ public:
     auto raise_or_return = [=]( std::ostream & msg )
       {
         if ( raise_on_error )
-          throw_runtime_error( msg.rdbuf() );
+          THROW_RUNTIME_ERROR( msg.rdbuf() );
         else 
           std::cerr << msg.rdbuf() << std::endl;
         return false;
@@ -1424,7 +1424,7 @@ public:
     auto cell_type = shape_t::none;
 
     if ( verts.size() != 2 )
-      throw_runtime_error( "must have exactly 2 vertices" );
+      THROW_RUNTIME_ERROR( "must have exactly 2 vertices" );
 
     e = base_t::template make<E>(cell_type);
     base_t::template init_entity<E::domain, E::dimension, vertex_t::dimension>(
@@ -1446,7 +1446,7 @@ public:
 
     switch ( verts.size() ) {
     case (1,2):
-      throw_runtime_error( "can't have <3 vertices" );
+      THROW_RUNTIME_ERROR( "can't have <3 vertices" );
     case (3):
       cell_type = shape_t::triangle;
       break;
@@ -1475,7 +1475,7 @@ public:
 
     switch ( verts.size() ) {
     case (1,2,3):
-      throw_runtime_error( "can't have <4 vertices" );
+      THROW_RUNTIME_ERROR( "can't have <4 vertices" );
     case (4):
       cell_type = shape_t::tetrahedron;
       break;
@@ -1483,7 +1483,7 @@ public:
       cell_type = shape_t::hexahedron;
       break;
     default:
-      throw_runtime_error( "can't build polyhedron from vertices alone" );      
+      THROW_RUNTIME_ERROR( "can't build polyhedron from vertices alone" );      
     }
 
     c = base_t::template make< cell_t >(cell_type);
@@ -1503,7 +1503,7 @@ public:
 
     switch ( faces.size() ) {
     case (1,2,3):
-      throw_runtime_error( "can't have <4 vertices" );
+      THROW_RUNTIME_ERROR( "can't have <4 vertices" );
     }
 
     c = base_t::template make< cell_t >( shape_t::polyhedron );

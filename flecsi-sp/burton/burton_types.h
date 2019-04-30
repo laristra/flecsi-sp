@@ -206,7 +206,7 @@ struct burton_1d_types_base
     case 0:
       switch(D) {
       default:
-        throw_logic_error("invalid topological dimension");
+        THROW_LOGIC_ERROR("invalid topological dimension");
       }
       //---------- Dual Mesh ----------//
     case 1:
@@ -214,11 +214,11 @@ struct burton_1d_types_base
       case 0:
         return mesh->template make<corner_t, corner_t::domain>(id);
       default:
-        throw_logic_error("invalid topological dimension");
+        THROW_LOGIC_ERROR("invalid topological dimension");
       }
       //---------- Error ----------//
     default:
-      throw_logic_error("invalid domain");
+      THROW_LOGIC_ERROR("invalid domain");
     }
     // should never get here
     return nullptr;
@@ -480,7 +480,7 @@ struct burton_2d_types_base
       case 1:
         return mesh->template make<edge_t>(id);
       default:
-        throw_logic_error("invalid topological dimension");
+        THROW_LOGIC_ERROR("invalid topological dimension");
       }
       //---------- Dual Mesh ----------//
     case 1:
@@ -490,11 +490,11 @@ struct burton_2d_types_base
       case 1:
         return mesh->template make<wedge_t, wedge_t::domain>(id);
       default:
-        throw_logic_error("invalid topological dimension");
+        THROW_LOGIC_ERROR("invalid topological dimension");
       }
       //---------- Error ----------//
     default:
-      throw_logic_error("invalid domain");
+      THROW_LOGIC_ERROR("invalid domain");
     }
     // should never get here
     return nullptr;
@@ -782,7 +782,7 @@ struct burton_3d_types_base
     auto face_type = shape_t::polygon;
     switch(num_vertices) {
     case (1,2):
-      throw_runtime_error( "can't have <3 vertices" );
+      THROW_RUNTIME_ERROR( "can't have <3 vertices" );
     case (3):
       face_type = shape_t::triangle;
     case (4):
@@ -812,7 +812,7 @@ struct burton_3d_types_base
       case 2:
         return create_face( mesh, num_vertices, id );
       default:
-        throw_logic_error("invalid topological dimensions");
+        THROW_LOGIC_ERROR("invalid topological dimensions");
       }
       //---------- Dual Mesh ----------//
     case 1:
@@ -822,11 +822,11 @@ struct burton_3d_types_base
       case 1:
         return mesh->template make<wedge_t, wedge_t::domain>(id);
       default:
-        throw_logic_error("invalid topological dimension");
+        THROW_LOGIC_ERROR("invalid topological dimension");
       }
       //---------- Error ----------//
     default:
-      throw_logic_error("invalid domain");
+      THROW_LOGIC_ERROR("invalid domain");
     }
     // should never get here
     return nullptr;

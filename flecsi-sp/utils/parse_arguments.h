@@ -60,7 +60,7 @@ static auto parse_arguments(
       key_value_pair[c_str] = optarg ? optarg : "";
     // make sure we have not gone past argc
     if (optind > argc)
-      throw_runtime_error( "Expected argument after options" );
+      THROW_RUNTIME_ERROR( "Expected argument after options" );
   }
 
   return key_value_pair;
