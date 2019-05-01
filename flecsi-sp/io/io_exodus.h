@@ -29,7 +29,7 @@ namespace io {
 /// \tparam N  The number of dimensions.
 ////////////////////////////////////////////////////////////////////////////////
 template< typename MESH_TYPE >
-class io_exodus__ {
+class io_exodus {
 
 public:
 
@@ -56,7 +56,7 @@ public:
 
   //! use flecsi's base functionality
   using base_t =
-    flecsi_sp::io::exodus_base__< MESH_TYPE::num_dimensions, real_t >;
+    flecsi_sp::io::exodus_base< MESH_TYPE::num_dimensions, real_t >;
 
 #ifdef HAVE_EXODUS
 
