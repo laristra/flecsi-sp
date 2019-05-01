@@ -79,6 +79,7 @@ using burton_side_t = typename burton_extras_types_t<N>::side_t;
 //!
 //! \tparam N The total number of mesh dimensions.
 ////////////////////////////////////////////////////////////////////////////////
+
 template< std::size_t N >
 class burton_extras_t<N,0>
   : public flecsi::topology::mesh_entity_u<0, burton_config_t<N>::num_domains>
