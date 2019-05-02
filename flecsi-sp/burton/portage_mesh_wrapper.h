@@ -429,6 +429,8 @@ public:
       }
     case entity_kind_t::CELL :
       {
+        return false;
+        
   	auto c = cells_[id];
   	if (c->is_touching_boundary() == true) {
   	  return true;
