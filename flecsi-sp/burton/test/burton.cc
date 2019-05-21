@@ -57,7 +57,7 @@ auto prefix()
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Test some initial connectivity
 ////////////////////////////////////////////////////////////////////////////////
-void dump_test( utils::client_handle_r__<mesh_t> mesh ) {
+void dump_test( utils::client_handle_r<mesh_t> mesh ) {
 
   // get the context
   const auto & context = flecsi::execution::context_t::instance();
@@ -90,7 +90,7 @@ flecsi_register_task(dump_test, flecsi_sp::burton::test, loc,
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Test validity of mesh
 ////////////////////////////////////////////////////////////////////////////////
-void validity_test( utils::client_handle_r__<mesh_t> mesh ) {
+void validity_test( utils::client_handle_r<mesh_t> mesh ) {
   auto ret = mesh.is_valid( false );
   EXPECT_TRUE( ret ) << "VALIDITY TEST FAILED";
 }
@@ -102,7 +102,7 @@ flecsi_register_task(validity_test, flecsi_sp::burton::test, loc,
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh connectivity functions
 ////////////////////////////////////////////////////////////////////////////////
-void connectivity_test( utils::client_handle_r__<mesh_t> mesh ) {
+void connectivity_test( utils::client_handle_r<mesh_t> mesh ) {
   
   // get the context
   const auto & context = flecsi::execution::context_t::instance();
@@ -313,7 +313,7 @@ flecsi_register_task(connectivity_test, flecsi_sp::burton::test, loc,
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh geometry functions
 ////////////////////////////////////////////////////////////////////////////////
-void geometry_test( utils::client_handle_r__<mesh_t> mesh ) {
+void geometry_test( utils::client_handle_r<mesh_t> mesh ) {
   
   // get the context
   const auto & context = flecsi::execution::context_t::instance();
@@ -445,7 +445,7 @@ flecsi_register_task(geometry_test, flecsi_sp::burton::test, loc,
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh normal functions
 ////////////////////////////////////////////////////////////////////////////////
-void normals_test( utils::client_handle_r__<mesh_t> mesh ) {
+void normals_test( utils::client_handle_r<mesh_t> mesh ) {
   
   for(auto f : mesh.faces(flecsi::owned)) {
     auto n = f->normal();
@@ -465,7 +465,7 @@ flecsi_register_task(normals_test, flecsi_sp::burton::test, loc,
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the mesh subsets
 ////////////////////////////////////////////////////////////////////////////////
-void subset_test( utils::client_handle_r__<mesh_t> mesh ) {
+void subset_test( utils::client_handle_r<mesh_t> mesh ) {
   
   std::set< mesh_t::vertex_t* > overlapping_verts;
   auto & vs = mesh.vertices( mesh_t::subset_t::overlapping );
@@ -505,11 +505,11 @@ flecsi_register_field(mesh_t, hydro, edge_data, vector_t, dense, 1, index_spaces
 flecsi_register_field(mesh_t, hydro, vert_data, array_t, dense, 1, index_spaces_t::vertices);
 
 void state_fill_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<real_t> cell_data,
-  utils::dense_handle_w__<data_t> face_data,
-  utils::dense_handle_w__<vector_t> edge_data,
-  utils::dense_handle_w__<array_t> vert_data
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> cell_data,
+  utils::dense_handle_w<data_t> face_data,
+  utils::dense_handle_w<vector_t> edge_data,
+  utils::dense_handle_w<array_t> vert_data
 ) {
   
   const auto & context = flecsi::execution::context_t::instance();
@@ -546,11 +546,11 @@ void state_fill_test(
 } // TEST_F
 
 void state_check_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_r__<real_t> cell_data,
-  utils::dense_handle_r__<data_t> face_data,
-  utils::dense_handle_r__<vector_t> edge_data,
-  utils::dense_handle_r__<array_t> vert_data
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_r<real_t> cell_data,
+  utils::dense_handle_r<data_t> face_data,
+  utils::dense_handle_r<vector_t> edge_data,
+  utils::dense_handle_r<array_t> vert_data
 ) {
   
   const auto & context = flecsi::execution::context_t::instance();
@@ -600,7 +600,7 @@ flecsi_register_task(state_check_test, flecsi_sp::burton::test, loc,
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief test the classification of wedges and corners
 ////////////////////////////////////////////////////////////////////////////////
-void extras_test( utils::client_handle_r__<mesh_t> mesh ) {
+void extras_test( utils::client_handle_r<mesh_t> mesh ) {
   
   auto crns_excl = mesh.corners(flecsi::exclusive);
 
@@ -628,9 +628,9 @@ flecsi_register_field(mesh_t, hydro, wedge_data, int, dense, 1, index_spaces_t::
 flecsi_register_field(mesh_t, hydro, cornr_data, double, dense, 1, index_spaces_t::corners);
 
 void extra_state_fill_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_w__<int> wedge_data,
-  utils::dense_handle_w__<double> corner_data
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<int> wedge_data,
+  utils::dense_handle_w<double> corner_data
 ) {
   
   const auto & context = flecsi::execution::context_t::instance();
@@ -652,9 +652,9 @@ void extra_state_fill_test(
 } // TEST_F
 
 void extra_state_check_test(
-  utils::client_handle_r__<mesh_t> mesh,
-  utils::dense_handle_r__<int> wedge_data,
-  utils::dense_handle_r__<double> corner_data
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_r<int> wedge_data,
+  utils::dense_handle_r<double> corner_data
 ) {
   
   const auto & context = flecsi::execution::context_t::instance();

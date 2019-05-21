@@ -18,11 +18,11 @@
 // some type aliases confined to this test
 template<int D>
 using x3d_base_t =
-    flecsi_sp::io::x3d_base__<D, double>;
+    flecsi_sp::io::x3d_base<D, double>;
 
 template< int D >
 using x3d_definition_t =
-  flecsi_sp::io::x3d_definition__<D, double>;
+  flecsi_sp::io::x3d_definition<D, double>;
 
 // The flecsi library has undefined symbols in it.  It calls
 // flecsi::execution::driver even though we are not using the execution model.
@@ -34,9 +34,9 @@ void driver(int argc, char ** argv) {}
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// x3d_base__ tests
+// x3d_base tests
 ////////////////////////////////////////////////////////////////////////////////
-TEST(x3d_base__, verify_header2d) {
+TEST(x3d_base, verify_header2d) {
   std::fstream file("uniform_32.x3d.00001");
   auto header_params = x3d_base_t<2>::verify_and_read_header(file);
 
@@ -57,7 +57,7 @@ TEST(x3d_base__, verify_header2d) {
   file.close();
 }  // TEST
 
-TEST(x3d_base__, verify_header3d) {
+TEST(x3d_base, verify_header3d) {
   std::fstream file("spun_uniform_32.x3d");
   auto header_params = x3d_base_t<3>::verify_and_read_header(file);
 
@@ -80,7 +80,7 @@ TEST(x3d_base__, verify_header3d) {
 
 // The rest depend on the proper order in which they are called, so we'll do it
 // all
-TEST(x3d_base__, verify_file2d) {
+TEST(x3d_base, verify_file2d) {
   std::fstream file("uniform_32.x3d.00001");
   auto header_params = x3d_base_t<2>::verify_and_read_header(file);
   // material names
@@ -152,7 +152,7 @@ TEST(x3d_base__, verify_file2d) {
   file.close();
 }  // TEST
 
-TEST(x3d_base__, verify_file3d) {
+TEST(x3d_base, verify_file3d) {
   std::fstream file("spun_uniform_32.x3d");
   auto header_params = x3d_base_t<3>::verify_and_read_header(file);
   // material names
@@ -235,7 +235,7 @@ TEST(x3d_base__, verify_file3d) {
 }  // TEST
 
 ////////////////////////////////////////////////////////////////////////////////
-// x3d_definition__ tests
+// x3d_definition tests
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Read a simple uniform 2d mesh with 32x32 cells
 TEST(x3d_definition_2d, simple) {

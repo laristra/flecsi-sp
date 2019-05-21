@@ -132,7 +132,7 @@ struct x3d_header {
 /// \brief This is the X3D mesh reader.
 ////////////////////////////////////////////////////////////////////////////////
 template<int D, typename T>
-class x3d_base__ {
+class x3d_base {
  public:
   //============================================================================
   // Typedefs
@@ -496,25 +496,25 @@ class x3d_base__ {
       clog_fatal("Error parsing X3D file: expected '" << wanted <<
                  "' but received '" << given << "'");
   }
-};  // class x3d_base__
+};  // class x3d_base
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The mesh definition for X3D
 ////////////////////////////////////////////////////////////////////////////////
 template<int D, typename T>
-class x3d_definition__;
+class x3d_definition;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The two-dimensional mesh definition based on the X3D format
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class x3d_definition__<2, T> : public flecsi::topology::mesh_definition_u<2> {
+class x3d_definition<2, T> : public flecsi::topology::mesh_definition_u<2> {
  public:
   //============================================================================
   // Typedefs
   //============================================================================
   //! the instantiated base type
-  using base_t = x3d_base__<2, T>;
+  using base_t = x3d_base<2, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;
@@ -546,22 +546,22 @@ class x3d_definition__<2, T> : public flecsi::topology::mesh_definition_u<2> {
   // Constructors
   //============================================================================
   //! \brief Default constructor
-  x3d_definition__() = default;
+  x3d_definition() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename The name of the file to load
-  explicit x3d_definition__(const std::string & filename) {
+  explicit x3d_definition(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  x3d_definition__(const x3d_definition__ &) = delete;
+  x3d_definition(const x3d_definition &) = delete;
 
   /// Assignment opeartor (disabled)
-  x3d_definition__ & operator=(const x3d_definition__ &) = delete;
+  x3d_definition & operator=(const x3d_definition &) = delete;
 
   /// Destructor
-  ~x3d_definition__() = default;
+  ~x3d_definition() = default;
 
   //============================================================================
   //! \brief Implementation of the X3D mesh reader.  Populates private data
@@ -664,7 +664,8 @@ class x3d_definition__<2, T> : public flecsi::topology::mesh_definition_u<2> {
   //! \param [in] from_dim The dimension of the entities for which the
   //! definition is being requested.
   //! \param [in] to_dim The dimension of the entities of the definition.
-  const auto & entities(size_t from_dim, size_t to_dim) const {
+  const std::vector<std::vector<size_t>> &
+  entities(size_t from_dim, size_t to_dim) const {
     return entities_.at(from_dim).at(to_dim);
   }  // entities
 
@@ -742,19 +743,19 @@ class x3d_definition__<2, T> : public flecsi::topology::mesh_definition_u<2> {
 
   //! \brief storage for vertex coordinates
   matrix<real_t> vertices_;
-};  // x3d_definition__<2, T>
+};  // x3d_definition<2, T>
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief The three-dimensional mesh definition based on the X3D format
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class x3d_definition__<3, T> : public flecsi::topology::mesh_definition_u<3> {
+class x3d_definition<3, T> : public flecsi::topology::mesh_definition_u<3> {
  public:
   //============================================================================
   // Typedefs
   //============================================================================
   //! the instantiated base type
-  using base_t = x3d_base__<3, T>;
+  using base_t = x3d_base<3, T>;
 
   //! the instantiated mesh definition type
   using mesh_definition_t = flecsi::topology::mesh_definition_u<3>;
@@ -786,22 +787,22 @@ class x3d_definition__<3, T> : public flecsi::topology::mesh_definition_u<3> {
   // Constructors
   //============================================================================
   //! \brief Default constructor
-  x3d_definition__() = default;
+  x3d_definition() = default;
 
   //! \brief Constructor with filename
   //! \param [in] filename The name of the file to load
-  explicit x3d_definition__(const std::string & filename) {
+  explicit x3d_definition(const std::string & filename) {
     read(filename);
   }
 
   /// Copy constructor (disabled)
-  x3d_definition__(const x3d_definition__ &) = delete;
+  x3d_definition(const x3d_definition &) = delete;
 
   /// Assignment opeartor (disabled)
-  x3d_definition__ & operator=(const x3d_definition__ &) = delete;
+  x3d_definition & operator=(const x3d_definition &) = delete;
 
   /// Destructor
-  ~x3d_definition__() = default;
+  ~x3d_definition() = default;
 
   //============================================================================
   //! \brief Implementation of the X3D mesh reader.  Populates private data
@@ -924,7 +925,8 @@ class x3d_definition__<3, T> : public flecsi::topology::mesh_definition_u<3> {
   //! \param [in] from_dim The dimension of the entities for which the
   //! definition is being requested.
   //! \param [in] to_dim The dimension of the entities of the definition.
-  const auto & entities(size_t from_dim, size_t to_dim) const {
+  const std::vector<std::vector<size_t>> &
+  entities(size_t from_dim, size_t to_dim) const {
     return entities_.at(from_dim).at(to_dim);
   }  // entities
 
@@ -1002,7 +1004,7 @@ class x3d_definition__<3, T> : public flecsi::topology::mesh_definition_u<3> {
 
   //! \brief storage for vertex coordinates
   matrix<real_t> vertices_;
-};  // x3d_definition__<3, T>
+};  // x3d_definition<3, T>
 
 }  // namespace io
 }  // namespace flecsi_sp

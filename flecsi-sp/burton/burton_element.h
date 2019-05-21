@@ -679,6 +679,10 @@ struct burton_element_t<2,2>
   //! the shape type
   using shape_t = config_t::shape_t;
 
+  //! a bitfield type
+  using bitfield_t = typename config_t::bitfield_t;
+
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -730,6 +734,16 @@ struct burton_element_t<2,2>
   //! get the region id
   auto region() const
   { return region_; }
+
+
+  //! is this a cell that has a face on the boundary
+  bool is_touching_boundary() const
+  { return flags_.test( config_t::bits::boundary ); }
+
+  //! \brief set whether this element is touching the boundary
+  //! \param [in] is_boundary  True if touching the boundary.
+  void set_touching_boundary( bool is_touching_boundary )
+  { flags_.set(config_t::bits::boundary, is_touching_boundary); }
 
 
   //! the element type
@@ -811,7 +825,8 @@ struct burton_element_t<2,2>
     auto cell_verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
     auto cell_edges = primal_conn.get_entity_vec( cell, /* dimension */ 1 );
     auto num_vertices = cell_verts.size();
-
+    auto num_edges = cell_edges.size();
+    
     // main counter
     size_t i = 0;
 
@@ -924,6 +939,50 @@ struct burton_element_t<2,2>
 
     }
       //------------------------------------------------------------------------
+      // sides
+    case 2: {
+
+      // get connectivity specific to sides
+      // list of wedges associated to this cell.
+      auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
+      
+      // sort cell wedges for later intersection
+      std::sort( cell_wedges.begin(),  cell_wedges.end() );
+
+      // temporary storage for found wedges
+      std::vector<id_t> wedges;
+      wedges.reserve(2);
+
+      // loop over each edge (pair of vertices)
+      for(auto e1 = cell_edges.begin(); e1 != cell_edges.end();++e1)
+      {
+          auto edge_wedges = domain_conn.get_entity_vec(*e1,/*dimension*/1).vec();
+          
+          // sort cell wedges for later intersection
+          std::sort( edge_wedges.begin(),  edge_wedges.end() );
+
+          wedges.clear();
+          std::set_intersection( edge_wedges.begin(), edge_wedges.end(),
+                                 cell_wedges.begin(), cell_wedges.end(),
+                                 std::back_inserter(wedges));
+
+          // it should have two wedges per edges..
+          assert(wedges.size()==2);
+          auto edge_verts = primal_conn.get_entity_vec( *e1, /* dimension */ 0 );
+
+          for( auto v:edge_verts) 
+              entities[i++]=v;
+          entities[i++]=*e1;
+          for(auto we: wedges)
+          {
+              entities[i++]= we;
+          }//we
+      }//e1
+
+      return std::vector<size_t>(num_edges, 5);
+    }
+        
+      //------------------------------------------------------------------------
       // Failure
     default:
       THROW_RUNTIME_ERROR("Unknown bound entity type");
@@ -1016,7 +1075,10 @@ private:
   //============================================================================
   // Private Data
   //============================================================================
-  
+
+  //! the entity flags
+  bitfield_t flags_;
+
   //! the region tag
   size_t region_ = 0;
 
@@ -1418,6 +1480,10 @@ struct burton_element_t<3,3>
   //! the shape type
   using shape_t = config_t::shape_t;
 
+  //! The bitfield.
+  using bitfield_t = typename config_t::bitfield_t;
+
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -1471,6 +1537,14 @@ struct burton_element_t<3,3>
   auto type() const
   { return shape_; };
 
+  //! is this a cell that has a face on the boundary
+  bool is_touching_boundary() const
+  { return flags_.test( config_t::bits::boundary ); }
+
+  //! \brief set whether this element is touching the boundary
+  //! \param [in] is_boundary  True if touching the boundary.
+  void set_touching_boundary( bool is_touching_boundary )
+  { flags_.set(config_t::bits::boundary, is_touching_boundary); }
 
   //----------------------------------------------------------------------------
   //! \brief create_entities is a function that creates entities
@@ -1733,6 +1807,101 @@ struct burton_element_t<3,3>
       return std::vector<size_t>( num_wedges, 4 );
     }
       //------------------------------------------------------------------------
+      // sides
+    case 2: {
+
+      /////////////////////////////////////////////////////
+      // loop over each edge (pair of vertices of the face)
+      auto num_sides(0);
+      
+      // get the cell entities
+      auto cell_verts = primal_conn.get_entity_vec( cell, /* dim */ 0 );
+      auto cell_edges = primal_conn.get_entity_vec( cell, /* dim */ 1 ).vec();
+      auto cell_faces = primal_conn.get_entity_vec( cell, /* dim */ 2 ).vec();
+
+      // get connectivity specific to sides
+      // list of wedges associated to this cell.
+      auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
+      
+      // sort cell wedges for later intersection
+      // somehow, sort is important.
+      // without sort, the intersection fails..
+      std::sort( cell_wedges.begin(),  cell_wedges.end() );
+
+      // temporary storage for found wedges
+      std::vector<id_t> wedges;
+      wedges.reserve(2);
+
+      std::vector<id_t> faces;
+      faces.reserve(1);
+
+      // loop over each face.
+      for( auto f = cell_faces.begin(); f != cell_faces.end();++f)
+      {
+        auto face_edges = primal_conn.get_entity_vec( *f, /* dim */ 1 ).vec();
+
+        // list of wedges that attached to this face.
+        auto face_wedges = domain_conn.get_entity_vec(*f, 1).vec();
+        std::sort(face_wedges.begin(), face_wedges.end());
+        
+        std::vector<id_t> cell_face_wedges;
+        // find intersection, wedges that belongs to this cell and face.
+        cell_face_wedges.clear();
+        std::set_intersection( face_wedges.begin(), face_wedges.end(),
+                               cell_wedges.begin(), cell_wedges.end(),
+                               std::back_inserter(cell_face_wedges));
+
+        std::sort(cell_face_wedges.begin(), cell_face_wedges.end());
+        assert(cell_face_wedges.size() == face_edges.size()*2);
+        
+        
+        // loop over edges that belongs to this face.
+        for(auto e = face_edges.begin(); e != face_edges.end();++e)
+        {
+          // wedges attached to edge, e.
+          auto edge_wedges = domain_conn.get_entity_vec(*e,/*dimension*/1).vec();
+          std::sort(edge_wedges.begin(),edge_wedges.end());
+          
+          
+          // find intersection, that belongs this cell/face/edge.
+          std::vector<id_t> cell_face_edge_wedges;
+          // find intersection, wedges that belongs to this cell and face.
+          cell_face_edge_wedges.clear();
+          std::set_intersection( cell_face_wedges.begin(), cell_face_wedges.end(),
+                                 edge_wedges.begin(), edge_wedges.end(),
+                                 std::back_inserter(cell_face_edge_wedges));
+          assert(cell_face_edge_wedges.size() == 2);
+
+          // now attach the entities.
+          // sides consists of:
+          // 2 vertices,
+          // 1 edge,
+          // 1 face,
+          // 2 wedges,
+          // 
+          auto edge_verts  = primal_conn.get_entity_vec( *e, /* dimension */ 0 ).vec();
+
+          // 2 vertex entries 
+          for( auto v=edge_verts.begin(); v != edge_verts.end();++v) 
+              entities[i++]=*v;
+          
+          //1 edge entries
+          entities[i++]=*e;
+
+          // 1 face entries
+          entities[i++]=*f;
+
+          // 2 wedges.
+          for(auto we: cell_face_edge_wedges)
+            entities[i++]= we;
+
+          num_sides++;
+        }//e
+      }//f
+      return std::vector<size_t>(num_sides, 6);
+    }
+        
+      //------------------------------------------------------------------------
       // failure
     default:
       THROW_RUNTIME_ERROR("Unknown bound entity type");
@@ -1820,7 +1989,10 @@ struct burton_element_t<3,3>
   //============================================================================
   
 private:
-  
+
+  //! the entity flags
+  bitfield_t flags_;  
+
   //! the region tag
   size_t region_ = 0;
 

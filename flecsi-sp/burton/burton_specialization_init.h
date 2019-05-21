@@ -1273,6 +1273,288 @@ auto make_wedges( const MESH_DEFINITION & mesh_def )
 
 }
 
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper to make sides
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  typename = std::enable_if_t<
+    std::decay_t<MESH_DEFINITION>::dimension() == 2
+  >
+>
+auto make_sides( const MESH_DEFINITION & mesh_def )
+{
+
+  // not sure why this needs to be decayed
+  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
+  using connectivity_t = typename mesh_definition_t::connectivity_t;
+
+  // get the number of dimensions
+  constexpr auto num_dims = mesh_definition_t::dimension();
+
+  // get the connectvitiy from the cells to the vertices.  there is a
+  // sidee per cell, per vertex
+  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
+  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
+  const auto & edges_to_verts = mesh_def.entities(1, 0);
+
+  auto num_verts = mesh_def.num_entities(0);
+  auto num_cells = mesh_def.num_entities(num_dims);
+
+  // count sides
+  size_t num_sides = 0;
+  for ( const auto & edges : cells_to_edges )
+    num_sides += edges.size();
+
+  // create storage
+  std::map<size_t, connectivity_t> entities_to_sides;
+  std::map<size_t, connectivity_t> sides_to_entities;
+
+  // create entries for the connectivities we care about
+  auto & cells_to_sides = entities_to_sides[num_dims];
+  auto & sides_to_verts = sides_to_entities[0];
+  auto & sides_to_edges = sides_to_entities[1];
+  auto & sides_to_cells = sides_to_entities[num_dims];
+
+  // resize the underlying storage up front
+  cells_to_sides.resize( num_cells );
+  sides_to_verts.resize( num_sides );
+  sides_to_edges.resize( num_sides );
+  sides_to_cells.resize( num_sides );
+
+  // now make them
+  std::vector< size_t > side_ids;
+
+  for ( size_t cell_id=0, side_id=0; cell_id<num_cells; ++cell_id )
+  {
+    //-------------------------------------------------------------------------
+    // Create a predicate function to find edges given two vertices
+
+    // get the edges and vertices connected to this cell
+    const auto & edges = cells_to_edges.at(cell_id);
+    const auto & verts = cells_to_verts.at(cell_id);
+
+    //! create a temporary lambda function for searching for edges
+    //! \param[in] pa,pb  the point indexes of the edge to match
+    //! \return the edge id for that particular point pair
+    auto _find_edge = [&]( const auto & pa, const auto & pb  )
+    {
+      auto edge = std::find_if(
+        edges.begin(), edges.end(),
+        [&]( const auto & e )
+        {
+          auto verts = edges_to_verts.at(e);
+          assert( verts.size() == 2 && "should be two vertices per edge" );
+          return ( (verts[0] == pa && verts[1] == pb) ||
+                   (verts[0] == pb && verts[1] == pa) );
+        }
+      );
+      assert( edge != edges.end() && "should have found an edge");
+      return edge;
+    };
+
+    //-------------------------------------------------------------------------
+    // Now loop over each vertex-pair forming an edge and assign wedges
+
+
+    // create some storage for the list of cell wedge ids
+    side_ids.clear();
+    side_ids.reserve( edges.size() );
+
+    // loop over the vertices in pairs
+    for (
+        auto v1=verts.begin();
+        v1!=verts.end();
+        ++v1
+    ) {
+
+      // get the next vertex, if it goes off the end of the array, then
+      // make it start over
+      auto v2 = std::next(v1);
+      if ( v2==verts.end() ) v2 = verts.begin();
+
+      // then find the next edge
+      auto edge1 = _find_edge( *v1, *v2 );
+
+      // side consists of edge1 and centroid.
+      // Set the connectivity for both
+      side_ids.emplace_back( side_id );
+      sides_to_cells[side_id].emplace_back( cell_id );
+      sides_to_edges[side_id].emplace_back( *edge1 );
+      sides_to_verts[side_id].emplace_back( *v1 );
+      sides_to_verts[side_id].emplace_back( *v2 );
+      ++side_id;
+
+    } // verts
+
+    // set the wedge connectivity for this cell
+    cells_to_sides[cell_id] = side_ids;
+
+  } // cells
+
+  return std::make_pair( entities_to_sides, sides_to_entities );
+
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+/// \brief Helper to make wedges
+////////////////////////////////////////////////////////////////////////////////
+template<
+  typename MESH_DEFINITION,
+  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 3 >*
+    = nullptr
+>
+auto make_sides( const MESH_DEFINITION & mesh_def )
+{
+
+  // not sure why this needs to be decayed
+  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
+  using connectivity_t = typename mesh_definition_t::connectivity_t;
+
+  // get the number of dimensions
+  constexpr auto num_dims = mesh_definition_t::dimension();
+
+  // get the connectvitiy from the cells to the vertices.  there is a
+  // wedge per cell, per vertex
+  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
+  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
+  const auto & cells_to_faces = mesh_def.entities(num_dims, 2);
+  const auto & faces_to_verts = mesh_def.entities(2, 0);
+  const auto & faces_to_edges = mesh_def.entities(2, 1);
+  const auto & faces_to_cells = mesh_def.entities(2, 3);
+  const auto & edges_to_verts = mesh_def.entities(1, 0);
+
+  auto num_verts = mesh_def.num_entities(0);
+  auto num_cells = mesh_def.num_entities(num_dims);
+
+  // count wedges
+  size_t num_sides1 = 0;
+  for ( const auto & edges : cells_to_edges )
+      num_sides1 += edges.size();
+
+  // count wedges
+  size_t num_sides = 0;
+  for ( const auto & faces : cells_to_faces )
+    for ( auto f : faces ) {
+      const auto & edges = faces_to_edges.at(f);
+      num_sides += edges.size();
+    }
+
+  // create storage
+  std::map<size_t, connectivity_t> entities_to_sides;
+  std::map<size_t, connectivity_t> sides_to_entities;
+
+  // create entries for the connectivities we care about
+  auto & cells_to_sides = entities_to_sides[num_dims];
+  auto & sides_to_verts = sides_to_entities[0];
+  auto & sides_to_edges = sides_to_entities[1];
+  auto & sides_to_faces = sides_to_entities[2];
+  auto & sides_to_cells = sides_to_entities[num_dims];
+
+  // resize the underlying storage up front
+  cells_to_sides.resize( num_cells );
+  sides_to_verts.resize( num_sides );
+  sides_to_edges.resize( num_sides );
+  sides_to_faces.resize( num_sides );
+  sides_to_cells.resize( num_sides );
+  
+  // now make them
+  std::vector< size_t > side_ids;
+
+  for ( size_t cell_id=0, side_id=0; cell_id<num_cells; ++cell_id )
+  {
+    //-------------------------------------------------------------------------
+    // Create a predicate function to find edges given two vertices
+
+    // get the edges and vertices connected to this cell
+    const auto & cell_faces = cells_to_faces.at(cell_id);
+    const auto & cell_edges = cells_to_edges.at(cell_id);
+
+    //-------------------------------------------------------------------------
+    // Now loop over each vertex-pair forming an edge and assign sids
+
+
+    // create some storage for the list of cell side ids
+    side_ids.clear();
+    // harder to estimate the size here, so dont bother.  After a few
+    // iterations sufficient size will be allocated
+    // wedge_ids.reserve( 2*edges.size() );
+
+    for ( auto face_id : cell_faces ) {
+
+      // copy the vertices/faces of this face
+      auto face_verts = faces_to_verts.at(face_id);
+      const auto & face_edges = faces_to_edges.at(face_id);
+
+      // check if this cell owns this face, if it doesnt, rotate the
+      // vertices
+      const auto & face_cells = faces_to_cells.at(face_id);
+      if ( face_cells.front() != cell_id )
+        std::reverse( face_verts.begin(), face_verts.end() );
+
+
+      //! create a temporary lambda function for searching for edges
+      //! \param[in] pa,pb  the point indexes of the edge to match
+      //! \return the edge id for that particular point pair
+      auto _find_edge = [&]( const auto & pa, const auto & pb  )
+      {
+        auto edge = std::find_if(
+          face_edges.begin(), face_edges.end(),
+          [&]( const auto & e )
+          {
+            auto verts = edges_to_verts.at(e);
+            assert( verts.size() == 2 && "should be two vertices per edge" );
+            return ( (verts[0] == pa && verts[1] == pb) ||
+                    (verts[0] == pb && verts[1] == pa) );
+          }
+        );
+        assert( edge != face_edges.end() && "should have found an edge");
+        return edge;
+      };
+
+
+
+      // find the first edge that goes from the last vertex to the first
+      auto edge0 = _find_edge( face_verts.front(), face_verts.back() );
+
+      // loop over the vertices in pairs
+      for (
+          auto v1=face_verts.begin();
+          v1!=face_verts.end();
+          ++v1
+      ) {
+
+        // get the next vertex, if it goes off the end of the array, then
+        // make it start over
+        auto v2 = std::next(v1);
+        if ( v2==face_verts.end() ) v2 = face_verts.begin();
+
+        // then find the next edge
+        auto edge1 = _find_edge( *v1, *v2 );
+
+        // there is a side attached to this edge.
+        // set the connectivity
+        side_ids.emplace_back( side_id );
+        sides_to_cells[side_id].emplace_back( cell_id );
+        sides_to_faces[side_id].emplace_back( face_id );
+        sides_to_edges[side_id].emplace_back( *edge1 );
+        sides_to_verts[side_id].emplace_back( *v1 );
+        sides_to_verts[side_id].emplace_back( *v2 );
+        ++side_id;
+
+      } // verts
+
+    } // faces
+
+    // set the wedge connectivity for this cell
+    cells_to_sides[cell_id] = side_ids;
+
+  } // cells
+
+  return std::make_pair( entities_to_sides, sides_to_entities );
+
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
@@ -1288,7 +1570,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // make some type aliases
   using real_t = burton_mesh_t::real_t;
   using size_t = burton_mesh_t::size_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+  using exodus_definition_t = flecsi_sp::io::exodus_definition<num_dims, real_t>;
   using entity_info_t = flecsi::coloring::entity_info_t;
   using vertex_t = burton_mesh_t::vertex_t;
   using edge_t = burton_mesh_t::edge_t;
@@ -1296,6 +1578,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   using cell_t = burton_mesh_t::cell_t;
   using corner_t = burton_mesh_t::corner_t;
   using wedge_t = burton_mesh_t::wedge_t;
+  using side_t = burton_mesh_t::side_t;
 
   // load the mesh
   auto filename_string = filename.str();
@@ -1474,7 +1757,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   }
 
   //----------------------------------------------------------------------------
-  // Identify exclusive, shared and ghost for corners and wedges
+  // Identify exclusive, shared and ghost for corners and wedges and side
   //----------------------------------------------------------------------------
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
@@ -1525,6 +1808,32 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     = wedge_entities.exclusive.size()
     + wedge_entities.shared.size()
     + wedge_entities.ghost.size();
+
+  auto sides = make_sides( mesh_def );
+  const auto & cells_to_sides = sides.first[num_dims];
+  const auto & sides_to_cells = sides.second[num_dims];
+
+  color_entity(
+    communicator.get(),
+    cells_plus_halo,
+    remote_info_map,
+    shared_cells_map,
+    closure_intersection_map,
+    cells_to_sides,
+    sides_to_cells,
+    entities[ side_t::domain ][ side_t::dimension ],
+    entity_color_info[ side_t::domain ][ side_t::dimension ]
+  );
+
+  const auto & side_entities =
+    entities.at( side_t::domain ).at( side_t::dimension );
+  auto num_sides
+    = side_entities.exclusive.size()
+    + side_entities.shared.size()
+    + side_entities.ghost.size();
+
+  std::cout<<"num_sides: " << num_sides<<std::endl;
+  
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -1647,6 +1956,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   auto gathered_corners = communicator->gather_sizes( num_corners );
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
   auto gathered_wedges = communicator->gather_sizes( num_wedges );
+  auto gathered_sides = communicator->gather_sizes( num_sides );
+  // Not quite correct, needs way to properly compute necessarily size for connectivity.
+  auto gathered_sides2 = communicator->gather_sizes( 2*num_sides );
+  auto gathered_sides4 = communicator->gather_sizes( 4*num_sides );
 #endif
 
   // cell to corner
@@ -1791,6 +2104,86 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
 
+
+
+  //////////////////////////////////////////////////////////////////////////////////
+  // sides entries.
+  // only dim>1
+
+  // cell to side
+  ai.index_space = index_spaces::cells_to_sides;
+  ai.from_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  // side belongs to unique cell.
+  ai.color_sizes = gathered_sides;
+  context.add_adjacency(ai);
+  
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 2
+  // face to side
+  ai.index_space = index_spaces::faces_to_sides;
+  ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  //a side belongs to a unique face.
+  ai.color_sizes = gathered_sides;
+  context.add_adjacency(ai);
+#endif
+
+  // edge to side
+  ai.index_space = index_spaces::edges_to_sides;
+  ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  // side belongs to a unique edge.
+  ai.color_sizes = gathered_sides;
+  context.add_adjacency(ai);
+
+  // vertex to side
+  // For every edge connected to a vertex, there is one side in 2d, and two sides in 3d.
+  ai.index_space = index_spaces::vertices_to_sides;
+  ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  // each side has 2 vertices.
+  ai.color_sizes = gathered_sides4;
+  //ai.color_sizes = gathered_sides2;
+  context.add_adjacency(ai);
+
+  // side to cell
+  // each side goes to one cell
+  ai.index_space = index_spaces::sides_to_cells;
+  ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[cell_t::domain][cell_t::dimension];
+  
+  ai.color_sizes = gathered_sides;
+  
+  context.add_adjacency(ai);
+
+#if FLECSI_SP_BURTON_MESH_DIMENSION > 2
+  // side to face
+  // each side goes to once face
+  ai.index_space = index_spaces::sides_to_faces;
+  ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
+  ai.color_sizes = gathered_sides;
+  context.add_adjacency(ai);
+#endif
+
+  // side to edges
+  // each side goes to one edge
+  ai.index_space = index_spaces::sides_to_edges;
+  ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
+  ai.color_sizes = gathered_sides;
+  context.add_adjacency(ai);
+
+  // side to vertex
+  // each side goes to two vertex
+  ai.index_space = index_spaces::sides_to_vertices;
+  ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
+  ai.color_sizes = gathered_sides2;
+  context.add_adjacency(ai);
+
+
+  
   // wedge to corner
   // each wedge goes to one corner
   ai.index_space = index_spaces::wedges_to_corners;
@@ -1806,6 +2199,41 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
   ai.color_sizes = gathered_wedges;
   context.add_adjacency(ai);
+
+
+  // side to corner
+  // each side belongs to two corners
+  ai.index_space = index_spaces::sides_to_corners;
+  ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.color_sizes = gathered_sides2;
+  context.add_adjacency(ai);
+
+  // corner to  side
+  // eaceh corner goes to two sides
+  ai.index_space = index_spaces::corners_to_sides;
+  ai.from_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.color_sizes = gathered_sides2;
+  context.add_adjacency(ai);
+
+
+  // side to wedge
+  // each side belongs to two wedges
+  ai.index_space = index_spaces::sides_to_wedges;
+  ai.from_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.color_sizes = gathered_sides2;
+  context.add_adjacency(ai);
+
+  // wedge to  side
+  // each wedge goes to one side
+  ai.index_space = index_spaces::wedges_to_sides;
+  ai.from_index_space = index_spaces::entity_map[wedge_t::domain][wedge_t::dimension];
+  ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
+  ai.color_sizes = gathered_sides2;
+  context.add_adjacency(ai);
+
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -1932,6 +2360,40 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     wedges_to_entities.emplace( w, entity_list );
     entities_to_wedges.emplace( entity_list, w );
   }
+
+
+  //--- SIDES
+
+  // concatenate exclusive shared and ghost
+  auto side_ids = concatenate_ids( side_entities );
+
+  // get the intermediate binding maps from the context
+  auto & sides_to_entities =
+    context.intermediate_binding_map( /* dim */ 2, /* dom */ 1 );
+  auto & entities_to_sides =
+    context.reverse_intermediate_binding_map( /* dim */ 2, /* dom */ 1 );
+
+  // loop over each list of entities
+  for ( auto s : side_ids ) {
+    // create a temporary list
+    std::decay_t< decltype(sides_to_entities) >::mapped_type entity_list;
+    // loop over all dimensions
+    for ( int dim=0; dim<=num_dims; ++dim ) {
+      // alias the side to entity mapping
+      const auto & side_to_entities = sides.second[dim];
+      const auto & entities = side_to_entities.at(s);
+      // resize storage
+      entity_list.reserve( entity_list.size() + entities.size() );
+      // add the entities to the list
+      for ( auto e : entities )
+        entity_list.emplace_back( /* dom */ 0, dim, e );
+    }
+    // sorted for comparison later
+    std::sort( entity_list.begin(), entity_list.end() );
+    // add all the mappings for this corner
+    sides_to_entities.emplace( s, entity_list );
+    entities_to_sides.emplace( entity_list, s );
+  }
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -2011,7 +2473,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 /// \brief the main mesh initialization driver
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_mesh(
-  utils::client_handle_w__<burton_mesh_t> mesh,
+  utils::client_handle_w<burton_mesh_t> mesh,
   utils::char_array_t filename
 ) {
 
@@ -2024,7 +2486,7 @@ void initialize_mesh(
 
   // alias some types
   using real_t = burton_mesh_t::real_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition__<num_dims, real_t>;
+  using exodus_definition_t = flecsi_sp::io::exodus_definition<num_dims, real_t>;
 
   // get the context
   const auto & context = flecsi::execution::context_t::instance();

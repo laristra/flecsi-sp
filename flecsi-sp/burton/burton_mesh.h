@@ -44,7 +44,7 @@ enum data_attributes_t : size_t {
 /// \tparam N The number of dimensions.
 ////////////////////////////////////////////////////////////////////////////////
 template< std::size_t N, bool Extra_Elements = false >
-class burton_mesh__  : public burton_mesh_topology_t<N, Extra_Elements>
+class burton_mesh  : public burton_mesh_topology_t<N, Extra_Elements>
 
 {
 public:
@@ -109,6 +109,10 @@ public:
   //! Corner type.
   using corner_t = typename types_t::corner_t;
 
+  //! Side type.
+  using side_t = typename types_t::side_t;
+
+
   //! the index spaces type
   using index_spaces_t = typename types_t::index_spaces_t;
   //! special subspace for 
@@ -137,24 +141,24 @@ public:
   //============================================================================
 
   //! Default constructor
-  burton_mesh__() = default;
+  burton_mesh() = default;
 
   //! \brief Assignment operator (default)
-  burton_mesh__ & operator=(const burton_mesh__ &) = default;
+  burton_mesh & operator=(const burton_mesh &) = default;
 
   //! \brief Copy constructor
 
-  burton_mesh__(const burton_mesh__ &src) = default;
+  burton_mesh(const burton_mesh &src) = default;
 
   //! \brief allow move construction
-  burton_mesh__( burton_mesh__ && ) = default;
+  burton_mesh( burton_mesh && ) = default;
 
   //! \brief Copy constructor for data client handle
-  burton_mesh__(const burton_mesh__& m, bool dummy) : base_t(m, dummy)
+  burton_mesh(const burton_mesh& m, bool dummy) : base_t(m, dummy)
   {}
 
   //! Destructor
-  virtual ~burton_mesh__() {};
+  virtual ~burton_mesh() {};
 
   //============================================================================
   // Accessors
@@ -826,6 +830,97 @@ public:
 
 
   //============================================================================
+  // Side Interface
+  //============================================================================
+
+  //! \brief Return number of sides in the burton mesh.
+  //! \return The number of sides in the burton mesh.
+  size_t num_sides() const
+  {
+    return 
+      base_t::template num_entities<side_t::dimension, side_t::domain>();
+  }
+
+  size_t num_sides(partition_t subset) const
+  {
+    return 
+      base_t::template num_entities<side_t::dimension, side_t::domain>(subset);
+  }
+
+  //! \brief Return all sides in the burton mesh.
+  //!
+  //! \return Return all sides in the burton mesh as a sequence for use, e.g.,
+  //!   in range based for loops.
+  decltype(auto) sides() const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>();
+  }
+
+  decltype(auto) sides(partition_t subset) const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>(subset);
+  }
+
+  //! \brief Return all sides in the burton mesh.
+  //! \return Return all sides in the burton mesh as a sequence for use, e.g.,
+  //!   in range based for loops.
+  decltype(auto) sides() // FIXME const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>();
+  }
+
+
+  //! \brief Return sides associated with entity instance of type \e E.
+  //!
+  //! \tparam E entity type of instance to return sides for.
+  //!
+  //! \param[in] e instance of entity to return sides for.
+  //!
+  //! \return Return sides associated with entity instance \e e as a sequence.
+  template <class E>
+  decltype(auto) sides(E * e) const
+  {
+    return base_t::template entities<side_t::dimension, side_t::domain>(e);
+  }
+
+  //! \brief Return sides for entity \e e in domain \e M.
+  //!
+  //! \tparam M Domain.
+  //! \tparam E Entity type to get sides for.
+  //!
+  //! \param[in] e Entity to get sides for.
+  //!
+  //! \return Sides for entity \e e in domain \e M.
+  template<size_t M, class E>
+  decltype(auto) sides(const flecsi::topology::domain_entity_u<M, E> & e) const
+  {
+    return query_entities<M, E, side_t>(e);
+  }
+
+  //! \brief Return ids for all sides in the burton mesh.
+  //! \return Ids for all sides in the burton mesh.
+  decltype(auto) side_ids() const
+  {
+    return base_t::template entity_ids<side_t::dimension, side_t::domain>();
+  }
+
+  //! \brief Return side ids associated with entity instance of type \e E.
+  //!
+  //! \tparam E entity type of instance to return side ids for.
+  //!
+  //! \param[in] e instance of entity to return side ids for.
+  //!
+  //! \return Return side ids associated with entity instance \e e as a
+  //!   sequence.
+  template <class E>
+  decltype(auto) side_ids(E * e) const
+  {
+    return 
+      base_t::template entity_ids<side_t::dimension, side_t::domain>(e);
+  }
+
+
+  //============================================================================
   // Region Interface
   //============================================================================
 
@@ -844,6 +939,16 @@ public:
     for ( auto c : cells() )
       c->region() = region_ids[c.id()];
   }
+
+void set_regions(std::vector<int> &region_ids)
+{
+    for(auto c: cells())
+    {
+        int id = region_ids[c.id()];
+        c->set_region(id);
+    }
+    
+}
 
   //! \brief Return all cells in the regions mesh.
   //!
@@ -1033,21 +1138,27 @@ public:
   {
 
     base_t::template init<0>();
+    std::cout<<"done init()"<<std::endl;
+    
     base_t::template init_bindings<1>();
 
     // now set the boundary flags.
     for ( auto f : faces() ) {
-      f->set_boundary( (cells(f).size() == 1) );
+	    auto cs = cells(f);
+      f->set_boundary( (cs.size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
-        // point flags are only for 2d and 3d
-        if ( num_dimensions >= 2 ) {
+        if constexpr ( num_dimensions >= 2 ) {
+	        // cell flags
+	        for ( auto c : cs )
+	          c->set_touching_boundary( true );
+          // point flags are only for 2d and 3d
           auto ps = vertices(f);
           for ( auto p : ps )
             p->set_boundary( true );
         }
         // edge flags are only for 3d
-        if ( num_dimensions == 3 ) {
+        if constexpr ( num_dimensions == 3 ) {
           auto es = edges(f);
           for ( auto e : es ) 
             e->set_boundary( true );
@@ -1062,7 +1173,7 @@ public:
 #endif
 
     // identify the cell regions
-    for ( auto c : cells() ) c->region() = 0;
+    //for ( auto c : cells() ) c->region() = 0;
 
     // update the geometry
     update_geometry();
@@ -1394,13 +1505,32 @@ public:
   }
 #endif
 
+  auto cell_vertex_neighbors(
+    const flecsi::topology::domain_entity_u<0, cell_t> & c0) const
+  { 
+ 
+    std::vector<cell_t*> cs;
+
+    auto vs = vertices(c0);
+    for ( auto v : vs )
+      for ( auto c : cells(v) )
+        if ( c != c0 ) 
+          cs.emplace_back(c);
+    
+    std::sort( cs.begin(), cs.end() );
+    auto last = std::unique( cs.begin(), cs.end() );
+    cs.erase( last, cs.end() );
+    return cs;
+  }
+
+
   //============================================================================
   // Operators
   //============================================================================
 
   //! Print some statistics.
   template< std::size_t M >
-  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh);
+  friend std::ostream& operator<< (std::ostream& stream, const burton_mesh<M>& mesh);
 
 
 
@@ -1534,7 +1664,7 @@ public:
 //!  \return the stream operator.
 template< std::size_t M >
 inline
-std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
+std::ostream& operator<< (std::ostream& stream, const burton_mesh<M>& mesh)
 {
   using std::endl;
   stream << "Burton mesh:" << endl;
@@ -1551,17 +1681,17 @@ std::ostream& operator<< (std::ostream& stream, const burton_mesh__<M>& mesh)
 #ifndef FLECSI_SP_BURTON_MESH_EXTRAS
 
 #  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
-using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION>;
+using burton_mesh_t = burton_mesh<FLECSI_SP_BURTON_MESH_DIMENSION>;
 #  else
-using burton_mesh_t = burton_mesh__<2>;
+using burton_mesh_t = burton_mesh<2>;
 #  endif
 
 #else
 
 #  ifdef FLECSI_SP_BURTON_MESH_DIMENSION
-using burton_mesh_t = burton_mesh__<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
+using burton_mesh_t = burton_mesh<FLECSI_SP_BURTON_MESH_DIMENSION,true>;
 #  else
-using burton_mesh_t = burton_mesh__<2,true>;
+using burton_mesh_t = burton_mesh<2,true>;
 #  endif
 
 #endif

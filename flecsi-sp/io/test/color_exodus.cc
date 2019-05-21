@@ -41,9 +41,9 @@ void driver(int argc, char ** argv) {}
 
 
 // some type aliases
-using exodus_definition_2d_t = flecsi_sp::io::exodus_definition__<2, double>;
+using exodus_definition_2d_t = flecsi_sp::io::exodus_definition<2, double>;
 
-using exodus_definition_3d_t = flecsi_sp::io::exodus_definition__<3, double>;
+using exodus_definition_3d_t = flecsi_sp::io::exodus_definition<3, double>;
 
 using std::vector;
   
