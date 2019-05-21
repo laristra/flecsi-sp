@@ -50,7 +50,7 @@ void specialization_tlt_init(int argc, char** argv)
                 << std::endl;
   }
   else {
-    throw_runtime_error( "No mesh file provided" );
+    THROW_RUNTIME_ERROR( "No mesh file provided" );
   }
   
   // get the maximum number of entries

@@ -322,7 +322,7 @@ struct burton_element_t<1,1>
       //------------------------------------------------------------------------
       // Failure
     default:
-      throw_runtime_error("Unknown bound entity type");
+      THROW_RUNTIME_ERROR("Unknown bound entity type");
     } // switch
 
   }
@@ -985,7 +985,7 @@ struct burton_element_t<2,2>
       //------------------------------------------------------------------------
       // Failure
     default:
-      throw_runtime_error("Unknown bound entity type");
+      THROW_RUNTIME_ERROR("Unknown bound entity type");
     } // switch
 
   }
@@ -1065,7 +1065,7 @@ struct burton_element_t<2,2>
 
       // there should be no unmatched case
       default:
-        throw_runtime_error( "Unknown cell type" );
+        THROW_RUNTIME_ERROR( "Unknown cell type" );
 
     } // switch
   }
@@ -1286,7 +1286,7 @@ struct burton_element_t<3,2>
     const connectivity_t& domain_conn,
     id_t * entities )
   { 
-    throw_implemented_error(
+    THROW_IMPLEMENTED_ERROR(
       "burton_3d_face_t::create_bound_entities has not been implemented"
     );
   }
@@ -1364,7 +1364,7 @@ struct burton_element_t<3,2>
   
       // there should be no unmatched case
       default:
-        throw_runtime_error( "Unknown cell type" );
+        THROW_RUNTIME_ERROR( "Unknown cell type" );
   
     } // switch
     
@@ -1904,7 +1904,7 @@ struct burton_element_t<3,3>
       //------------------------------------------------------------------------
       // failure
     default:
-      throw_runtime_error("Unknown bound entity type");
+      THROW_RUNTIME_ERROR("Unknown bound entity type");
       return {};
   
     } // switch
@@ -1978,7 +1978,7 @@ struct burton_element_t<3,3>
   
       // there should be no unmatched case
       default:
-        throw_runtime_error( "Unknown cell type" );
+        THROW_RUNTIME_ERROR( "Unknown cell type" );
   
     } // switch
     
