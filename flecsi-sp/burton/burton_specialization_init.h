@@ -38,7 +38,7 @@ namespace burton {
 template< typename COLOR_INFO >
 auto concatenate_ids( COLOR_INFO && entities )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   using id_t = std::decay_t< decltype(entities.exclusive.begin()->id) >;
 
   auto num_entities =
@@ -63,7 +63,7 @@ auto concatenate_ids( COLOR_INFO && entities )
 template< typename COLOR_INFO, typename ENTITY_IDS >
 auto concatenate_ids( COLOR_INFO && entities, ENTITY_IDS & entity_ids )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   auto num_entities =
     std::forward<COLOR_INFO>(entities).exclusive.size() +
     std::forward<COLOR_INFO>(entities).shared.size() +
@@ -103,7 +103,7 @@ auto color_entity(
   INDEX_COLOR & entities,
   COLOR_INFO & entity_color_info
 ) {
-
+  CALI_CXX_MARK_FUNCTION;
   // some type aliases
   using entity_info_t = flecsi::coloring::entity_info_t;
 
@@ -245,7 +245,7 @@ template<
 >
 void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   //----------------------------------------------------------------------------
   // Initial compile time setup
   //----------------------------------------------------------------------------
@@ -333,7 +333,7 @@ template<
 >
 void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   //----------------------------------------------------------------------------
   // Initial compile time setup
   //----------------------------------------------------------------------------
@@ -457,7 +457,7 @@ template<
 >
 void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   using mesh_t = typename std::decay_t< MESH_TYPE >;
 
   // Alias the index spaces type
@@ -517,7 +517,7 @@ template<
 >
 void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   using mesh_t = typename std::decay_t< MESH_TYPE >;
 
   // Alias the index spaces type
@@ -587,7 +587,7 @@ template<
 >
 void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   using mesh_t = typename std::decay_t< MESH_TYPE >;
 
   // Alias the index spaces type
@@ -665,6 +665,7 @@ template<
 >
 auto make_corners( const MESH_DEFINITION & mesh_def )
 {
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -747,6 +748,7 @@ template<
 >
 auto make_corners( const MESH_DEFINITION & mesh_def )
 {
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -852,6 +854,7 @@ template<
 >
 auto make_corners( const MESH_DEFINITION & mesh_def )
 {
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -983,7 +986,7 @@ template<
 >
 auto make_wedges( const MESH_DEFINITION & mesh_def )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -1117,7 +1120,7 @@ template<
 >
 auto make_wedges( const MESH_DEFINITION & mesh_def )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -1284,7 +1287,7 @@ template<
 >
 auto make_sides( const MESH_DEFINITION & mesh_def )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -1407,7 +1410,7 @@ template<
 >
 auto make_sides( const MESH_DEFINITION & mesh_def )
 {
-
+  CALI_CXX_MARK_FUNCTION;
   // not sure why this needs to be decayed
   using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   using connectivity_t = typename mesh_definition_t::connectivity_t;
@@ -1561,6 +1564,7 @@ auto make_sides( const MESH_DEFINITION & mesh_def )
 ////////////////////////////////////////////////////////////////////////////////
 void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 {
+  CALI_CXX_MARK_FUNCTION;
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
   constexpr auto num_domains = burton_mesh_t::num_domains;
@@ -1710,6 +1714,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   cell_color_info.exclusive = cells.exclusive.size();
   cell_color_info.shared = cells.shared.size();
   cell_color_info.ghost = cells.ghost.size();
+
+  std::cout << cell_color_info << std::endl;
 
   //----------------------------------------------------------------------------
   // Create some maps for easy lookups when determining the other dependent
@@ -2423,7 +2429,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //----------------------------------------------------------------------------
   // output the result
   //----------------------------------------------------------------------------
-
+#if 0
   // figure out this ranks file name
   auto basename = ristra::utils::basename( filename_string );
   auto output_prefix = ristra::utils::remove_extension( basename );
@@ -2464,7 +2470,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   );
 
   clog(info) << "Finished mesh partitioning." << std::endl;
-
+#endif
 
 } // partition_mesh
 
@@ -2476,7 +2482,7 @@ void initialize_mesh(
   utils::client_handle_w<burton_mesh_t> mesh,
   utils::char_array_t filename
 ) {
-
+  CALI_CXX_MARK_FUNCTION;
   //----------------------------------------------------------------------------
   // Fill the mesh information
   //----------------------------------------------------------------------------
