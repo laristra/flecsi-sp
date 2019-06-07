@@ -199,7 +199,7 @@ public:
     //  vol += corner->area();
     //return vol;
 
-    throw_implemented_error( "dual_cell_volume not implemented yet!" );
+    THROW_IMPLEMENTED_ERROR( "dual_cell_volume not implemented yet!" );
     return 0.0;
   }
 
