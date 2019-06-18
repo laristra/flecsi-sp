@@ -112,6 +112,63 @@ build_connectivity(
   }  // for
 }  // build_connectivity
 
+template<typename CONNECTIVITY_TYPE, typename FUNCTION>
+void
+new_build_connectivity(
+    const CONNECTIVITY_TYPE & cell_to_vertex,
+    CONNECTIVITY_TYPE & cell_to_edge,
+    CONNECTIVITY_TYPE & edge_to_vertex,
+    FUNCTION && build_edges_from_vertices) {
+
+  using index_t = typename CONNECTIVITY_TYPE::value_type;
+
+  // some temporary storage
+  CONNECTIVITY_TYPE new_edges;
+  std::vector<index_t> sorted_vs;
+  std::vector<index_t> these_edges;
+  
+  // a map for searching: vertices -> edge id
+  std::map<std::vector<index_t>, index_t> edges;
+
+  // loop over cells, adding all of their edges to the table
+  for (const auto & these_verts : cell_to_vertex) {
+
+    // clear this cells edges
+    these_edges.clear();
+
+    // now build the edges for the cell
+    new_edges.clear();
+    std::forward<FUNCTION>(build_edges_from_vertices)(these_verts, new_edges);
+
+    // now look for exsiting vertex pairs in the edge-to-vertex master list
+    // or add a new edge to the list.  add the matched edge id to the
+    // cell-to-edge list
+    for (const auto & vs : new_edges) {
+      // sort the vertices
+      sorted_vs.assign(vs.begin(), vs.end());
+      std::sort(sorted_vs.begin(), sorted_vs.end());
+      // if we dont find the edge
+      if (edges.find(sorted_vs) == edges.end()) {
+        // add to the local reverse map
+        auto edgeid = edges.size();
+        edges.emplace(sorted_vs, edgeid);
+        // add to the original sorted and unsorted maps
+        edge_to_vertex.push_back(vs);
+        // add to the list of edges
+        these_edges.push_back(edgeid);
+      } else {
+        // if we do find the edge
+        // just add the id to the list of edges
+        these_edges.push_back(edges[sorted_vs]);
+      }
+    }
+
+    // now add this cells edges
+    cell_to_edge.push_back( these_edges );
+
+  }  // for
+}  // build_connectivity
+
 //==============================================================================
 //! \brief Intersect two connectivity arrays; that is, given X-to-Y and Y-to-Z
 //! connectivity, build X-to-Z connectivity.

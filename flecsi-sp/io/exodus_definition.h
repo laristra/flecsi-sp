@@ -71,6 +71,7 @@ public:
   //! the number of dimensions
   static constexpr size_t num_dims = D;
 
+  //! An enumeration to keep track of element types
   enum class block_t { tri, quad, polygon, tet, hex, polyhedron, unknown };
 
   //============================================================================
@@ -460,7 +461,10 @@ public:
       int exoid,
       ex_entity_id blk_id,
       ex_entity_type entity_type,
-      connectivity_t & entities) {
+      vector<int> & counts,
+      vector<U> & indices )
+  {
+
     // some type aliases
     using ex_index_t = U;
 
@@ -487,42 +491,23 @@ public:
       auto num_nodes_this_blk = num_nodes_per_elem;
 
       // get the number of nodes per element
-      vector<int> elem_node_counts(num_elem_this_blk);
+      counts.resize(num_elem_this_blk);
       status = ex_get_entity_count_per_polyhedra(
-          exoid, entity_type, blk_id, elem_node_counts.data());
+          exoid, entity_type, blk_id, counts.data());
       if (status)
         clog_fatal(
             "Problem getting element node numbers, "
             << "ex_get_entity_count_per_polyhedra() returned " << status);
 
       // read element definitions
-      vector<ex_index_t> elem_nodes(num_nodes_this_blk);
+      indices.resize(num_nodes_this_blk);
       status = ex_get_conn(
-          exoid, entity_type, blk_id, elem_nodes.data(), nullptr, nullptr);
+          exoid, entity_type, blk_id, indices.data(), nullptr, nullptr);
       if (status)
         clog_fatal(
             "Problem getting element connectivity, ex_get_elem_conn() "
             << "returned " << status);
-
-      // storage for element verts
-      vector<index_t> elem_vs;
-      elem_vs.reserve(num_dims * elem_node_counts[0]);
-
-      // create cells in mesh
-      size_t base = 0;
-      for (counter_t e = 0; e < num_elem_this_blk; ++e) {
-        elem_vs.clear();
-        // get the number of nodes
-        num_nodes_per_elem = elem_node_counts[e];
-        // copy local vertices into vector ( exodus uses 1 indexed arrays )
-        for (int v = 0; v < num_nodes_per_elem; v++)
-          elem_vs.emplace_back(elem_nodes[base + v] - 1);
-        // add the row
-        entities.push_back(elem_vs);
-        // base offset into elt_conn
-        base += num_nodes_per_elem;
-      }
-
+      
       return block_t::polygon;
 
     }
@@ -536,41 +521,22 @@ public:
       auto num_face_this_blk = num_faces_per_elem;
 
       // get the number of nodes per element
-      vector<int> elem_face_counts(num_face_this_blk);
+      counts.resize(num_elem_this_blk);
       status = ex_get_entity_count_per_polyhedra(
-          exoid, entity_type, blk_id, elem_face_counts.data());
+          exoid, entity_type, blk_id, counts.data());
       if (status)
         clog_fatal(
             "Problem reading element node info, "
             << "ex_get_entity_count_per_polyhedra() returned " << status);
 
       // read element definitions
-      vector<ex_index_t> elem_faces(num_face_this_blk);
+      indices.resize(num_face_this_blk);
       status = ex_get_conn(
-          exoid, entity_type, blk_id, nullptr, nullptr, elem_faces.data());
+          exoid, entity_type, blk_id, nullptr, nullptr, indices.data());
       if (status)
         clog_fatal(
             "Problem getting element connectivity, ex_get_conn() "
             << "returned " << status);
-
-      // storage for element faces
-      vector<index_t> elem_fs;
-      elem_fs.reserve(elem_face_counts[0]);
-
-      // create cells in mesh
-      for (counter_t e = 0, base = 0; e < num_elem_this_blk; ++e) {
-        // reset storage
-        elem_fs.clear();
-        // get the number of faces
-        num_faces_per_elem = elem_face_counts[e];
-        // copy local vertices into vector ( exodus uses 1 indexed arrays )
-        for (int v = 0; v < num_faces_per_elem; v++)
-          elem_fs.emplace_back(elem_faces[base + v] - 1);
-        // base offset into elt_conn
-        base += num_faces_per_elem;
-        // add vertex list to master list
-        entities.push_back(elem_fs);
-      }
 
       return block_t::polyhedron;
 
@@ -579,29 +545,17 @@ public:
     // fixed element size
     else {
 
+      // set the counts
+      counts.resize(num_elem_this_blk);
+      std::fill( counts.begin(), counts.end(), num_nodes_per_elem );
+
       // read element definitions
-      vector<ex_index_t> elt_conn(num_elem_this_blk * num_nodes_per_elem);
-      status = ex_get_elem_conn(exoid, blk_id, elt_conn.data());
+      indices.resize(num_elem_this_blk * num_nodes_per_elem);
+      status = ex_get_elem_conn(exoid, blk_id, indices.data());
       if (status)
         clog_fatal(
             "Problem getting element connectivity, ex_get_elem_conn() "
             << "returned " << status);
-
-      // storage for element verts
-      vector<index_t> elem_vs;
-      elem_vs.reserve(num_nodes_per_elem);
-
-      // create cells in mesh
-      for (counter_t e = 0; e < num_elem_this_blk; ++e) {
-        elem_vs.clear();
-        // base offset into elt_conn
-        auto b = e * num_nodes_per_elem;
-        // copy local vertices into vector ( exodus uses 1 indexed arrays )
-        for (int v = 0; v < num_nodes_per_elem; v++)
-          elem_vs.emplace_back(elt_conn[b + v] - 1);
-        // add the row
-        entities.push_back(elem_vs);
-      }
 
       // return element type
       if (strcasecmp("tri3", elem_type) == 0)
@@ -664,9 +618,10 @@ public:
   static auto read_element_block(
       int exoid,
       ex_entity_id elem_blk_id,
-      connectivity_t & elements) {
-
-    return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, elements);
+      vector<int> & counts,
+      vector<U> & indices )
+  {
+    return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, counts, indices);
   }
 
   //============================================================================
@@ -1021,7 +976,7 @@ private:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition<2, T> : public flecsi::topology::mesh_definition_u<2>
+class exodus_definition<2, T> : public flecsi::topology::mesh_definition_u<2, T>
 {
 
 public:
@@ -1040,8 +995,11 @@ public:
 
   //! the floating point type
   using real_t = typename base_t::real_t;
+
   //! the index type
   using index_t = typename base_t::index_t;
+
+  using typename flecsi::topology::mesh_definition_u<2, T>::byte_t;
 
   //! the vector type
   template<typename U>
@@ -1049,6 +1007,7 @@ public:
 
   //! the connectivity type
   using connectivity_t = typename base_t::connectivity_t;
+  using crs_t = flecsi::coloring::crs_t;
 
   //============================================================================
   // Constructors
@@ -1091,6 +1050,15 @@ public:
     auto exoid = base_t::open(name, std::ios_base::in);
     if (exoid < 0)
       clog_fatal("Problem reading exodus file");
+  
+    //int nproc, nprocf;
+    //char ftype[2];
+    //auto err = ex_get_init_info(exoid, &nproc, &nprocf, ftype);
+    //std::cout << "err=" << err << std::endl;
+    //std::cout << "nproc=" << nproc << std::endl;
+    //std::cout << "nprocf=" << nprocf << std::endl;
+    //std::cout << ftype[0] << ftype[1] << std::endl;
+    //exit(-1);
 
     // get the initialization parameters
     auto exo_params = base_t::read_params(exoid);
@@ -1099,22 +1067,78 @@ public:
     auto int64 = base_t::is_int64(exoid);
 
     //--------------------------------------------------------------------------
-    // read coordinates
+    // Figure out partitioning 
+    
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
-    vertices_ = base_t::read_point_coords(exoid, exo_params.num_nodes);
-    clog_assert(
-        vertices_.size() == dimension() * exo_params.num_nodes,
-        "Mismatch in read vertices");
+    vector<index_t> cell_partitioning;
+    flecsi::coloring::subdivide( exo_params.num_elem, comm_size,
+        cell_partitioning );
 
-    auto num_vertices = vertices_.size() / dimension();
+    auto cell_min = cell_partitioning[comm_rank];
+    auto cell_max = cell_partitioning[comm_rank+1] - 1;
+
+    constexpr auto num_dims = base_t::num_dims;
+    auto & cell2vertices_ = local_connectivity_[num_dims][0];
+    cell2vertices_.clear();
+
+    //--------------------------------------------------------------------------
+    // Lambda function to process a block
+
+    auto add_block = [](
+        const auto & counts_in,
+        const auto & indices_in,
+        auto min,
+        auto max,
+        auto & counter,
+        auto & offsets_out,
+        auto & indices_out)
+    {
+      auto num_offsets = counts_in.size();
+      auto num_indices = indices_in.size();
+
+      // if this is outside the range, just increment counter and return
+      if ( counter + num_offsets <= min || counter > max )
+      {
+        counter += num_offsets;
+        return;
+      }
+
+      // storage for element verts
+      offsets_out.reserve( offsets_out.size() + num_offsets );
+      indices_out.reserve( indices_out.size() + num_indices );
+      
+      // create cells in mesh
+      size_t base = 0;
+      for (size_t e = 0; e < num_offsets; ++e, ++counter) {
+        // get the number of nodes
+        auto cnt = counts_in[e];
+        // the global id is within the range
+        if ( counter >= min && counter <= max )
+        {
+          // copy local vertices into vector ( exodus uses 1 indexed arrays )
+          for (int v = 0; v < cnt; v++)
+            indices_out.emplace_back(indices_in[base + v] - 1);
+          // add the row
+          offsets_out.emplace_back( offsets_out.back() + cnt );
+        }
+        // base offset into elt_conn
+        base += cnt;
+      }
+    };
 
     //--------------------------------------------------------------------------
     // element blocks
+    
+    // offsets always have initial zero
+    cell2vertices_.offsets.emplace_back( 0 );
+    size_t cell_counter{0};
 
+    // the number of blocks and some storage for block ids
     auto num_elem_blk = exo_params.num_elem_blk;
     vector<index_t> elem_blk_ids;
-
-    auto & cell_vertices_ref = entities_[2][0];
 
     // get the element block ids
     if (int64)
@@ -1126,42 +1150,130 @@ public:
 
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
-      if (int64)
+
+      vector<int> counts;
+      if (int64) {
+        vector<long long> indices;
         base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
-      else
+            exoid, elem_blk_ids[iblk], counts, indices );
+        add_block( counts, indices, cell_min, cell_max, cell_counter,
+            cell2vertices_.offsets, cell2vertices_.indices );
+
+      }
+      else {
+        vector<int> indices;
         base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            exoid, elem_blk_ids[iblk], counts, indices );
+        add_block( counts, indices, cell_min, cell_max, cell_counter,
+            cell2vertices_.offsets, cell2vertices_.indices );
+      }
+
+    }
+    
+    // check some assertions
+    auto num_cells = cell_max - cell_min + 1;
+    clog_assert(
+        cell2vertices_.size() == num_cells,
+        "Mismatch in read blocks");
+    
+    // invert the global id to local id map
+    auto & cell_local2global_ = local_to_global_[num_dims];
+    auto & cell_global2local_ = global_to_local_[num_dims];
+
+    cell_local2global_.clear();
+    cell_local2global_.resize(num_cells);
+    for ( size_t i=0; i<num_cells; ++i ) {
+      auto global_id = cell_min + i;
+      cell_local2global_[i] = global_id;
+      cell_global2local_.emplace( std::make_pair( global_id, i ) );
+    }
+    
+    //--------------------------------------------------------------------------
+    // read coordinates
+
+    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    clog_assert(
+        coordinates.size() == dimension() * exo_params.num_nodes,
+        "Mismatch in read vertices");
+
+    auto num_vertices = coordinates.size() / dimension();
+    
+    //--------------------------------------------------------------------------
+    // Renumber vertices
+
+    // Throw away vertices that are not mine
+    size_t local_vertices{0};
+    auto & vertex_global2local_ = global_to_local_[0];
+    vertex_global2local_.clear();
+
+    for ( size_t i=0; i<num_cells; ++i ) {
+      for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
+        auto global_id = cell2vertices_.indices[j];
+        auto res = vertex_global2local_.emplace(
+            std::make_pair(global_id, local_vertices) );
+        if ( res.second ) local_vertices++;
+      }
     }
 
-    // check some assertions
-    clog_assert(
-        cell_vertices_ref.size() == exo_params.num_elem,
-        "Mismatch in read blocks");
+    // invert the global id to local id map
+    auto & vertex_local2global_ = local_to_global_[0];
+    vertex_local2global_.clear();
+    vertex_local2global_.resize(local_vertices);
 
+    for ( const auto & global_local : vertex_global2local_ )
+      vertex_local2global_[global_local.second] = global_local.first;
+    
+    // convert element conectivity to local ids and extract only coordinates
+    // that are needed
+    vertices_.clear();
+    vertices_.resize(local_vertices*num_dims);
+
+    for ( auto & v : cell2vertices_.indices ) {
+      auto global_id = v;
+      v = vertex_global2local_.at(global_id);
+      for ( int d=0; d<num_dims; ++d ) {
+        vertices_[ v*num_dims + d ] = 
+          coordinates[d * num_vertices + global_id];
+      }
+    }
+
+    //--------------------------------------------------------------------------
+    // close the file
+    base_t::close(exoid);
+
+  }
+
+
+  void build_connectivity() override {
+    
     //--------------------------------------------------------------------------
     // build the edges
 
     // reference storage for the cell edges and edge vertices
-    auto & cell_edges_ref = entities_[2][1];
-    auto & edge_vertices_ref = entities_[1][0];
-
-    // temprary storage for matching edges
-    auto edge_vertices_sorted = std::make_unique<connectivity_t>();
+    const auto & cells2vertices = local_connectivity_.at(2).at(0);
+    auto & cells2edges = local_connectivity_[2][1];
+    auto & edges2vertices = local_connectivity_[1][0];
 
     // build the connecitivity array
-    detail::build_connectivity(
-        cell_vertices_ref, cell_edges_ref, edge_vertices_ref,
-        *edge_vertices_sorted, [](const auto & vs, auto & edge_vs) {
-          using connectivity_type = std::decay_t<decltype(edge_vs)>;
-          using list_type = std::decay_t<decltype(*edge_vs.begin())>;
-          for (auto v0 = std::prev(vs.end()), v1 = vs.begin(); v1 != vs.end();
-               v0 = v1, ++v1)
-            edge_vs.emplace_back(list_type{*v0, *v1});
+    detail::new_build_connectivity(
+        cells2vertices, cells2edges, edges2vertices,
+        [](const auto & vs, auto & edge_vs) {
+          for (
+            auto v0 = std::prev(vs.end()), v1 = vs.begin();
+            v1 != vs.end();
+            v0 = v1, ++v1
+          )
+            edge_vs.push_back({*v0, *v1});
         });
 
-    // clear temporary storage
-    edge_vertices_sorted.reset();
+
+    // now figure out global ids
+    auto & edge_local2global = local_to_global_[1];
+    auto & edge_global2local = global_to_local_[1];
+    flecsi::coloring::match_ids( *this, 1, edge_local2global, edge_global2local );
+    
+    
+#if 0
 
     // make storage for the edge vertices
     auto num_edges = edge_vertices_ref.size();
@@ -1177,9 +1289,7 @@ public:
     detail::transpose(entities_[2][0], entities_[0][2]);
     detail::transpose(entities_[1][0], entities_[0][1]);
 
-    //--------------------------------------------------------------------------
-    // close the file
-    base_t::close(exoid);
+#endif
   }
 
   //============================================================================
@@ -1316,7 +1426,7 @@ public:
         return vertices_.size() / dimension();
       case 1:
       case 2:
-        return entities_.at(dim).at(0).size();
+        return local_connectivity_.at(dim).at(0).size();
       default:
         clog_fatal(
             "Dimension out of range: 0 < " << dim << " </ " << dimension());
@@ -1331,25 +1441,323 @@ public:
   entities(size_t from_dim, size_t to_dim) const override {
     return entities_.at(from_dim).at(to_dim);
   } // vertices
+  
+  const std::vector<size_t> &
+  local_to_global(size_t dim) const override
+  {
+    return local_to_global_.at(dim);
+  }
+  
+  const std::map<size_t, size_t> &
+  global_to_local(size_t dim) const override
+  {
+    return global_to_local_.at(dim);
+  }
+
+
+  const crs_t &
+  entities_crs(size_t from_dim, size_t to_dim) const override {
+    return local_connectivity_.at(from_dim).at(to_dim);
+  }
 
   /// return the set of vertices of a particular entity.
   /// \param [in] dimension  the entity dimension to query.
   /// \param [in] entity_id  the id of the entity in question.
   std::vector<size_t>
-  entities(size_t from_dim, size_t to_dim, size_t from_id) const override {
-    return entities_.at(from_dim).at(to_dim).at(from_id);
-  } // vertices
+  entities(size_t from_dim, size_t to_dim, size_t from_id) const override
+  {
+    const auto & connectivity = local_connectivity_.at(from_dim).at(to_dim);
+    auto start = connectivity.offsets[from_id];
+    auto end = connectivity.offsets[from_id+1];
+    std::vector<size_t> result( &connectivity.indices[start],
+        &connectivity.indices[end] );
+    return result;
+  }
 
   /// Return the vertex coordinates for a certain id.
   /// \param [in] vertex_id  The id of the vertex to query.
-  template<typename POINT_TYPE>
-  auto vertex(size_t vertex_id) const {
-    auto num_vertices = vertices_.size() / dimension();
-    POINT_TYPE p;
-    for (int i = 0; i < dimension(); ++i)
-      p[i] = vertices_[i * num_vertices + vertex_id];
-    return p;
+  void vertex(size_t vertex_id, real_t * coords) const override {
+    constexpr auto num_dims = dimension();
+    for ( int i=0; i<num_dims; ++i ) {
+      coords[i] =
+        vertices_[ vertex_id*num_dims + num_dims ];
+    }
   } // vertex
+  
+  void create_graph(
+      size_t from_dimension,
+      size_t to_dimension,
+      size_t min_connections,
+      flecsi::coloring::dcrs_t & dcrs ) const override
+  {
+    constexpr auto num_dims = dimension();
+
+    if ( from_dimension != num_dims || to_dimension != 0 )
+      throw_runtime_error( "Incorrect dimensions provided to create_graph" );
+
+    flecsi::coloring::make_dcrs_distributed<num_dims>(
+      *this, from_dimension, to_dimension, min_connections, dcrs);
+  }
+
+  void erase(
+    size_t dimension,
+    const vector<size_t> & local_ids ) override
+  {
+    
+    if (local_ids.empty()) return;
+
+    // assume sorted
+    assert( std::is_sorted( local_ids.begin(), local_ids.end() )
+        && "entries to delete are not sorted" );
+
+    constexpr auto num_dims = base_t::num_dims;
+
+    //--------------------------------------------------------------------------
+    // Erase elements
+
+    // erase any vertices that are no longer used.
+    auto & cells2verts = local_connectivity_.at(num_dims).at(0);
+    std::vector<index_t> check_vertices;
+    
+    // erase the local mapping
+    auto & cell_local2global = local_to_global_.at(num_dims);
+    auto & cell_global2local = global_to_local_.at(num_dims);
+
+    auto num_remove = local_ids.size();
+    auto num_cells = cell_local2global.size();
+
+    for (auto i = num_remove; i-- > 0; ) {
+
+      // get global and local id
+      auto local_id = local_ids[i];
+      auto global_id = cell_local2global[local_id];
+
+      // add vertices to check to the list
+      auto start = cells2verts.offsets[local_id];
+      auto end = cells2verts.offsets[local_id+1];
+      for ( auto j=start; j<end; ++j )
+        check_vertices.emplace_back( cells2verts.indices[j] );
+      
+
+      // shift all local to global ids
+      for ( auto j=local_id; j<num_cells; ++j )
+        cell_local2global[j] = cell_local2global[j+1];
+    
+      // and the global mapping ( need to decrement entries )
+      auto count = cell_global2local.erase( global_id );
+      assert( count > 0 && "global id not found!" );
+      for ( auto & pair : cell_global2local )
+        if ( pair.second>local_id )
+          pair.second--;
+      
+      // decrement number of cells
+      num_cells--;
+    }
+
+    // resize
+    cell_local2global.resize(num_cells);
+    
+    // erase cells to vertices info
+    cells2verts.erase(local_ids);
+
+    //--------------------------------------------------------------------------
+    // Determine unused vertices
+
+    // sort vertices to check and remove duplicates
+    std::sort( check_vertices.begin(), check_vertices.end() );
+    auto last = std::unique( check_vertices.begin(), check_vertices.end() );
+
+    // find vertices that are no longer used
+    std::vector<index_t> delete_vertices;
+    delete_vertices.reserve( check_vertices.size() );
+
+    for ( auto it = check_vertices.begin(); it != last; ++it ) {
+      // mark unused first
+      bool used = false;
+      // iterate over all cell-vertices, and bounce if its used
+      for ( auto i : cells2verts.indices ) {
+        if ( i == *it ) {
+          used = true;
+          break;
+        }
+      }
+      // if vertex is unused, add to list to delete
+      if ( !used ) delete_vertices.emplace_back( *it );
+    }
+    
+    //--------------------------------------------------------------------------
+    // Delete vertices
+
+    num_remove = delete_vertices.size();
+    if ( num_remove ) {
+   
+      //------------
+      // Delete
+
+      // erase the local mapping
+      auto num_vertices = vertices_.size() / num_dims;
+      auto & vert_local2global = local_to_global_.at(0);
+      auto & vert_global2local = global_to_local_.at(0);
+
+      auto vertex_count = num_vertices;
+      for (auto i = num_remove; i-- > 0; ) {
+
+        // get global and local id
+        auto local_id = delete_vertices[i];
+        auto global_id = vert_local2global[local_id];
+
+        // shift all local to global ids, and vertices
+        for ( auto j=local_id; j<vertex_count; ++j ) {
+          vert_local2global[j] = vert_local2global[j+1];
+          for ( int d=0; d<num_dims; ++d )
+            vertices_[ j*num_dims + d ] = vertices_[ (j+1)*num_dims + d ];
+        }
+      
+        // and delete the global mapping
+        auto count = vert_global2local.erase( global_id );
+        assert( count > 0 && "global id not found!" );
+        for ( auto & pair : vert_global2local )
+          if ( pair.second>local_id )
+            pair.second--;
+        
+        // decrement number of vertices
+        vertex_count--;
+      }
+
+      // resize
+      vert_local2global.resize(vertex_count);
+      vertices_.resize(vertex_count*num_dims);
+      
+      //------------
+      // Renumber
+      
+      // storage for renumberings
+      vector<index_t>
+        old2new( num_vertices, std::numeric_limits<size_t>::max() );
+      
+      // add the number of vertices to the oend
+      delete_vertices.emplace_back( num_vertices );
+
+      // figure new numbering
+      size_t i{0};
+      vertex_count = 0;
+
+      for (auto it=delete_vertices.begin(); it != delete_vertices.end(); ++it)
+      {
+        for ( ; i<*it; ++i ) {
+          old2new[i] = vertex_count;
+          vertex_count++;
+        }
+        i++;
+      }
+ 
+      assert( vertex_count == num_vertices - num_remove &&
+          "Vertex deletion messed up" );
+
+      // renumber cell connectivity
+      for ( auto & i : cells2verts.indices ) {
+        i = old2new[i];
+        assert( i< vertex_count && "Messed up renumbering #1" );
+      }
+
+    } // delete vertices
+    
+  }
+
+  void pack(
+    size_t dimension,
+    size_t local_id,
+    std::vector<byte_t> & buffer ) const override
+  {
+    // get number of vertices
+    constexpr auto num_dims = base_t::num_dims;
+    const auto & cells2verts = local_connectivity_.at(num_dims).at(0);
+    const auto & start = cells2verts.offsets[local_id];
+    const auto & end   = cells2verts.offsets[local_id+1];
+    auto num_verts = end - start;
+    // get numbering maps
+    const auto & cells_local2global = local_to_global_.at(num_dims);
+    const auto & verts_local2global = local_to_global_.at(0);
+    // add mesh global id to buffer
+    flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
+    // add num verts to buffer
+    flecsi::topology::cast_insert( &num_verts, 1, buffer );
+    // add global vertex indices to buffer
+    for (auto i=start; i<end; ++i) {
+      auto lid = cells2verts.indices[i];
+      auto gid = verts_local2global[lid];
+      flecsi::topology::cast_insert( &gid, 1, buffer );
+    }
+    // also pack coordinates too, not ideal but easiest
+    for (auto i=start; i<end; ++i) {
+      auto lid = cells2verts.indices[i];
+      auto coord = vertices_.data() + lid*num_dims;
+      flecsi::topology::cast_insert( coord, num_dims, buffer );
+    }
+  }
+
+  void unpack(
+    size_t dimension,
+    size_t local_id,
+    byte_t const * & buffer ) override
+  {
+
+    // get the numbering and connectivity maps
+    constexpr auto num_dims = base_t::num_dims;
+    auto & cells2verts = local_connectivity_.at(num_dims).at(0);
+    auto & cells_local2global = local_to_global_.at(num_dims);
+    auto & cells_global2local = global_to_local_.at(num_dims);
+    
+    // compute the new local id
+    local_id = cells_local2global.size();
+    // get global mesh id
+    size_t global_id;
+    flecsi::topology::uncast( buffer, 1, &global_id );
+    // add mapping
+    cells_local2global.emplace_back( global_id );
+    auto res = cells_global2local.emplace( std::make_pair(global_id, local_id) );
+    assert( res.second && "Global id already exists but shouldn't" );
+    
+    // get the number of vertices
+    size_t num_verts;
+    flecsi::topology::uncast( buffer, 1, &num_verts );
+   
+    // retrieve global vertex ids
+    auto start = cells2verts.offsets.back();
+    auto end = start + num_verts;
+    cells2verts.offsets.emplace_back( end );
+    cells2verts.indices.resize( end );
+    flecsi::topology::uncast( buffer, num_verts, &cells2verts.indices[start] );
+
+    // unpack vertex coordinates
+    vector<real_t> coords(num_dims*num_verts);
+    flecsi::topology::uncast( buffer, coords.size(), coords.data() );
+
+    // need to convert global vertex ids to local ids
+    auto & verts_local2global = local_to_global_.at(0);
+    auto & verts_global2local = global_to_local_.at(0);
+    for ( size_t i=0; i<num_verts; ++i ) {
+      auto iv = start + i;
+      auto gid = cells2verts.indices[iv];
+      auto lid = verts_global2local.size();
+      auto res = verts_global2local.emplace( std::make_pair(gid,lid) );
+      // inserted, so add entries to maps
+      if ( res.second ) {
+        verts_local2global.emplace_back( gid );
+        vertices_.reserve( vertices_.size() + num_dims );
+        for ( int dim=0; dim<num_dims; ++dim )
+          vertices_.emplace_back( coords[i*num_dims + dim] );
+      }
+      // not inserted, so get local id
+      else {
+        lid = res.first->second;
+      }
+      // now remap indices
+      cells2verts.indices[iv] = lid;
+    }
+
+  }
+
 
 private:
   //============================================================================
@@ -1361,6 +1769,14 @@ private:
 
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
+
+  //! \brief storage for cell to vertex connectivity
+  std::map<index_t, std::map<index_t, crs_t>> local_connectivity_;
+
+  //! \brief global/local id maps
+  std::map<index_t, std::map<index_t, index_t>> global_to_local_;
+  std::map<index_t, vector<index_t>> local_to_global_;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////

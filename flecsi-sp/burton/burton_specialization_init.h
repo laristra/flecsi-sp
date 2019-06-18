@@ -32,6 +32,19 @@
 namespace flecsi_sp {
 namespace burton {
 
+namespace globals {
+
+  using mesh_definition_t =
+    flecsi::topology::mesh_definition_u< burton_mesh_t::num_dimensions >;
+  std::unique_ptr<mesh_definition_t> mesh_def;
+
+  std::map< size_t, flecsi::coloring::crs_t > ghost_connectivity;
+  std::map< size_t, std::vector<size_t> > ghost_ids;
+  std::vector< size_t > cell_distribution;
+
+}
+
+
 ////////////////////////////////////////////////////////////////////////////////
 //! Concatenate the list of exclusve, shared and ghost entities
 ////////////////////////////////////////////////////////////////////////////////
@@ -261,6 +274,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   // alias some other types
   using point_t = typename mesh_t::point_t;
   using vertex_t = typename mesh_t::vertex_t;
+  using edge_t = typename mesh_t::edge_t;
   using cell_t = typename mesh_t::cell_t;
 
   //----------------------------------------------------------------------------
@@ -268,7 +282,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   //----------------------------------------------------------------------------
 
   // get the context
-  const auto & context = flecsi::execution::context_t::instance();
+  auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
 
   // get the entity maps
@@ -276,11 +290,12 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   // - mid = mesh id - the original id of the entity ( usually from file )
   // - gid = global id - the new global id of the entity ( set by flecsi )
   const auto & vertex_lid_to_mid = context.index_map( index_spaces::vertices );
-  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
   const auto & vertex_mid_to_lid = context.reverse_index_map(
     index_spaces::vertices
   );
+
+  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
   //----------------------------------------------------------------------------
   // create the vertices
@@ -288,12 +303,21 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
   std::vector< vertex_t * > vertices;
   vertices.reserve( vertex_lid_to_mid.size() );
+  
+  const auto & vert_global2local = mesh_def.global_to_local(vertex_t::dimension);
 
+  point_t temp_point{0};
   for(auto & vm: vertex_lid_to_mid) {
-    // get the point
-    const auto & p = mesh_def.template vertex<point_t>( vm.second );
-    // now create it
-    auto v = mesh.create_vertex( p );
+    // search this ranks mesh definition for the matching offset
+    auto it = vert_global2local.find( vm.second );
+    // the vertex exists on this rank so create it
+    if ( it != vert_global2local.end() ) {
+      // get the point
+      mesh_def.vertex(it->second, temp_point.data());
+    }
+    // now create it, if the vertex did not exist, it doesnt matter what
+    // data we give it
+    auto v = mesh.create_vertex( temp_point );
     vertices.emplace_back(v);
   } // for vertices
 
@@ -301,23 +325,140 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   // create the cells
   //----------------------------------------------------------------------------
 
+  // get the list of vertices
+  const auto & cell_to_vertices =
+      mesh_def.entities_crs( cell_t::dimension, vertex_t::dimension );
+  
+  const auto & ghost_ids = globals::ghost_ids.at(vertex_t::dimension);
+  const auto & ghost_connectivity = globals::ghost_connectivity.at(vertex_t::dimension);
+
+  auto determine_vertex_id = [&](auto v) {
+    auto vit = std::find_if( vertex_lid_to_mid.begin(),
+        vertex_lid_to_mid.end(), 
+        [=](const auto & a) { return a.second == v; } );
+    assert( vit != vertex_lid_to_mid.end() && "Could not find ghost vertex id" );
+    return vit->first;
+  };
+
+  // create a list of vertex pointers
+  std::vector< vertex_t * > elem_vs;
+
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
-    // get the list of vertices
-    auto vs =
-      mesh_def.entities( cell_t::dimension, vertex_t::dimension, cm.second );
-    // create a list of vertex pointers
-    std::vector< vertex_t * > elem_vs( vs.size() );
-    // transform the list of vertices to mesh ids
-    std::transform(
-      vs.begin(),
-      vs.end(),
-      elem_vs.begin(),
-      [&](auto v) { return vertices[ vertex_mid_to_lid.at(v) ]; }
-    );
-    // create the cell
+
+    auto lid = cm.first;
+    auto mid = cm.second;
+
+    // clear the list
+    elem_vs.clear();
+
+    // search this ranks mesh definition for the matching offset
+    auto r = flecsi::coloring::rank_owner( globals::cell_distribution, mid );
+
+    // if i am the owner
+    if ( r == rank ) {
+      // figure out the original local id (note flecsi will have renumberd this)
+      auto id = mid - globals::cell_distribution[rank];
+      // get the list of vertices
+      const auto & vs = cell_to_vertices.at(id);
+      // create a list of vertex pointers
+      elem_vs.resize( vs.size() );
+      // transform the list of vertices to mesh ids
+      std::transform(
+        vs.begin(),
+        vs.end(),
+        elem_vs.begin(),
+        [&](auto v) { return vertices[ determine_vertex_id(v) ]; }
+      );
+    }
+    // otherwise, it is a ghost cell
+    else {
+      // find out what its connectivity info is
+      auto it = std::find( ghost_ids.begin(), ghost_ids.end(), cm.second );
+      assert( it != ghost_ids.end() && "Could not find ghost cell id" );
+      auto i = std::distance( ghost_ids.begin(), it );
+      // reserve space
+      const auto & vs = ghost_connectivity.at(i);
+      elem_vs.reserve( vs.size() );
+      // now convert my global ids to flecsi local ids
+      for ( auto v : vs ) {
+        auto id = determine_vertex_id(v);
+        elem_vs.emplace_back( vertices[id] );
+      }
+    }
+
+    // create the cell (only need the number of vertices rn)
+    // if this is a ghost cell, it is junk for now
     auto c = mesh.create_cell( elem_vs );
   }
+
+  //----------------------------------------------------------------------------
+  // create the edges
+  //----------------------------------------------------------------------------
+  
+  const auto & edge_lid_to_mid = context.index_map( index_spaces::edges );
+  const auto & edges = context.coloring( index_spaces::edges );
+  
+  const auto & edge_global2local = mesh_def.global_to_local(edge_t::dimension);
+  const auto & edge_to_vertices =
+      mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
+  
+  // create the edges
+  for(auto & em: edge_lid_to_mid) {
+
+    auto lid = em.first;
+    auto mid = em.second;
+
+    // clear the list
+    elem_vs.clear();
+
+    // search for the mid
+    bool found = false;
+    auto it = std::find_if( edges.exclusive.begin(), edges.exclusive.end(), 
+        [=](auto i) { return i.id == mid; } );
+    // not found, look in shared
+    if ( it == edges.exclusive.end() ) {
+      auto it = std::find_if( edges.shared.begin(), edges.shared.end(), 
+          [=](auto i) { return i.id == mid; } );
+      if ( it != edges.shared.end() ) {
+        found = true;
+      }
+    }
+    else {
+      found = true;
+    }
+
+    // it is either exclusive or shared
+    if ( found ) {
+      // search this ranks mesh definition for the matching offset
+      auto it = edge_global2local.find( mid );
+      assert( it != edge_global2local.end() && "edge id not found" );
+      // the vertex exists on this rank so create it
+      if ( it != edge_global2local.end() ) {
+        // get the list of vertices
+        auto id = it->second;
+        const auto & vs = edge_to_vertices.at(id);
+        // create a list of vertex pointers
+        elem_vs.resize( vs.size() );
+        // transform the list of vertices to mesh ids
+        std::transform(
+          vs.begin(),
+          vs.end(),
+          elem_vs.begin(),
+          [&](auto v) { return vertices[ determine_vertex_id(v) ]; }
+        );
+      }
+    }
+    // otherwise it is a ghost edge
+    else {
+    }
+
+    // make the edge
+    auto new_edge = mesh.template make<edge_t>();
+    // add the connectivity
+    mesh.init_entity_<0>(new_edge, elem_vs);
+  }
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1580,15 +1721,46 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   using wedge_t = burton_mesh_t::wedge_t;
   using side_t = burton_mesh_t::side_t;
 
-  // load the mesh
-  auto filename_string = filename.str();
-  exodus_definition_t mesh_def( filename_string );
-
   // Create a communicator instance to get neighbor information.
   auto communicator = std::make_unique<flecsi::coloring::mpi_communicator_t>();
   auto comm_size = communicator->size();
   auto rank = communicator->rank();
 
+  enum class file_type_t {
+    exodus,
+    nemesis,
+    unknown
+  };
+
+  // try to figure out what kind of file it is
+  auto get_file_type = []( auto str ) {
+    auto base = ristra::utils::basename(str);
+    auto i = base.rfind( '.', base.length() );
+    while ( i != std::string::npos ) {
+      auto ext = base.substr(i+1, base.length()-1);
+      if ( ext == "g" || ext == "exo" ) return file_type_t::exodus;
+      else if ( ext == "par" ) return file_type_t::nemesis;
+      base = base.substr(0, i);
+      i = base.rfind( '.', base.length() );
+    }
+    return file_type_t::unknown;
+  };
+
+  // load the mesh
+  auto filename_string = filename.str();
+  auto file_type = get_file_type( filename.str() );
+
+  // Here we pull the mesh definition out of the 
+  using globals::mesh_def;
+
+  if ( file_type == file_type_t::exodus )
+    mesh_def = std::make_unique<exodus_definition_t>( filename_string );
+  else if ( file_type == file_type_t::nemesis ) {
+    filename_string += "." + std::to_string(rank);
+    mesh_def = std::make_unique<exodus_definition_t>( filename_string );
+  }
+  else
+    throw_implemented_error( "Unknown mesh file type" );
 
   // create a vector of colorings and color info for each dimensional entity
   std::map< size_t, std::map< size_t, flecsi::coloring::index_coloring_t > >
@@ -1603,166 +1775,72 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // Cells index coloring.
   auto & cells = entities[0][ num_dims ];
   auto & cell_color_info = entity_color_info[0][ num_dims ];
+  
+  // distributed compressed row storage
+  flecsi::coloring::dcrs_t dcrs;
+
+  // if ( needs_repartitioning ) {
 
   // Create the dCRS representation for the distributed colorer.
   // This essentialy makes the graph of the dual mesh.
-  auto dcrs = flecsi::coloring::make_dcrs(mesh_def);
+  mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
 
   // Create a colorer instance to generate the primary coloring.
   auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
 
-  // Create the primary coloring.
-  cells.primary = colorer->color(dcrs);
+  // Create the primary coloring and partition the mesh.
+  auto partitioning = colorer->color(dcrs);
+  // now migrate the entities to their respective ranks
+  flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
+
+  // } // needs_repartitioning
 
   //----------------------------------------------------------------------------
   // Cell Closure.  However many layers of ghost cells are needed are found
   // here.
   //----------------------------------------------------------------------------
+  
+  // now that partitioning is over, recreate the dual graph so that we can
+  // determine ghost cells.  This time we want corner cells, so 1 shared 
+  // vertex is eneough to consider a cell as a neighbor.
+  // FIXME: Here is where you would specify the depth of ghost cells.
+  mesh_def->create_graph( num_dims, 0, 1, dcrs );
+  globals::cell_distribution = dcrs.distribution;
 
-  // Compute the dependency closure of the primary cell coloring
-  // through vertex intersections (specified by last argument "1").
-  // To specify edge or face intersections, use 2 (edges) or 3 (faces).
-  auto cells_plus_halo =
-    flecsi::topology::entity_neighbors<cell_dim, cell_dim, thru_dim>(
-      mesh_def, cells.primary
-    );
-
-  // Subtracting out the initial set leaves just the nearest
-  // neighbors. This is similar to the image of the adjacency
-  // graph of the initial indices.
-  auto halo_cells =
-    flecsi::utils::set_difference(cells_plus_halo, cells.primary);
-
-  //----------------------------------------------------------------------------
-  // Find one more layer of ghost cells now, these are needed to get some corner
-  // cases right.
-  //----------------------------------------------------------------------------
-
-  // We can iteratively add halos of nearest neighbors, e.g.,
-  // here we add the next nearest neighbors. For most mesh types
-  // we actually need information about the ownership of these indices
-  // so that we can deterministically assign rank ownership to vertices.
-  auto halo_neightbors =
-    flecsi::topology::entity_neighbors<cell_dim, cell_dim, thru_dim>(
-      mesh_def, halo_cells
-    );
-
-  // Subtracting out the closure leaves just the
-  // next nearest neighbors.
-  auto second_halo_cells =
-    flecsi::utils::set_difference(halo_neightbors, cells_plus_halo);
-
-  // The union of the nearest and next-nearest neighbors gives us all
-  // of the cells that might reference a vertex that we need.
-  auto two_halo_cells =
-    flecsi::utils::set_union(halo_cells, second_halo_cells);
-
-  //----------------------------------------------------------------------------
-  // Find exclusive, shared, and ghost cells..
-  //----------------------------------------------------------------------------
-
-  // Get the rank and offset information for our nearest neighbor
-  // dependencies. This also gives information about the ranks
-  // that access our shared cells.
-  auto cell_nn_info =
-    communicator->get_primary_info(cells.primary, halo_cells);
-
-  // Create a map version of the local info for lookups below.
-  std::unordered_map<size_t, size_t> primary_indices_map;
-  {
-    size_t offset(0);
-    for(auto i: cells.primary)
-      primary_indices_map[offset++] = i;
-  } // scope
-
-  // Populate exclusive and shared cell information.
-  {
-    size_t offset(0);
-    for(auto i: std::get<0>(cell_nn_info)) {
-      // get the entity info
-      auto entry =
-        entity_info_t(primary_indices_map.at(offset), rank, offset, i);
-      // if it belongs to other colors, its a shared cell
-      if(i.size()) {
-        cells.shared.insert(entry);
-        // Collect all colors with whom we require communication
-        // to send shared information.
-        cell_color_info.shared_users =
-          flecsi::utils::set_union(cell_color_info.shared_users, i);
-      }
-      // otherwise, its an exclusive cell
-      else
-        cells.exclusive.insert(entry);
-      // increment counter
-      offset++;
-    } // for
-  } // scope
-
-  // Populate ghost cell information.
-  for(auto i: std::get<1>(cell_nn_info)) {
-    cells.ghost.insert(i);
-    // Collect all colors with whom we require communication
-    // to receive ghost information.
-    cell_color_info.ghost_owners.insert(i.rank);
-  }
-
-  // store the sizes of each set
-  cell_color_info.exclusive = cells.exclusive.size();
-  cell_color_info.shared = cells.shared.size();
-  cell_color_info.ghost = cells.ghost.size();
-
-  //----------------------------------------------------------------------------
-  // Create some maps for easy lookups when determining the other dependent
-  // closures.
-  //----------------------------------------------------------------------------
-
-  // Create a map version for lookups below.
-  std::unordered_map<size_t, entity_info_t> shared_cells_map;
-  for(auto i: cells.shared)
-    shared_cells_map[i.id] = i;
-
-  // Get the rank and offset information for all relevant neighbor
-  // dependencies. This information will be necessary for determining
-  // shared vertices.
-  auto cell_all_info =
-    communicator->get_primary_info(cells.primary, two_halo_cells);
-
-  // Create a map version of the remote info for lookups below.
-  std::unordered_map<size_t, entity_info_t> remote_info_map;
-  for(auto i: std::get<1>(cell_all_info))
-    remote_info_map[i.id] = i;
-
-  // Get the intersection of our nearest neighbors with the nearest
-  // neighbors of other ranks. This map of sets will only be populated
-  // with intersections that are non-empty
-  auto closure_intersection_map =
-    communicator->get_intersection_info(halo_cells);
-
+  // now we can build all the other connectivity
+  mesh_def->build_connectivity();
+  
   //----------------------------------------------------------------------------
   // Identify exclusive, shared, and ghost for other entities
   //----------------------------------------------------------------------------
+  
+  // Find exclusive, shared, and ghost cells..
+  // Not a fan of sets, but alot of machinery is built up on it.
+  flecsi::coloring::get_owner_info( dcrs, cells, cell_color_info );
+
+  // Find exclusive, shared, and ghost for the auxiliary index spaces (i.e.
+  // edges, vertices, faces)
+  std::map< size_t, std::map<size_t, size_t> > counts;
 
   for ( int i=0; i<num_dims; ++i ) {
-    color_entity(
-      communicator.get(),
-      cells_plus_halo,
-      remote_info_map,
-      shared_cells_map,
-      closure_intersection_map,
-      mesh_def.entities(num_dims, i),
-      mesh_def.entities(i, num_dims),
-      entities[0][i],
-      entity_color_info[0][i]
-    );
+    flecsi::coloring::color_entities( *mesh_def, i, cells, entities[0][i],
+        entity_color_info[0][i], globals::ghost_ids[i],
+        globals::ghost_connectivity[i], counts[num_dims][i] );
   }
 
+  // edge to vertex connectivity sizes is easy
+  {
+    const auto & edges = entities.at(0).at(1);
+    counts[1][0] = 2*(edges.exclusive.size() + edges.shared.size() + edges.ghost.size());
+  }
+  
   //----------------------------------------------------------------------------
   // Identify exclusive, shared and ghost for corners and wedges and side
   //----------------------------------------------------------------------------
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
-  auto corners = make_corners( mesh_def );
+  auto corners = make_corners( *mesh_def );
   const auto & cells_to_corners = corners.first[num_dims];
   const auto & corners_to_cells = corners.second[num_dims];
 
@@ -1786,7 +1864,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     + corner_entities.ghost.size();
 
 #if FLECSI_SP_BURTON_MESH_DIMENSION > 1
-  auto wedges = make_wedges( mesh_def );
+  auto wedges = make_wedges( *mesh_def );
   const auto & cells_to_wedges = wedges.first[num_dims];
   const auto & wedges_to_cells = wedges.second[num_dims];
 
@@ -1809,7 +1887,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     + wedge_entities.shared.size()
     + wedge_entities.ghost.size();
 
-  auto sides = make_sides( mesh_def );
+  auto sides = make_sides( *mesh_def );
   const auto & cells_to_sides = sides.first[num_dims];
   const auto & sides_to_cells = sides.second[num_dims];
 
@@ -1832,8 +1910,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     + side_entities.shared.size()
     + side_entities.ghost.size();
 
-  std::cout<<"num_sides: " << num_sides<<std::endl;
-  
 #endif // DIMENSION > 1
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -1877,44 +1953,14 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //----------------------------------------------------------------------------
   // add adjacency information
   //----------------------------------------------------------------------------
-
-  std::vector< std::vector<size_t> > entity_ids(num_dims+1);
-
-  // create a master list of all entities
-  for ( int i=0; i<num_dims+1; ++i ) {
-
-    const auto & these_entities = entities.at(0).at(i);
-    auto & these_ids = entity_ids[i];
-
-    // get the list of exclusive+shared+ghost ids
-    concatenate_ids( these_entities, these_ids );
-    auto num_entities = these_ids.size();
-
-    // sort the entities ( this is needed for the search down below )
-    // hoepefully it doesnt cause any problems
-    std::sort( these_ids.begin(), these_ids.end() );
-    auto last = std::unique( these_ids.begin(), these_ids.end() );
-    if ( last != these_ids.end() )
-      clog_error( "Duplicate ids in master lists" );
-
-  }
-
+  
   // loop over each dimension and determine the adjacency sizes
   for ( int from_dim = 0; from_dim<=num_dims; ++from_dim ) {
-
-    // the master list of all entity ids
-    const auto & from_ids = entity_ids[from_dim];
-
-    for ( int to_dim = 0; to_dim<=num_dims; ++to_dim ) {
+    for (int to_dim = num_dims+1; to_dim-- > 0; ) {
 
       // skip the case where both dimensions are the same
       if ( from_dim == to_dim ) continue;
-
-      // the master list of all entity ids
-      const auto & to_ids = entity_ids[to_dim];
-      const auto to_ids_begin = to_ids.begin();
-      const auto to_ids_end = to_ids.end();
-
+      
       // populate the adjacency information
       flecsi::coloring::adjacency_info_t ai;
       ai.index_space =
@@ -1924,18 +1970,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
       ai.color_sizes.resize(comm_size);
 
       // loop over all cells and count the number of adjacencies
-      size_t cnt = 0;
-      for ( auto c : from_ids ) {
-        // get the attached sub entitites
-        const auto & ids = mesh_def.entities(from_dim, to_dim, c);
-        // we need to make sure they are in this colors master
-        // list though
-        for ( auto v : ids ) {
-          auto it = std::lower_bound( to_ids_begin, to_ids_end, v );
-          if ( it != to_ids_end && *it == v )
-            cnt++;
-        }
-      }
+      size_t cnt = (to_dim>from_dim) ? counts.at(to_dim).at(from_dim) :
+        counts.at(from_dim).at(to_dim);
+      std::cout << "cnt = " << cnt << " for " << ai.index_space << std::endl;
 
       // gather the results
       ai.color_sizes = communicator->gather_sizes( cnt );
@@ -1944,6 +1981,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
       context.add_adjacency(ai);
 
     }
+
   }
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
@@ -2249,15 +2287,20 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // loop over all dimensions, getting the list of ids that are
   // connected to owned cells
   for ( int to_dim = 0; to_dim<num_dims; ++to_dim ) {
+    // connectivity
+    const auto & ents = mesh_def->entities_crs(num_dims, to_dim);
+    // storage for subspace ids
     std::vector<size_t> ids;
     // get all exclusive and shared ids.
     for ( auto c : cell_entities.exclusive ) {
-      const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
-      ids.insert( ids.end(), ents.begin(), ents.end() );
+      auto start = ents.offsets[c.offset];
+      auto end = ents.offsets[c.offset+1];
+      ids.insert( ids.end(), &ents.indices[start], &ents.indices[end] );
     }
     for ( auto c : cell_entities.shared ) {
-      const auto & ents = mesh_def.entities(num_dims, to_dim, c.id);
-      ids.insert( ids.end(), ents.begin(), ents.end() );
+      auto start = ents.offsets[c.offset];
+      auto end = ents.offsets[c.offset+1];
+      ids.insert( ids.end(), &ents.indices[start], &ents.indices[end] );
     }
     // get number of unique entries
     std::sort( ids.begin(), ids.end() );
@@ -2275,22 +2318,22 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // colorings.
   //----------------------------------------------------------------------------
 
-  for ( int i=1; i<num_dims; ++i ) {
-     // create a new map
-    auto & entity_to_vertex_map =
-      context.intermediate_map( /* dim */ i, /* dom */ 0 );
-    auto & vertex_to_entity_map =
-      context.reverse_intermediate_map( /* dim */ i, /* dom */ 0 );
-    // loop over each entity id and get its list of vertices
-    for ( auto e : entity_ids[i] ) {
-      auto vs = mesh_def.entities( /* dimension */ i, /* domain */ 0, e );
-      // sorted for comparison later
-      std::sort( vs.begin(), vs.end() );
-      // add all the mappings for this entity
-      entity_to_vertex_map.emplace( e, vs );
-      vertex_to_entity_map.emplace( vs, e );
-    }
-  }
+  //for ( int i=1; i<num_dims; ++i ) {
+  //   // create a new map
+  //  auto & entity_to_vertex_map =
+  //    context.intermediate_map( /* dim */ i, /* dom */ 0 );
+  //  auto & vertex_to_entity_map =
+  //    context.reverse_intermediate_map( /* dim */ i, /* dom */ 0 );
+  //  // loop over each entity id and get its list of vertices
+  //  for ( auto e : entity_ids[i] ) {
+  //    auto vs = mesh_def->entities( /* dimension */ i, /* domain */ 0, e );
+  //    // sorted for comparison later
+  //    std::sort( vs.begin(), vs.end() );
+  //    // add all the mappings for this entity
+  //    entity_to_vertex_map.emplace( e, vs );
+  //    vertex_to_entity_map.emplace( vs, e );
+  //  }
+  //}
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
@@ -2445,23 +2488,15 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   const auto & vertices = entities[0][0];
 
   // open the exodus file
-  if ( rank == 0 )
-    std::cout << "Writing mesh to: " << output_filename << std::endl;
+  //if ( rank == 0 )
+  //  std::cout << "Writing mesh to: " << output_filename << std::endl;
 
-  using std::make_pair;
-  mesh_def.write(
-    output_filename,
-    {
-      make_pair( "exclusive cells", to_vec(cells.exclusive) ),
-      make_pair( "shared cells", to_vec(cells.shared) ),
-      make_pair( "ghost cells", to_vec(cells.ghost) )
-    },
-    {
-      make_pair( "exclusive vertices", to_vec(vertices.exclusive) ),
-      make_pair( "shared vertices", to_vec(vertices.shared) ),
-      make_pair( "ghost vertices", to_vec(vertices.ghost) )
-    }
-  );
+  //using std::make_pair;
+  //if ( file_type == file_type_t::exodus ) {
+  //  auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
+  //  exo_def->write( output_filename );
+  //}
+
 
   clog(info) << "Finished mesh partitioning." << std::endl;
 
@@ -2473,8 +2508,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 /// \brief the main mesh initialization driver
 ////////////////////////////////////////////////////////////////////////////////
 void initialize_mesh(
-  utils::client_handle_w<burton_mesh_t> mesh,
-  utils::char_array_t filename
+  utils::client_handle_w<burton_mesh_t> mesh
 ) {
 
   //----------------------------------------------------------------------------
@@ -2486,24 +2520,22 @@ void initialize_mesh(
 
   // alias some types
   using real_t = burton_mesh_t::real_t;
-  using exodus_definition_t = flecsi_sp::io::exodus_definition<num_dims, real_t>;
 
   // get the context
   const auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
-
-  // Load the mesh
-  auto filename_string = filename.str();
-  exodus_definition_t mesh_def( filename_string );
+  
+  // Here we pull the mesh definition out of the 
+  using globals::mesh_def;
 
   // fill the mesh
-  create_cells( mesh_def, mesh );
+  create_cells( *mesh_def, mesh );
 
   // initialize the mesh
   mesh.init();
 
   // create the subspaces
-  create_subspaces( mesh_def, mesh );
+  create_subspaces( *mesh_def, mesh );
 
   ////----------------------------------------------------------------------------
   //// Some debug
@@ -2530,8 +2562,7 @@ void initialize_mesh(
 // Task Registration
 ///////////////////////////////////////////////////////////////////////////////
 flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
-flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
-    index|flecsi::leaf);
+flecsi_register_mpi_task(initialize_mesh, flecsi_sp::burton);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Clent Registration happens here because the specialization initialization
