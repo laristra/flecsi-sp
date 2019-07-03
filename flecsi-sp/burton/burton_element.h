@@ -470,6 +470,13 @@ struct burton_element_t<2,1> :
   void tag(const tag_t & tag)
   { tags_.push_back(tag); }
 
+  //! check if flipped
+  template<typename T>
+  bool is_flipped(const T & c)
+  {
+    return owner_id_ != c->template global_id().global();
+  }
+
   //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
   void update( const MESH_TOPOLOGY * mesh )
@@ -477,6 +484,7 @@ struct burton_element_t<2,1> :
     using ristra::math::sqr;
     using ristra::math::normal;
     auto vs = mesh->template entities<0, domain>(this);
+    auto cs = mesh->template entities<2, domain>(this);
     const auto & a = vs[0]->coordinates();
     const auto & b = vs[1]->coordinates();
     midpoint_[0] = 0.5*(a[0] + b[0]);
@@ -484,6 +492,7 @@ struct burton_element_t<2,1> :
     length_ = std::sqrt( sqr(a[0]-b[0]) + sqr(a[1]-b[1]) );
     normal_ = normal( b, a );
     normal_ /= length_;
+    owner_id_ = cs[0]->template global_id().global(); 
   }
 
   //============================================================================
@@ -502,6 +511,9 @@ private:
   real_t length_ = 0;
   point_t midpoint_ = 0;
   vector_t normal_ = 0;
+
+  //! owner
+  size_t owner_id_ = std::numeric_limits<size_t>::max();
 };
 
 
@@ -1300,6 +1312,7 @@ struct burton_element_t<3,2>
     using ristra::math::abs;
   
     auto vs = mesh->template entities<0, domain>(this);
+    auto cs = mesh->template entities<3, domain>(this);
   
     switch (shape_) {
   
@@ -1370,6 +1383,7 @@ struct burton_element_t<3,2>
     
     area_ = abs( normal_ );
     normal_ /= area_;
+    owner_id_ = cs[0]->template global_id().global(); 
   }
 
   //----------------------------------------------------------------------------
@@ -1396,6 +1410,13 @@ struct burton_element_t<3,2>
     return coords;
   }
 
+  //! check if flipped
+  template<typename T>
+  bool is_flipped(const T & c)
+  {
+    return owner_id_ != c->template global_id().global();
+  }
+
   //============================================================================
   // Private Data
   //============================================================================
@@ -1417,6 +1438,9 @@ private:
 
   // the shape parameter
   shape_t shape_ = shape_t::none;
+
+  //! owner
+  size_t owner_id_ = std::numeric_limits<size_t>::max();
 
 }; // struct burton_element_t<3,2>
 

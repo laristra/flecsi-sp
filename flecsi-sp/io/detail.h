@@ -127,8 +127,17 @@ new_build_connectivity(
   std::vector<index_t> sorted_vs;
   std::vector<index_t> these_edges;
   
-  // a map for searching: vertices -> edge id
+  // invert the edge id to vertices map
+  // Could store and keep track of sorted vertices for each edge like I used
+  // to, but not sure if it is really that expensive.
   std::map<std::vector<index_t>, index_t> edges;
+  for ( const auto & vs : edge_to_vertex ) {
+      sorted_vs.assign(vs.begin(), vs.end());
+      std::sort(sorted_vs.begin(), sorted_vs.end());
+      auto edgeid = edges.size();
+      edges.emplace(sorted_vs, edgeid);
+  }
+
 
   // loop over cells, adding all of their edges to the table
   for (const auto & these_verts : cell_to_vertex) {
@@ -202,6 +211,92 @@ intersect(
     these_edges.erase(last, these_edges.end());
   }  // cells
 }  // intersect
+
+template<typename CONNECTIVITY_TYPE>
+void
+new_intersect(
+    const CONNECTIVITY_TYPE & cell_to_face,
+    const CONNECTIVITY_TYPE & face_to_edge,
+    CONNECTIVITY_TYPE & cell_to_edge) {
+
+  // some temporary storage
+  using index_t = typename CONNECTIVITY_TYPE::value_type;
+  std::vector<index_t> these_edges;
+
+  // loop over cells, collecting their face edges
+  for (const auto & these_faces : cell_to_face) {
+    // reference the storage for this cells edges
+    these_edges.clear();
+
+    // now add the edges of this cell
+    for (auto f : these_faces)
+      for (auto e : face_to_edge.at(f)) {
+        // set insertion is not the quickest, but maintains order
+        auto it = std::find( these_edges.begin(), these_edges.end(), e );
+        if ( it == these_edges.end() ) these_edges.push_back(e);
+      }
+
+    // sort them and remove the non-unique ones
+    // ... This mightbe quicker but does not maintain order
+    // std::sort(these_edges.begin(), these_edges.end());
+    // auto last = std::unique(these_edges.begin(), these_edges.end());
+    // these_edges.erase(last, these_edges.end());
+
+    // now add this cells edges
+    cell_to_edge.push_back( these_edges );
+
+  }  // cells
+}  // intersect
+
+
+//==============================================================================
+// Lambda function to process a block
+
+template< typename T, typename U, typename V, typename W>
+void filter_block(
+    const T & counts_in,
+    const U & indices_in,
+    size_t min,
+    size_t max,
+    size_t & counter,
+    V & offsets_out,
+    W & indices_out)
+{
+  auto num_offsets = counts_in.size();
+  auto num_indices = indices_in.size();
+
+  // if this is outside the range, just increment counter and return
+  if ( counter + num_offsets <= min || counter > max )
+  {
+    counter += num_offsets;
+    return;
+  }
+
+  // storage for element verts
+  offsets_out.reserve( offsets_out.size() + num_offsets );
+  indices_out.reserve( indices_out.size() + num_indices );
+
+  if (offsets_out.empty()) offsets_out.emplace_back(0);
+  
+  // create cells in mesh
+  size_t base = 0;
+  for (size_t e = 0; e < num_offsets; ++e, ++counter) {
+    // get the number of nodes
+    auto cnt = counts_in[e];
+    // the global id is within the range
+    if ( counter >= min && counter <= max )
+    {
+      // copy local vertices into vector ( exodus uses 1 indexed arrays )
+      for (int v = 0; v < cnt; v++)
+        indices_out.emplace_back(indices_in[base + v] - 1);
+      // add the row
+      offsets_out.emplace_back( offsets_out.back() + cnt );
+    }
+    // base offset into elt_conn
+    base += cnt;
+  }
+}
+
 
 }  // namespace detail
 }  // namespace io

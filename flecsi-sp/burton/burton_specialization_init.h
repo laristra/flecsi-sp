@@ -38,7 +38,7 @@ namespace globals {
     flecsi::topology::mesh_definition_u< burton_mesh_t::num_dimensions >;
   std::unique_ptr<mesh_definition_t> mesh_def;
 
-  std::map< size_t, flecsi::coloring::crs_t > ghost_connectivity;
+  std::map< size_t, std::map<size_t, flecsi::coloring::crs_t> > ghost_connectivity;
   std::map< size_t, std::vector<size_t> > ghost_ids;
   std::vector< size_t > cell_distribution;
 
@@ -285,29 +285,24 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
 
-  // get the entity maps
-  // - lid = local id - the id of the entity local to this processor
-  // - mid = mesh id - the original id of the entity ( usually from file )
-  // - gid = global id - the new global id of the entity ( set by flecsi )
-  const auto & vertex_lid_to_mid = context.index_map( index_spaces::vertices );
-
-  const auto & vertex_mid_to_lid = context.reverse_index_map(
-    index_spaces::vertices
-  );
-
-  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
-
   //----------------------------------------------------------------------------
   // create the vertices
   //----------------------------------------------------------------------------
+  
+  const auto & vertex_lid_to_mid = context.index_map( index_spaces::vertices );
+  const auto & vertex_mid_to_lid = context.reverse_index_map(
+    index_spaces::vertices
+  );
 
   std::vector< vertex_t * > vertices;
   vertices.reserve( vertex_lid_to_mid.size() );
   
   const auto & vert_global2local = mesh_def.global_to_local(vertex_t::dimension);
+  const auto & vert_local2global = mesh_def.local_to_global(vertex_t::dimension);
 
   point_t temp_point{0};
   for(auto & vm: vertex_lid_to_mid) {
+
     // search this ranks mesh definition for the matching offset
     auto it = vert_global2local.find( vm.second );
     // the vertex exists on this rank so create it
@@ -315,11 +310,91 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
       // get the point
       mesh_def.vertex(it->second, temp_point.data());
     }
+    else {
+      // doesnt matter but useful for debugging
+      temp_point = 0;
+    }
     // now create it, if the vertex did not exist, it doesnt matter what
     // data we give it
     auto v = mesh.create_vertex( temp_point );
+    v->global_id().set_global(vm.second);
     vertices.emplace_back(v);
   } // for vertices
+  
+  //----------------------------------------------------------------------------
+  // create the edges
+  //----------------------------------------------------------------------------
+  
+  const auto & edge_lid_to_mid = context.index_map( index_spaces::edges );
+  const auto & edges = context.coloring( index_spaces::edges );
+  
+  const auto & edge_global2local = mesh_def.global_to_local(edge_t::dimension);
+  const auto & edge_to_vertices =
+      mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
+  
+  const auto & ghost_edges = globals::ghost_ids.at(edge_t::dimension);
+  const auto & ghost_edge2vertex =
+    globals::ghost_connectivity.at(edge_t::dimension).at(vertex_t::dimension);
+  
+  // create a list of vertex pointers
+  std::vector< vertex_t * > elem_vs;
+
+  // create the edges
+  for(auto & em: edge_lid_to_mid) {
+
+    auto lid = em.first;
+    auto mid = em.second;
+
+    // clear the list
+    elem_vs.clear();
+
+    // search this ranks mesh definition for the matching offset
+    auto it = edge_global2local.find( mid );
+    
+    // the vertex exists on this rank so create it
+    if ( it != edge_global2local.end() ) {
+      // get the list of vertices
+      auto id = it->second;
+      const auto & vs = edge_to_vertices.at(id);
+      // create a list of vertex pointers
+      elem_vs.resize( vs.size() );
+      // transform the list of vertices to mesh ids
+      std::transform(
+        vs.begin(),
+        vs.end(),
+        elem_vs.begin(),
+        [&](auto v) {
+          auto global_id = vert_local2global[v];
+          auto flecsi_id = vertex_mid_to_lid.at(global_id);
+          return vertices[ flecsi_id ];
+        }
+      );
+    }
+    
+    // otherwise it is a ghost edge
+    else {
+      // find out what its connectivity info is
+      auto it = std::find( ghost_edges.begin(), ghost_edges.end(), mid );
+      assert( it != ghost_edges.end() && "Could not find ghost edge id" );
+      auto i = std::distance( ghost_edges.begin(), it );
+      // reserve space
+      const auto & vs = ghost_edge2vertex.at(i);
+      elem_vs.reserve( vs.size() );
+      // now convert my global ids to flecsi local ids
+      for ( auto v : vs ) {
+        auto id = vertex_mid_to_lid.at(v);
+        elem_vs.emplace_back( vertices[id] );
+      }
+    }
+
+    // make the edge
+    auto new_edge = mesh.template make<edge_t>();
+    new_edge->global_id().set_global(mid);
+    // add the connectivity
+    mesh.template init_entity<0, edge_t::dimension, vertex_t::dimension>(
+        new_edge, elem_vs);
+  }
+
 
   //----------------------------------------------------------------------------
   // create the cells
@@ -329,19 +404,11 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & cell_to_vertices =
       mesh_def.entities_crs( cell_t::dimension, vertex_t::dimension );
   
-  const auto & ghost_ids = globals::ghost_ids.at(vertex_t::dimension);
-  const auto & ghost_connectivity = globals::ghost_connectivity.at(vertex_t::dimension);
-
-  auto determine_vertex_id = [&](auto v) {
-    auto vit = std::find_if( vertex_lid_to_mid.begin(),
-        vertex_lid_to_mid.end(), 
-        [=](const auto & a) { return a.second == v; } );
-    assert( vit != vertex_lid_to_mid.end() && "Could not find ghost vertex id" );
-    return vit->first;
-  };
-
-  // create a list of vertex pointers
-  std::vector< vertex_t * > elem_vs;
+  const auto & ghost_cells = globals::ghost_ids.at(cell_t::dimension);
+  const auto & ghost_cell2vertex =
+    globals::ghost_connectivity.at(cell_t::dimension).at(vertex_t::dimension);
+  
+  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
@@ -368,21 +435,25 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         vs.begin(),
         vs.end(),
         elem_vs.begin(),
-        [&](auto v) { return vertices[ determine_vertex_id(v) ]; }
+        [&](auto v) {
+          auto global_id = vert_local2global[v];
+          auto flecsi_id = vertex_mid_to_lid.at(global_id);
+          return vertices[ flecsi_id ];
+        }
       );
     }
     // otherwise, it is a ghost cell
     else {
       // find out what its connectivity info is
-      auto it = std::find( ghost_ids.begin(), ghost_ids.end(), cm.second );
-      assert( it != ghost_ids.end() && "Could not find ghost cell id" );
-      auto i = std::distance( ghost_ids.begin(), it );
+      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), cm.second );
+      assert( it != ghost_cells.end() && "Could not find ghost cell id" );
+      auto i = std::distance( ghost_cells.begin(), it );
       // reserve space
-      const auto & vs = ghost_connectivity.at(i);
+      const auto & vs = ghost_cell2vertex.at(i);
       elem_vs.reserve( vs.size() );
       // now convert my global ids to flecsi local ids
       for ( auto v : vs ) {
-        auto id = determine_vertex_id(v);
+        auto id = vertex_mid_to_lid.at(v);
         elem_vs.emplace_back( vertices[id] );
       }
     }
@@ -390,73 +461,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell (only need the number of vertices rn)
     // if this is a ghost cell, it is junk for now
     auto c = mesh.create_cell( elem_vs );
-  }
-
-  //----------------------------------------------------------------------------
-  // create the edges
-  //----------------------------------------------------------------------------
-  
-  const auto & edge_lid_to_mid = context.index_map( index_spaces::edges );
-  const auto & edges = context.coloring( index_spaces::edges );
-  
-  const auto & edge_global2local = mesh_def.global_to_local(edge_t::dimension);
-  const auto & edge_to_vertices =
-      mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
-  
-  // create the edges
-  for(auto & em: edge_lid_to_mid) {
-
-    auto lid = em.first;
-    auto mid = em.second;
-
-    // clear the list
-    elem_vs.clear();
-
-    // search for the mid
-    bool found = false;
-    auto it = std::find_if( edges.exclusive.begin(), edges.exclusive.end(), 
-        [=](auto i) { return i.id == mid; } );
-    // not found, look in shared
-    if ( it == edges.exclusive.end() ) {
-      auto it = std::find_if( edges.shared.begin(), edges.shared.end(), 
-          [=](auto i) { return i.id == mid; } );
-      if ( it != edges.shared.end() ) {
-        found = true;
-      }
-    }
-    else {
-      found = true;
-    }
-
-    // it is either exclusive or shared
-    if ( found ) {
-      // search this ranks mesh definition for the matching offset
-      auto it = edge_global2local.find( mid );
-      assert( it != edge_global2local.end() && "edge id not found" );
-      // the vertex exists on this rank so create it
-      if ( it != edge_global2local.end() ) {
-        // get the list of vertices
-        auto id = it->second;
-        const auto & vs = edge_to_vertices.at(id);
-        // create a list of vertex pointers
-        elem_vs.resize( vs.size() );
-        // transform the list of vertices to mesh ids
-        std::transform(
-          vs.begin(),
-          vs.end(),
-          elem_vs.begin(),
-          [&](auto v) { return vertices[ determine_vertex_id(v) ]; }
-        );
-      }
-    }
-    // otherwise it is a ghost edge
-    else {
-    }
-
-    // make the edge
-    auto new_edge = mesh.template make<edge_t>();
-    // add the connectivity
-    mesh.init_entity_<0>(new_edge, elem_vs);
+    c->global_id().set_global(mid);
   }
 
 }
@@ -490,6 +495,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   // alias some other types
   using point_t = typename mesh_t::point_t;
   using vertex_t = typename mesh_t::vertex_t;
+  using edge_t = typename mesh_t::edge_t;
   using face_t = typename mesh_t::face_t;
   using cell_t = typename mesh_t::cell_t;
 
@@ -498,74 +504,259 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   //----------------------------------------------------------------------------
 
   // get the context
-  const auto & context = flecsi::execution::context_t::instance();
+  auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
-
-  // get the entity maps
-  // - lid = local id - the id of the entity local to this processor
-  // - mid = mesh id - the original id of the entity ( usually from file )
-  // - gid = global id - the new global id of the entity ( set by flecsi )
-  const auto & vertex_lid_to_mid = context.index_map( index_spaces::vertices );
-  const auto & face_lid_to_mid = context.index_map( index_spaces::faces );
-  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
-
-  const auto & vertex_mid_to_lid =
-    context.reverse_index_map( index_spaces::vertices );
-
-  const auto & face_mid_to_lid =
-    context.reverse_index_map( index_spaces::faces );
-
-
 
   //----------------------------------------------------------------------------
   // create the vertices
   //----------------------------------------------------------------------------
+  
+  const auto & vertex_lid_to_mid = context.index_map( index_spaces::vertices );
+  const auto & vertex_mid_to_lid = context.reverse_index_map(
+    index_spaces::vertices
+  );
 
   std::vector< vertex_t * > vertices;
   vertices.reserve( vertex_lid_to_mid.size() );
+  
+  const auto & vert_global2local = mesh_def.global_to_local(vertex_t::dimension);
+  const auto & vert_local2global = mesh_def.local_to_global(vertex_t::dimension);
 
+  point_t temp_point{0};
   for(auto & vm: vertex_lid_to_mid) {
-    // get the point
-    const auto & p = mesh_def.template vertex<point_t>( vm.second );
-    // now create it
-    auto v = mesh.create_vertex( p );
+
+    // search this ranks mesh definition for the matching offset
+    auto it = vert_global2local.find( vm.second );
+    // the vertex exists on this rank so create it
+    if ( it != vert_global2local.end() ) {
+      // get the point
+      mesh_def.vertex(it->second, temp_point.data());
+    }
+    else {
+      // doesnt matter but useful for debugging
+      temp_point = 0;
+    }
+    // now create it, if the vertex did not exist, it doesnt matter what
+    // data we give it
+    auto v = mesh.create_vertex( temp_point );
+    v->global_id().set_global(vm.second);
     vertices.emplace_back(v);
   } // for vertices
+  
+  //----------------------------------------------------------------------------
+  // create the edges
+  //----------------------------------------------------------------------------
+  
+  const auto & edge_lid_to_mid = context.index_map( index_spaces::edges );
+  
+  const auto & edge_global2local = mesh_def.global_to_local(edge_t::dimension);
+  const auto & edge_to_vertices =
+      mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
+  
+  const auto & ghost_edges = globals::ghost_ids.at(edge_t::dimension);
+  const auto & ghost_edge2vertex =
+    globals::ghost_connectivity.at(edge_t::dimension).at(vertex_t::dimension);
+  
+  // create a list of vertex pointers
+  std::vector< vertex_t * > elem_vs;
 
+  // create the edges
+  for(auto & em: edge_lid_to_mid) {
+
+    auto lid = em.first;
+    auto mid = em.second;
+
+    // clear the list
+    elem_vs.clear();
+
+    // search this ranks mesh definition for the matching offset
+    auto it = edge_global2local.find( mid );
+    
+    // the vertex exists on this rank so create it
+    if ( it != edge_global2local.end() ) {
+      // get the list of vertices
+      auto id = it->second;
+      const auto & vs = edge_to_vertices.at(id);
+      // create a list of vertex pointers
+      elem_vs.resize( vs.size() );
+      // transform the list of vertices to mesh ids
+      std::transform(
+        vs.begin(),
+        vs.end(),
+        elem_vs.begin(),
+        [&](auto v) {
+          auto global_id = vert_local2global[v];
+          auto flecsi_id = vertex_mid_to_lid.at(global_id);
+          return vertices[ flecsi_id ];
+        }
+      );
+    }
+    
+    // otherwise it is a ghost edge
+    else {
+      // find out what its connectivity info is
+      auto it = std::find( ghost_edges.begin(), ghost_edges.end(), mid );
+      assert( it != ghost_edges.end() && "Could not find ghost edge id" );
+      auto i = std::distance( ghost_edges.begin(), it );
+      // reserve space
+      const auto & vs = ghost_edge2vertex.at(i);
+      elem_vs.reserve( vs.size() );
+      // now convert my global ids to flecsi local ids
+      for ( auto v : vs ) {
+        auto id = vertex_mid_to_lid.at(v);
+        elem_vs.emplace_back( vertices[id] );
+      }
+    }
+
+    // make the edge
+    auto new_edge = mesh.template make<edge_t>();
+    new_edge->global_id().set_global(mid);
+    // add the connectivity
+    mesh.template init_entity<0, edge_t::dimension, vertex_t::dimension>(
+        new_edge, elem_vs);
+  }
 
   //----------------------------------------------------------------------------
   // create the faces
   //----------------------------------------------------------------------------
-
-  // storage for the face pointers ( not used in 2d )
+  
+  const auto & face_lid_to_mid = context.index_map( index_spaces::faces );
+  
+  const auto & face_global2local = mesh_def.global_to_local(face_t::dimension);
+  const auto & face_to_vertices =
+      mesh_def.entities_crs( face_t::dimension, vertex_t::dimension );
+  
+  const auto & ghost_faces = globals::ghost_ids.at(face_t::dimension);
+  const auto & ghost_face2vertex =
+    globals::ghost_connectivity.at(face_t::dimension).at(vertex_t::dimension);
+  
   std::vector< face_t * > faces;
-
-  // reserve size
   faces.reserve( face_lid_to_mid.size() );
+  
+  // create the faces
+  for(auto & em: face_lid_to_mid) {
 
-  // loop over the faces
-  for(auto & fm: face_lid_to_mid) {
-    // get the list of vertices
-    auto vs =
-      mesh_def.entities( face_t::dimension, vertex_t::dimension, fm.second );
-    // create a list of vertex pointers
-    std::vector< vertex_t * > elem_vs( vs.size() );
-    // transform the list of vertices to mesh ids
-    std::transform(
-      vs.begin(),
-      vs.end(),
-      elem_vs.begin(),
-      [&](auto v) { return vertices[ vertex_mid_to_lid.at(v) ]; }
-    );
-    // create the face
-    auto f = mesh.create_face( elem_vs );
+    auto lid = em.first;
+    auto mid = em.second;
+
+    // clear the list
+    elem_vs.clear();
+
+    // search this ranks mesh definition for the matching offset
+    auto it = face_global2local.find( mid );
+    
+    // the vertex exists on this rank so create it
+    if ( it != face_global2local.end() ) {
+      // get the list of vertices
+      auto id = it->second;
+      const auto & vs = face_to_vertices.at(id);
+      // create a list of vertex pointers
+      elem_vs.resize( vs.size() );
+      // transform the list of vertices to mesh ids
+      std::transform(
+        vs.begin(),
+        vs.end(),
+        elem_vs.begin(),
+        [&](auto v) {
+          auto global_id = vert_local2global[v];
+          auto flecsi_id = vertex_mid_to_lid.at(global_id);
+          return vertices[ flecsi_id ];
+        }
+      );
+    }
+    
+    // otherwise it is a ghost face
+    else {
+      // find out what its connectivity info is
+      auto it = std::find( ghost_faces.begin(), ghost_faces.end(), mid );
+      assert( it != ghost_faces.end() && "Could not find ghost face id" );
+      auto i = std::distance( ghost_faces.begin(), it );
+      // reserve space
+      const auto & vs = ghost_face2vertex.at(i);
+      elem_vs.reserve( vs.size() );
+      // now convert my global ids to flecsi local ids
+      for ( auto v : vs ) {
+        auto id = vertex_mid_to_lid.at(v);
+        elem_vs.emplace_back( vertices[id] );
+      }
+    }
+
+    // make the face
+    auto f = mesh.create_face(elem_vs);
+    f->global_id().set_global(mid);
     faces.emplace_back( f );
   }
+
 
   //----------------------------------------------------------------------------
   // create the cells
   //----------------------------------------------------------------------------
 
+  // get the list of vertices
+  const auto & cell_to_vertices =
+      mesh_def.entities_crs( cell_t::dimension, vertex_t::dimension );
+
+  const auto & ghost_cells = globals::ghost_ids.at(cell_t::dimension);
+  const auto & ghost_cell2vertex =
+    globals::ghost_connectivity.at(cell_t::dimension).at(vertex_t::dimension);
+  
+  const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
+
+  // create the cells
+  for(auto & cm: cell_lid_to_mid) {
+
+    auto lid = cm.first;
+    auto mid = cm.second;
+
+    // clear the list
+    elem_vs.clear();
+
+    // search this ranks mesh definition for the matching offset
+    auto r = flecsi::coloring::rank_owner( globals::cell_distribution, mid );
+
+    // if i am the owner
+    if ( r == rank ) {
+      // figure out the original local id (note flecsi will have renumberd this)
+      auto id = mid - globals::cell_distribution[rank];
+      // get the list of vertices
+      const auto & vs = cell_to_vertices.at(id);
+      // create a list of vertex pointers
+      elem_vs.resize( vs.size() );
+      // transform the list of vertices to mesh ids
+      std::transform(
+        vs.begin(),
+        vs.end(),
+        elem_vs.begin(),
+        [&](auto v) {
+          auto global_id = vert_local2global[v];
+          auto flecsi_id = vertex_mid_to_lid.at(global_id);
+          return vertices[ flecsi_id ];
+        }
+      );
+    }
+    // otherwise, it is a ghost cell
+    else {
+      // find out what its connectivity info is
+      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), cm.second );
+      assert( it != ghost_cells.end() && "Could not find ghost cell id" );
+      auto i = std::distance( ghost_cells.begin(), it );
+      // reserve space
+      const auto & vs = ghost_cell2vertex.at(i);
+      elem_vs.reserve( vs.size() );
+      // now convert my global ids to flecsi local ids
+      for ( auto v : vs ) {
+        auto id = vertex_mid_to_lid.at(v);
+        elem_vs.emplace_back( vertices[id] );
+      }
+    }
+
+    // create the cell (only need the number of vertices rn)
+    // if this is a ghost cell, it is junk for now
+    auto c = mesh.create_cell( elem_vs );
+    c->global_id().set_global(mid);
+  }
+
+#if 0
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
     // get the list of faces
@@ -583,6 +774,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_fs );
   }
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1780,7 +1972,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   flecsi::coloring::dcrs_t dcrs;
 
   // if ( needs_repartitioning ) {
-
+#if 1
+  if ( rank == 0 ) std::cout << "Partitioning mesh...";
   // Create the dCRS representation for the distributed colorer.
   // This essentialy makes the graph of the dual mesh.
   mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
@@ -1790,9 +1983,13 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   // Create the primary coloring and partition the mesh.
   auto partitioning = colorer->color(dcrs);
-  // now migrate the entities to their respective ranks
-  flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
+  if ( rank == 0 ) std::cout << "done." << std::endl;
 
+  // now migrate the entities to their respective ranks
+  if ( rank == 0 ) std::cout << "Migrating mesh...";
+  flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
+  if ( rank == 0 ) std::cout << "done." << std::endl;
+#endif
   // } // needs_repartitioning
 
   //----------------------------------------------------------------------------
@@ -1824,15 +2021,62 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   for ( int i=0; i<num_dims; ++i ) {
     flecsi::coloring::color_entities( *mesh_def, i, cells, entities[0][i],
-        entity_color_info[0][i], globals::ghost_ids[i],
-        globals::ghost_connectivity[i], counts[num_dims][i] );
+        entity_color_info[0][i], counts[num_dims][i] );
+  }
+  
+ 
+  //----------------------------------------------------------------------------
+  // Count connectivity sizes
+  //----------------------------------------------------------------------------
+ 
+  // already have cell to everthing connectivity, but still need ghost
+  // connectivitiy
+  for ( int to_dim=0; to_dim<num_dims; ++to_dim ) {
+      flecsi::coloring::ghost_connectivity( *mesh_def, num_dims, to_dim,
+          entities.at(0).at(num_dims), globals::ghost_ids[num_dims],
+          globals::ghost_connectivity[num_dims][to_dim] );
   }
 
-  // edge to vertex connectivity sizes is easy
-  {
-    const auto & edges = entities.at(0).at(1);
-    counts[1][0] = 2*(edges.exclusive.size() + edges.shared.size() + edges.ghost.size());
+  // Need rest of counts
+  for ( int from_dim=1; from_dim<num_dims; ++from_dim ) {
+
+    // get the local-to-global mapping for the from entity
+    const auto & local2global = mesh_def->local_to_global(from_dim);
+
+    // loop over the "to" dimension
+    for ( int to_dim=0; to_dim<from_dim; ++to_dim ) {
+      
+      // storage for connectivity counts.  This is needed because 
+      // there is some overlap beween the mesh definition and the 
+      // exclusive/shared/ghost entities
+      std::map<size_t, size_t> my_counts;
+
+      // get local connecitivy and count it
+      const auto & conn = mesh_def->entities_crs(from_dim, to_dim);
+      for ( size_t i=0; i<conn.size(); ++i ) {
+        auto global_id = local2global[i];
+        my_counts.emplace(global_id, conn.at(i).size());
+      }
+
+      // get the ghost connectivity and count it
+      auto & ghost_ids = globals::ghost_ids[from_dim];
+      auto & ghost_conn = globals::ghost_connectivity[from_dim][to_dim];
+      flecsi::coloring::ghost_connectivity( *mesh_def, from_dim, to_dim,
+          entities.at(0).at(from_dim), ghost_ids, ghost_conn );
+
+      // get the ghost entitiy connecitivity and count it.
+      for ( size_t i=0; i<ghost_ids.size(); ++i ) {
+        auto global_id = ghost_ids[i];
+        my_counts.emplace(global_id, ghost_conn.at(i).size());
+      }
+
+      // now sum the counts
+      size_t cnt{0};
+      for ( auto i : my_counts ) cnt += i.second;
+      counts[from_dim][to_dim] = cnt;
+    }
   }
+  
   
   //----------------------------------------------------------------------------
   // Identify exclusive, shared and ghost for corners and wedges and side
@@ -1972,7 +2216,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
       // loop over all cells and count the number of adjacencies
       size_t cnt = (to_dim>from_dim) ? counts.at(to_dim).at(from_dim) :
         counts.at(from_dim).at(to_dim);
-      std::cout << "cnt = " << cnt << " for " << ai.index_space << std::endl;
 
       // gather the results
       ai.color_sizes = communicator->gather_sizes( cnt );
@@ -2280,7 +2523,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // add index subspace mappings
   //----------------------------------------------------------------------------
 
-
   // the master list of all entity ids
   const auto & cell_entities = entities.at(0).at(num_dims);
 
@@ -2309,6 +2551,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     // subspace id happens to be the same as the dim
     context.add_index_subspace(to_dim, count);
   }
+
 
   //----------------------------------------------------------------------------
   // add intermediate mappings
@@ -2462,41 +2705,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     isi.index_space = i;
     context.set_sparse_index_space_info(isi);
   }
-
-  //----------------------------------------------------------------------------
-  // output the result
-  //----------------------------------------------------------------------------
-
-  // figure out this ranks file name
-  auto basename = ristra::utils::basename( filename_string );
-  auto output_prefix = ristra::utils::remove_extension( basename );
-  auto output_filename = output_prefix + "-partition_rank" +
-    ristra::utils::zero_padded(rank) + ".exo";
-
-  // a lamda function to convert sets of entitiy_info_t's to vectors
-  // of ids
-  auto to_vec = [](const auto & list_in)
-  {
-    std::vector<size_t> list_out;
-    list_out.reserve( list_in.size() );
-    for ( auto & e : list_in )
-      list_out.push_back( e.id );
-    return list_out;
-  };
-
-  // get a reference to the vertices
-  const auto & vertices = entities[0][0];
-
-  // open the exodus file
-  //if ( rank == 0 )
-  //  std::cout << "Writing mesh to: " << output_filename << std::endl;
-
-  //using std::make_pair;
-  //if ( file_type == file_type_t::exodus ) {
-  //  auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
-  //  exo_def->write( output_filename );
-  //}
-
 
   clog(info) << "Finished mesh partitioning." << std::endl;
 

@@ -570,6 +570,9 @@ public:
         return block_t::tet;
       else if (strcasecmp("hex8", elem_type) == 0)
         return block_t::hex;
+      else if (strcasecmp("hex8", elem_type) == 0 ||
+               strcasecmp("hex", elem_type) == 0)
+        return block_t::hex;
       else {
         clog_fatal("Unknown block type, " << elem_type);
         return block_t::unknown;
@@ -586,9 +589,12 @@ public:
   //============================================================================
   template<typename U>
   static auto
-  read_face_block(int exoid, ex_entity_id blk_id, connectivity_t & faces) {
-
-    return read_block<U>(exoid, blk_id, EX_FACE_BLOCK, faces);
+  read_face_block(
+    int exoid,
+    ex_entity_id blk_id, 
+    vector<int> & counts,
+    vector<U> & indices ) {
+    return read_block<U>(exoid, blk_id, EX_FACE_BLOCK, counts, indices);
   }
 
   //============================================================================
@@ -957,6 +963,21 @@ public:
     return p;
   } // vertex
 
+  void create_graph(
+      size_t from_dimension,
+      size_t to_dimension,
+      size_t min_connections,
+      flecsi::coloring::dcrs_t & dcrs ) const override
+  {
+    constexpr auto num_dims = dimension();
+
+    if ( from_dimension != num_dims || to_dimension != 0 )
+      throw_runtime_error( "Incorrect dimensions provided to create_graph" );
+
+    flecsi::coloring::make_dcrs_distributed<num_dims>(
+      *this, from_dimension, to_dimension, min_connections, dcrs);
+  }
+
 private:
   //============================================================================
   // Private data
@@ -1085,51 +1106,6 @@ public:
     cell2vertices_.clear();
 
     //--------------------------------------------------------------------------
-    // Lambda function to process a block
-
-    auto add_block = [](
-        const auto & counts_in,
-        const auto & indices_in,
-        auto min,
-        auto max,
-        auto & counter,
-        auto & offsets_out,
-        auto & indices_out)
-    {
-      auto num_offsets = counts_in.size();
-      auto num_indices = indices_in.size();
-
-      // if this is outside the range, just increment counter and return
-      if ( counter + num_offsets <= min || counter > max )
-      {
-        counter += num_offsets;
-        return;
-      }
-
-      // storage for element verts
-      offsets_out.reserve( offsets_out.size() + num_offsets );
-      indices_out.reserve( indices_out.size() + num_indices );
-      
-      // create cells in mesh
-      size_t base = 0;
-      for (size_t e = 0; e < num_offsets; ++e, ++counter) {
-        // get the number of nodes
-        auto cnt = counts_in[e];
-        // the global id is within the range
-        if ( counter >= min && counter <= max )
-        {
-          // copy local vertices into vector ( exodus uses 1 indexed arrays )
-          for (int v = 0; v < cnt; v++)
-            indices_out.emplace_back(indices_in[base + v] - 1);
-          // add the row
-          offsets_out.emplace_back( offsets_out.back() + cnt );
-        }
-        // base offset into elt_conn
-        base += cnt;
-      }
-    };
-
-    //--------------------------------------------------------------------------
     // element blocks
     
     // offsets always have initial zero
@@ -1156,7 +1132,7 @@ public:
         vector<long long> indices;
         base_t::template read_element_block<long long>(
             exoid, elem_blk_ids[iblk], counts, indices );
-        add_block( counts, indices, cell_min, cell_max, cell_counter,
+        detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
             cell2vertices_.offsets, cell2vertices_.indices );
 
       }
@@ -1164,7 +1140,7 @@ public:
         vector<int> indices;
         base_t::template read_element_block<int>(
             exoid, elem_blk_ids[iblk], counts, indices );
-        add_block( counts, indices, cell_min, cell_max, cell_counter,
+        detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
             cell2vertices_.offsets, cell2vertices_.indices );
       }
 
@@ -1220,8 +1196,9 @@ public:
     vertex_local2global_.clear();
     vertex_local2global_.resize(local_vertices);
 
-    for ( const auto & global_local : vertex_global2local_ )
+    for ( const auto & global_local : vertex_global2local_ ) {
       vertex_local2global_[global_local.second] = global_local.first;
+    }
     
     // convert element conectivity to local ids and extract only coordinates
     // that are needed
@@ -1272,146 +1249,6 @@ public:
     auto & edge_global2local = global_to_local_[1];
     flecsi::coloring::match_ids( *this, 1, edge_local2global, edge_global2local );
     
-    
-#if 0
-
-    // make storage for the edge vertices
-    auto num_edges = edge_vertices_ref.size();
-
-    //--------------------------------------------------------------------------
-    // Create the remainder of the connectivities
-
-    entities_[1][2].reserve(num_edges);
-    entities_[0][2].reserve(num_vertices);
-    entities_[0][1].reserve(num_vertices);
-
-    detail::transpose(entities_[2][1], entities_[1][2]);
-    detail::transpose(entities_[2][0], entities_[0][2]);
-    detail::transpose(entities_[1][0], entities_[0][1]);
-
-#endif
-  }
-
-  //============================================================================
-  //! \brief Implementation of exodus mesh write for burton specialization.
-  //!
-  //! \param[in] name Read burton mesh \e m from \e name.
-  //! \param[out] m Populate burton mesh \e m with contents of \e name.
-  //!
-  //! \return Exodus error code. 0 on success.
-  //============================================================================
-  template<typename U = int>
-  void write(
-      const std::string & name,
-      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
-          element_sets = {},
-      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
-          node_sets = {}) const {
-
-    clog(info) << "Writing mesh to: " << name << std::endl;
-
-    //--------------------------------------------------------------------------
-    // Open file
-
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::out);
-
-    // write the initialization parameters
-    auto exo_params = base_t::make_params();
-    auto num_cells = num_entities(dimension());
-    exo_params.num_nodes = num_entities(0);
-    exo_params.num_node_sets = node_sets.size();
-    exo_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
-
-    if (element_sets.size()) {
-      for (const auto & set : element_sets)
-        exo_params.num_elem += set.second.size();
-    } else
-      exo_params.num_elem = num_cells;
-
-    base_t::write_params(exoid, exo_params);
-
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
-
-    //--------------------------------------------------------------------------
-    // write coordinates
-
-    base_t::write_point_coords(exoid, vertices_);
-
-    //--------------------------------------------------------------------------
-    // element blocks
-
-    const auto & cell_vertices = entities_.at(2).at(0);
-    int elem_blk_id = 1;
-
-    // add the whole element block
-    if (!element_sets.size()) {
-
-      auto cell_vertices_func = [&](auto c, auto & vert_list) {
-        const auto & vs = cell_vertices[c];
-        vert_list.insert(vert_list.end(), vs.begin(), vs.end());
-      };
-
-      if (int64)
-        base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_vertices_func);
-      else
-        base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_vertices_func);
-
-    } // element block
-
-    // or add the element sets
-    for (const auto & set : element_sets) {
-
-      const auto & set_name = set.first;
-      const auto & set_elements = set.second;
-      auto num_cells_set = set_elements.size();
-
-      if (num_cells_set == 0)
-        continue;
-
-      auto cell_vertices_func = [&](auto c, auto & vert_list) {
-        const auto & vs = cell_vertices[set_elements[c]];
-        vert_list.insert(vert_list.end(), vs.begin(), vs.end());
-      };
-
-      if (int64)
-        base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
-      else
-        base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_vertices_func);
-
-    } // sets
-
-    //--------------------------------------------------------------------------
-    // Node sets
-
-    int node_set_id = 1;
-
-    for (const auto & set : node_sets) {
-
-      const auto & set_name = set.first;
-      const auto & set_nodes = set.second;
-      auto num_nodes_set = set_nodes.size();
-
-      if (num_nodes_set == 0)
-        continue;
-
-      if (int64)
-        base_t::template write_node_set<long long>(
-            exoid, ++node_set_id, set_name, set_nodes);
-      else
-        base_t::template write_node_set<int>(
-            exoid, ++node_set_id, set_name, set_nodes);
-
-    } // sets
-
-    //--------------------------------------------------------------------------
-    // close the file
-    base_t::close(exoid);
   }
 
   //============================================================================
@@ -1434,14 +1271,6 @@ public:
     }
   }
 
-  /// Return the set of vertices of a particular entity.
-  /// \param [in] dimension  The entity dimension to query.
-  /// \param [in] entity_id  The id of the entity in question.
-  const std::vector<std::vector<size_t>> &
-  entities(size_t from_dim, size_t to_dim) const override {
-    return entities_.at(from_dim).at(to_dim);
-  } // vertices
-  
   const std::vector<size_t> &
   local_to_global(size_t dim) const override
   {
@@ -1480,7 +1309,7 @@ public:
     constexpr auto num_dims = dimension();
     for ( int i=0; i<num_dims; ++i ) {
       coords[i] =
-        vertices_[ vertex_id*num_dims + num_dims ];
+        vertices_[ vertex_id*num_dims + i ];
     }
   } // vertex
   
@@ -1569,7 +1398,8 @@ public:
 
     // find vertices that are no longer used
     std::vector<index_t> delete_vertices;
-    delete_vertices.reserve( check_vertices.size() );
+    delete_vertices.reserve(
+        std::distance(check_vertices.begin(), check_vertices.end()) );
 
     for ( auto it = check_vertices.begin(); it != last; ++it ) {
       // mark unused first
@@ -1764,9 +1594,6 @@ private:
   // Private data
   //============================================================================
 
-  //! \brief storage for element verts
-  std::map<index_t, std::map<index_t, connectivity_t>> entities_;
-
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
 
@@ -1814,6 +1641,7 @@ public:
 
   //! the connectivity type
   using connectivity_t = typename base_t::connectivity_t;
+  using crs_t = flecsi::coloring::crs_t;
 
   //============================================================================
   // Constructors
@@ -1854,6 +1682,8 @@ public:
 
     // open the exodus file
     auto exoid = base_t::open(name, std::ios_base::in);
+    if (exoid < 0)
+      clog_fatal("Problem reading exodus file");
 
     // get the initialization parameters
     auto exo_params = base_t::read_params(exoid);
@@ -1862,53 +1692,39 @@ public:
     auto int64 = base_t::is_int64(exoid);
 
     //--------------------------------------------------------------------------
-    // read coordinates
+    // Figure out partitioning 
+    
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
-    vertices_ = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    vector<index_t> cell_partitioning;
+    flecsi::coloring::subdivide( exo_params.num_elem, comm_size,
+        cell_partitioning );
 
-    //--------------------------------------------------------------------------
-    // read face blocks
+    auto cell_min = cell_partitioning[comm_rank];
+    auto cell_max = cell_partitioning[comm_rank+1] - 1;
 
-    auto num_face_blk = exo_params.num_face_blk;
-    vector<index_t> face_blk_ids;
-
-    auto & face_vertices_ref = entities_[2][0];
-
-    // get the face block ids
-    if (int64)
-      face_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
-    else
-      face_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
-
-    // read each block
-    for (int iblk = 0; iblk < num_face_blk; iblk++) {
-      // first get the vertices
-      if (int64)
-        base_t::template read_face_block<long long>(
-            exoid, face_blk_ids[iblk], face_vertices_ref);
-      else
-        base_t::template read_face_block<int>(
-            exoid, face_blk_ids[iblk], face_vertices_ref);
-      // rotate the vertices so the lowest one is first
-      for (auto & vs : face_vertices_ref) {
-        auto lowest = std::min_element(vs.begin(), vs.end());
-        std::rotate(vs.begin(), lowest, vs.end());
-      }
-    }
-
+    constexpr auto num_dims = base_t::num_dims;
+    
+    
     //--------------------------------------------------------------------------
     // element blocks
+    
+    // offsets always have initial zero
+    auto & cell2vertices_ = local_connectivity_[num_dims][0];
+    auto & cell2faces_ = local_connectivity_[num_dims][2];
+    auto & face2vertices_ = local_connectivity_[2][0];
 
+    cell2vertices_.clear();
+    cell2faces_.clear();
+    face2vertices_.clear();
+    
+    size_t cell_counter{0};
+
+    // the number of blocks and some storage for block ids
     auto num_elem_blk = exo_params.num_elem_blk;
     vector<index_t> elem_blk_ids;
-
-    auto & cell_faces_ref = entities_[3][2];
-    auto & cell_vertices_ref = entities_[3][0];
-
-    // temprary storage for matching faces
-    auto face_vertices_sorted = std::make_unique<connectivity_t>();
 
     // get the element block ids
     if (int64)
@@ -1921,17 +1737,26 @@ public:
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
 
-      // read the block info, the actual type may change based on
-      // the type of the block
-      connectivity_t results;
       typename base_t::block_t block_type;
-      if (int64)
-        block_type = base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], results);
-      else
-        block_type = base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], results);
+      crs_t new_entities;
 
+      if (int64) {
+        vector<int> temp_counts;
+        vector<long long> temp_indices;
+        block_type = base_t::template read_element_block<long long>(
+            exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
+        detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
+            cell_counter, new_entities.offsets, new_entities.indices );
+
+      }
+      else {
+        vector<int> temp_counts, temp_indices;
+        block_type = base_t::template read_element_block<int>(
+            exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
+        detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
+            cell_counter, new_entities.offsets, new_entities.indices );
+      }
+      
       //--------------------------------
       // make sure the block type isnt unknown
       if (block_type == base_t::block_t::unknown) {
@@ -1946,253 +1771,179 @@ public:
       else if (block_type == base_t::block_t::polyhedron) {
 
         // insert the faces into the cell face list
-        cell_faces_ref.insert(
-            cell_faces_ref.end(), results.begin(), results.end());
+        for ( auto fs : new_entities )
+          cell2faces_.append(fs.begin(), fs.end());
 
-        // collect the cell vertices
-        detail::intersect(
-            results, // i.e. cell_faces for this block
-            face_vertices_ref, cell_vertices_ref);
+        clog_fatal("NOT IMPLEMENTED YET");
+        //// collect the cell vertices
+        //detail::intersect(
+        //    results, // i.e. cell_faces for this block
+        //    face_vertices_ref, cell_vertices_ref);
 
       }
 
       //--------------------------------
       // if the block type is fixed element size, we need to build the faces
       else {
-
-        // insert the faces into the cell vertex list
-        cell_vertices_ref.insert(
-            cell_vertices_ref.end(), results.begin(), results.end());
+        
+        // insert the faces into the cell face list
+        for ( auto vs : new_entities )
+          cell2vertices_.append(vs.begin(), vs.end());
 
         // build the connecitivity array
-        detail::build_connectivity(
-            results, // i.e. cell_vertices for each block
-            cell_faces_ref, face_vertices_ref, *face_vertices_sorted,
+        detail::new_build_connectivity(
+            new_entities, // i.e. cell_vertices for each block
+            cell2faces_, face2vertices_, 
             [=](const auto & vs, auto & face_vs) {
-              using connectivity_type = std::decay_t<decltype(face_vs)>;
-              using list_type = std::decay_t<decltype(*face_vs.begin())>;
               // hardcoded for hex
               if (block_type == base_t::block_t::hex) {
-                face_vs.emplace_back(list_type{vs[0], vs[1], vs[5], vs[4]});
-                face_vs.emplace_back(list_type{vs[1], vs[2], vs[6], vs[5]});
-                face_vs.emplace_back(list_type{vs[2], vs[3], vs[7], vs[6]});
-                face_vs.emplace_back(list_type{vs[3], vs[0], vs[4], vs[7]});
-                face_vs.emplace_back(list_type{vs[0], vs[3], vs[2], vs[1]});
-                face_vs.emplace_back(list_type{vs[4], vs[5], vs[6], vs[7]});
+                face_vs.push_back({vs[0], vs[1], vs[5], vs[4]});
+                face_vs.push_back({vs[1], vs[2], vs[6], vs[5]});
+                face_vs.push_back({vs[2], vs[3], vs[7], vs[6]});
+                face_vs.push_back({vs[3], vs[0], vs[4], vs[7]});
+                face_vs.push_back({vs[0], vs[3], vs[2], vs[1]});
+                face_vs.push_back({vs[4], vs[5], vs[6], vs[7]});
               }
               // this is for a tet
               else if (block_type == base_t::block_t::tet) {
-                face_vs.emplace_back(list_type{vs[0], vs[1], vs[3]});
-                face_vs.emplace_back(list_type{vs[1], vs[2], vs[3]});
-                face_vs.emplace_back(list_type{vs[2], vs[0], vs[3]});
-                face_vs.emplace_back(list_type{vs[0], vs[2], vs[1]});
+                face_vs.push_back({vs[0], vs[1], vs[3]});
+                face_vs.push_back({vs[1], vs[2], vs[3]});
+                face_vs.push_back({vs[2], vs[0], vs[3]});
+                face_vs.push_back({vs[0], vs[2], vs[1]});
               } // block type
             });
 
       } // block type
 
     } // blocks
-
-    // clear temporary storage
-    face_vertices_sorted.reset();
-
+    
     // check some assertions
+    auto num_cells = cell_max - cell_min + 1;
     clog_assert(
-        cell_vertices_ref.size() == exo_params.num_elem,
+        cell2vertices_.size() == num_cells,
         "Mismatch in read blocks");
+    
+    // invert the global id to local id map
+    auto & cell_local2global_ = local_to_global_[num_dims];
+    auto & cell_global2local_ = global_to_local_[num_dims];
+
+    cell_local2global_.clear();
+    cell_local2global_.resize(num_cells);
+    for ( size_t i=0; i<num_cells; ++i ) {
+      auto global_id = cell_min + i;
+      cell_local2global_[i] = global_id;
+      cell_global2local_.emplace( std::make_pair( global_id, i ) );
+    }
 
     //--------------------------------------------------------------------------
-    // build the edges
+    // read coordinates
 
-    // make storage for the face edges
-    auto & face_edges_ref = entities_[2][1];
-    auto & edge_vertices_ref = entities_[1][0];
+    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    clog_assert(
+        coordinates.size() == dimension() * exo_params.num_nodes,
+        "Mismatch in read vertices");
 
-    // temprary storage for matching edges
-    auto edge_vertices_sorted = std::make_unique<connectivity_t>();
-
-    // build the connecitivity array
-    detail::build_connectivity(
-        face_vertices_ref, face_edges_ref, edge_vertices_ref,
-        *edge_vertices_sorted, [](const auto & vs, auto & edge_vs) {
-          using connectivity_type = std::decay_t<decltype(edge_vs)>;
-          using list_type = std::decay_t<decltype(*edge_vs.begin())>;
-          for (auto v0 = std::prev(vs.end()), v1 = vs.begin(); v1 != vs.end();
-               v0 = v1, ++v1)
-            edge_vs.emplace_back(list_type{*v0, *v1});
-        });
-
-    // clear temporary storage
-    edge_vertices_sorted.reset();
-
-    // make storage for the edge vertices
-    auto num_edges = edge_vertices_ref.size();
-
-    // Determine cell edges
-    auto & cell_edges_ref = entities_[3][1];
-    detail::intersect(cell_faces_ref, face_edges_ref, cell_edges_ref);
-
+    auto num_vertices = coordinates.size() / dimension();
+    
     //--------------------------------------------------------------------------
-    // Create the remainder of the connectivities
+    // Renumber vertices
 
-    auto num_vertices = vertices_.size() / dimension();
-    auto num_faces = face_vertices_ref.size();
+    // Throw away vertices that are not mine
+    size_t local_vertices{0};
+    auto & vertex_global2local_ = global_to_local_[0];
+    vertex_global2local_.clear();
 
-    entities_[0][1].reserve(num_vertices);
-    entities_[0][2].reserve(num_vertices);
-    entities_[0][3].reserve(num_vertices);
-    entities_[1][2].reserve(num_edges);
-    entities_[1][3].reserve(num_edges);
-    entities_[2][3].reserve(num_faces);
+    for ( size_t i=0; i<num_cells; ++i ) {
+      for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
+        auto global_id = cell2vertices_.indices[j];
+        auto res = vertex_global2local_.emplace(
+            std::make_pair(global_id, local_vertices) );
+        if ( res.second ) local_vertices++;
+      }
+    }
 
-    detail::transpose(entities_[1][0], entities_[0][1]);
-    detail::transpose(entities_[2][0], entities_[0][2]);
-    detail::transpose(entities_[3][0], entities_[0][3]);
-    detail::transpose(entities_[2][1], entities_[1][2]);
-    detail::transpose(entities_[3][1], entities_[1][3]);
-    detail::transpose(entities_[3][2], entities_[2][3]);
+    // invert the global id to local id map
+    auto & vertex_local2global_ = local_to_global_[0];
+    vertex_local2global_.clear();
+    vertex_local2global_.resize(local_vertices);
 
+    for ( const auto & global_local : vertex_global2local_ ) {
+      vertex_local2global_[global_local.second] = global_local.first;
+    }
+    
+    // convert element conectivity to local ids and extract only coordinates
+    // that are needed
+    vertices_.clear();
+    vertices_.resize(local_vertices*num_dims);
+
+    for ( auto & v : cell2vertices_.indices ) {
+      auto global_id = v;
+      v = vertex_global2local_.at(global_id);
+      for ( int d=0; d<num_dims; ++d ) {
+        vertices_[ v*num_dims + d ] = 
+          coordinates[d * num_vertices + global_id];
+      }
+    }
+    
+    for ( auto & v : face2vertices_.indices ) 
+      v = vertex_global2local_.at(v);
+
+    // determine face owners
+    // The convention is the first cell to use the face is the owner.
+    auto num_faces = face2vertices_.size();
+    constexpr auto max_id = std::numeric_limits<size_t>::max();
+    face_owner_.clear();
+    face_owner_.resize( num_faces, max_id );
+
+    for ( size_t c=0; c<num_cells; ++c ){
+      for ( auto f : cell2faces_.at(c) ) {
+        if ( face_owner_[f] == max_id ) {
+          face_owner_[f] = cell_local2global_[c];
+        }
+      }
+    }
+
+#if 0
     //--------------------------------------------------------------------------
-    // close the file
-    base_t::close(exoid);
-  }
+    // read face blocks
 
-  //============================================================================
-  //! \brief Implementation of exodus mesh write for burton specialization.
-  //!
-  //! \param[in] name Read burton mesh \e m from \e name.
-  //! \param[out] m Populate burton mesh \e m with contents of \e name.
-  //!
-  //! \return Exodus error code. 0 on success.
-  //============================================================================
-  template<typename U = int>
-  void write(
-      const std::string & name,
-      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
-          element_sets = {},
-      const std::initializer_list<std::pair<const char *, std::vector<U>>> &
-          node_sets = {}) const {
+    // create 
+    auto & face2vertices_ = local_connectivity_[2][0];
+    face2vertices_.clear();
 
-    clog(info) << "Writing mesh to: " << name << std::endl;
+    auto num_face_blk = exo_params.num_face_blk;
+    vector<index_t> face_blk_ids;
 
-    //--------------------------------------------------------------------------
-    // Open file
-
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::out);
-
-    // write the initialization parameters
-    auto exo_params = base_t::make_params();
-    auto num_faces = num_entities(dimension() - 1);
-    auto num_cells = num_entities(dimension());
-    exo_params.num_nodes = num_entities(0);
-    exo_params.num_face = num_faces;
-    exo_params.num_face_blk = 1;
-    exo_params.num_node_sets = node_sets.size();
-    exo_params.num_elem_blk = element_sets.size() ? element_sets.size() : 1;
-
-    if (element_sets.size()) {
-      for (const auto & set : element_sets)
-        exo_params.num_elem += set.second.size();
-    } else
-      exo_params.num_elem = num_cells;
-
-    base_t::write_params(exoid, exo_params);
-
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
-
-    //--------------------------------------------------------------------------
-    // write coordinates
-
-    base_t::write_point_coords(exoid, vertices_);
-
-    //--------------------------------------------------------------------------
-    // face blocks
-
-    const auto & face_vertices = entities_.at(2).at(0);
-
-    auto face_vertices_func = [&](auto f, auto & vert_list) {
-      const auto & vs = face_vertices[f];
-      vert_list.insert(vert_list.end(), vs.begin(), vs.end());
-    };
-
+    // get the face block ids
     if (int64)
-      base_t::template write_face_block<long long>(
-          exoid, 1, "faces", num_faces, face_vertices_func);
+      face_blk_ids = base_t::template read_block_ids<long long>(
+          exoid, EX_FACE_BLOCK, num_face_blk);
     else
-      base_t::template write_face_block<int>(
-          exoid, 1, "faces", num_faces, face_vertices_func);
+      face_blk_ids = base_t::template read_block_ids<int>(
+          exoid, EX_FACE_BLOCK, num_face_blk);
 
-    //--------------------------------------------------------------------------
-    // element blocks
+    // read each block
+    for (int iblk = 0; iblk < num_face_blk; iblk++) {
+      vector<int> counts;
+      // first get the vertices
+      if (int64) {
+        vector<long long> indices;
+        base_t::template read_face_block<long long>(
+            exoid, face_blk_ids[iblk], counts, indices);
+      }
+      else {
+        vector<int> indices;
+        base_t::template read_face_block<int>(
+            exoid, face_blk_ids[iblk], counts, indices);
+      }
+      // rotate the vertices so the lowest one is first
+      //for (auto & vs : face_vertices_ref) {
+      //  auto lowest = std::min_element(vs.begin(), vs.end());
+      //  std::rotate(vs.begin(), lowest, vs.end());
+      //}
+    }
 
-    const auto & cell_faces = entities_.at(3).at(2);
-    int elem_blk_id = 1;
-
-    // add the whole element block
-    if (!element_sets.size()) {
-
-      auto cell_faces_func = [&](auto c, auto & face_list) {
-        const auto & fs = cell_faces[c];
-        face_list.insert(face_list.end(), fs.begin(), fs.end());
-      };
-
-      if (int64)
-        base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_faces_func);
-      else
-        base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, "cells", num_cells, cell_faces_func);
-
-    } // element block
-
-    // or add the element sets
-    for (const auto & set : element_sets) {
-
-      const auto & set_name = set.first;
-      const auto & set_elements = set.second;
-      auto num_cells_set = set_elements.size();
-
-      if (num_cells_set == 0)
-        continue;
-
-      auto cell_faces_func = [&](auto c, auto & face_list) {
-        const auto & fs = cell_faces[set_elements[c]];
-        face_list.insert(face_list.end(), fs.begin(), fs.end());
-      };
-
-      if (int64)
-        base_t::template write_element_block<long long>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_faces_func);
-      else
-        base_t::template write_element_block<int>(
-            exoid, elem_blk_id++, set_name, num_cells_set, cell_faces_func);
-
-    } // sets
-
-    //--------------------------------------------------------------------------
-    // Node sets
-
-    int node_set_id = 1;
-
-    for (const auto & set : node_sets) {
-
-      const auto & set_name = set.first;
-      const auto & set_nodes = set.second;
-      auto num_nodes_set = set_nodes.size();
-
-      if (num_nodes_set == 0)
-        continue;
-
-      if (int64)
-        base_t::template write_node_set<long long>(
-            exoid, ++node_set_id, set_name, set_nodes);
-      else
-        base_t::template write_node_set<int>(
-            exoid, ++node_set_id, set_name, set_nodes);
-
-    } // sets
+#endif
 
     //--------------------------------------------------------------------------
     // close the file
@@ -2210,46 +1961,592 @@ public:
       case 0:
         return vertices_.size() / dimension();
       default:
-        return entities_.at(dim).at(0).size();
+        return local_connectivity_.at(dim).at(0).size();
     }
   }
 
-  /// Return the set of vertices of a particular entity.
-  /// \param [in] dimension  The entity dimension to query.
-  /// \param [in] entity_id  The id of the entity in question.
-  const std::vector<std::vector<size_t>> & entities(size_t from_dim, size_t to_dim) const override {
-    return entities_.at(from_dim).at(to_dim);
-  } // vertices
+  const std::vector<size_t> &
+  local_to_global(size_t dim) const override
+  {
+    return local_to_global_.at(dim);
+  }
+  
+  const std::map<size_t, size_t> &
+  global_to_local(size_t dim) const override
+  {
+    return global_to_local_.at(dim);
+  }
+
+
+  const crs_t &
+  entities_crs(size_t from_dim, size_t to_dim) const override {
+    return local_connectivity_.at(from_dim).at(to_dim);
+  }
 
   /// return the set of vertices of a particular entity.
   /// \param [in] dimension  the entity dimension to query.
   /// \param [in] entity_id  the id of the entity in question.
   std::vector<size_t>
-  entities(size_t from_dim, size_t to_dim, size_t from_id) const override {
-    return entities_.at(from_dim).at(to_dim).at(from_id);
-  } // vertices
+  entities(size_t from_dim, size_t to_dim, size_t from_id) const override
+  {
+    const auto & connectivity = local_connectivity_.at(from_dim).at(to_dim);
+    auto start = connectivity.offsets[from_id];
+    auto end = connectivity.offsets[from_id+1];
+    std::vector<size_t> result( &connectivity.indices[start],
+        &connectivity.indices[end] );
+    return result;
+  }
 
   /// Return the vertex coordinates for a certain id.
   /// \param [in] vertex_id  The id of the vertex to query.
-  template<typename POINT_TYPE>
-  auto vertex(size_t vertex_id) const {
-    auto num_vertices = vertices_.size() / dimension();
-    POINT_TYPE p;
-    for (int i = 0; i < dimension(); ++i)
-      p[i] = vertices_[i * num_vertices + vertex_id];
-    return p;
+  void vertex(size_t vertex_id, real_t * coords) const override {
+    constexpr auto num_dims = dimension();
+    for ( int i=0; i<num_dims; ++i ) {
+      coords[i] =
+        vertices_[ vertex_id*num_dims + i ];
+    }
   } // vertex
+  
+  void create_graph(
+      size_t from_dimension,
+      size_t to_dimension,
+      size_t min_connections,
+      flecsi::coloring::dcrs_t & dcrs ) const override
+  {
+    constexpr auto num_dims = dimension();
+
+    if ( from_dimension != num_dims || to_dimension != 0 )
+      throw_runtime_error( "Incorrect dimensions provided to create_graph" );
+
+    flecsi::coloring::make_dcrs_distributed<num_dims>(
+      *this, from_dimension, to_dimension, min_connections, dcrs);
+  }
+  
+  void pack(
+    size_t dimension,
+    size_t local_id,
+    std::vector<byte_t> & buffer ) const override
+  {
+    constexpr auto num_dims = base_t::num_dims;
+    // get connectivity maps
+    const auto & cells2verts = local_connectivity_.at(num_dims).at(0);
+    const auto & cells2faces = local_connectivity_.at(num_dims).at(2);
+    const auto & faces2verts = local_connectivity_.at(2).at(0);
+    // get numbering maps
+    const auto & cells_local2global = local_to_global_.at(num_dims);
+    const auto & verts_local2global = local_to_global_.at(0);
+
+    //--------------------------------------------------------------------------
+    // pack vertices
+    {
+      // get number of vertices
+      const auto & vs = cells2verts.at(local_id);
+      auto num_verts = vs.size();
+      // add mesh global id to buffer
+      flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
+      // add num verts to buffer
+      flecsi::topology::cast_insert( &num_verts, 1, buffer );
+      // add global vertex indices to buffer
+      for (auto lid : vs) {
+        auto gid = verts_local2global[lid];
+        flecsi::topology::cast_insert( &gid, 1, buffer );
+      }
+      // also pack coordinates too, not ideal but easiest
+      for (auto lid : vs) {
+        auto coord = vertices_.data() + lid*num_dims;
+        flecsi::topology::cast_insert( coord, num_dims, buffer );
+      }
+    } // verts
+
+    //--------------------------------------------------------------------------
+    // now pack faces
+    {
+      // get number of faces
+      const auto & fs = cells2faces.at(local_id);
+      auto num_faces = fs.size();
+      // add num faces to buffer
+      flecsi::topology::cast_insert( &num_faces, 1, buffer );
+      // loop over faces
+      for ( auto fid : fs ) {
+        // get face verts
+        const auto & vs = faces2verts.at(fid);
+        auto num_verts = vs.size();
+        std::vector<size_t> vs_copy( vs.begin(), vs.end() );
+        // if this cell is not the owner, then reverse the face verts
+        if ( face_owner_[fid] != cells_local2global[local_id] )
+          std::reverse( vs_copy.begin(), vs_copy.end() );
+        // add number of verts to buffer
+        flecsi::topology::cast_insert( &num_verts, 1, buffer );
+        // add face verts to buffer
+        for ( auto vid : vs_copy ) {
+          auto gid = verts_local2global[vid];
+          flecsi::topology::cast_insert( &gid, 1, buffer );
+        }
+      } // faces
+
+    }
+  }
+
+  void unpack(
+    size_t dimension,
+    size_t local_id,
+    byte_t const * & buffer ) override
+  {
+
+    // get the numbering and connectivity maps
+    constexpr auto num_dims = base_t::num_dims;
+
+    auto & cells2verts = local_connectivity_.at(num_dims).at(0);
+    auto & cells2faces = local_connectivity_.at(num_dims).at(2);
+    auto & faces2verts = local_connectivity_.at(2).at(0);
+
+    auto & cells_local2global = local_to_global_.at(num_dims);
+    auto & cells_global2local = global_to_local_.at(num_dims);
+    auto & verts_local2global = local_to_global_.at(0);
+    auto & verts_global2local = global_to_local_.at(0);
+    
+    // compute the new local id
+    local_id = cells_local2global.size();
+    // get global mesh id
+    size_t global_id;
+    flecsi::topology::uncast( buffer, 1, &global_id );
+    // add mapping
+    cells_local2global.emplace_back( global_id );
+    auto res = cells_global2local.emplace( std::make_pair(global_id, local_id) );
+    assert( res.second && "Global id already exists but shouldn't" );
+   
+    //--------------------------------------------------------------------------
+    // verts
+    {
+      // get the number of vertices
+      size_t num_verts;
+      flecsi::topology::uncast( buffer, 1, &num_verts );
+   
+      // retrieve global vertex ids
+      std::vector<size_t> vs(num_verts);
+      flecsi::topology::uncast( buffer, num_verts, vs.data() );
+
+      // unpack vertex coordinates
+      vector<real_t> coords(num_dims*num_verts);
+      flecsi::topology::uncast( buffer, coords.size(), coords.data() );
+
+      // need to convert global vertex ids to local ids
+      for ( size_t i=0; i<num_verts; ++i ) {
+        auto gid = vs[i];
+        auto lid = verts_global2local.size();
+        auto res = verts_global2local.emplace( std::make_pair(gid,lid) );
+        // inserted, so add entries to maps
+        if ( res.second ) {
+          verts_local2global.emplace_back( gid );
+          vertices_.reserve( vertices_.size() + num_dims );
+          for ( int dim=0; dim<num_dims; ++dim )
+            vertices_.emplace_back( coords[i*num_dims + dim] );
+        }
+        // not inserted, so get local id
+        else {
+          lid = res.first->second;
+        }
+        // now remap indices
+        vs[i] = lid;
+      }
+
+      // now append to the connectivity list
+      cells2verts.append( vs.begin(), vs.end() );
+    } // verts
+
+    //--------------------------------------------------------------------------
+    // faces
+    {
+      // get the number of faces
+      size_t num_faces;
+      flecsi::topology::uncast( buffer, 1, &num_faces );
+
+      // storage to keep track of new cell faces
+      std::vector<size_t> fs;
+      fs.reserve( num_faces );
+
+      // loop over faces and unpack verts
+      for ( size_t i=0; i<num_faces; ++i ) {
+
+        // the number of vertices
+        size_t num_verts;
+        flecsi::topology::uncast( buffer, 1, &num_verts );
+
+        // the ids of the vertices
+        std::vector<size_t> vs(num_verts);
+        flecsi::topology::uncast( buffer, num_verts, vs.data() );
+        // convert vertex global ids to local ids
+        for ( auto & v : vs ) v = verts_global2local.at(v);
+
+        // sort vertices for search
+        std::vector<size_t> sorted_vs(vs.begin(), vs.end());
+        std::sort( sorted_vs.begin(), sorted_vs.end() );
+
+        // search for the face to see if it exists
+        size_t face_counter{0};
+        for ( const auto & search_vs : faces2verts ) {
+          // sort this faces vertices
+          std::vector<size_t> sorted_search_vs( search_vs.begin(), search_vs.end() );
+          std::sort( sorted_search_vs.begin(), sorted_search_vs.end() );
+          // is it a match?
+          auto matches = std::equal(sorted_vs.begin(), sorted_vs.end(),
+                sorted_search_vs.begin() );
+          if ( matches ) break;
+          // bump counter
+          ++face_counter;
+        }
+        // if there was a match, use this id
+        if ( face_counter != faces2verts.size() ) {
+          fs.emplace_back(face_counter);
+        }
+        // else append to the connectivity list
+        else {
+          fs.emplace_back( faces2verts.size() );
+          faces2verts.append( vs.begin(), vs.end() );
+          face_owner_.emplace_back( global_id );
+        }
+
+      }
+      
+      // now append to the connectivity list
+      cells2faces.append( fs.begin(), fs.end() );
+
+    } // faces
+    
+  }
+
+  void erase(
+    size_t dimension,
+    const vector<size_t> & local_ids ) override
+  {
+    
+    if (local_ids.empty()) return;
+
+    // assume sorted
+    assert( std::is_sorted( local_ids.begin(), local_ids.end() )
+        && "entries to delete are not sorted" );
+
+    constexpr auto num_dims = base_t::num_dims;
+
+    //--------------------------------------------------------------------------
+    // Erase elements
+
+    // erase any vertices and faces that are no longer used.
+    auto & cells2verts = local_connectivity_.at(num_dims).at(0);
+    auto & cells2faces = local_connectivity_.at(num_dims).at(2);
+    auto & faces2verts = local_connectivity_.at(2).at(0);
+    std::vector<index_t> check_vertices, check_faces;
+    
+    // erase the local mapping
+    auto & cell_local2global = local_to_global_.at(num_dims);
+    auto & cell_global2local = global_to_local_.at(num_dims);
+
+    auto num_remove = local_ids.size();
+    auto num_cells = cell_local2global.size();
+
+    for (auto i = num_remove; i-- > 0; ) {
+
+      // get global and local id
+      auto local_id = local_ids[i];
+      auto global_id = cell_local2global[local_id];
+
+      // add vertices to check to the list
+      for ( auto v : cells2verts.at(local_id) )
+        check_vertices.emplace_back(v);
+      for ( auto f : cells2faces.at(local_id) )
+        check_faces.emplace_back(f);
+      
+
+      // shift all local to global ids
+      for ( auto j=local_id; j<num_cells; ++j )
+        cell_local2global[j] = cell_local2global[j+1];
+    
+      // and the global mapping ( need to decrement entries )
+      auto count = cell_global2local.erase( global_id );
+      assert( count > 0 && "global id not found!" );
+      for ( auto & pair : cell_global2local )
+        if ( pair.second>local_id )
+          pair.second--;
+      
+      // decrement number of cells
+      num_cells--;
+    }
+
+    // resize
+    cell_local2global.resize(num_cells);
+    
+    // erase cells to vertices info
+    cells2verts.erase(local_ids);
+    cells2faces.erase(local_ids);
+
+    //--------------------------------------------------------------------------
+    // Determine unused vertices/faces
+    
+    auto remove_duplicates = [](auto & list) {
+      std::sort( list.begin(), list.end() );
+      auto last = std::unique( list.begin(), list.end() );
+      list.erase( last, list.end() );
+    };
+
+    // sort vertices to check and remove duplicates
+    remove_duplicates( check_vertices );
+    remove_duplicates( check_faces );
+    
+    //--------------------------------------------------------------------------
+    // Delete faces
+    
+    // find faces that are no longer used
+    std::vector<index_t> delete_items;
+    delete_items.reserve( check_faces.size() );
+    
+    for ( auto f_rm : check_faces ) {
+      // mark unused first
+      bool used = false;
+      // iterate over all cell-vertices, and bounce if its used
+      for ( auto f : cells2faces.indices ) {
+        if ( f == f_rm ) {
+          used = true;
+          break;
+        }
+      }
+      // if face is unused, add to list to delete
+      if ( !used ) delete_items.emplace_back( f_rm );
+    }
+    
+    // Now actually delete
+    if ( !delete_items.empty() ) {
+      
+      // store the number of faces
+      auto num_faces = faces2verts.size();
+      num_remove = delete_items.size();
+
+      // delete face to vertex connectivity
+      faces2verts.erase(delete_items);
+      
+      // renumber cell to face connectivity
+      // storage for renumberings
+      constexpr auto max_id = std::numeric_limits<size_t>::max();
+      vector<index_t> old2new( num_faces, max_id );
+      
+      // add the number of faces to the end for the logic below to work
+      delete_items.emplace_back( num_faces );
+    
+      // figure new numbering
+      size_t i{0}, face_count{0};
+
+      for (auto it=delete_items.begin(); it != delete_items.end(); ++it)
+      {
+        for ( ; i<*it; ++i ) {
+          old2new[i] = face_count;
+          face_count++;
+        }
+        i++;
+      }
+      
+      assert( face_count == num_faces - num_remove &&
+          "Face deletion messed up" );
+
+      // renumber cell connectivity
+      for ( auto & i : cells2faces.indices ) {
+        i = old2new[i];
+        assert( i<face_count && "Messed up renumbering #1" );
+      }
+
+      // renumber face owners
+      vector<index_t> new_face_owner(face_count);
+      for ( size_t old_id=0; old_id<num_faces; ++old_id ) {
+        auto new_id = old2new[old_id];
+        if ( new_id != max_id )
+          new_face_owner[new_id] = face_owner_[old_id];
+      }
+      std::swap( new_face_owner, face_owner_ );
+
+      // reverse any vertices whose owner was deleted
+      for ( size_t f=0; f<face_count; ++f ) {
+        // get the old owner
+        auto owner_id = face_owner_[f];
+        // if it isn't the global list, reverse it
+        if ( !cell_global2local.count(owner_id) ) {
+          auto start = faces2verts.offsets[f];
+          auto end = faces2verts.offsets[f+1];
+          std::reverse( &faces2verts.indices[start], &faces2verts.indices[end] );
+          // reset the id
+          face_owner_[f] = max_id;
+        }
+      }
+   
+      // figure out any of the reset face owners
+      for ( size_t c=0; c<cells2verts.size(); ++c ){
+        for ( auto f : cells2faces.at(c) ) {
+          if ( face_owner_[f] == max_id ) {
+            face_owner_[f] = cell_local2global[c];
+          }
+        }
+      }
+
+    } // remove faces
+    
+
+    //--------------------------------------------------------------------------
+    // Delete vertices
+
+    // find vertices that are no longer used
+    delete_items.reserve( check_vertices.size() );
+    delete_items.clear();
+
+    for ( auto v_rm : check_vertices ) {
+      // mark unused first
+      bool used = false;
+      // iterate over all cell-vertices, and bounce if its used
+      for ( auto v : cells2verts.indices ) {
+        if ( v == v_rm ) {
+          used = true;
+          break;
+        }
+      }
+      // if vertex is unused, add to list to delete
+      if ( !used ) delete_items.emplace_back( v_rm );
+    }
+    
+    if ( !delete_items.empty() ) {
+   
+      //------------
+      // Delete
+    
+      num_remove = delete_items.size();
+
+      // erase the local mapping
+      auto num_vertices = vertices_.size() / num_dims;
+      auto & vert_local2global = local_to_global_.at(0);
+      auto & vert_global2local = global_to_local_.at(0);
+
+      auto vertex_count = num_vertices;
+      for (auto i = num_remove; i-- > 0; ) {
+
+        // get global and local id
+        auto local_id = delete_items[i];
+        auto global_id = vert_local2global[local_id];
+
+        // shift all local to global ids, and vertices
+        for ( auto j=local_id; j<vertex_count; ++j ) {
+          vert_local2global[j] = vert_local2global[j+1];
+          for ( int d=0; d<num_dims; ++d )
+            vertices_[ j*num_dims + d ] = vertices_[ (j+1)*num_dims + d ];
+        }
+      
+        // and delete the global mapping
+        auto count = vert_global2local.erase( global_id );
+        assert( count > 0 && "global id not found!" );
+        for ( auto & pair : vert_global2local )
+          if ( pair.second>local_id )
+            pair.second--;
+        
+        // decrement number of vertices
+        vertex_count--;
+      }
+
+      // resize
+      vert_local2global.resize(vertex_count);
+      vertices_.resize(vertex_count*num_dims);
+      
+      //------------
+      // Renumber
+      
+      // storage for renumberings
+      vector<index_t>
+        old2new( num_vertices, std::numeric_limits<size_t>::max() );
+      
+      // add the number of vertices to the end for the logic below to work
+      delete_items.emplace_back( num_vertices );
+
+      // figure new numbering
+      size_t i{0};
+      vertex_count = 0;
+
+      for (auto it=delete_items.begin(); it != delete_items.end(); ++it)
+      {
+        for ( ; i<*it; ++i ) {
+          old2new[i] = vertex_count;
+          vertex_count++;
+        }
+        i++;
+      }
+ 
+      assert( vertex_count == num_vertices - num_remove &&
+          "Vertex deletion messed up" );
+
+      // renumber cell connectivity
+      for ( auto & i : cells2verts.indices ) {
+        i = old2new[i];
+        assert( i< vertex_count && "Messed up renumbering #1" );
+      }
+      // renumber face connectivity
+      for ( auto & i : faces2verts.indices ) {
+        i = old2new[i];
+        assert( i< vertex_count && "Messed up renumbering #1" );
+      }
+
+    } // delete vertices
+    
+  }
+
+  void build_connectivity() override {
+
+    //--------------------------------------------------------------------------
+    // build the edges
+      
+    // reference storage for the cell edges and edge vertices
+    const auto & faces2vertices = local_connectivity_.at(2).at(0);
+    auto & faces2edges = local_connectivity_[2][1];
+    auto & edges2vertices = local_connectivity_[1][0];
+
+    // build the connecitivity array
+    detail::new_build_connectivity(
+        faces2vertices, faces2edges, edges2vertices,
+        [](const auto & vs, auto & edge_vs) {
+          for (
+            auto v0 = std::prev(vs.end()), v1 = vs.begin();
+            v1 != vs.end();
+            v0 = v1, ++v1
+          )
+            edge_vs.push_back({*v0, *v1});
+        });
+    
+    // now figure out cell to edge connectivity through the faces
+    const auto & cells2faces = local_connectivity_.at(3).at(2);
+    auto & cells2edges = local_connectivity_[3][1];
+    detail::new_intersect(cells2faces, faces2edges, cells2edges);
+
+    // now figure out global ids of edges
+    auto & edge_local2global = local_to_global_[1];
+    auto & edge_global2local = global_to_local_[1];
+    flecsi::coloring::match_ids( *this, 1, edge_local2global, edge_global2local );
+    
+    // now figure out global ids of faces
+    auto & face_local2global = local_to_global_[2];
+    auto & face_global2local = global_to_local_[2];
+    flecsi::coloring::match_ids( *this, 2, face_local2global, face_global2local );
+    
+  }
+
 
 private:
   //============================================================================
   // Private data
   //============================================================================
 
-  //! \brief storage for element verts
-  std::map<index_t, std::map<index_t, connectivity_t>> entities_;
-
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
+
+  //! \brief storage for cell to vertex connectivity
+  std::map<index_t, std::map<index_t, crs_t>> local_connectivity_;
+
+  std::vector<index_t> face_owner_;
+
+  //! \brief global/local id maps
+  std::map<index_t, std::map<index_t, index_t>> global_to_local_;
+  std::map<index_t, vector<index_t>> local_to_global_;
+
 };
 
 } // namespace io

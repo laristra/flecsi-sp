@@ -1138,7 +1138,6 @@ void set_regions(std::vector<int> &region_ids)
   {
 
     base_t::template init<0>();
-    std::cout<<"done init()"<<std::endl;
     
     base_t::template init_bindings<1>();
 
@@ -1206,32 +1205,36 @@ void set_regions(std::vector<int> &region_ids)
     //--------------------------------------------------------------------------
     // make sure face normal points out from first cell
     
-    // auto & context = flecsi::execution::context_t::instance();
-    // auto rank = context.color();
-    // auto & vertex_map = context.index_map( index_spaces_t::vertices );
-    // auto & face_map = context.index_map( index_spaces_t::faces );
-    // auto & cell_map = context.index_map( index_spaces_t::cells );
+    auto & context = flecsi::execution::context_t::instance();
+    auto rank = context.color();
+    auto & vertex_map = context.index_map( index_spaces_t::vertices );
+    auto & face_map = context.index_map( index_spaces_t::faces );
+    auto & cell_map = context.index_map( index_spaces_t::cells );
 
-    for( auto f : faces( subset_t::overlapping ) ) {
+    for( auto f : faces() ) {
       auto n = f->normal();
       auto fx = f->midpoint();
       auto c = cells(f).front();
       auto cx = c->midpoint();
-      auto delta = fx - cx;
+      auto flipped = (f->is_flipped(c));
+      auto delta = flipped ? cx - fx : fx - cx;
       auto dot = dot_product( n, delta );
+      // std::cout << "Checking face with mid " << face_map[ f.id() ] << std::endl;
+      // std::cout << "With cells : ";
+      // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
+      // //for ( auto cl : cells(f) ) std::cout << cl.id() << ", ";
+      // std::cout << std::endl;
+      // std::cout << "And vertices : ";
+      // for ( auto vt : vertices(f) ) std::cout << vertex_map[ vt.id() ] << ", ";
+      // std::cout << std::endl;
+      // std::cout << "Face has midpoint " << fx << std::endl;
+      // std::cout << "Cell has midpoint " << c->midpoint() << std::endl;
+      // std::cout << "Cell has centroid " << c->centroid() << std::endl;
+      // std::cout << dot << ", " << std::boolalpha << flipped << std::endl;
+      // std::cout << std::endl;
       if ( dot < 0 ) {
-        // std::cout << "Checking face with mid " << face_map[ f.id() ] << std::endl;
-        // std::cout << "With cells : ";
-        // for ( auto cl : cells(f) ) std::cout << cell_map[ cl.id() ] << ", ";
-        // std::cout << std::endl;
-        // std::cout << "And vertices : ";
-        // for ( auto vt : vertices(f) ) std::cout << vertex_map[ vt.id() ] << ", ";
-        // std::cout << std::endl;
-        // std::cout << "Face has midpoint " << fx << std::endl;
-        // std::cout << "Cell has midpoint " << c->midpoint() << std::endl;
-        // std::cout << "Cell has centroid " << c->centroid() << std::endl;
-        // std::cout << std::endl;
-        ss << "Face " << f.id() << " has opposite normal" << std::endl;
+        ss << "Face " << face_map.at(f.id()) << " of rank " << rank << 
+          " has opposite normal " << std::endl;
       }
     } 
 
