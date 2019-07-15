@@ -12,6 +12,8 @@
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <flecsi-sp/burton/burton_specialization_arguments.h>
 
+void launch_init_vpsc_data();
+
 namespace flecsi {
 namespace execution {
 
@@ -24,6 +26,8 @@ void specialization_tlt_init(int argc, char** argv)
   application_tlt_init(argc, argv);
 #endif // BURTON_ENABLE_APPLICATION_TLT_INIT
   clog(info) << "In specialization top-level-task init" << std::endl;
+
+  launch_init_vpsc_data();
 
   // get the color
   auto & context = flecsi::execution::context_t::instance();
