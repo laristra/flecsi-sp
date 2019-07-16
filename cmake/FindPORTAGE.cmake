@@ -11,10 +11,10 @@
 #  PORTAGE_FOUND        - True if flecsi found.
 
 # Look for the header file.
-FIND_PATH(PORTAGE_INCLUDE_DIR NAMES portage.h
+FIND_PATH(_portage_include_dir NAMES portage.h
   PATH_SUFFIXES portage/support)
 
-if ( PORTAGE_INCLUDE_DIR )
+if ( _portage_include_dir AND NOT PORTAGE_INCLUDE_DIR )
   set(PORTAGE_INCLUDE_DIR ${PORTAGE_INCLUDE_DIR}/../.. )
 endif()
 
