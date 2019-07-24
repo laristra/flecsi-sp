@@ -212,7 +212,7 @@ public:
       return;
     }
     // if we got here, there is something wrong
-    throw_runtime_error( "Could not find variable to ReMAP!" );
+    THROW_RUNTIME_ERROR( "Could not find variable to ReMAP!" );
   }
 
   void check_map(std::string const & var_name) const {
@@ -340,7 +340,7 @@ public:
   {
     return mesh_->num_cells();
     //    return (var_map_copy.at(var_name)).size();
-    //    throw_runtime_error( "get_data_size not implemented yet!" );
+    //    THROW_RUNTIME_ERROR( "get_data_size not implemented yet!" );
   }
 
 

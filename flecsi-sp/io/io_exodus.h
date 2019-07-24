@@ -102,7 +102,7 @@ public:
     // put the number of element fields
     status = ex_put_var_param(exoid, "e", num_var);
     if (status)
-      throw_runtime_error(
+      THROW_RUNTIME_ERROR(
         "Problem writing variable number, " <<
         " ex_put_var_param() returned " << status 
       );
@@ -111,7 +111,7 @@ public:
     auto label = validate_string( f.label() );
     status = ex_put_var_name(exoid, "e", var_id, "density");
     if (status)
-      throw_runtime_error(
+      THROW_RUNTIME_ERROR(
         "Problem writing variable name, " <<
         " ex_put_var_name() returned " << status 
       );
@@ -123,7 +123,7 @@ public:
       exoid, time_step, var_id, elem_blk_id, tmp.size(), tmp.data()
     );
     if (status)
-      throw_runtime_error(
+      THROW_RUNTIME_ERROR(
         "Problem writing variable data, " <<
         " ex_put_elem_var() returned " << status 
       );
@@ -375,7 +375,7 @@ public:
     // put the number of element fields
     status = ex_put_var_param(exoid, "e", num_var);
     if (status)
-      throw_runtime_error(
+      THROW_RUNTIME_ERROR(
         "Problem writing variable number, " <<
         " ex_put_var_param() returned " << status 
       );
@@ -390,7 +390,7 @@ public:
         status = ex_put_var_name(exoid, "e", var_id, name[i].c_str());
 
         if (status)
-            throw_runtime_error(
+            THROW_RUNTIME_ERROR(
                 "Problem writing variable name, " << name[i].c_str()<<
                 " ex_put_var_name() returned " << status 
                 );
@@ -417,7 +417,7 @@ public:
             );
 
         if (status)
-            throw_runtime_error(
+            THROW_RUNTIME_ERROR(
                 "Problem writing variable data, " <<
                 " ex_put_elem_var() returned " << status 
                 );
