@@ -4149,7 +4149,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     mesh_def = std::make_unique<exodus_definition_t>( filename_string );
   }
   else
-    throw_implemented_error( "Unknown mesh file type" );
+    THROW_IMPLEMENTED_ERROR( "Unknown mesh file type" );
 
   // create a vector of colorings and color info for each dimensional entity
   std::map< size_t, std::map< size_t, flecsi::coloring::index_coloring_t > >

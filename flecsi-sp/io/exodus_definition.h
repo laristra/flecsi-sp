@@ -976,7 +976,7 @@ public:
     constexpr auto num_dims = dimension();
 
     if ( from_dimension != num_dims || to_dimension != 0 )
-      throw_runtime_error( "Incorrect dimensions provided to create_graph" );
+      THROW_RUNTIME_ERROR( "Incorrect dimensions provided to create_graph" );
 
     flecsi::coloring::make_dcrs_distributed<num_dims>(
       *this, from_dimension, to_dimension, min_connections, dcrs);
@@ -1326,7 +1326,7 @@ public:
     constexpr auto num_dims = dimension();
 
     if ( from_dimension != num_dims || to_dimension != 0 )
-      throw_runtime_error( "Incorrect dimensions provided to create_graph" );
+      THROW_RUNTIME_ERROR( "Incorrect dimensions provided to create_graph" );
 
     flecsi::coloring::make_dcrs_distributed<num_dims>(
       *this, from_dimension, to_dimension, min_connections, dcrs);
@@ -2020,7 +2020,7 @@ public:
     constexpr auto num_dims = dimension();
 
     if ( from_dimension != num_dims || to_dimension != 0 )
-      throw_runtime_error( "Incorrect dimensions provided to create_graph" );
+      THROW_RUNTIME_ERROR( "Incorrect dimensions provided to create_graph" );
 
     flecsi::coloring::make_dcrs_distributed<num_dims>(
       *this, from_dimension, to_dimension, min_connections, dcrs);
