@@ -48,5 +48,8 @@ using client_handle_w = flecsi::data_client_handle_u<DC, flecsi::wo>;
 template<typename DC>
 using client_handle_r = flecsi::data_client_handle_u<DC, flecsi::ro>;
 
+template<typename DC>
+using client_handle_rw = flecsi::data_client_handle_u<DC, flecsi::rw>;
+
 } // namespace
 } // namespace

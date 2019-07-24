@@ -2,435 +2,435 @@ For each cell:
 ---- cell id: 0 with centroid ( -0.375 -0.375 0.375 ) and volume 0.015625
 ++++ vertex id: 0 with coordinates ( -0.5 -0.5 0.5 )
 ++++ vertex id: 25 with coordinates ( -0.5 -0.5 0.25 )
-++++ vertex id: 27 with coordinates ( -0.25 -0.5 0.25 )
-++++ vertex id: 2 with coordinates ( -0.25 -0.5 0.5 )
 ++++ vertex id: 26 with coordinates ( -0.5 -0.25 0.25 )
-++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
 ++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
+++++ vertex id: 2 with coordinates ( -0.25 -0.5 0.5 )
+++++ vertex id: 27 with coordinates ( -0.25 -0.5 0.25 )
+++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ---- cell id: 1 with centroid ( -0.375 -0.125 0.375 ) and volume 0.015625
-++++ vertex id: 26 with coordinates ( -0.5 -0.25 0.25 )
 ++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
+++++ vertex id: 26 with coordinates ( -0.5 -0.25 0.25 )
+++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
+++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
-++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
 ++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
-++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ---- cell id: 2 with centroid ( -0.375 0.125 0.375 ) and volume 0.015625
-++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
 ++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
+++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
+++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
+++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
-++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
 ++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
-++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ---- cell id: 3 with centroid ( -0.375 0.375 0.375 ) and volume 0.015625
-++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
 ++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
+++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
+++++ vertex id: 41 with coordinates ( -0.5 0.5 0.25 )
+++++ vertex id: 8 with coordinates ( -0.5 0.5 0.5 )
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
-++++ vertex id: 41 with coordinates ( -0.5 0.5 0.25 )
 ++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
-++++ vertex id: 8 with coordinates ( -0.5 0.5 0.5 )
 ++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ---- cell id: 4 with centroid ( -0.125 -0.375 0.375 ) and volume 0.015625
 ++++ vertex id: 2 with coordinates ( -0.25 -0.5 0.5 )
 ++++ vertex id: 27 with coordinates ( -0.25 -0.5 0.25 )
-++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
-++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
-++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
+++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
+++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
+++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ---- cell id: 5 with centroid ( -0.125 -0.125 0.375 ) and volume 0.015625
-++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
+++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
+++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
+++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
-++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
-++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ---- cell id: 6 with centroid ( -0.125 0.125 0.375 ) and volume 0.015625
-++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
+++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
+++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
+++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
-++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ---- cell id: 7 with centroid ( -0.125 0.375 0.375 ) and volume 0.015625
-++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
+++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
+++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
+++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
 ---- cell id: 8 with centroid ( 0.125 -0.375 0.375 ) and volume 0.015625
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
+++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ---- cell id: 9 with centroid ( 0.125 -0.125 0.375 ) and volume 0.015625
-++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
+++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
+++++ vertex id: 49 with coordinates ( 0 0 0.25 )
+++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ---- cell id: 10 with centroid ( 0.125 0.125 0.375 ) and volume 0.015625
-++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
+++++ vertex id: 49 with coordinates ( 0 0 0.25 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ---- cell id: 11 with centroid ( 0.125 0.375 0.375 ) and volume 0.015625
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
 ++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
 ++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
 ---- cell id: 12 with centroid ( 0.375 -0.375 0.375 ) and volume 0.015625
 ++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
 ++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
-++++ vertex id: 20 with coordinates ( 0.5 -0.5 0.5 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
+++++ vertex id: 20 with coordinates ( 0.5 -0.5 0.5 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
 ++++ vertex id: 21 with coordinates ( 0.5 -0.25 0.5 )
 ---- cell id: 13 with centroid ( 0.375 -0.125 0.375 ) and volume 0.015625
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 21 with coordinates ( 0.5 -0.25 0.5 )
 ++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 22 with coordinates ( 0.5 0 0.5 )
 ---- cell id: 14 with centroid ( 0.375 0.125 0.375 ) and volume 0.015625
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 22 with coordinates ( 0.5 0 0.5 )
 ++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
-++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 23 with coordinates ( 0.5 0.25 0.5 )
 ---- cell id: 15 with centroid ( 0.375 0.375 0.375 ) and volume 0.015625
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
 ++++ vertex id: 23 with coordinates ( 0.5 0.25 0.5 )
 ++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
 ++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
-++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
 ++++ vertex id: 24 with coordinates ( 0.5 0.5 0.5 )
 ---- cell id: 16 with centroid ( -0.375 -0.375 0.125 ) and volume 0.015625
 ++++ vertex id: 25 with coordinates ( -0.5 -0.5 0.25 )
 ++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
-++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
-++++ vertex id: 27 with coordinates ( -0.25 -0.5 0.25 )
 ++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 26 with coordinates ( -0.5 -0.25 0.25 )
+++++ vertex id: 27 with coordinates ( -0.25 -0.5 0.25 )
+++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
 ---- cell id: 17 with centroid ( -0.375 -0.125 0.125 ) and volume 0.015625
-++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
 ++++ vertex id: 26 with coordinates ( -0.5 -0.25 0.25 )
+++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
+++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
 ++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 35 with coordinates ( -0.5 0 0 )
 ++++ vertex id: 36 with coordinates ( -0.25 0 0 )
-++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
 ++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ---- cell id: 18 with centroid ( -0.375 0.125 0.125 ) and volume 0.015625
-++++ vertex id: 35 with coordinates ( -0.5 0 0 )
 ++++ vertex id: 33 with coordinates ( -0.5 0 0.25 )
+++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
+++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
 ++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ++++ vertex id: 36 with coordinates ( -0.25 0 0 )
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
 ++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
 ++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ---- cell id: 19 with centroid ( -0.375 0.375 0.125 ) and volume 0.015625
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
 ++++ vertex id: 37 with coordinates ( -0.5 0.25 0.25 )
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
+++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
+++++ vertex id: 41 with coordinates ( -0.5 0.5 0.25 )
 ++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
 ++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
-++++ vertex id: 41 with coordinates ( -0.5 0.5 0.25 )
 ++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ---- cell id: 20 with centroid ( -0.125 -0.375 0.125 ) and volume 0.015625
 ++++ vertex id: 27 with coordinates ( -0.25 -0.5 0.25 )
 ++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
-++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
-++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
 ++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
+++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
+++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ---- cell id: 21 with centroid ( -0.125 -0.125 0.125 ) and volume 0.015625
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ---- cell id: 22 with centroid ( -0.125 0.125 0.125 ) and volume 0.015625
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
 ++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ---- cell id: 23 with centroid ( -0.125 0.375 0.125 ) and volume 0.015625
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
+++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
 ---- cell id: 24 with centroid ( 0.125 -0.375 0.125 ) and volume 0.015625
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
 ++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ---- cell id: 25 with centroid ( 0.125 -0.125 0.125 ) and volume 0.015625
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ---- cell id: 26 with centroid ( 0.125 0.125 0.125 ) and volume 0.015625
-++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ---- cell id: 27 with centroid ( 0.125 0.375 0.125 ) and volume 0.015625
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
 ++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
 ---- cell id: 28 with centroid ( 0.375 -0.375 0.125 ) and volume 0.015625
 ++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
 ++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
 ---- cell id: 29 with centroid ( 0.375 -0.125 0.125 ) and volume 0.015625
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
 ++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 70 with coordinates ( 0.5 0 0 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
 ---- cell id: 30 with centroid ( 0.375 0.125 0.125 ) and volume 0.015625
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
 ++++ vertex id: 70 with coordinates ( 0.5 0 0 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
 ---- cell id: 31 with centroid ( 0.375 0.375 0.125 ) and volume 0.015625
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
 ++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
 ++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
----- cell id: 32 with centroid ( -0.375 -0.375 -0.125 ) and volume 0.015625
+---- cell id: 32 with centroid ( 0.125 -0.375 -0.125 ) and volume 0.015625
+++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
+++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+---- cell id: 33 with centroid ( 0.125 -0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
+++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+---- cell id: 34 with centroid ( 0.125 0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
+++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+---- cell id: 35 with centroid ( 0.125 0.375 -0.125 ) and volume 0.015625
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
+++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
+---- cell id: 36 with centroid ( 0.375 -0.375 -0.125 ) and volume 0.015625
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
+++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
+++++ vertex id: 95 with coordinates ( 0.5 -0.5 -0.25 )
+++++ vertex id: 96 with coordinates ( 0.5 -0.25 -0.25 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
+---- cell id: 37 with centroid ( 0.375 -0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
+++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
+++++ vertex id: 96 with coordinates ( 0.5 -0.25 -0.25 )
+++++ vertex id: 97 with coordinates ( 0.5 0 -0.25 )
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
+---- cell id: 38 with centroid ( 0.375 0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
+++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
+++++ vertex id: 97 with coordinates ( 0.5 0 -0.25 )
+++++ vertex id: 98 with coordinates ( 0.5 0.25 -0.25 )
+++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
+---- cell id: 39 with centroid ( 0.375 0.375 -0.125 ) and volume 0.015625
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
+++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
+++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
+++++ vertex id: 98 with coordinates ( 0.5 0.25 -0.25 )
+++++ vertex id: 99 with coordinates ( 0.5 0.5 -0.25 )
+++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
+---- cell id: 40 with centroid ( -0.375 -0.375 -0.125 ) and volume 0.015625
 ++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
 ++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
-++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
+++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
 ++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
-++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
 ++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
----- cell id: 33 with centroid ( -0.375 -0.125 -0.125 ) and volume 0.015625
+---- cell id: 41 with centroid ( -0.375 -0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
 ++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
-++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 35 with coordinates ( -0.5 0 0 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
----- cell id: 34 with centroid ( -0.375 0.125 -0.125 ) and volume 0.015625
 ++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
 ++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+---- cell id: 42 with centroid ( -0.375 0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
+++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
 ++++ vertex id: 36 with coordinates ( -0.25 0 0 )
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
 ++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
----- cell id: 35 with centroid ( -0.375 0.375 -0.125 ) and volume 0.015625
+---- cell id: 43 with centroid ( -0.375 0.375 -0.125 ) and volume 0.015625
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
 ++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
 ++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
-++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
 ++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
 ++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
----- cell id: 36 with centroid ( -0.125 -0.375 -0.125 ) and volume 0.015625
+---- cell id: 44 with centroid ( -0.125 -0.375 -0.125 ) and volume 0.015625
 ++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
 ++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
 ++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
----- cell id: 37 with centroid ( -0.125 -0.125 -0.125 ) and volume 0.015625
+---- cell id: 45 with centroid ( -0.125 -0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
----- cell id: 38 with centroid ( -0.125 0.125 -0.125 ) and volume 0.015625
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
 ++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+---- cell id: 46 with centroid ( -0.125 0.125 -0.125 ) and volume 0.015625
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
----- cell id: 39 with centroid ( -0.125 0.375 -0.125 ) and volume 0.015625
+---- cell id: 47 with centroid ( -0.125 0.375 -0.125 ) and volume 0.015625
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
 ++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
-++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
 ++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
----- cell id: 40 with centroid ( 0.125 -0.375 -0.125 ) and volume 0.015625
-++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
-++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- cell id: 41 with centroid ( 0.125 -0.125 -0.125 ) and volume 0.015625
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- cell id: 42 with centroid ( 0.125 0.125 -0.125 ) and volume 0.015625
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- cell id: 43 with centroid ( 0.125 0.375 -0.125 ) and volume 0.015625
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
 ++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
-++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
----- cell id: 44 with centroid ( 0.375 -0.375 -0.125 ) and volume 0.015625
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
-++++ vertex id: 95 with coordinates ( 0.5 -0.5 -0.25 )
-++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
-++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
-++++ vertex id: 96 with coordinates ( 0.5 -0.25 -0.25 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
----- cell id: 45 with centroid ( 0.375 -0.125 -0.125 ) and volume 0.015625
-++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
-++++ vertex id: 96 with coordinates ( 0.5 -0.25 -0.25 )
-++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
-++++ vertex id: 97 with coordinates ( 0.5 0 -0.25 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
----- cell id: 46 with centroid ( 0.375 0.125 -0.125 ) and volume 0.015625
-++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
-++++ vertex id: 97 with coordinates ( 0.5 0 -0.25 )
-++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
-++++ vertex id: 98 with coordinates ( 0.5 0.25 -0.25 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
----- cell id: 47 with centroid ( 0.375 0.375 -0.125 ) and volume 0.015625
-++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
-++++ vertex id: 98 with coordinates ( 0.5 0.25 -0.25 )
-++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
-++++ vertex id: 99 with coordinates ( 0.5 0.5 -0.25 )
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
-++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
 For each face:
 ---- face id: 0 with midpoint ( -0.375 -0.5 0.375 ), area 0.0625 and normal ( 0 -1 0 )
 ++++ vertex id: 0 with coordinates ( -0.5 -0.5 0.5 )
@@ -577,56 +577,56 @@ For each face:
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
----- face id: 29 with midpoint ( 0 0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
----- face id: 30 with midpoint ( 0.125 -0.5 0.375 ), area 0.0625 and normal ( 0 -1 0 )
+---- face id: 29 with midpoint ( 0.125 -0.5 0.375 ), area 0.0625 and normal ( 0 -1 0 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
 ++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
 ++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
----- face id: 31 with midpoint ( 0.125 -0.25 0.375 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 30 with midpoint ( 0.125 -0.25 0.375 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
----- face id: 32 with midpoint ( 0.125 -0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
+---- face id: 31 with midpoint ( 0.125 -0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
----- face id: 33 with midpoint ( 0.25 -0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
----- face id: 34 with midpoint ( 0.125 0 0.375 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 32 with midpoint ( 0.125 0 0.375 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
----- face id: 35 with midpoint ( 0.125 -0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
+---- face id: 33 with midpoint ( 0.125 -0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
----- face id: 36 with midpoint ( 0.25 -0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
----- face id: 37 with midpoint ( 0.125 0.25 0.375 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
-++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
----- face id: 38 with midpoint ( 0.125 0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
+---- face id: 34 with midpoint ( 0.125 0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
+---- face id: 35 with midpoint ( 0 0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
+---- face id: 36 with midpoint ( 0.25 -0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
+---- face id: 37 with midpoint ( 0.25 -0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
+---- face id: 38 with midpoint ( 0.125 0.25 0.375 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
+++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ---- face id: 39 with midpoint ( 0.25 0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
@@ -897,171 +897,171 @@ For each face:
 ++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
----- face id: 93 with midpoint ( 0 0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
----- face id: 94 with midpoint ( 0.125 -0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 93 with midpoint ( 0.125 -0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
----- face id: 95 with midpoint ( 0.125 -0.5 0.125 ), area 0.0625 and normal ( 0 -1 0 )
+---- face id: 94 with midpoint ( 0.125 -0.5 0.125 ), area 0.0625 and normal ( 0 -1 0 )
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
 ++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
 ++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
----- face id: 96 with midpoint ( 0.125 -0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 95 with midpoint ( 0.125 -0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
----- face id: 97 with midpoint ( 0.125 -0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 96 with midpoint ( 0.125 -0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- face id: 98 with midpoint ( 0.25 -0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
----- face id: 99 with midpoint ( 0.125 -0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 97 with midpoint ( 0.125 -0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
----- face id: 100 with midpoint ( 0.125 -0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 98 with midpoint ( 0.125 -0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- face id: 101 with midpoint ( 0.125 0 0.125 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 99 with midpoint ( 0.125 0 0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- face id: 102 with midpoint ( 0.25 -0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
----- face id: 103 with midpoint ( 0.125 0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 100 with midpoint ( 0.125 0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
----- face id: 104 with midpoint ( 0.125 0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 101 with midpoint ( 0.125 0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- face id: 105 with midpoint ( 0.125 0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- face id: 106 with midpoint ( 0.25 0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
----- face id: 107 with midpoint ( 0.125 0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
----- face id: 108 with midpoint ( 0.125 0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 102 with midpoint ( 0.125 0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- face id: 109 with midpoint ( 0.125 0.5 0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
----- face id: 110 with midpoint ( 0.25 0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
----- face id: 111 with midpoint ( 0.375 -0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
----- face id: 112 with midpoint ( 0.375 -0.5 0.125 ), area 0.0625 and normal ( 0 -1 0 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
----- face id: 113 with midpoint ( 0.375 -0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 103 with midpoint ( 0.375 -0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
 ++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
----- face id: 114 with midpoint ( 0.375 -0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
----- face id: 115 with midpoint ( 0.5 -0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
-++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
----- face id: 116 with midpoint ( 0.375 -0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
----- face id: 117 with midpoint ( 0.375 -0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 104 with midpoint ( 0.375 -0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 70 with coordinates ( 0.5 0 0 )
 ++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
----- face id: 118 with midpoint ( 0.375 0 0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
----- face id: 119 with midpoint ( 0.5 -0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
----- face id: 120 with midpoint ( 0.375 0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
----- face id: 121 with midpoint ( 0.375 0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 105 with midpoint ( 0.375 0.125 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
 ++++ vertex id: 70 with coordinates ( 0.5 0 0 )
----- face id: 122 with midpoint ( 0.375 0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
-++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
----- face id: 123 with midpoint ( 0.5 0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
-++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
----- face id: 124 with midpoint ( 0.375 0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
----- face id: 125 with midpoint ( 0.375 0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 106 with midpoint ( 0.375 0.375 0 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
+---- face id: 107 with midpoint ( 0 0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+---- face id: 108 with midpoint ( 0.25 -0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+---- face id: 109 with midpoint ( 0.25 -0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+---- face id: 110 with midpoint ( 0.125 0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+---- face id: 111 with midpoint ( 0.25 0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+---- face id: 112 with midpoint ( 0.125 0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+---- face id: 113 with midpoint ( 0.125 0.5 0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
+---- face id: 114 with midpoint ( 0.25 0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+---- face id: 115 with midpoint ( 0.375 -0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+---- face id: 116 with midpoint ( 0.375 -0.5 0.125 ), area 0.0625 and normal ( 0 -1 0 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+---- face id: 117 with midpoint ( 0.375 -0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
+---- face id: 118 with midpoint ( 0.5 -0.375 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+---- face id: 119 with midpoint ( 0.375 -0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+---- face id: 120 with midpoint ( 0.375 0 0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
+---- face id: 121 with midpoint ( 0.5 -0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+---- face id: 122 with midpoint ( 0.375 0.125 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+---- face id: 123 with midpoint ( 0.375 0.25 0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
+++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
+---- face id: 124 with midpoint ( 0.5 0.125 0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
+++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
+---- face id: 125 with midpoint ( 0.375 0.375 0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
 ---- face id: 126 with midpoint ( 0.375 0.5 0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
@@ -1072,216 +1072,216 @@ For each face:
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
 ++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
 ++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
----- face id: 128 with midpoint ( -0.375 -0.5 -0.125 ), area 0.0625 and normal ( 0 -1 0 )
-++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
-++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
-++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
-++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
----- face id: 129 with midpoint ( -0.375 -0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
-++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
----- face id: 130 with midpoint ( -0.375 -0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
-++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
----- face id: 131 with midpoint ( -0.5 -0.375 -0.125 ), area 0.0625 and normal ( -1 0 0 )
-++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
-++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
-++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
-++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
----- face id: 132 with midpoint ( -0.25 -0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
-++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
----- face id: 133 with midpoint ( -0.375 -0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
-++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
----- face id: 134 with midpoint ( -0.375 0 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
-++++ vertex id: 35 with coordinates ( -0.5 0 0 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
----- face id: 135 with midpoint ( -0.5 -0.125 -0.125 ), area 0.0625 and normal ( -1 0 0 )
-++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
-++++ vertex id: 35 with coordinates ( -0.5 0 0 )
-++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
-++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
----- face id: 136 with midpoint ( -0.25 -0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
----- face id: 137 with midpoint ( -0.375 0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
-++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
----- face id: 138 with midpoint ( -0.375 0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
----- face id: 139 with midpoint ( -0.5 0.125 -0.125 ), area 0.0625 and normal ( -1 0 0 )
-++++ vertex id: 35 with coordinates ( -0.5 0 0 )
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
-++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
-++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
----- face id: 140 with midpoint ( -0.25 0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
----- face id: 141 with midpoint ( -0.375 0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
-++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
-++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
----- face id: 142 with midpoint ( -0.375 0.5 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
-++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
-++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
-++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
----- face id: 143 with midpoint ( -0.5 0.375 -0.125 ), area 0.0625 and normal ( -1 0 0 )
-++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
-++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
-++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
-++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
----- face id: 144 with midpoint ( -0.25 0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
-++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
----- face id: 145 with midpoint ( -0.125 -0.5 -0.125 ), area 0.0625 and normal ( 0 -1 0 )
-++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
-++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
-++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
----- face id: 146 with midpoint ( -0.125 -0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
----- face id: 147 with midpoint ( -0.125 -0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
----- face id: 148 with midpoint ( 0 -0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
----- face id: 149 with midpoint ( -0.125 -0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
----- face id: 150 with midpoint ( -0.125 0 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 36 with coordinates ( -0.25 0 0 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
----- face id: 151 with midpoint ( 0 -0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
----- face id: 152 with midpoint ( -0.125 0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
----- face id: 153 with midpoint ( -0.125 0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
----- face id: 154 with midpoint ( 0 0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
----- face id: 155 with midpoint ( -0.125 0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
-++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
-++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
-++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
----- face id: 156 with midpoint ( -0.125 0.5 -0.125 ), area 0.0625 and normal ( 0 1 0 )
-++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
-++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
----- face id: 157 with midpoint ( 0 0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
----- face id: 158 with midpoint ( 0.125 -0.5 -0.125 ), area 0.0625 and normal ( 0 -1 0 )
+---- face id: 128 with midpoint ( 0.125 -0.5 -0.125 ), area 0.0625 and normal ( 0 -1 0 )
 ++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
 ++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
 ++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
----- face id: 159 with midpoint ( 0.125 -0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 129 with midpoint ( 0.125 -0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
 ++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
 ++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
----- face id: 160 with midpoint ( 0.125 -0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 130 with midpoint ( 0.125 -0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
----- face id: 161 with midpoint ( 0.25 -0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
-++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- face id: 162 with midpoint ( 0.125 -0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 131 with midpoint ( 0 -0.375 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+---- face id: 132 with midpoint ( 0.125 -0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
 ++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
----- face id: 163 with midpoint ( 0.125 0 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 133 with midpoint ( 0 -0.125 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+---- face id: 134 with midpoint ( -0.375 -0.5 -0.125 ), area 0.0625 and normal ( 0 -1 0 )
+++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
+++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
+++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
+++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
+---- face id: 135 with midpoint ( -0.375 -0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
+++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
+---- face id: 136 with midpoint ( -0.375 -0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+---- face id: 137 with midpoint ( -0.5 -0.375 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
+++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
+++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
+---- face id: 138 with midpoint ( -0.25 -0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
+++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
+---- face id: 139 with midpoint ( -0.375 -0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+---- face id: 140 with midpoint ( -0.375 0 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
+++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+---- face id: 141 with midpoint ( -0.5 -0.125 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
+++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
+++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
+---- face id: 142 with midpoint ( -0.25 -0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+---- face id: 143 with midpoint ( -0.375 0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
+++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+---- face id: 144 with midpoint ( -0.375 0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+---- face id: 145 with midpoint ( -0.5 0.125 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 35 with coordinates ( -0.5 0 0 )
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
+++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
+++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
+---- face id: 146 with midpoint ( -0.25 0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+---- face id: 147 with midpoint ( -0.375 0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
+++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
+++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+---- face id: 148 with midpoint ( -0.375 0.5 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
+++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
+++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
+++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
+---- face id: 149 with midpoint ( -0.5 0.375 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
+++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
+++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
+++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
+---- face id: 150 with midpoint ( -0.25 0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
+++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
+---- face id: 151 with midpoint ( -0.125 -0.5 -0.125 ), area 0.0625 and normal ( 0 -1 0 )
+++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
+++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
+---- face id: 152 with midpoint ( -0.125 -0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+---- face id: 153 with midpoint ( -0.125 -0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+---- face id: 154 with midpoint ( -0.125 -0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+---- face id: 155 with midpoint ( -0.125 0 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 36 with coordinates ( -0.25 0 0 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+---- face id: 156 with midpoint ( -0.125 0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+---- face id: 157 with midpoint ( -0.125 0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+---- face id: 158 with midpoint ( -0.125 0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
+++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
+++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+---- face id: 159 with midpoint ( -0.125 0.5 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
+++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
+---- face id: 160 with midpoint ( 0.25 -0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
+++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+---- face id: 161 with midpoint ( 0.125 0 -0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
----- face id: 164 with midpoint ( 0.25 -0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+---- face id: 162 with midpoint ( 0.25 -0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- face id: 165 with midpoint ( 0.125 0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 163 with midpoint ( 0.125 0.125 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
----- face id: 166 with midpoint ( 0.125 0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 164 with midpoint ( 0.125 0.25 -0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
----- face id: 167 with midpoint ( 0.25 0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
+---- face id: 165 with midpoint ( 0 0.125 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+---- face id: 166 with midpoint ( 0.25 0.125 -0.125 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- face id: 168 with midpoint ( 0.125 0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
+---- face id: 167 with midpoint ( 0.125 0.375 -0.25 ), area 0.0625 and normal ( 0 0 -1 )
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
 ++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
 ++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
----- face id: 169 with midpoint ( 0.125 0.5 -0.125 ), area 0.0625 and normal ( 0 1 0 )
+---- face id: 168 with midpoint ( 0.125 0.5 -0.125 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
+---- face id: 169 with midpoint ( 0 0.375 -0.125 ), area 0.0625 and normal ( -1 0 0 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
 ---- face id: 170 with midpoint ( 0.25 0.375 -0.125 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
@@ -1449,39 +1449,39 @@ For each edge:
 ---- edge id: 31 with midpoint ( -0.125 0.25 0.5 ), length 0.25
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
----- edge id: 32 with midpoint ( 0 0.25 0.375 ), length 0.25
-++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
----- edge id: 33 with midpoint ( 0 0.125 0.5 ), length 0.25
+---- edge id: 32 with midpoint ( 0 0.125 0.5 ), length 0.25
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
----- edge id: 34 with midpoint ( -0.125 0.5 0.5 ), length 0.25
+---- edge id: 33 with midpoint ( -0.125 0.5 0.5 ), length 0.25
 ++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
----- edge id: 35 with midpoint ( 0 0.5 0.375 ), length 0.25
-++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
----- edge id: 36 with midpoint ( 0 0.375 0.5 ), length 0.25
-++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
-++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
----- edge id: 37 with midpoint ( 0.125 -0.5 0.5 ), length 0.25
+---- edge id: 34 with midpoint ( 0.125 -0.5 0.5 ), length 0.25
 ++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
----- edge id: 38 with midpoint ( 0.25 -0.5 0.375 ), length 0.25
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
----- edge id: 39 with midpoint ( 0.125 -0.25 0.5 ), length 0.25
+---- edge id: 35 with midpoint ( 0.125 -0.25 0.5 ), length 0.25
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
----- edge id: 40 with midpoint ( 0.25 -0.25 0.375 ), length 0.25
-++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
----- edge id: 41 with midpoint ( 0.25 -0.375 0.5 ), length 0.25
-++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
-++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
----- edge id: 42 with midpoint ( 0.125 0 0.5 ), length 0.25
+---- edge id: 36 with midpoint ( 0.125 0 0.5 ), length 0.25
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
+---- edge id: 37 with midpoint ( 0 0.25 0.375 ), length 0.25
+++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+---- edge id: 38 with midpoint ( 0 0.5 0.375 ), length 0.25
+++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+---- edge id: 39 with midpoint ( 0 0.375 0.5 ), length 0.25
+++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
+++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
+---- edge id: 40 with midpoint ( 0.25 -0.5 0.375 ), length 0.25
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
+---- edge id: 41 with midpoint ( 0.25 -0.25 0.375 ), length 0.25
+++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+---- edge id: 42 with midpoint ( 0.25 -0.375 0.5 ), length 0.25
+++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
+++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ---- edge id: 43 with midpoint ( 0.25 0 0.375 ), length 0.25
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
@@ -1704,315 +1704,315 @@ For each edge:
 ---- edge id: 116 with midpoint ( -0.125 0.25 0 ), length 0.25
 ++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
----- edge id: 117 with midpoint ( 0 0.125 0 ), length 0.25
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 50 with coordinates ( 0 0 0 )
----- edge id: 118 with midpoint ( 0 0.25 0.125 ), length 0.25
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
----- edge id: 119 with midpoint ( -0.125 0.5 0.25 ), length 0.25
+---- edge id: 117 with midpoint ( -0.125 0.5 0.25 ), length 0.25
 ++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
----- edge id: 120 with midpoint ( 0 0.375 0.25 ), length 0.25
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
----- edge id: 121 with midpoint ( -0.125 0.5 0 ), length 0.25
+---- edge id: 118 with midpoint ( -0.125 0.5 0 ), length 0.25
 ++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
----- edge id: 122 with midpoint ( 0 0.375 0 ), length 0.25
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
----- edge id: 123 with midpoint ( 0 0.5 0.125 ), length 0.25
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
----- edge id: 124 with midpoint ( 0.125 -0.5 0.25 ), length 0.25
+---- edge id: 119 with midpoint ( 0.125 -0.5 0.25 ), length 0.25
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
 ++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
----- edge id: 125 with midpoint ( 0.125 -0.25 0.25 ), length 0.25
+---- edge id: 120 with midpoint ( 0.125 -0.25 0.25 ), length 0.25
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
----- edge id: 126 with midpoint ( 0.25 -0.375 0.25 ), length 0.25
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
----- edge id: 127 with midpoint ( 0.125 -0.5 0 ), length 0.25
+---- edge id: 121 with midpoint ( 0.125 -0.5 0 ), length 0.25
 ++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
----- edge id: 128 with midpoint ( 0.25 -0.5 0.125 ), length 0.25
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
----- edge id: 129 with midpoint ( 0.125 -0.25 0 ), length 0.25
+---- edge id: 122 with midpoint ( 0.125 -0.25 0 ), length 0.25
 ++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- edge id: 130 with midpoint ( 0.25 -0.375 0 ), length 0.25
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
-++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
----- edge id: 131 with midpoint ( 0.25 -0.25 0.125 ), length 0.25
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- edge id: 132 with midpoint ( 0.125 0 0.25 ), length 0.25
+---- edge id: 123 with midpoint ( 0.125 0 0.25 ), length 0.25
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
----- edge id: 133 with midpoint ( 0.25 -0.125 0.25 ), length 0.25
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
----- edge id: 134 with midpoint ( 0.125 0 0 ), length 0.25
+---- edge id: 124 with midpoint ( 0.25 -0.375 0 ), length 0.25
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+---- edge id: 125 with midpoint ( 0.25 -0.125 0 ), length 0.25
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+---- edge id: 126 with midpoint ( 0.125 0 0 ), length 0.25
 ++++ vertex id: 50 with coordinates ( 0 0 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- edge id: 135 with midpoint ( 0.25 -0.125 0 ), length 0.25
+---- edge id: 127 with midpoint ( 0.25 0.125 0 ), length 0.25
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
-++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
----- edge id: 136 with midpoint ( 0.25 0 0.125 ), length 0.25
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- edge id: 137 with midpoint ( 0.125 0.25 0.25 ), length 0.25
-++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
----- edge id: 138 with midpoint ( 0.25 0.125 0.25 ), length 0.25
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
----- edge id: 139 with midpoint ( 0.125 0.25 0 ), length 0.25
+---- edge id: 128 with midpoint ( 0.125 0.25 0 ), length 0.25
 ++++ vertex id: 52 with coordinates ( 0 0.25 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- edge id: 140 with midpoint ( 0.25 0.125 0 ), length 0.25
+---- edge id: 129 with midpoint ( 0 0.125 0 ), length 0.25
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+---- edge id: 130 with midpoint ( 0.25 0.375 0 ), length 0.25
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
-++++ vertex id: 60 with coordinates ( 0.25 0 0 )
----- edge id: 141 with midpoint ( 0.25 0.25 0.125 ), length 0.25
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- edge id: 142 with midpoint ( 0.125 0.5 0.25 ), length 0.25
-++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
----- edge id: 143 with midpoint ( 0.25 0.375 0.25 ), length 0.25
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
----- edge id: 144 with midpoint ( 0.125 0.5 0 ), length 0.25
+---- edge id: 131 with midpoint ( 0.125 0.5 0 ), length 0.25
 ++++ vertex id: 54 with coordinates ( 0 0.5 0 )
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
----- edge id: 145 with midpoint ( 0.25 0.375 0 ), length 0.25
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
-++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
----- edge id: 146 with midpoint ( 0.25 0.5 0.125 ), length 0.25
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
----- edge id: 147 with midpoint ( 0.375 -0.5 0.25 ), length 0.25
-++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
----- edge id: 148 with midpoint ( 0.375 -0.25 0.25 ), length 0.25
-++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
----- edge id: 149 with midpoint ( 0.5 -0.375 0.25 ), length 0.25
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
----- edge id: 150 with midpoint ( 0.375 -0.5 0 ), length 0.25
+---- edge id: 132 with midpoint ( 0 0.375 0 ), length 0.25
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+---- edge id: 133 with midpoint ( 0.375 -0.5 0 ), length 0.25
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
 ++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
----- edge id: 151 with midpoint ( 0.5 -0.5 0.125 ), length 0.25
+---- edge id: 134 with midpoint ( 0.5 -0.375 0 ), length 0.25
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
 ++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
-++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
----- edge id: 152 with midpoint ( 0.375 -0.25 0 ), length 0.25
+---- edge id: 135 with midpoint ( 0.375 -0.25 0 ), length 0.25
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
----- edge id: 153 with midpoint ( 0.5 -0.375 0 ), length 0.25
+---- edge id: 136 with midpoint ( 0.5 -0.125 0 ), length 0.25
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
 ++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
-++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
----- edge id: 154 with midpoint ( 0.5 -0.25 0.125 ), length 0.25
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
----- edge id: 155 with midpoint ( 0.375 0 0.25 ), length 0.25
-++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
----- edge id: 156 with midpoint ( 0.5 -0.125 0.25 ), length 0.25
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
----- edge id: 157 with midpoint ( 0.375 0 0 ), length 0.25
+---- edge id: 137 with midpoint ( 0.375 0 0 ), length 0.25
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 70 with coordinates ( 0.5 0 0 )
----- edge id: 158 with midpoint ( 0.5 -0.125 0 ), length 0.25
+---- edge id: 138 with midpoint ( 0.5 0.125 0 ), length 0.25
+++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
 ++++ vertex id: 70 with coordinates ( 0.5 0 0 )
-++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
----- edge id: 159 with midpoint ( 0.5 0 0.125 ), length 0.25
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
----- edge id: 160 with midpoint ( 0.375 0.25 0.25 ), length 0.25
-++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
----- edge id: 161 with midpoint ( 0.5 0.125 0.25 ), length 0.25
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
-++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
----- edge id: 162 with midpoint ( 0.375 0.25 0 ), length 0.25
+---- edge id: 139 with midpoint ( 0.375 0.25 0 ), length 0.25
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
----- edge id: 163 with midpoint ( 0.5 0.125 0 ), length 0.25
+---- edge id: 140 with midpoint ( 0.5 0.375 0 ), length 0.25
+++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
-++++ vertex id: 70 with coordinates ( 0.5 0 0 )
----- edge id: 164 with midpoint ( 0.5 0.25 0.125 ), length 0.25
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
-++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
----- edge id: 165 with midpoint ( 0.375 0.5 0.25 ), length 0.25
-++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
-++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
----- edge id: 166 with midpoint ( 0.5 0.375 0.25 ), length 0.25
-++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
-++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
----- edge id: 167 with midpoint ( 0.375 0.5 0 ), length 0.25
+---- edge id: 141 with midpoint ( 0.375 0.5 0 ), length 0.25
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
----- edge id: 168 with midpoint ( 0.5 0.375 0 ), length 0.25
-++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
+---- edge id: 142 with midpoint ( 0 0.25 0.125 ), length 0.25
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+---- edge id: 143 with midpoint ( 0 0.375 0.25 ), length 0.25
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+---- edge id: 144 with midpoint ( 0 0.5 0.125 ), length 0.25
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
+---- edge id: 145 with midpoint ( 0.25 -0.375 0.25 ), length 0.25
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+---- edge id: 146 with midpoint ( 0.25 -0.5 0.125 ), length 0.25
+++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+---- edge id: 147 with midpoint ( 0.25 -0.25 0.125 ), length 0.25
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
+---- edge id: 148 with midpoint ( 0.25 -0.125 0.25 ), length 0.25
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+---- edge id: 149 with midpoint ( 0.25 0 0.125 ), length 0.25
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 60 with coordinates ( 0.25 0 0 )
+---- edge id: 150 with midpoint ( 0.125 0.25 0.25 ), length 0.25
+++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+---- edge id: 151 with midpoint ( 0.25 0.125 0.25 ), length 0.25
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+---- edge id: 152 with midpoint ( 0.25 0.25 0.125 ), length 0.25
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
+---- edge id: 153 with midpoint ( 0.125 0.5 0.25 ), length 0.25
+++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+---- edge id: 154 with midpoint ( 0.25 0.375 0.25 ), length 0.25
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+---- edge id: 155 with midpoint ( 0.25 0.5 0.125 ), length 0.25
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
+---- edge id: 156 with midpoint ( 0.375 -0.5 0.25 ), length 0.25
+++++ vertex id: 55 with coordinates ( 0.25 -0.5 0.25 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+---- edge id: 157 with midpoint ( 0.375 -0.25 0.25 ), length 0.25
+++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+---- edge id: 158 with midpoint ( 0.5 -0.375 0.25 ), length 0.25
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+---- edge id: 159 with midpoint ( 0.5 -0.5 0.125 ), length 0.25
+++++ vertex id: 67 with coordinates ( 0.5 -0.5 0 )
+++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
+---- edge id: 160 with midpoint ( 0.5 -0.25 0.125 ), length 0.25
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+++++ vertex id: 68 with coordinates ( 0.5 -0.25 0 )
+---- edge id: 161 with midpoint ( 0.375 0 0.25 ), length 0.25
+++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+---- edge id: 162 with midpoint ( 0.5 -0.125 0.25 ), length 0.25
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
+---- edge id: 163 with midpoint ( 0.5 0 0.125 ), length 0.25
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+++++ vertex id: 70 with coordinates ( 0.5 0 0 )
+---- edge id: 164 with midpoint ( 0.375 0.25 0.25 ), length 0.25
+++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
+---- edge id: 165 with midpoint ( 0.5 0.125 0.25 ), length 0.25
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
+++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
+---- edge id: 166 with midpoint ( 0.5 0.25 0.125 ), length 0.25
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
 ++++ vertex id: 72 with coordinates ( 0.5 0.25 0 )
+---- edge id: 167 with midpoint ( 0.375 0.5 0.25 ), length 0.25
+++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
+++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
+---- edge id: 168 with midpoint ( 0.5 0.375 0.25 ), length 0.25
+++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
+++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
 ---- edge id: 169 with midpoint ( 0.5 0.5 0.125 ), length 0.25
 ++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
 ++++ vertex id: 74 with coordinates ( 0.5 0.5 0 )
----- edge id: 170 with midpoint ( -0.5 -0.5 -0.125 ), length 0.25
+---- edge id: 170 with midpoint ( 0 -0.5 -0.125 ), length 0.25
+++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+---- edge id: 171 with midpoint ( 0.125 -0.5 -0.25 ), length 0.25
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
+---- edge id: 172 with midpoint ( 0 -0.375 -0.25 ), length 0.25
+++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+---- edge id: 173 with midpoint ( 0.125 -0.25 -0.25 ), length 0.25
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
+---- edge id: 174 with midpoint ( 0 -0.25 -0.125 ), length 0.25
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
+---- edge id: 175 with midpoint ( 0 -0.125 -0.25 ), length 0.25
+++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+---- edge id: 176 with midpoint ( -0.5 -0.5 -0.125 ), length 0.25
 ++++ vertex id: 29 with coordinates ( -0.5 -0.5 0 )
 ++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
----- edge id: 171 with midpoint ( -0.375 -0.5 -0.25 ), length 0.25
+---- edge id: 177 with midpoint ( -0.375 -0.5 -0.25 ), length 0.25
 ++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
 ++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
----- edge id: 172 with midpoint ( -0.25 -0.5 -0.125 ), length 0.25
+---- edge id: 178 with midpoint ( -0.25 -0.5 -0.125 ), length 0.25
 ++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
 ++++ vertex id: 31 with coordinates ( -0.25 -0.5 0 )
----- edge id: 173 with midpoint ( -0.5 -0.375 -0.25 ), length 0.25
+---- edge id: 179 with midpoint ( -0.5 -0.375 -0.25 ), length 0.25
 ++++ vertex id: 75 with coordinates ( -0.5 -0.5 -0.25 )
 ++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
----- edge id: 174 with midpoint ( -0.375 -0.25 -0.25 ), length 0.25
+---- edge id: 180 with midpoint ( -0.375 -0.25 -0.25 ), length 0.25
 ++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
----- edge id: 175 with midpoint ( -0.25 -0.375 -0.25 ), length 0.25
+---- edge id: 181 with midpoint ( -0.25 -0.375 -0.25 ), length 0.25
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
 ++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
----- edge id: 176 with midpoint ( -0.5 -0.25 -0.125 ), length 0.25
+---- edge id: 182 with midpoint ( -0.5 -0.25 -0.125 ), length 0.25
 ++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
 ++++ vertex id: 30 with coordinates ( -0.5 -0.25 0 )
----- edge id: 177 with midpoint ( -0.25 -0.25 -0.125 ), length 0.25
+---- edge id: 183 with midpoint ( -0.25 -0.25 -0.125 ), length 0.25
 ++++ vertex id: 32 with coordinates ( -0.25 -0.25 0 )
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
----- edge id: 178 with midpoint ( -0.5 -0.125 -0.25 ), length 0.25
+---- edge id: 184 with midpoint ( -0.5 -0.125 -0.25 ), length 0.25
 ++++ vertex id: 76 with coordinates ( -0.5 -0.25 -0.25 )
 ++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
----- edge id: 179 with midpoint ( -0.375 0 -0.25 ), length 0.25
+---- edge id: 185 with midpoint ( -0.375 0 -0.25 ), length 0.25
 ++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
----- edge id: 180 with midpoint ( -0.25 -0.125 -0.25 ), length 0.25
+---- edge id: 186 with midpoint ( -0.25 -0.125 -0.25 ), length 0.25
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
----- edge id: 181 with midpoint ( -0.5 0 -0.125 ), length 0.25
+---- edge id: 187 with midpoint ( -0.5 0 -0.125 ), length 0.25
 ++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
 ++++ vertex id: 35 with coordinates ( -0.5 0 0 )
----- edge id: 182 with midpoint ( -0.25 0 -0.125 ), length 0.25
+---- edge id: 188 with midpoint ( -0.25 0 -0.125 ), length 0.25
 ++++ vertex id: 36 with coordinates ( -0.25 0 0 )
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
----- edge id: 183 with midpoint ( -0.5 0.125 -0.25 ), length 0.25
+---- edge id: 189 with midpoint ( -0.5 0.125 -0.25 ), length 0.25
 ++++ vertex id: 79 with coordinates ( -0.5 0 -0.25 )
 ++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
----- edge id: 184 with midpoint ( -0.375 0.25 -0.25 ), length 0.25
+---- edge id: 190 with midpoint ( -0.375 0.25 -0.25 ), length 0.25
 ++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
----- edge id: 185 with midpoint ( -0.25 0.125 -0.25 ), length 0.25
+---- edge id: 191 with midpoint ( -0.25 0.125 -0.25 ), length 0.25
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
----- edge id: 186 with midpoint ( -0.5 0.25 -0.125 ), length 0.25
+---- edge id: 192 with midpoint ( -0.5 0.25 -0.125 ), length 0.25
 ++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
 ++++ vertex id: 39 with coordinates ( -0.5 0.25 0 )
----- edge id: 187 with midpoint ( -0.25 0.25 -0.125 ), length 0.25
+---- edge id: 193 with midpoint ( -0.25 0.25 -0.125 ), length 0.25
 ++++ vertex id: 40 with coordinates ( -0.25 0.25 0 )
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
----- edge id: 188 with midpoint ( -0.5 0.375 -0.25 ), length 0.25
+---- edge id: 194 with midpoint ( -0.5 0.375 -0.25 ), length 0.25
 ++++ vertex id: 81 with coordinates ( -0.5 0.25 -0.25 )
 ++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
----- edge id: 189 with midpoint ( -0.375 0.5 -0.25 ), length 0.25
+---- edge id: 195 with midpoint ( -0.375 0.5 -0.25 ), length 0.25
 ++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
 ++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
----- edge id: 190 with midpoint ( -0.25 0.375 -0.25 ), length 0.25
+---- edge id: 196 with midpoint ( -0.25 0.375 -0.25 ), length 0.25
 ++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
----- edge id: 191 with midpoint ( -0.5 0.5 -0.125 ), length 0.25
+---- edge id: 197 with midpoint ( -0.5 0.5 -0.125 ), length 0.25
 ++++ vertex id: 83 with coordinates ( -0.5 0.5 -0.25 )
 ++++ vertex id: 43 with coordinates ( -0.5 0.5 0 )
----- edge id: 192 with midpoint ( -0.25 0.5 -0.125 ), length 0.25
+---- edge id: 198 with midpoint ( -0.25 0.5 -0.125 ), length 0.25
 ++++ vertex id: 44 with coordinates ( -0.25 0.5 0 )
 ++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
----- edge id: 193 with midpoint ( -0.125 -0.5 -0.25 ), length 0.25
+---- edge id: 199 with midpoint ( -0.125 -0.5 -0.25 ), length 0.25
 ++++ vertex id: 77 with coordinates ( -0.25 -0.5 -0.25 )
 ++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
----- edge id: 194 with midpoint ( 0 -0.5 -0.125 ), length 0.25
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
-++++ vertex id: 47 with coordinates ( 0 -0.5 0 )
----- edge id: 195 with midpoint ( -0.125 -0.25 -0.25 ), length 0.25
+---- edge id: 200 with midpoint ( -0.125 -0.25 -0.25 ), length 0.25
 ++++ vertex id: 78 with coordinates ( -0.25 -0.25 -0.25 )
 ++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
----- edge id: 196 with midpoint ( 0 -0.375 -0.25 ), length 0.25
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
----- edge id: 197 with midpoint ( 0 -0.25 -0.125 ), length 0.25
-++++ vertex id: 48 with coordinates ( 0 -0.25 0 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
----- edge id: 198 with midpoint ( -0.125 0 -0.25 ), length 0.25
+---- edge id: 201 with midpoint ( -0.125 0 -0.25 ), length 0.25
 ++++ vertex id: 80 with coordinates ( -0.25 0 -0.25 )
 ++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
----- edge id: 199 with midpoint ( 0 -0.125 -0.25 ), length 0.25
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
----- edge id: 200 with midpoint ( 0 0 -0.125 ), length 0.25
-++++ vertex id: 50 with coordinates ( 0 0 0 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
----- edge id: 201 with midpoint ( -0.125 0.25 -0.25 ), length 0.25
+---- edge id: 202 with midpoint ( -0.125 0.25 -0.25 ), length 0.25
 ++++ vertex id: 82 with coordinates ( -0.25 0.25 -0.25 )
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
----- edge id: 202 with midpoint ( 0 0.125 -0.25 ), length 0.25
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
-++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
----- edge id: 203 with midpoint ( 0 0.25 -0.125 ), length 0.25
-++++ vertex id: 52 with coordinates ( 0 0.25 0 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
----- edge id: 204 with midpoint ( -0.125 0.5 -0.25 ), length 0.25
+---- edge id: 203 with midpoint ( -0.125 0.5 -0.25 ), length 0.25
 ++++ vertex id: 84 with coordinates ( -0.25 0.5 -0.25 )
 ++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
----- edge id: 205 with midpoint ( 0 0.375 -0.25 ), length 0.25
-++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
-++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
----- edge id: 206 with midpoint ( 0 0.5 -0.125 ), length 0.25
-++++ vertex id: 54 with coordinates ( 0 0.5 0 )
-++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
----- edge id: 207 with midpoint ( 0.125 -0.5 -0.25 ), length 0.25
-++++ vertex id: 85 with coordinates ( 0 -0.5 -0.25 )
-++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
----- edge id: 208 with midpoint ( 0.25 -0.5 -0.125 ), length 0.25
+---- edge id: 204 with midpoint ( 0.25 -0.5 -0.125 ), length 0.25
 ++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
 ++++ vertex id: 57 with coordinates ( 0.25 -0.5 0 )
----- edge id: 209 with midpoint ( 0.125 -0.25 -0.25 ), length 0.25
-++++ vertex id: 86 with coordinates ( 0 -0.25 -0.25 )
-++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
----- edge id: 210 with midpoint ( 0.25 -0.375 -0.25 ), length 0.25
+---- edge id: 205 with midpoint ( 0.25 -0.375 -0.25 ), length 0.25
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
 ++++ vertex id: 90 with coordinates ( 0.25 -0.5 -0.25 )
----- edge id: 211 with midpoint ( 0.25 -0.25 -0.125 ), length 0.25
+---- edge id: 206 with midpoint ( 0.25 -0.25 -0.125 ), length 0.25
 ++++ vertex id: 58 with coordinates ( 0.25 -0.25 0 )
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
----- edge id: 212 with midpoint ( 0.125 0 -0.25 ), length 0.25
+---- edge id: 207 with midpoint ( 0.125 0 -0.25 ), length 0.25
 ++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
----- edge id: 213 with midpoint ( 0.25 -0.125 -0.25 ), length 0.25
+---- edge id: 208 with midpoint ( 0.25 -0.125 -0.25 ), length 0.25
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
 ++++ vertex id: 91 with coordinates ( 0.25 -0.25 -0.25 )
----- edge id: 214 with midpoint ( 0.25 0 -0.125 ), length 0.25
+---- edge id: 209 with midpoint ( 0 0 -0.125 ), length 0.25
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 50 with coordinates ( 0 0 0 )
+---- edge id: 210 with midpoint ( 0.25 0 -0.125 ), length 0.25
 ++++ vertex id: 60 with coordinates ( 0.25 0 0 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
----- edge id: 215 with midpoint ( 0.125 0.25 -0.25 ), length 0.25
+---- edge id: 211 with midpoint ( 0 0.125 -0.25 ), length 0.25
+++++ vertex id: 87 with coordinates ( 0 0 -0.25 )
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+---- edge id: 212 with midpoint ( 0.125 0.25 -0.25 ), length 0.25
 ++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
----- edge id: 216 with midpoint ( 0.25 0.125 -0.25 ), length 0.25
+---- edge id: 213 with midpoint ( 0.25 0.125 -0.25 ), length 0.25
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
 ++++ vertex id: 92 with coordinates ( 0.25 0 -0.25 )
----- edge id: 217 with midpoint ( 0.25 0.25 -0.125 ), length 0.25
+---- edge id: 214 with midpoint ( 0 0.25 -0.125 ), length 0.25
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+++++ vertex id: 52 with coordinates ( 0 0.25 0 )
+---- edge id: 215 with midpoint ( 0.25 0.25 -0.125 ), length 0.25
 ++++ vertex id: 62 with coordinates ( 0.25 0.25 0 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
----- edge id: 218 with midpoint ( 0.125 0.5 -0.25 ), length 0.25
+---- edge id: 216 with midpoint ( 0 0.375 -0.25 ), length 0.25
+++++ vertex id: 88 with coordinates ( 0 0.25 -0.25 )
+++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
+---- edge id: 217 with midpoint ( 0.125 0.5 -0.25 ), length 0.25
 ++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
 ++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
----- edge id: 219 with midpoint ( 0.25 0.375 -0.25 ), length 0.25
+---- edge id: 218 with midpoint ( 0.25 0.375 -0.25 ), length 0.25
 ++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
 ++++ vertex id: 93 with coordinates ( 0.25 0.25 -0.25 )
+---- edge id: 219 with midpoint ( 0 0.5 -0.125 ), length 0.25
+++++ vertex id: 89 with coordinates ( 0 0.5 -0.25 )
+++++ vertex id: 54 with coordinates ( 0 0.5 0 )
 ---- edge id: 220 with midpoint ( 0.25 0.5 -0.125 ), length 0.25
 ++++ vertex id: 64 with coordinates ( 0.25 0.5 0 )
 ++++ vertex id: 94 with coordinates ( 0.25 0.5 -0.25 )
@@ -4011,10 +4011,10 @@ For each wedge:
 ---- wedge id: 1949 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 1950 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 1951 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 1952 with facet normal ( -1 -0 0 ), facet area 0.0078125
----- wedge id: 1953 with facet normal ( -1 0 -0 ), facet area 0.0078125
----- wedge id: 1954 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 1955 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 1952 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 1953 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 1954 with facet normal ( -1 -0 0 ), facet area 0.0078125
+---- wedge id: 1955 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- wedge id: 1956 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 1957 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 1958 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -4059,10 +4059,10 @@ For each wedge:
 ---- wedge id: 1997 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 1998 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 1999 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 2000 with facet normal ( -1 -0 0 ), facet area 0.0078125
----- wedge id: 2001 with facet normal ( -1 0 -0 ), facet area 0.0078125
----- wedge id: 2002 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2003 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2000 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2001 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2002 with facet normal ( -1 -0 0 ), facet area 0.0078125
+---- wedge id: 2003 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2004 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2005 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2006 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -4107,10 +4107,10 @@ For each wedge:
 ---- wedge id: 2045 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 2046 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 2047 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 2048 with facet normal ( -1 -0 0 ), facet area 0.0078125
----- wedge id: 2049 with facet normal ( -1 0 -0 ), facet area 0.0078125
----- wedge id: 2050 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2051 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2048 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2049 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2050 with facet normal ( -1 -0 0 ), facet area 0.0078125
+---- wedge id: 2051 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2052 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2053 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2054 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -4155,10 +4155,10 @@ For each wedge:
 ---- wedge id: 2093 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 2094 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 2095 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 2096 with facet normal ( -1 -0 0 ), facet area 0.0078125
----- wedge id: 2097 with facet normal ( -1 0 -0 ), facet area 0.0078125
----- wedge id: 2098 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2099 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2096 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2097 with facet normal ( -1 0 0 ), facet area 0.0078125
+---- wedge id: 2098 with facet normal ( -1 -0 0 ), facet area 0.0078125
+---- wedge id: 2099 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2100 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2101 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2102 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -4211,13 +4211,13 @@ For each wedge:
 ---- wedge id: 2149 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2150 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2151 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2152 with facet normal ( 1 -0 0 ), facet area 0.0078125
+---- wedge id: 2152 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2153 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2154 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2155 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2155 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2156 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2157 with facet normal ( 1 0 -0 ), facet area 0.0078125
----- wedge id: 2158 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2157 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2158 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ---- wedge id: 2159 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2160 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ---- wedge id: 2161 with facet normal ( 0 -1 0 ), facet area 0.0078125
@@ -4259,13 +4259,13 @@ For each wedge:
 ---- wedge id: 2197 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2198 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2199 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2200 with facet normal ( 1 -0 0 ), facet area 0.0078125
+---- wedge id: 2200 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2201 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2202 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2203 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2203 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2204 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2205 with facet normal ( 1 0 -0 ), facet area 0.0078125
----- wedge id: 2206 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2205 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2206 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ---- wedge id: 2207 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2208 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ---- wedge id: 2209 with facet normal ( 0 -1 0 ), facet area 0.0078125
@@ -4307,13 +4307,13 @@ For each wedge:
 ---- wedge id: 2245 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2246 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2247 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2248 with facet normal ( 1 -0 0 ), facet area 0.0078125
+---- wedge id: 2248 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2249 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2250 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2251 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2251 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2252 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2253 with facet normal ( 1 0 -0 ), facet area 0.0078125
----- wedge id: 2254 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2253 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2254 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ---- wedge id: 2255 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2256 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ---- wedge id: 2257 with facet normal ( 0 -1 0 ), facet area 0.0078125
@@ -4355,13 +4355,13 @@ For each wedge:
 ---- wedge id: 2293 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2294 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 2295 with facet normal ( -1 0 0 ), facet area 0.0078125
----- wedge id: 2296 with facet normal ( 1 -0 0 ), facet area 0.0078125
+---- wedge id: 2296 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2297 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- wedge id: 2298 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2299 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2299 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- wedge id: 2300 with facet normal ( 1 0 0 ), facet area 0.0078125
----- wedge id: 2301 with facet normal ( 1 0 -0 ), facet area 0.0078125
----- wedge id: 2302 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2301 with facet normal ( 1 0 0 ), facet area 0.0078125
+---- wedge id: 2302 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ---- wedge id: 2303 with facet normal ( 1 0 0 ), facet area 0.0078125
 For each corner:
 ---- corner id: 0
@@ -6609,29 +6609,29 @@ For each corner:
 ++++ wedge id: 1921 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1950 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 1951 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 1958 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 1959 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 1952 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 1953 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 321
 ++++ wedge id: 1922 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1923 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1928 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 1929 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 1956 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 1957 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 1958 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 1959 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 322
 ++++ wedge id: 1930 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 1931 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 1936 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 1937 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 1954 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 1955 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 1956 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 1957 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 323
 ++++ wedge id: 1938 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 1939 with facet normal ( -0 1 0 ), facet area 0.0078125
 ++++ wedge id: 1948 with facet normal ( -0 0 1 ), facet area 0.0078125
 ++++ wedge id: 1949 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 1952 with facet normal ( -1 -0 0 ), facet area 0.0078125
-++++ wedge id: 1953 with facet normal ( -1 0 -0 ), facet area 0.0078125
+++++ wedge id: 1954 with facet normal ( -1 -0 0 ), facet area 0.0078125
+++++ wedge id: 1955 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 324
 ++++ wedge id: 1926 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 1927 with facet normal ( -0 -1 0 ), facet area 0.0078125
@@ -6665,29 +6665,29 @@ For each corner:
 ++++ wedge id: 1973 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1998 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 1999 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2006 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2007 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2000 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2001 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 329
 ++++ wedge id: 1974 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1975 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1976 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 1977 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2004 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2005 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2006 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2007 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 330
 ++++ wedge id: 1978 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 1979 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 1984 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 1985 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2002 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2003 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2004 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2005 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 331
 ++++ wedge id: 1986 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 1987 with facet normal ( -0 1 0 ), facet area 0.0078125
 ++++ wedge id: 1996 with facet normal ( -0 0 1 ), facet area 0.0078125
 ++++ wedge id: 1997 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2000 with facet normal ( -1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2001 with facet normal ( -1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2002 with facet normal ( -1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2003 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 332
 ++++ wedge id: 1970 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 1971 with facet normal ( -0 -1 0 ), facet area 0.0078125
@@ -6721,29 +6721,29 @@ For each corner:
 ++++ wedge id: 2021 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2046 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2047 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2054 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2055 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2048 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2049 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 337
 ++++ wedge id: 2022 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2023 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2024 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2025 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2052 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2053 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2054 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2055 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 338
 ++++ wedge id: 2026 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2027 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2032 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2033 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2050 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2051 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2052 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2053 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 339
 ++++ wedge id: 2034 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2035 with facet normal ( -0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2044 with facet normal ( -0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2045 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2048 with facet normal ( -1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2049 with facet normal ( -1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2050 with facet normal ( -1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2051 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 340
 ++++ wedge id: 2018 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 2019 with facet normal ( -0 -1 0 ), facet area 0.0078125
@@ -6777,29 +6777,29 @@ For each corner:
 ++++ wedge id: 2069 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2094 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2095 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2102 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2103 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2096 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2097 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 345
 ++++ wedge id: 2070 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2071 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2072 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2073 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2100 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2101 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2102 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2103 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 346
 ++++ wedge id: 2074 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2075 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2080 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2081 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2098 with facet normal ( -1 0 0 ), facet area 0.0078125
-++++ wedge id: 2099 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2100 with facet normal ( -1 0 0 ), facet area 0.0078125
+++++ wedge id: 2101 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 347
 ++++ wedge id: 2082 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2083 with facet normal ( -0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2092 with facet normal ( -0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2093 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2096 with facet normal ( -1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2097 with facet normal ( -1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2098 with facet normal ( -1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2099 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 348
 ++++ wedge id: 2066 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 2067 with facet normal ( -0 -1 0 ), facet area 0.0078125
@@ -6861,29 +6861,29 @@ For each corner:
 ++++ wedge id: 2119 with facet normal ( -0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2136 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2137 with facet normal ( 0 -0 1 ), facet area 0.0078125
-++++ wedge id: 2152 with facet normal ( 1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2153 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2158 with facet normal ( 1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2159 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 357
 ++++ wedge id: 2116 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2117 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2126 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2127 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2154 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2155 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2152 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2153 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 358
 ++++ wedge id: 2124 with facet normal ( -0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2125 with facet normal ( 0 -0 -1 ), facet area 0.0078125
 ++++ wedge id: 2134 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ++++ wedge id: 2135 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2156 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2157 with facet normal ( 1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2154 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2155 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- corner id: 359
 ++++ wedge id: 2132 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2133 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2138 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2139 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2158 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2159 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2156 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2157 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 360
 ++++ wedge id: 2164 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2165 with facet normal ( 0 -1 0 ), facet area 0.0078125
@@ -6917,29 +6917,29 @@ For each corner:
 ++++ wedge id: 2163 with facet normal ( -0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2184 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2185 with facet normal ( 0 -0 1 ), facet area 0.0078125
-++++ wedge id: 2200 with facet normal ( 1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2201 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2206 with facet normal ( 1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2207 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 365
 ++++ wedge id: 2160 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2161 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2174 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2175 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2202 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2203 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2200 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2201 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 366
 ++++ wedge id: 2172 with facet normal ( -0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2173 with facet normal ( 0 -0 -1 ), facet area 0.0078125
 ++++ wedge id: 2182 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ++++ wedge id: 2183 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2204 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2205 with facet normal ( 1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2202 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2203 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- corner id: 367
 ++++ wedge id: 2180 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2181 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2186 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2187 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2206 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2207 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2204 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2205 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 368
 ++++ wedge id: 2212 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2213 with facet normal ( 0 -1 0 ), facet area 0.0078125
@@ -6973,29 +6973,29 @@ For each corner:
 ++++ wedge id: 2211 with facet normal ( -0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2232 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2233 with facet normal ( 0 -0 1 ), facet area 0.0078125
-++++ wedge id: 2248 with facet normal ( 1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2249 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2254 with facet normal ( 1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2255 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 373
 ++++ wedge id: 2208 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2209 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2222 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2223 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2250 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2251 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2248 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2249 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 374
 ++++ wedge id: 2220 with facet normal ( -0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2221 with facet normal ( 0 -0 -1 ), facet area 0.0078125
 ++++ wedge id: 2230 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ++++ wedge id: 2231 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2252 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2253 with facet normal ( 1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2250 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2251 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- corner id: 375
 ++++ wedge id: 2228 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2229 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2234 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2235 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2254 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2255 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2252 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2253 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 376
 ++++ wedge id: 2260 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2261 with facet normal ( 0 -1 0 ), facet area 0.0078125
@@ -7029,26 +7029,26 @@ For each corner:
 ++++ wedge id: 2259 with facet normal ( -0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2280 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2281 with facet normal ( 0 -0 1 ), facet area 0.0078125
-++++ wedge id: 2296 with facet normal ( 1 -0 0 ), facet area 0.0078125
-++++ wedge id: 2297 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2302 with facet normal ( 1 -0 0 ), facet area 0.0078125
+++++ wedge id: 2303 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 381
 ++++ wedge id: 2256 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2257 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 2270 with facet normal ( 0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2271 with facet normal ( 0 0 -1 ), facet area 0.0078125
-++++ wedge id: 2298 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2299 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2296 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2297 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 382
 ++++ wedge id: 2268 with facet normal ( -0 0 -1 ), facet area 0.0078125
 ++++ wedge id: 2269 with facet normal ( 0 -0 -1 ), facet area 0.0078125
 ++++ wedge id: 2278 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ++++ wedge id: 2279 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 2300 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2301 with facet normal ( 1 0 -0 ), facet area 0.0078125
+++++ wedge id: 2298 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2299 with facet normal ( 1 0 -0 ), facet area 0.0078125
 ---- corner id: 383
 ++++ wedge id: 2276 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2277 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 2282 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 2283 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 2302 with facet normal ( 1 0 0 ), facet area 0.0078125
-++++ wedge id: 2303 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2300 with facet normal ( 1 0 0 ), facet area 0.0078125
+++++ wedge id: 2301 with facet normal ( 1 0 0 ), facet area 0.0078125

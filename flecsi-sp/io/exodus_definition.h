@@ -10,8 +10,12 @@
 // user includes
 #include <flecsi-sp/io/detail.h>
 
+#include <flecsi/coloring/dcrs_utils.h>
 #include <flecsi/topology/mesh_definition.h>
 #include <flecsi/utils/logging.h>
+#include <flecsi/utils/logging.h>
+
+#include <ristra/assertions/errors.h>
 
 // thirdparty includes
 #include <exodusII.h>
@@ -2529,6 +2533,9 @@ public:
     
   }
 
+  const std::vector<size_t> & face_owners() const override {
+    return face_owner_;
+  }
 
 private:
   //============================================================================

@@ -57,7 +57,7 @@ public:
   using base_t = burton_mesh_topology_t<N, Extra_Elements>;
 
   //! \brief the mesh types
-  using types_t = burton_types_t<N>;
+  using types_t = burton_types_t<N, Extra_Elements>;
 
   //! \brief the mesh traits
   using config_t = typename types_t::config_t;
@@ -1144,6 +1144,7 @@ void set_regions(std::vector<int> &region_ids)
     // now set the boundary flags.
     for ( auto f : faces() ) {
 	    auto cs = cells(f);
+      f->set_owner(cs[0]);
       f->set_boundary( (cs.size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
@@ -1175,7 +1176,7 @@ void set_regions(std::vector<int> &region_ids)
     //for ( auto c : cells() ) c->region() = 0;
 
     // update the geometry
-    update_geometry();
+    // update_geometry();
   }
 
 
@@ -1246,6 +1247,7 @@ void set_regions(std::vector<int> &region_ids)
     // check all the corners and wedges
     auto cnrs = corners();
     auto num_corners = cnrs.size();
+    auto & wedge_map = context.index_map( index_spaces_t::wedges );
 
     //#omp parallel for reduction( || : bad_corner )
     for( counter_t cnid=0; cnid<num_corners; ++cnid ) {
@@ -1331,10 +1333,22 @@ void set_regions(std::vector<int> &region_ids)
           ss << "Wedge " << wg.id() << " has incorrect corner " 
              << corn.id() << "!=" << cn.id() << std::endl;
         }
+        auto cell_verts = vertices(cl);
+        auto vert_exists = false;
+        for ( auto v : vertices(cl) )
+          if ( v == vt ) {
+            vert_exists = true;
+            break;
+          }
+        if ( !vert_exists ) {
+          ss << "Wedge " << wg.id() << " has vertex " 
+             << vt.id() << " that is not in cell" << std::endl;
+        }
         auto fc = fs.front();            
         auto fx = fc->midpoint();
-        auto cx = cl->midpoint();
+        auto cx = cl->centroid();
         auto delta = fx - cx;
+        auto flipped = (fc->is_flipped(cl));
         real_t dot;
         auto n = wg->facet_normal();
         dot = dot_product( n, delta );
@@ -1433,12 +1447,12 @@ void set_regions(std::vector<int> &region_ids)
           for ( auto wit = ws.begin(); wit != ws.end(); ++wit )
           {
             // get the first wedge normal
-            (*wit)->update( this, true );
+            (*wit)->update( this, false );
             // move to next wedge
             ++wit;
             assert( wit != ws.end() );
             // get the second wedge normal
-            (*wit)->update( this, false );
+            (*wit)->update( this, true );
           }
         }
       }  // else num_dimensions

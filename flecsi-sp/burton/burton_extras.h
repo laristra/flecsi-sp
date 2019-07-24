@@ -392,6 +392,8 @@ public:
   {
       return volume_;
   }
+  auto is_right() const { return is_right_; }
+
   //============================================================================
   // Private Data
   //============================================================================
@@ -419,7 +421,7 @@ public:
 
   //! this is midpoint between cell mid-point and vertex.
   point_t corner_midpoint_=0;
-  
+  bool is_right_ = false;
 };
 
 
@@ -559,7 +561,7 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
   auto cs = mesh->template entities<cell_t::dimension, domain, cell_t::domain>(this);
   const auto & mp = cs.front()->centroid();
   
-  if ( is_right )
+  if ( !is_right )
   {
     
     facet_normal_ =
@@ -593,6 +595,7 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
     ristra::geometry::shapes::tetrahedron::volume( v, f, e, mp );
 
   set_boundary( fs.front()->is_boundary() );
+  is_right_ = is_right;
 
   // NOTE internal facet values are not defined....
 }

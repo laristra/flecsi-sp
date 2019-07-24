@@ -53,6 +53,16 @@ auto prefix()
   return ss.str();
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//! \brief Update the goemetry
+////////////////////////////////////////////////////////////////////////////////
+void update_geometry( utils::client_handle_r<mesh_t> mesh ) {
+  mesh.update_geometry( );
+}
+
+flecsi_register_task(update_geometry, flecsi_sp::burton::test, loc,
+    index|flecsi::leaf);
+
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Test some initial connectivity
@@ -560,27 +570,27 @@ void state_check_test(
   auto & cells_lid_to_mid = context.index_map( index_spaces_t::cells );
 
   // cells
-  for(auto c: mesh.cells(flecsi::owned)) {
+  for(auto c: mesh.cells()) {
     auto id = cells_lid_to_mid.at( c.id() );
     ASSERT_EQ( cell_data(c), id ) << "CELL DATA NOT COMMUNICATED PROPERLY";
   }
 
   // faces
-  for (auto f: mesh.faces(flecsi::owned)) {
+  for (auto f: mesh.faces()) {
     auto id = faces_lid_to_mid.at( f.id() );
     ASSERT_EQ( face_data(f).i, id ) << "FACE DATA NOT COMMUNICATED PROPERLY";
     ASSERT_EQ( face_data(f).x, id ) << "FACE DATA NOT COMMUNICATED PROPERLY";
   }
 
   // edges
-  for (auto e: mesh.edges(flecsi::owned)) {
+  for (auto e: mesh.edges()) {
     auto id = edges_lid_to_mid.at( e.id() );
     for ( auto & x : edge_data(e) )
       ASSERT_EQ(x, id) << "EDGE DATA NOT COMMUNICATED PROPERLY";
   }
 
   // vertices
-  for (auto v: mesh.vertices(flecsi::owned)) {
+  for (auto v: mesh.vertices()) {
     auto id = verts_lid_to_mid.at( v.id() );
     for ( auto & x : vert_data(v) )
       ASSERT_EQ(x, id) << "VERTEX DATA NOT COMMUNICATED PROPERLY";
@@ -662,13 +672,13 @@ void extra_state_check_test(
   auto & corners_lid_to_mid = context.index_map( index_spaces_t::corners );
 
   // corners
-  for(auto c: mesh.corners(flecsi::owned)) {
+  for(auto c: mesh.corners()) {
     auto id = corners_lid_to_mid.at( c.id() );
     ASSERT_EQ( corner_data(c), id ) << "CORNER DATA NOT COMMUNICATED PROPERLY";
   }
 
   // wedges
-  for (auto w: mesh.wedges(flecsi::owned)) {
+  for (auto w: mesh.wedges()) {
     auto id = wedges_lid_to_mid.at( w.id() );
     ASSERT_EQ( wedge_data(w), id ) << "WEDGE DATA NOT COMMUNICATED PROPERLY";
   }
@@ -700,6 +710,9 @@ void driver(int argc, char ** argv)
 
   // get the mesh handle
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
+  auto f = 
+    flecsi_execute_task(update_geometry, flecsi_sp::burton::test, index, mesh_handle);
+  f.wait(); // dont go forward until this is done!
 
   // launch the validity test task
   flecsi_execute_task(validity_test, flecsi_sp::burton::test, index, mesh_handle);

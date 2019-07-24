@@ -476,6 +476,11 @@ struct burton_element_t<2,1> :
   {
     return owner_id_ != c->template global_id().global();
   }
+  
+  template<typename T>
+  void set_owner(const T & c) {
+    owner_id_ = c->template global_id().global();
+  }
 
   //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
@@ -484,7 +489,6 @@ struct burton_element_t<2,1> :
     using ristra::math::sqr;
     using ristra::math::normal;
     auto vs = mesh->template entities<0, domain>(this);
-    auto cs = mesh->template entities<2, domain>(this);
     const auto & a = vs[0]->coordinates();
     const auto & b = vs[1]->coordinates();
     midpoint_[0] = 0.5*(a[0] + b[0]);
@@ -492,7 +496,6 @@ struct burton_element_t<2,1> :
     length_ = std::sqrt( sqr(a[0]-b[0]) + sqr(a[1]-b[1]) );
     normal_ = normal( b, a );
     normal_ /= length_;
-    owner_id_ = cs[0]->template global_id().global(); 
   }
 
   //============================================================================
@@ -1312,7 +1315,6 @@ struct burton_element_t<3,2>
     using ristra::math::abs;
   
     auto vs = mesh->template entities<0, domain>(this);
-    auto cs = mesh->template entities<3, domain>(this);
   
     switch (shape_) {
   
@@ -1383,7 +1385,6 @@ struct burton_element_t<3,2>
     
     area_ = abs( normal_ );
     normal_ /= area_;
-    owner_id_ = cs[0]->template global_id().global(); 
   }
 
   //----------------------------------------------------------------------------
@@ -1415,6 +1416,11 @@ struct burton_element_t<3,2>
   bool is_flipped(const T & c)
   {
     return owner_id_ != c->template global_id().global();
+  }
+  
+  template<typename T>
+  void set_owner(const T & c) {
+    owner_id_ = c->template global_id().global();
   }
 
   //============================================================================
@@ -1963,6 +1969,7 @@ struct burton_element_t<3,3>
   
       // the element is a hex
       case shape_t::hexahedron: {
+        ristra::geometry::shapes::polyhedron<point_t> poly;     
         const auto & v0 = vs[0]->coordinates();
         const auto & v1 = vs[1]->coordinates();
         const auto & v2 = vs[2]->coordinates();
@@ -1971,15 +1978,15 @@ struct burton_element_t<3,3>
         const auto & v5 = vs[5]->coordinates();
         const auto & v6 = vs[6]->coordinates();
         const auto & v7 = vs[7]->coordinates();
-        centroid_ = 
-          ristra::geometry::shapes::hexahedron::centroid(
-              v0, v1, v2, v3, v4, v5, v6, v7 );
-        midpoint_ = 
-          ristra::geometry::shapes::hexahedron::midpoint(
-              v0, v1, v2, v3, v4, v5, v6, v7 );
-        volume_ = 
-          ristra::geometry::shapes::hexahedron::volume(
-              v0, v1, v2, v3, v4, v5, v6, v7 );
+        poly.insert( {v0, v3, v2, v1} );
+        poly.insert( {v1, v2, v6, v5} );
+        poly.insert( {v2, v3, v7, v6} );
+        poly.insert( {v3, v0, v4, v7} );
+        poly.insert( {v0, v1, v5, v4} );
+        poly.insert( {v4, v5, v6, v7} );
+        centroid_ = poly.centroid();
+        midpoint_ = poly.midpoint();
+        volume_ = poly.volume();
         min_length_ = detail::min_length( vs );
         break;
       }
@@ -1989,7 +1996,7 @@ struct burton_element_t<3,3>
         ristra::geometry::shapes::polyhedron<point_t> poly;     
         for ( auto f : fs ) {
           auto cs = mesh->template entities<3, domain>(f);
-          auto reverse = (cs[0] != this); // FIXME: reverse
+          auto reverse = !f->is_flipped(cs[0]);
           auto coords = f->coordinates( mesh, reverse );
           poly.insert( coords );
         }
