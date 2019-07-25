@@ -146,6 +146,10 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   
   // create a list of vertex pointers
   std::vector< vertex_t * > elem_vs;
+  
+  // assume numbering goes, exlusive, then shared, then ghost
+  auto num_owned_edges =
+    edge_coloring.exclusive.size() + edge_coloring.shared.size();
 
   // create the edges
   for(auto & em: edge_lid_to_mid) {
@@ -158,12 +162,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
     // search this ranks mesh definition for the matching offset
     auto it = edge_global2local.find( mid );
-    auto ite = std::find_if( edge_coloring.exclusive.begin(),
-        edge_coloring.exclusive.end(), [=](auto f) { return f.id == mid; } );
-    auto its = std::find_if( edge_coloring.shared.begin(),
-        edge_coloring.shared.end(), [=](auto f) { return f.id == mid; } );
-    auto is_mine = (ite != edge_coloring.exclusive.end()) || 
-      (its != edge_coloring.shared.end());
+    bool is_mine = lid < num_owned_edges;
     
     // the vertex exists on this rank so create it
     if ( is_mine && it != edge_global2local.end() ) {
@@ -450,6 +449,10 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   
   std::vector< face_t * > faces;
   faces.reserve( face_lid_to_mid.size() );
+
+  // assume numbering goes, exlusive, then shared, then ghost
+  auto num_owned_faces =
+    face_coloring.exclusive.size() + face_coloring.shared.size();
   
   // create the faces
   for(auto & em: face_lid_to_mid) {
@@ -462,12 +465,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
     // search this ranks mesh definition for the matching offset
     auto it = face_global2local.find( mid );
-    auto ite = std::find_if( face_coloring.exclusive.begin(),
-        face_coloring.exclusive.end(), [=](auto f) { return f.id == mid; } );
-    auto its = std::find_if( face_coloring.shared.begin(),
-        face_coloring.shared.end(), [=](auto f) { return f.id == mid; } );
-    auto is_mine = (ite != face_coloring.exclusive.end()) || 
-      (its != face_coloring.shared.end());
+    bool is_mine = lid < num_owned_faces;
     
     // the vertex exists on this rank so create it
     if ( is_mine && it != face_global2local.end() ) {
