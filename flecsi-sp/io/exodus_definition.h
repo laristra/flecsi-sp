@@ -1236,8 +1236,10 @@ public:
     auto & edges2vertices = local_connectivity_[1][0];
 
     // build the connecitivity array
+    std::map<std::vector<index_t>, index_t> sorted_vertices_to_edges;
     detail::new_build_connectivity(
         cells2vertices, cells2edges, edges2vertices,
+        sorted_vertices_to_edges,
         [](const auto & vs, auto & edge_vs) {
           for (
             auto v0 = std::prev(vs.end()), v1 = vs.begin();
@@ -1603,7 +1605,7 @@ private:
 
   //! \brief storage for cell to vertex connectivity
   std::map<index_t, std::map<index_t, crs_t>> local_connectivity_;
-
+        
   //! \brief global/local id maps
   std::map<index_t, std::map<index_t, index_t>> global_to_local_;
   std::map<index_t, vector<index_t>> local_to_global_;
@@ -1798,6 +1800,7 @@ public:
         detail::new_build_connectivity(
             new_entities, // i.e. cell_vertices for each block
             cell2faces_, face2vertices_, 
+            sorted_vertices_to_faces_,
             [=](const auto & vs, auto & face_vs) {
               // hardcoded for hex
               if (block_type == base_t::block_t::hex) {
@@ -2168,6 +2171,9 @@ public:
       // storage to keep track of new cell faces
       std::vector<size_t> fs;
       fs.reserve( num_faces );
+        
+      // storage for vertices
+      std::vector<size_t> vs, sorted_vs;
 
       // loop over faces and unpack verts
       for ( size_t i=0; i<num_faces; ++i ) {
@@ -2177,37 +2183,29 @@ public:
         flecsi::topology::uncast( buffer, 1, &num_verts );
 
         // the ids of the vertices
-        std::vector<size_t> vs(num_verts);
+        vs.clear(); vs.resize(num_verts);
         flecsi::topology::uncast( buffer, num_verts, vs.data() );
         // convert vertex global ids to local ids
         for ( auto & v : vs ) v = verts_global2local.at(v);
 
         // sort vertices for search
-        std::vector<size_t> sorted_vs(vs.begin(), vs.end());
+        sorted_vs.assign(vs.begin(), vs.end());
         std::sort( sorted_vs.begin(), sorted_vs.end() );
 
         // search for the face to see if it exists
-        size_t face_counter{0};
-        for ( const auto & search_vs : faces2verts ) {
-          // sort this faces vertices
-          std::vector<size_t> sorted_search_vs( search_vs.begin(), search_vs.end() );
-          std::sort( sorted_search_vs.begin(), sorted_search_vs.end() );
-          // is it a match?
-          auto matches = std::equal(sorted_vs.begin(), sorted_vs.end(),
-                sorted_search_vs.begin() );
-          if ( matches ) break;
-          // bump counter
-          ++face_counter;
-        }
-        // if there was a match, use this id
-        if ( face_counter != faces2verts.size() ) {
-          fs.emplace_back(face_counter);
-        }
-        // else append to the connectivity list
-        else {
-          fs.emplace_back( faces2verts.size() );
+        auto it = sorted_vertices_to_faces_.find( sorted_vs );
+        // no match, add it to the connectivity list
+        if ( it == sorted_vertices_to_faces_.end() ) {
+          auto new_face_id = faces2verts.size();
+          fs.emplace_back( new_face_id );
           faces2verts.append( vs.begin(), vs.end() );
           face_owner_.emplace_back( global_id );
+          sorted_vertices_to_faces_.emplace( sorted_vs, new_face_id );
+          assert( faces2verts.size() == sorted_vertices_to_faces_.size() );
+        }
+        // if there was a match, use the id
+        else {
+          fs.emplace_back(it->second);
         }
 
       }
@@ -2323,7 +2321,7 @@ public:
       // store the number of faces
       auto num_faces = faces2verts.size();
       num_remove = delete_items.size();
-
+    
       // delete face to vertex connectivity
       faces2verts.erase(delete_items);
       
@@ -2355,6 +2353,7 @@ public:
         i = old2new[i];
         assert( i<face_count && "Messed up renumbering #1" );
       }
+
 
       // renumber face owners
       vector<index_t> new_face_owner(face_count);
@@ -2491,6 +2490,20 @@ public:
       }
 
     } // delete vertices
+      
+    // delete the sorted face vertices.  you cant change the key of a map, so
+    // you cant renumber the vertices.  just blow away the whole map and
+    // rebuild it.
+    sorted_vertices_to_faces_.clear();
+
+    size_t face_cnt{0};
+    std::vector<size_t> sorted_vs;
+    for ( const auto & vs : faces2verts ) {
+      sorted_vs.assign( vs.begin(), vs.end() );
+      std::sort( sorted_vs.begin(), sorted_vs.end() );
+      sorted_vertices_to_faces_.emplace(sorted_vs, face_cnt);
+      ++face_cnt;
+    }
     
   }
 
@@ -2505,8 +2518,10 @@ public:
     auto & edges2vertices = local_connectivity_[1][0];
 
     // build the connecitivity array
+    std::map<std::vector<index_t>, index_t> sorted_vertices_to_edges;
     detail::new_build_connectivity(
         faces2vertices, faces2edges, edges2vertices,
+        sorted_vertices_to_edges,
         [](const auto & vs, auto & edge_vs) {
           for (
             auto v0 = std::prev(vs.end()), v1 = vs.begin();
@@ -2549,6 +2564,7 @@ private:
   std::map<index_t, std::map<index_t, crs_t>> local_connectivity_;
 
   std::vector<index_t> face_owner_;
+  std::map<std::vector<index_t>, index_t> sorted_vertices_to_faces_;
 
   //! \brief global/local id maps
   std::map<index_t, std::map<index_t, index_t>> global_to_local_;

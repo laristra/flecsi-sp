@@ -4170,7 +4170,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   // if ( needs_repartitioning ) {
 #if 1
-  if ( rank == 0 ) std::cout << "Partitioning mesh...";
+  if ( rank == 0 ) std::cout << "Partitioning mesh..." << std::flush;
   // Create the dCRS representation for the distributed colorer.
   // This essentialy makes the graph of the dual mesh.
   mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
@@ -4183,7 +4183,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   if ( rank == 0 ) std::cout << "done." << std::endl;
 
   // now migrate the entities to their respective ranks
-  if ( rank == 0 ) std::cout << "Migrating mesh...";
+  if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
   flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
   if ( rank == 0 ) std::cout << "done." << std::endl;
 #endif
@@ -4417,7 +4417,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   }
 
   clog(info) << "Finished mesh partitioning." << std::endl;
-  if (rank) std::cout << "Finished mesh partitioning." << std::endl;
+  if (rank == 0) std::cout << "Finished mesh partitioning." << std::endl;
 
 
 } // partition_mesh
@@ -4446,6 +4446,8 @@ void initialize_mesh(
   
   // Here we pull the mesh definition out of the 
   using globals::mesh_def;
+  
+  if (rank == 0) std::cout << "Initializing mesh..." << std::flush;
 
   // fill the mesh
   create_cells( *mesh_def, mesh );
@@ -4459,6 +4461,8 @@ void initialize_mesh(
 
   // create the subspaces
   create_subspaces( *mesh_def, mesh );
+  
+  if (rank == 0) std::cout << "done" << std::endl;
 
   ////----------------------------------------------------------------------------
   //// Some debug

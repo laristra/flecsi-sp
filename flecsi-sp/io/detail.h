@@ -112,12 +112,16 @@ build_connectivity(
   }  // for
 }  // build_connectivity
 
-template<typename CONNECTIVITY_TYPE, typename FUNCTION>
+template<
+  typename CONNECTIVITY_TYPE,
+  typename SORTED_CONNECTIVITY_TYPE,
+  typename FUNCTION>
 void
 new_build_connectivity(
     const CONNECTIVITY_TYPE & cell_to_vertex,
     CONNECTIVITY_TYPE & cell_to_edge,
     CONNECTIVITY_TYPE & edge_to_vertex,
+    SORTED_CONNECTIVITY_TYPE & sorted_vertices_to_edges,
     FUNCTION && build_edges_from_vertices) {
 
   using index_t = typename CONNECTIVITY_TYPE::value_type;
@@ -127,18 +131,6 @@ new_build_connectivity(
   std::vector<index_t> sorted_vs;
   std::vector<index_t> these_edges;
   
-  // invert the edge id to vertices map
-  // Could store and keep track of sorted vertices for each edge like I used
-  // to, but not sure if it is really that expensive.
-  std::map<std::vector<index_t>, index_t> edges;
-  for ( const auto & vs : edge_to_vertex ) {
-      sorted_vs.assign(vs.begin(), vs.end());
-      std::sort(sorted_vs.begin(), sorted_vs.end());
-      auto edgeid = edges.size();
-      edges.emplace(sorted_vs, edgeid);
-  }
-
-
   // loop over cells, adding all of their edges to the table
   for (const auto & these_verts : cell_to_vertex) {
 
@@ -157,10 +149,12 @@ new_build_connectivity(
       sorted_vs.assign(vs.begin(), vs.end());
       std::sort(sorted_vs.begin(), sorted_vs.end());
       // if we dont find the edge
-      if (edges.find(sorted_vs) == edges.end()) {
+      auto it = sorted_vertices_to_edges.find(sorted_vs);
+      if (it == sorted_vertices_to_edges.end())
+      {
         // add to the local reverse map
-        auto edgeid = edges.size();
-        edges.emplace(sorted_vs, edgeid);
+        auto edgeid = sorted_vertices_to_edges.size();
+        sorted_vertices_to_edges.emplace(sorted_vs, edgeid);
         // add to the original sorted and unsorted maps
         edge_to_vertex.push_back(vs);
         // add to the list of edges
@@ -168,7 +162,7 @@ new_build_connectivity(
       } else {
         // if we do find the edge
         // just add the id to the list of edges
-        these_edges.push_back(edges[sorted_vs]);
+        these_edges.push_back(it->second);
       }
     }
 
