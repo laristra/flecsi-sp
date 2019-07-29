@@ -444,8 +444,6 @@ public:
 
 #ifdef HAVE_EXODUS
 
-    std::cout << "Writing mesh to: " << name << std::endl;
-
     // alias some types
     using std::vector;
     using std::array;
@@ -585,8 +583,6 @@ public:
   ) {
 
 #ifdef HAVE_EXODUS
-
-    std::cout << "Writing mesh to: " << name << std::endl;
 
     // alias some types
     using std::vector;

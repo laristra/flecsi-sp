@@ -34,12 +34,10 @@ namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
 
-namespace globals {
-
-  using mesh_definition_t =
-    flecsi::topology::mesh_definition_u< burton_mesh_t::num_dimensions >;
-  std::unique_ptr<mesh_definition_t> mesh_def;
-
+//! \brief holds some extra mesh info.  
+//! This is used to pass information between tlt and spmd initializations.
+//! The alternative would be to duplicate some computation.
+struct extra_mesh_info_t {
   std::map<dom_dim_t, std::map<dom_dim_t, flecsi::coloring::crs_t>> connectivity;
   std::map<dom_dim_t, std::map<size_t, size_t>> global_to_local;
   std::map<dom_dim_t, std::vector<size_t>> local_to_global;
@@ -48,6 +46,17 @@ namespace globals {
   std::map< dom_dim_t, std::vector<size_t> > ghost_ids;
 
   std::vector< size_t > cell_distribution;
+};
+  
+using mesh_definition_t =
+  flecsi::topology::mesh_definition_u< burton_mesh_t::num_dimensions >;
+
+
+namespace globals {
+
+  std::unique_ptr<mesh_definition_t> mesh_def;
+
+  std::unique_ptr<extra_mesh_info_t> extra_mesh_info;
 
 }
 
@@ -56,32 +65,28 @@ namespace globals {
 ///
 /// \remarks This is the 1D and 2D version
 ////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename MESH_TYPE,
-  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() < 3 ),
-  typename = std::enable_if_t< Enabled >
->
-void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+template< typename MESH_TYPE >
+void create_cells(
+  flecsi::topology::mesh_definition_u<2> & mesh_def,
+  extra_mesh_info_t & extra_mesh_info,
+  MESH_TYPE & mesh )
 {
 
   //----------------------------------------------------------------------------
   // Initial compile time setup
   //----------------------------------------------------------------------------
 
-  using mesh_t = typename std::decay_t< MESH_TYPE >;
-
   // some constant expressions
-  constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
 
   // Alias the index spaces type
-  using index_spaces = typename mesh_t::index_spaces_t;
+  using index_spaces = typename burton_mesh_t::index_spaces_t;
 
   // alias some other types
-  using point_t = typename mesh_t::point_t;
-  using vertex_t = typename mesh_t::vertex_t;
-  using edge_t = typename mesh_t::edge_t;
-  using cell_t = typename mesh_t::cell_t;
+  using point_t = typename burton_mesh_t::point_t;
+  using vertex_t = typename burton_mesh_t::vertex_t;
+  using edge_t = typename burton_mesh_t::edge_t;
+  using cell_t = typename burton_mesh_t::cell_t;
 
   //----------------------------------------------------------------------------
   // Get context information
@@ -140,9 +145,9 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & edge_to_vertices =
       mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
   
-  const auto & ghost_edges = globals::ghost_ids.at({0,edge_t::dimension});
-  const auto & ghost_edge2vertex =
-    globals::ghost_connectivity.at({0,edge_t::dimension}).at({0,vertex_t::dimension});
+  const auto & ghost_edges = extra_mesh_info.ghost_ids.at({0,edge_t::dimension});
+  const auto & ghost_edge2vertex = extra_mesh_info.ghost_connectivity.
+    at({0,edge_t::dimension}).at({0,vertex_t::dimension});
   
   // create a list of vertex pointers
   std::vector< vertex_t * > elem_vs;
@@ -217,9 +222,9 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & cell_to_vertices =
       mesh_def.entities_crs( cell_t::dimension, vertex_t::dimension );
   
-  const auto & ghost_cells = globals::ghost_ids.at({0,cell_t::dimension});
-  const auto & ghost_cell2vertex =
-    globals::ghost_connectivity.at({0,cell_t::dimension}).at({0,vertex_t::dimension});
+  const auto & ghost_cells = extra_mesh_info.ghost_ids.at({0,cell_t::dimension});
+  const auto & ghost_cell2vertex = extra_mesh_info.ghost_connectivity.
+    at({0,cell_t::dimension}).at({0,vertex_t::dimension});
   
   const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
@@ -233,12 +238,12 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     elem_vs.clear();
 
     // search this ranks mesh definition for the matching offset
-    auto r = flecsi::coloring::rank_owner( globals::cell_distribution, mid );
+    auto r = flecsi::coloring::rank_owner( extra_mesh_info.cell_distribution, mid );
 
     // if i am the owner
     if ( r == rank ) {
       // figure out the original local id (note flecsi will have renumberd this)
-      auto id = mid - globals::cell_distribution[rank];
+      auto id = mid - extra_mesh_info.cell_distribution[rank];
       // get the list of vertices
       const auto & vs = cell_to_vertices.at(id);
       // create a list of vertex pointers
@@ -284,33 +289,29 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 ///
 /// \remarks This is the 3D version
 ////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename MESH_TYPE,
-  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 3 ),
-  typename std::enable_if_t< Enabled >* = nullptr
->
-void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+template< typename MESH_TYPE >
+void create_cells(
+  flecsi::topology::mesh_definition_u<3> & mesh_def,
+  extra_mesh_info_t & extra_mesh_info,
+  MESH_TYPE & mesh )
 {
 
   //----------------------------------------------------------------------------
   // Initial compile time setup
   //----------------------------------------------------------------------------
 
-  using mesh_t = typename std::decay_t< MESH_TYPE >;
-
   // some constant expressions
-  constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
 
   // Alias the index spaces type
-  using index_spaces = typename mesh_t::index_spaces_t;
+  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // alias some other types
-  using point_t = typename mesh_t::point_t;
-  using vertex_t = typename mesh_t::vertex_t;
-  using edge_t = typename mesh_t::edge_t;
-  using face_t = typename mesh_t::face_t;
-  using cell_t = typename mesh_t::cell_t;
+  using point_t = burton_mesh_t::point_t;
+  using vertex_t = burton_mesh_t::vertex_t;
+  using edge_t = burton_mesh_t::edge_t;
+  using face_t = burton_mesh_t::face_t;
+  using cell_t = burton_mesh_t::cell_t;
 
   //----------------------------------------------------------------------------
   // Get context information
@@ -366,9 +367,9 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & edge_to_vertices =
       mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
   
-  const auto & ghost_edges = globals::ghost_ids.at({0,edge_t::dimension});
-  const auto & ghost_edge2vertex =
-    globals::ghost_connectivity.at({0,edge_t::dimension}).at({0,vertex_t::dimension});
+  const auto & ghost_edges = extra_mesh_info.ghost_ids.at({0,edge_t::dimension});
+  const auto & ghost_edge2vertex = extra_mesh_info.ghost_connectivity.
+    at({0,edge_t::dimension}).at({0,vertex_t::dimension});
   
   // create a list of vertex pointers
   std::vector< vertex_t * > elem_vs;
@@ -441,9 +442,9 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & face_to_vertices =
       mesh_def.entities_crs( face_t::dimension, vertex_t::dimension );
   
-  const auto & ghost_faces = globals::ghost_ids.at({0,face_t::dimension});
-  const auto & ghost_face2vertex =
-    globals::ghost_connectivity.at({0,face_t::dimension}).at({0,vertex_t::dimension});
+  const auto & ghost_faces = extra_mesh_info.ghost_ids.at({0,face_t::dimension});
+  const auto & ghost_face2vertex = extra_mesh_info.ghost_connectivity.
+    at({0,face_t::dimension}).at({0,vertex_t::dimension});
   
   const auto & face_owners = mesh_def.face_owners();
   
@@ -522,9 +523,9 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & cell_to_vertices =
       mesh_def.entities_crs( cell_t::dimension, vertex_t::dimension );
 
-  const auto & ghost_cells = globals::ghost_ids.at({0,cell_t::dimension});
-  const auto & ghost_cell2vertex =
-    globals::ghost_connectivity.at({0,cell_t::dimension}).at({0,vertex_t::dimension});
+  const auto & ghost_cells = extra_mesh_info.ghost_ids.at({0,cell_t::dimension});
+  const auto & ghost_cell2vertex = extra_mesh_info.ghost_connectivity.
+    at({0,cell_t::dimension}).at({0,vertex_t::dimension});
   
   const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
@@ -538,12 +539,12 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     elem_vs.clear();
 
     // search this ranks mesh definition for the matching offset
-    auto r = flecsi::coloring::rank_owner( globals::cell_distribution, mid );
+    auto r = flecsi::coloring::rank_owner( extra_mesh_info.cell_distribution, mid );
 
     // if i am the owner
     if ( r == rank ) {
       // figure out the original local id (note flecsi will have renumberd this)
-      auto id = mid - globals::cell_distribution[rank];
+      auto id = mid - extra_mesh_info.cell_distribution[rank];
       // get the list of vertices
       const auto & vs = cell_to_vertices.at(id);
       // create a list of vertex pointers
@@ -584,40 +585,37 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
 }
 
+
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper function to create the cells
 ///
 /// \remarks This is the 1D and 2D version
 ////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename MESH_TYPE,
-  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() < 3 ),
-  typename = std::enable_if_t< Enabled >
->
-void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+template< typename MESH_TYPE >
+void create_extras(
+  flecsi::topology::mesh_definition_u<2> & mesh_def,
+  extra_mesh_info_t & extra_mesh_info,
+  MESH_TYPE & mesh )
 {
 
   //----------------------------------------------------------------------------
   // Initial compile time setup
   //----------------------------------------------------------------------------
 
-  using mesh_t = typename std::decay_t< MESH_TYPE >;
-
   // some constant expressions
-  constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
 
   // Alias the index spaces type
-  using index_spaces = typename mesh_t::index_spaces_t;
+  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // alias some other types
-  using point_t = typename mesh_t::point_t;
-  using vertex_t = typename mesh_t::vertex_t;
-  using edge_t = typename mesh_t::edge_t;
-  using cell_t = typename mesh_t::cell_t;
-  using corner_t = typename mesh_t::corner_t;
-  using wedge_t = typename mesh_t::wedge_t;
-  using side_t = typename mesh_t::side_t;
+  using point_t = typename burton_mesh_t::point_t;
+  using vertex_t = typename burton_mesh_t::vertex_t;
+  using edge_t = typename burton_mesh_t::edge_t;
+  using cell_t = typename burton_mesh_t::cell_t;
+  using corner_t = typename burton_mesh_t::corner_t;
+  using wedge_t = typename burton_mesh_t::wedge_t;
+  using side_t = typename burton_mesh_t::side_t;
 
   //----------------------------------------------------------------------------
   // Get context information
@@ -629,8 +627,10 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
   const auto & vert_local2global = mesh_def.local_to_global(vertex_t::dimension);
   const auto & edge_local2global = mesh_def.local_to_global(edge_t::dimension);
-  const auto & wedge_local2global = globals::local_to_global.at({wedge_t::domain, wedge_t::dimension});
-  const auto & corner_local2global = globals::local_to_global.at({corner_t::domain, corner_t::dimension});
+  const auto & wedge_local2global = extra_mesh_info.local_to_global.
+    at({wedge_t::domain, wedge_t::dimension});
+  const auto & corner_local2global = extra_mesh_info.local_to_global.
+    at({corner_t::domain, corner_t::dimension});
   
   const auto & vertex_mid_to_lid = context.reverse_index_map(index_spaces::vertices);
   const auto & edge_mid_to_lid = context.reverse_index_map(index_spaces::edges);
@@ -658,14 +658,14 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   
   
   auto wedge_pair = std::make_pair(wedge_t::domain, wedge_t::dimension);
-  const auto & wedge_global2local = globals::global_to_local.at(wedge_pair);
-  const auto & wedge_conn = globals::connectivity.at(wedge_pair);
+  const auto & wedge_global2local = extra_mesh_info.global_to_local.at(wedge_pair);
+  const auto & wedge_conn = extra_mesh_info.connectivity.at(wedge_pair);
   const auto & wedge_to_vertices = wedge_conn.at({0,0});
   const auto & wedge_to_edges    = wedge_conn.at({0,1});
   const auto & wedge_to_cells    = wedge_conn.at({0,2});
   
-  const auto & ghost_wedges = globals::ghost_ids.at(wedge_pair);
-  const auto & ghost_wedge_conn = globals::ghost_connectivity.at(wedge_pair);
+  const auto & ghost_wedges = extra_mesh_info.ghost_ids.at(wedge_pair);
+  const auto & ghost_wedge_conn = extra_mesh_info.ghost_connectivity.at(wedge_pair);
   const auto & ghost_wedge_to_vertices = ghost_wedge_conn.at({0,0});
   const auto & ghost_wedge_to_edges = ghost_wedge_conn.at({0,1});
   const auto & ghost_wedge_to_cells = ghost_wedge_conn.at({0,2});
@@ -723,7 +723,7 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         cs.end(),
         entity_cs.begin(),
         [&](auto c) {
-          auto global_id = globals::cell_distribution[rank] + c;
+          auto global_id = extra_mesh_info.cell_distribution[rank] + c;
           auto flecsi_id = cell_mid_to_lid.at(global_id);
           return &cells[ flecsi_id ];
         }
@@ -779,15 +779,15 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   std::vector<corner_t*> corners; corners.reserve(corner_lid_to_mid.size());
   
   auto corner_pair = std::make_pair(corner_t::domain, corner_t::dimension);
-  const auto & corner_global2local = globals::global_to_local.at(corner_pair);
-  const auto & corner_conn = globals::connectivity.at(corner_pair);
+  const auto & corner_global2local = extra_mesh_info.global_to_local.at(corner_pair);
+  const auto & corner_conn = extra_mesh_info.connectivity.at(corner_pair);
   const auto & corner_to_vertices = corner_conn.at({0,0});
   const auto & corner_to_edges    = corner_conn.at({0,1});
   const auto & corner_to_cells    = corner_conn.at({0,2});
   const auto & corner_to_wedges   = corner_conn.at(wedge_pair);
   
-  const auto & ghost_corners = globals::ghost_ids.at(corner_pair);
-  const auto & ghost_corner_conn = globals::ghost_connectivity.at(corner_pair);
+  const auto & ghost_corners = extra_mesh_info.ghost_ids.at(corner_pair);
+  const auto & ghost_corner_conn = extra_mesh_info.ghost_connectivity.at(corner_pair);
   const auto & ghost_corner_to_vertices = ghost_corner_conn.at({0,0});
   const auto & ghost_corner_to_edges = ghost_corner_conn.at({0,1});
   const auto & ghost_corner_to_cells = ghost_corner_conn.at({0,2});
@@ -849,7 +849,7 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         cs.end(),
         entity_cs.begin(),
         [&](auto c) {
-          auto global_id = globals::cell_distribution[rank] + c;
+          auto global_id = extra_mesh_info.cell_distribution[rank] + c;
           auto flecsi_id = cell_mid_to_lid.at(global_id);
           return &cells[ flecsi_id ];
         }
@@ -924,16 +924,16 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   std::vector<side_t*> sides; sides.reserve(side_lid_to_mid.size());
   
   auto side_pair = std::make_pair(side_t::domain, side_t::dimension);
-  const auto & side_global2local = globals::global_to_local.at(side_pair);
-  const auto & side_conn = globals::connectivity.at(side_pair);
+  const auto & side_global2local = extra_mesh_info.global_to_local.at(side_pair);
+  const auto & side_conn = extra_mesh_info.connectivity.at(side_pair);
   const auto & side_to_vertices = side_conn.at({0,0});
   const auto & side_to_edges    = side_conn.at({0,1});
   const auto & side_to_cells    = side_conn.at({0,2});
   const auto & side_to_wedges   = side_conn.at(wedge_pair);
   const auto & side_to_corners  = side_conn.at(corner_pair);
   
-  const auto & ghost_sides = globals::ghost_ids.at(side_pair);
-  const auto & ghost_side_conn = globals::ghost_connectivity.at(side_pair);
+  const auto & ghost_sides = extra_mesh_info.ghost_ids.at(side_pair);
+  const auto & ghost_side_conn = extra_mesh_info.ghost_connectivity.at(side_pair);
   const auto & ghost_side_to_vertices = ghost_side_conn.at({0,0});
   const auto & ghost_side_to_edges = ghost_side_conn.at({0,1});
   const auto & ghost_side_to_cells = ghost_side_conn.at({0,2});
@@ -999,7 +999,7 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         cs.end(),
         entity_cs.begin(),
         [&](auto c) {
-          auto global_id = globals::cell_distribution[rank] + c;
+          auto global_id = extra_mesh_info.cell_distribution[rank] + c;
           auto flecsi_id = cell_mid_to_lid.at(global_id);
           return &cells[ flecsi_id ];
         }
@@ -1089,36 +1089,32 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 ///
 /// \remarks This is the 1D and 2D version
 ////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename MESH_TYPE,
-  bool Enabled = ( std::decay_t<MESH_DEFINITION>::dimension() == 3 ),
-  typename std::enable_if_t< Enabled >* = nullptr
->
-void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
+template< typename MESH_TYPE >
+void create_extras(
+  flecsi::topology::mesh_definition_u<3> & mesh_def,
+  extra_mesh_info_t & extra_mesh_info,
+  MESH_TYPE & mesh )
 {
 
   //----------------------------------------------------------------------------
   // Initial compile time setup
   //----------------------------------------------------------------------------
 
-  using mesh_t = typename std::decay_t< MESH_TYPE >;
-
   // some constant expressions
-  constexpr auto num_dims = mesh_t::num_dimensions;
+  constexpr auto num_dims = burton_mesh_t::num_dimensions;
 
   // Alias the index spaces type
-  using index_spaces = typename mesh_t::index_spaces_t;
+  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // alias some other types
-  using point_t = typename mesh_t::point_t;
-  using vertex_t = typename mesh_t::vertex_t;
-  using edge_t = typename mesh_t::edge_t;
-  using face_t = typename mesh_t::face_t;
-  using cell_t = typename mesh_t::cell_t;
-  using corner_t = typename mesh_t::corner_t;
-  using wedge_t = typename mesh_t::wedge_t;
-  using side_t = typename mesh_t::side_t;
+  using point_t = burton_mesh_t::point_t;
+  using vertex_t = burton_mesh_t::vertex_t;
+  using edge_t = burton_mesh_t::edge_t;
+  using face_t = burton_mesh_t::face_t;
+  using cell_t = burton_mesh_t::cell_t;
+  using corner_t = burton_mesh_t::corner_t;
+  using wedge_t = burton_mesh_t::wedge_t;
+  using side_t = burton_mesh_t::side_t;
 
   //----------------------------------------------------------------------------
   // Get context information
@@ -1131,8 +1127,8 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & vert_local2global = mesh_def.local_to_global(vertex_t::dimension);
   const auto & edge_local2global = mesh_def.local_to_global(edge_t::dimension);
   const auto & face_local2global = mesh_def.local_to_global(face_t::dimension);
-  const auto & wedge_local2global = globals::local_to_global.at({wedge_t::domain, wedge_t::dimension});
-  const auto & corner_local2global = globals::local_to_global.at({corner_t::domain, corner_t::dimension});
+  const auto & wedge_local2global = extra_mesh_info.local_to_global.at({wedge_t::domain, wedge_t::dimension});
+  const auto & corner_local2global = extra_mesh_info.local_to_global.at({corner_t::domain, corner_t::dimension});
   
   const auto & vertex_mid_to_lid = context.reverse_index_map(index_spaces::vertices);
   const auto & edge_mid_to_lid = context.reverse_index_map(index_spaces::edges);
@@ -1163,15 +1159,15 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   
   
   auto wedge_pair = std::make_pair(wedge_t::domain, wedge_t::dimension);
-  const auto & wedge_global2local = globals::global_to_local.at(wedge_pair);
-  const auto & wedge_conn = globals::connectivity.at(wedge_pair);
+  const auto & wedge_global2local = extra_mesh_info.global_to_local.at(wedge_pair);
+  const auto & wedge_conn = extra_mesh_info.connectivity.at(wedge_pair);
   const auto & wedge_to_vertices = wedge_conn.at({0,0});
   const auto & wedge_to_edges    = wedge_conn.at({0,1});
   const auto & wedge_to_faces    = wedge_conn.at({0,2});
   const auto & wedge_to_cells    = wedge_conn.at({0,3});
   
-  const auto & ghost_wedges = globals::ghost_ids.at(wedge_pair);
-  const auto & ghost_wedge_conn = globals::ghost_connectivity.at(wedge_pair);
+  const auto & ghost_wedges = extra_mesh_info.ghost_ids.at(wedge_pair);
+  const auto & ghost_wedge_conn = extra_mesh_info.ghost_connectivity.at(wedge_pair);
   const auto & ghost_wedge_to_vertices = ghost_wedge_conn.at({0,0});
   const auto & ghost_wedge_to_edges = ghost_wedge_conn.at({0,1});
   const auto & ghost_wedge_to_faces = ghost_wedge_conn.at({0,2});
@@ -1243,7 +1239,7 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         cs.end(),
         entity_cs.begin(),
         [&](auto c) {
-          auto global_id = globals::cell_distribution[rank] + c;
+          auto global_id = extra_mesh_info.cell_distribution[rank] + c;
           auto flecsi_id = cell_mid_to_lid.at(global_id);
           return &cells[ flecsi_id ];
         }
@@ -1307,16 +1303,16 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   std::vector<corner_t*> corners; corners.reserve(corner_lid_to_mid.size());
   
   auto corner_pair = std::make_pair(corner_t::domain, corner_t::dimension);
-  const auto & corner_global2local = globals::global_to_local.at(corner_pair);
-  const auto & corner_conn = globals::connectivity.at(corner_pair);
+  const auto & corner_global2local = extra_mesh_info.global_to_local.at(corner_pair);
+  const auto & corner_conn = extra_mesh_info.connectivity.at(corner_pair);
   const auto & corner_to_vertices = corner_conn.at({0,0});
   const auto & corner_to_edges    = corner_conn.at({0,1});
   const auto & corner_to_faces    = corner_conn.at({0,2});
   const auto & corner_to_cells    = corner_conn.at({0,3});
   const auto & corner_to_wedges   = corner_conn.at(wedge_pair);
   
-  const auto & ghost_corners = globals::ghost_ids.at(corner_pair);
-  const auto & ghost_corner_conn = globals::ghost_connectivity.at(corner_pair);
+  const auto & ghost_corners = extra_mesh_info.ghost_ids.at(corner_pair);
+  const auto & ghost_corner_conn = extra_mesh_info.ghost_connectivity.at(corner_pair);
   const auto & ghost_corner_to_vertices = ghost_corner_conn.at({0,0});
   const auto & ghost_corner_to_edges = ghost_corner_conn.at({0,1});
   const auto & ghost_corner_to_faces = ghost_corner_conn.at({0,2});
@@ -1392,7 +1388,7 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         cs.end(),
         entity_cs.begin(),
         [&](auto c) {
-          auto global_id = globals::cell_distribution[rank] + c;
+          auto global_id = extra_mesh_info.cell_distribution[rank] + c;
           auto flecsi_id = cell_mid_to_lid.at(global_id);
           return &cells[ flecsi_id ];
         }
@@ -1475,8 +1471,8 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   std::vector<side_t*> sides; sides.reserve(side_lid_to_mid.size());
   
   auto side_pair = std::make_pair(side_t::domain, side_t::dimension);
-  const auto & side_global2local = globals::global_to_local.at(side_pair);
-  const auto & side_conn = globals::connectivity.at(side_pair);
+  const auto & side_global2local = extra_mesh_info.global_to_local.at(side_pair);
+  const auto & side_conn = extra_mesh_info.connectivity.at(side_pair);
   const auto & side_to_vertices = side_conn.at({0,0});
   const auto & side_to_edges    = side_conn.at({0,1});
   const auto & side_to_faces    = side_conn.at({0,2});
@@ -1484,8 +1480,8 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   const auto & side_to_wedges   = side_conn.at(wedge_pair);
   const auto & side_to_corners  = side_conn.at(corner_pair);
   
-  const auto & ghost_sides = globals::ghost_ids.at(side_pair);
-  const auto & ghost_side_conn = globals::ghost_connectivity.at(side_pair);
+  const auto & ghost_sides = extra_mesh_info.ghost_ids.at(side_pair);
+  const auto & ghost_side_conn = extra_mesh_info.ghost_connectivity.at(side_pair);
   const auto & ghost_side_to_vertices = ghost_side_conn.at({0,0});
   const auto & ghost_side_to_edges = ghost_side_conn.at({0,1});
   const auto & ghost_side_to_faces = ghost_side_conn.at({0,2});
@@ -1565,7 +1561,7 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
         cs.end(),
         entity_cs.begin(),
         [&](auto c) {
-          auto global_id = globals::cell_distribution[rank] + c;
+          auto global_id = extra_mesh_info.cell_distribution[rank] + c;
           auto flecsi_id = cell_mid_to_lid.at(global_id);
           return &cells[ flecsi_id ];
         }
@@ -1657,7 +1653,6 @@ void create_extras( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   }
 
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper function to create the subspaces
@@ -1873,104 +1868,13 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper to make corners
 ////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 1 >**
-    = nullptr
->
-auto make_corners( const MESH_DEFINITION & mesh_def )
+void make_corners(
+  flecsi::topology::mesh_definition_u<2> & mesh_def,
+  extra_mesh_info_t & extra_mesh_info,
+  std::map<size_t, flecsi::coloring::index_coloring_t> & coloring,
+  std::map<size_t, flecsi::coloring::coloring_info_t> & coloring_info,
+  std::map< dom_dim_t, std::map<dom_dim_t, size_t> > counts )
 {
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
-  using connectivity_t = typename mesh_definition_t::connectivity_t;
-
-  // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
-
-  // get the connectivity from the cells to the vertices.  there is a
-  // corner per cell, per vertex
-  const auto & cells_to_vertices = mesh_def.entities(num_dims, 0);
-  auto num_cells = cells_to_vertices.size();
-  auto num_verts = mesh_def.num_entities(0);
-
-  // count corners
-  size_t num_corners = 0;
-  for ( const auto & verts : cells_to_vertices )
-    num_corners += verts.size();
-
-  // create storage
-  std::map<size_t, connectivity_t> entities_to_corners;
-  std::map<size_t, connectivity_t> corners_to_entities;
-
-  // create entries for the connectivities we care about
-  auto & cells_to_corners = entities_to_corners[num_dims];
-  auto & corners_to_verts = corners_to_entities[0];
-  auto & corners_to_cells = corners_to_entities[num_dims];
-
-  // resize the underlying storage up front
-  cells_to_corners.resize( num_cells );
-  corners_to_verts.resize( num_corners );
-  corners_to_cells.resize( num_corners );
-
-  // some temporary storage
-  std::vector< size_t > corner_ids;
-  std::map< size_t, size_t > verts_to_corners;
-
-  for ( size_t cell_id=0, corner_id=0; cell_id<num_cells; ++cell_id )
-  {
-
-    //-------------------------------------------------------------------------
-    // First assign a corner to each cell vertex
-
-    // clear any temporary storage
-    verts_to_corners.clear();
-    corner_ids.clear();
-
-    // get the list of cell vertices
-    const auto & verts = cells_to_vertices.at(cell_id);
-    corner_ids.reserve( verts.size() );
-
-    // loop over each vertex, assigning corner ids
-    for ( auto vertex_id : verts ) {
-      // keep track of this cells corners
-      corner_ids.emplace_back( corner_id );
-      // store all the connectivity
-      verts_to_corners.emplace( vertex_id, corner_id );
-      corners_to_cells[corner_id].emplace_back( cell_id );
-      corners_to_verts[corner_id].emplace_back( vertex_id );
-      // bump the corner counter
-      ++corner_id;
-    }
-
-    // store the cell to corner connectivity
-    cells_to_corners[cell_id] = corner_ids;
-
-  }
-
-  return std::make_pair( entities_to_corners, corners_to_entities );
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Helper to make corners
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename COLOR_MAP,
-  typename COLOR_INFO_MAP,
-  typename COUNT_MAP,
-  typename = std::enable_if_t<
-    std::decay_t<MESH_DEFINITION>::dimension() == 2
-  >
->
-void make_corners( const MESH_DEFINITION & mesh_def,
-  const flecsi::coloring::index_coloring_t & cells,
-  COLOR_MAP & coloring,
-  COLOR_INFO_MAP & coloring_info,
-  COUNT_MAP & counts )
-{
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   
   // get communication info
   int size;
@@ -1979,7 +1883,7 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
+  constexpr auto num_dims = mesh_def.dimension();
 
   // get the connectvitiy from the cells to the vertices.  there is a
   // corner per cell, per vertex
@@ -2011,19 +1915,19 @@ void make_corners( const MESH_DEFINITION & mesh_def,
 
   // create entries for the connectivities we care about
   auto corner_pair = std::make_pair(corner_t::domain, corner_t::dimension);
-  auto & corner_conn = globals::connectivity[corner_pair];
+  auto & corner_conn = extra_mesh_info.connectivity[corner_pair];
   auto & corners_to_verts = corner_conn[{0,0}];
   auto & corners_to_edges = corner_conn[{0,1}];
   auto & corners_to_cells = corner_conn[{0,2}];
   
   auto wedge_pair = std::make_pair(wedge_t::domain, wedge_t::dimension);
-  auto & wedge_conn = globals::connectivity[wedge_pair];
+  auto & wedge_conn = extra_mesh_info.connectivity[wedge_pair];
   auto & wedges_to_verts = wedge_conn[{0,0}];
   auto & wedges_to_edges = wedge_conn[{0,1}];
   auto & wedges_to_cells = wedge_conn[{0,2}];
 
   auto side_pair = std::make_pair(side_t::domain, side_t::dimension);
-  auto & side_conn = globals::connectivity[side_pair];
+  auto & side_conn = extra_mesh_info.connectivity[side_pair];
   auto & sides_to_verts = side_conn[{0,0}];
   auto & sides_to_edges = side_conn[{0,1}];
   auto & sides_to_cells = side_conn[{0,2}];
@@ -2181,8 +2085,8 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   for ( size_t i=0; i<size; ++i ) dist[i+1] += dist[i];
 
   // create global numbering
-  auto & corner_local2global = globals::local_to_global[corner_pair];
-  auto & corner_global2local = globals::global_to_local[corner_pair];
+  auto & corner_local2global = extra_mesh_info.local_to_global[corner_pair];
+  auto & corner_global2local = extra_mesh_info.global_to_local[corner_pair];
   corner_local2global.resize(corner_cnt);
   for ( size_t i=0; i<corner_cnt; ++i ) {
     auto global_id = dist[rank] + i;
@@ -2195,8 +2099,8 @@ void make_corners( const MESH_DEFINITION & mesh_def,
     1, mpi_size_t, MPI_COMM_WORLD);
   for ( size_t i=0; i<size; ++i ) dist[i+1] += dist[i];
 
-  auto & wedge_local2global = globals::local_to_global[wedge_pair];
-  auto & wedge_global2local = globals::global_to_local[wedge_pair];
+  auto & wedge_local2global = extra_mesh_info.local_to_global[wedge_pair];
+  auto & wedge_global2local = extra_mesh_info.global_to_local[wedge_pair];
   wedge_local2global.resize(wedge_cnt);
   for ( size_t i=0; i<wedge_cnt; ++i ) {
     auto global_id = dist[rank] + i;
@@ -2209,8 +2113,8 @@ void make_corners( const MESH_DEFINITION & mesh_def,
     1, mpi_size_t, MPI_COMM_WORLD);
   for ( size_t i=0; i<size; ++i ) dist[i+1] += dist[i];
 
-  auto & side_local2global = globals::local_to_global[side_pair];
-  auto & side_global2local = globals::global_to_local[side_pair];
+  auto & side_local2global = extra_mesh_info.local_to_global[side_pair];
+  auto & side_global2local = extra_mesh_info.global_to_local[side_pair];
   side_local2global.resize(side_cnt);
   for ( size_t i=0; i<side_cnt; ++i ) {
     auto global_id = dist[rank] + i;
@@ -2223,21 +2127,25 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   //----------------------------------------------------------------------------
   size_t dummy_counts;
 
+  // Alias the index spaces type
+  using index_spaces = burton_mesh_t::index_spaces_t;
+  const auto & cells = coloring.at( index_spaces::cells );
+
   using corner_t = burton_mesh_t::corner_t;
-  auto & corners = coloring[ corner_t::domain ][ corner_t::dimension ];
-  auto & corner_info = coloring_info[ corner_t::domain ][ corner_t::dimension ];
+  auto & corners = coloring[ index_spaces::corners ];
+  auto & corner_info = coloring_info[ index_spaces::corners ];
   flecsi::coloring::color_entities( cells_to_corners, corner_local2global,
       corner_global2local, cells, corners, corner_info, dummy_counts );
 
   using wedge_t = burton_mesh_t::wedge_t;
-  auto & wedges = coloring[ wedge_t::domain ][ wedge_t::dimension ];
-  auto & wedge_info = coloring_info[ wedge_t::domain ][ wedge_t::dimension ];
+  auto & wedges = coloring[ index_spaces::wedges ];
+  auto & wedge_info = coloring_info[ index_spaces::wedges ];
   flecsi::coloring::color_entities( cells_to_wedges, wedge_local2global,
       wedge_global2local, cells, wedges, wedge_info, dummy_counts );
 
   using side_t = burton_mesh_t::side_t;
-  auto & sides = coloring[ side_t::domain ][ side_t::dimension ];
-  auto & side_info = coloring_info[ side_t::domain ][ side_t::dimension ];
+  auto & sides = coloring[ index_spaces::sides ];
+  auto & side_info = coloring_info[ index_spaces::sides ];
   flecsi::coloring::color_entities( cells_to_sides, side_local2global,
       side_global2local, cells, sides, side_info, dummy_counts );
 
@@ -2247,7 +2155,7 @@ void make_corners( const MESH_DEFINITION & mesh_def,
 
   // the size everything is based off
   const auto & ghost_cells_to_vertices = 
-    globals::ghost_connectivity[{0,num_dims}][{0,0}];
+    extra_mesh_info.ghost_connectivity[{0,num_dims}][{0,0}];
   auto n = cells_to_vertices.indices.size() + ghost_cells_to_vertices.indices.size();
   
   // figure out everyones counts
@@ -2256,9 +2164,6 @@ void make_corners( const MESH_DEFINITION & mesh_def,
       1, mpi_size_t, MPI_COMM_WORLD);
   auto color_sizes_times_2 = color_sizes;
   for ( auto & i : color_sizes_times_2 ) i *= 2;
-
-  // Alias the index spaces type
-  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // create a adjacency object
   auto & context = flecsi::execution::context_t::instance();
@@ -2559,22 +2464,22 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   if ( ret != MPI_SUCCESS ) clog_error( "Error communicating vertices" );
 
   // now upack connectivity
-  auto & ghost_cell_ids = globals::ghost_ids[{0,2}];
+  auto & ghost_cell_ids = extra_mesh_info.ghost_ids[{0,2}];
 
-  auto & ghost_corner_ids = globals::ghost_ids[corner_pair];
-  auto & ghost_corner_conn = globals::ghost_connectivity[corner_pair];
+  auto & ghost_corner_ids = extra_mesh_info.ghost_ids[corner_pair];
+  auto & ghost_corner_conn = extra_mesh_info.ghost_connectivity[corner_pair];
   auto & ghost_corners_to_verts = ghost_corner_conn[{0,0}];
   auto & ghost_corners_to_edges = ghost_corner_conn[{0,1}];
   auto & ghost_corners_to_cells = ghost_corner_conn[{0,2}];
 
-  auto & ghost_wedge_ids = globals::ghost_ids[wedge_pair];
-  auto & ghost_wedge_conn = globals::ghost_connectivity[wedge_pair];
+  auto & ghost_wedge_ids = extra_mesh_info.ghost_ids[wedge_pair];
+  auto & ghost_wedge_conn = extra_mesh_info.ghost_connectivity[wedge_pair];
   auto & ghost_wedges_to_verts = ghost_wedge_conn[{0,0}];
   auto & ghost_wedges_to_edges = ghost_wedge_conn[{0,1}];
   auto & ghost_wedges_to_cells = ghost_wedge_conn[{0,2}];
 
-  auto & ghost_side_ids = globals::ghost_ids[side_pair];
-  auto & ghost_side_conn = globals::ghost_connectivity[side_pair];
+  auto & ghost_side_ids = extra_mesh_info.ghost_ids[side_pair];
+  auto & ghost_side_conn = extra_mesh_info.ghost_connectivity[side_pair];
   auto & ghost_sides_to_verts = ghost_side_conn[{0,0}];
   auto & ghost_sides_to_edges = ghost_side_conn[{0,1}];
   auto & ghost_sides_to_cells = ghost_side_conn[{0,2}];
@@ -2661,22 +2566,13 @@ void make_corners( const MESH_DEFINITION & mesh_def,
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Helper to make corners
 ////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename COLOR_MAP,
-  typename COLOR_INFO_MAP,
-  typename COUNT_MAP,
-  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 3 >*
-    = nullptr
->
-void make_corners( const MESH_DEFINITION & mesh_def,
-  const flecsi::coloring::index_coloring_t & cells,
-  COLOR_MAP & coloring,
-  COLOR_INFO_MAP & coloring_info,
-  COUNT_MAP & counts )
+void make_corners(
+  flecsi::topology::mesh_definition_u<3> & mesh_def,
+  extra_mesh_info_t & extra_mesh_info,
+  std::map<size_t, flecsi::coloring::index_coloring_t> & coloring,
+  std::map<size_t, flecsi::coloring::coloring_info_t> & coloring_info,
+  std::map< dom_dim_t, std::map<dom_dim_t, size_t> > counts )
 {
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
   
   // get communication info
   int size;
@@ -2685,7 +2581,7 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
+  constexpr auto num_dims = mesh_def.dimension();
 
   // get the connectvitiy from the cells to the vertices.  there is a
   // corner per cell, per vertex
@@ -2724,21 +2620,21 @@ void make_corners( const MESH_DEFINITION & mesh_def,
 
   // create entries for the connectivities we care about
   auto corner_pair = std::make_pair(corner_t::domain, corner_t::dimension);
-  auto & corner_conn = globals::connectivity[corner_pair];
+  auto & corner_conn = extra_mesh_info.connectivity[corner_pair];
   auto & corners_to_verts = corner_conn[{0,0}];
   auto & corners_to_edges = corner_conn[{0,1}];
   auto & corners_to_faces = corner_conn[{0,2}];
   auto & corners_to_cells = corner_conn[{0,3}];
   
   auto wedge_pair = std::make_pair(wedge_t::domain, wedge_t::dimension);
-  auto & wedge_conn = globals::connectivity[wedge_pair];
+  auto & wedge_conn = extra_mesh_info.connectivity[wedge_pair];
   auto & wedges_to_verts = wedge_conn[{0,0}];
   auto & wedges_to_edges = wedge_conn[{0,1}];
   auto & wedges_to_faces = wedge_conn[{0,2}];
   auto & wedges_to_cells = wedge_conn[{0,3}];
 
   auto side_pair = std::make_pair(side_t::domain, side_t::dimension);
-  auto & side_conn = globals::connectivity[side_pair];
+  auto & side_conn = extra_mesh_info.connectivity[side_pair];
   auto & sides_to_verts = side_conn[{0,0}];
   auto & sides_to_edges = side_conn[{0,1}];
   auto & sides_to_faces = side_conn[{0,2}];
@@ -2945,8 +2841,8 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   for ( size_t i=0; i<size; ++i ) dist[i+1] += dist[i];
 
   // create global numbering
-  auto & corner_local2global = globals::local_to_global[corner_pair];
-  auto & corner_global2local = globals::global_to_local[corner_pair];
+  auto & corner_local2global = extra_mesh_info.local_to_global[corner_pair];
+  auto & corner_global2local = extra_mesh_info.global_to_local[corner_pair];
   corner_local2global.resize(corner_cnt);
   for ( size_t i=0; i<corner_cnt; ++i ) {
     auto global_id = dist[rank] + i;
@@ -2959,8 +2855,8 @@ void make_corners( const MESH_DEFINITION & mesh_def,
     1, mpi_size_t, MPI_COMM_WORLD);
   for ( size_t i=0; i<size; ++i ) dist[i+1] += dist[i];
 
-  auto & wedge_local2global = globals::local_to_global[wedge_pair];
-  auto & wedge_global2local = globals::global_to_local[wedge_pair];
+  auto & wedge_local2global = extra_mesh_info.local_to_global[wedge_pair];
+  auto & wedge_global2local = extra_mesh_info.global_to_local[wedge_pair];
   wedge_local2global.resize(wedge_cnt);
   for ( size_t i=0; i<wedge_cnt; ++i ) {
     auto global_id = dist[rank] + i;
@@ -2973,8 +2869,8 @@ void make_corners( const MESH_DEFINITION & mesh_def,
     1, mpi_size_t, MPI_COMM_WORLD);
   for ( size_t i=0; i<size; ++i ) dist[i+1] += dist[i];
 
-  auto & side_local2global = globals::local_to_global[side_pair];
-  auto & side_global2local = globals::global_to_local[side_pair];
+  auto & side_local2global = extra_mesh_info.local_to_global[side_pair];
+  auto & side_global2local = extra_mesh_info.global_to_local[side_pair];
   side_local2global.resize(side_cnt);
   for ( size_t i=0; i<side_cnt; ++i ) {
     auto global_id = dist[rank] + i;
@@ -2986,22 +2882,26 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   // Apply coloring
   //----------------------------------------------------------------------------
   size_t dummy_counts;
+  
+  using index_spaces = burton_mesh_t::index_spaces_t;
+
+  const auto & cells = coloring.at( index_spaces::cells );
 
   using corner_t = burton_mesh_t::corner_t;
-  auto & corners = coloring[ corner_t::domain ][ corner_t::dimension ];
-  auto & corner_info = coloring_info[ corner_t::domain ][ corner_t::dimension ];
+  auto & corners = coloring[ index_spaces::corners ];
+  auto & corner_info = coloring_info[ index_spaces::corners ];
   flecsi::coloring::color_entities( cells_to_corners, corner_local2global,
       corner_global2local, cells, corners, corner_info, dummy_counts );
 
   using wedge_t = burton_mesh_t::wedge_t;
-  auto & wedges = coloring[ wedge_t::domain ][ wedge_t::dimension ];
-  auto & wedge_info = coloring_info[ wedge_t::domain ][ wedge_t::dimension ];
+  auto & wedges = coloring[ index_spaces::wedges ];
+  auto & wedge_info = coloring_info[ index_spaces::wedges ];
   flecsi::coloring::color_entities( cells_to_wedges, wedge_local2global,
       wedge_global2local, cells, wedges, wedge_info, dummy_counts );
 
   using side_t = burton_mesh_t::side_t;
-  auto & sides = coloring[ side_t::domain ][ side_t::dimension ];
-  auto & side_info = coloring_info[ side_t::domain ][ side_t::dimension ];
+  auto & sides = coloring[ index_spaces::sides ];
+  auto & side_info = coloring_info[ index_spaces::sides ];
   flecsi::coloring::color_entities( cells_to_sides, side_local2global,
       side_global2local, cells, sides, side_info, dummy_counts );
 
@@ -3022,9 +2922,6 @@ void make_corners( const MESH_DEFINITION & mesh_def,
       1, mpi_size_t, MPI_COMM_WORLD);
   ret = MPI_Allgather( &num_wedges, 1, mpi_size_t, wedge_sizes.data(), 
       1, mpi_size_t, MPI_COMM_WORLD);
-
-  // Alias the index spaces type
-  using index_spaces = burton_mesh_t::index_spaces_t;
 
   // create a adjacency object
   auto & context = flecsi::execution::context_t::instance();
@@ -3386,24 +3283,24 @@ void make_corners( const MESH_DEFINITION & mesh_def,
   if ( ret != MPI_SUCCESS ) clog_error( "Error communicating vertices" );
 
   // now upack connectivity
-  auto & ghost_cell_ids = globals::ghost_ids[{0,3}];
+  auto & ghost_cell_ids = extra_mesh_info.ghost_ids[{0,3}];
 
-  auto & ghost_corner_ids = globals::ghost_ids[corner_pair];
-  auto & ghost_corner_conn = globals::ghost_connectivity[corner_pair];
+  auto & ghost_corner_ids = extra_mesh_info.ghost_ids[corner_pair];
+  auto & ghost_corner_conn = extra_mesh_info.ghost_connectivity[corner_pair];
   auto & ghost_corners_to_verts = ghost_corner_conn[{0,0}];
   auto & ghost_corners_to_edges = ghost_corner_conn[{0,1}];
   auto & ghost_corners_to_faces = ghost_corner_conn[{0,2}];
   auto & ghost_corners_to_cells = ghost_corner_conn[{0,3}];
 
-  auto & ghost_wedge_ids = globals::ghost_ids[wedge_pair];
-  auto & ghost_wedge_conn = globals::ghost_connectivity[wedge_pair];
+  auto & ghost_wedge_ids = extra_mesh_info.ghost_ids[wedge_pair];
+  auto & ghost_wedge_conn = extra_mesh_info.ghost_connectivity[wedge_pair];
   auto & ghost_wedges_to_verts = ghost_wedge_conn[{0,0}];
   auto & ghost_wedges_to_edges = ghost_wedge_conn[{0,1}];
   auto & ghost_wedges_to_faces = ghost_wedge_conn[{0,2}];
   auto & ghost_wedges_to_cells = ghost_wedge_conn[{0,3}];
 
-  auto & ghost_side_ids = globals::ghost_ids[side_pair];
-  auto & ghost_side_conn = globals::ghost_connectivity[side_pair];
+  auto & ghost_side_ids = extra_mesh_info.ghost_ids[side_pair];
+  auto & ghost_side_conn = extra_mesh_info.ghost_connectivity[side_pair];
   auto & ghost_sides_to_verts = ghost_side_conn[{0,0}];
   auto & ghost_sides_to_edges = ghost_side_conn[{0,1}];
   auto & ghost_sides_to_faces = ghost_side_conn[{0,2}];
@@ -3501,590 +3398,6 @@ void make_corners( const MESH_DEFINITION & mesh_def,
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Helper to make wedges
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename = std::enable_if_t<
-    std::decay_t<MESH_DEFINITION>::dimension() == 2
-  >
->
-auto make_wedges( const MESH_DEFINITION & mesh_def )
-{
-
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
-  using connectivity_t = typename mesh_definition_t::connectivity_t;
-
-  // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
-
-  // get the connectvitiy from the cells to the vertices.  there is a
-  // wedge per cell, per vertex
-  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
-  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
-  const auto & edges_to_verts = mesh_def.entities(1, 0);
-
-  auto num_verts = mesh_def.num_entities(0);
-  auto num_cells = mesh_def.num_entities(num_dims);
-
-  // count wedges
-  size_t num_wedges = 0;
-  for ( const auto & edges : cells_to_edges )
-    num_wedges += 2*edges.size();
-
-  // create storage
-  std::map<size_t, connectivity_t> entities_to_wedges;
-  std::map<size_t, connectivity_t> wedges_to_entities;
-
-  // create entries for the connectivities we care about
-  auto & cells_to_wedges = entities_to_wedges[num_dims];
-  auto & wedges_to_verts = wedges_to_entities[0];
-  auto & wedges_to_edges = wedges_to_entities[1];
-  auto & wedges_to_cells = wedges_to_entities[num_dims];
-
-  // resize the underlying storage up front
-  cells_to_wedges.resize( num_cells );
-  wedges_to_verts.resize( num_wedges );
-  wedges_to_edges.resize( num_wedges );
-  wedges_to_cells.resize( num_wedges );
-
-  // now make them
-  std::vector< size_t > wedge_ids;
-
-  for ( size_t cell_id=0, wedge_id=0; cell_id<num_cells; ++cell_id )
-  {
-    //-------------------------------------------------------------------------
-    // Create a predicate function to find edges given two vertices
-
-    // get the edges and vertices connected to this cell
-    const auto & edges = cells_to_edges.at(cell_id);
-    const auto & verts = cells_to_verts.at(cell_id);
-
-    //! create a temporary lambda function for searching for edges
-    //! \param[in] pa,pb  the point indexes of the edge to match
-    //! \return the edge id for that particular point pair
-    auto _find_edge = [&]( const auto & pa, const auto & pb  )
-    {
-      auto edge = std::find_if(
-        edges.begin(), edges.end(),
-        [&]( const auto & e )
-        {
-          auto verts = edges_to_verts.at(e);
-          assert( verts.size() == 2 && "should be two vertices per edge" );
-          return ( (verts[0] == pa && verts[1] == pb) ||
-                   (verts[0] == pb && verts[1] == pa) );
-        }
-      );
-      assert( edge != edges.end() && "should have found an edge");
-      return edge;
-    };
-
-    //-------------------------------------------------------------------------
-    // Now loop over each vertex-pair forming an edge and assign wedges
-
-
-    // create some storage for the list of cell wedge ids
-    wedge_ids.clear();
-    wedge_ids.reserve( 2*edges.size() );
-
-    // find the first edge that goes from the last vertex to the first
-    auto edge0 = _find_edge( verts.front(), verts.back() );
-
-    // loop over the vertices in pairs
-    for (
-        auto v1=verts.begin(), v0 = std::prev(verts.end());
-        v1!=verts.end();
-        ++v1
-    ) {
-
-      // get the next vertex, if it goes off the end of the array, then
-      // make it start over
-      auto v2 = std::next(v1);
-      if ( v2==verts.end() ) v2 = verts.begin();
-
-      // then find the next edge
-      auto edge1 = _find_edge( *v1, *v2 );
-
-      // there are two wedges attached to this vertex.  set the
-      // connectivity for both
-      wedge_ids.emplace_back( wedge_id );
-      wedges_to_cells[wedge_id].emplace_back( cell_id );
-      wedges_to_edges[wedge_id].emplace_back( *edge1 );
-      wedges_to_verts[wedge_id].emplace_back( *v1 );
-      ++wedge_id;
-
-      wedge_ids.emplace_back( wedge_id );
-      wedges_to_cells[wedge_id].emplace_back( cell_id );
-      wedges_to_edges[wedge_id].emplace_back( *edge0 );
-      wedges_to_verts[wedge_id].emplace_back( *v1 );
-      ++wedge_id;
-
-      // update the old vertex and edge (saves having to find it again)
-      v0 = v1;
-      edge0 = edge1;
-    } // verts
-
-    // set the wedge connectivity for this cell
-    cells_to_wedges[cell_id] = wedge_ids;
-
-  } // cells
-
-  return std::make_pair( entities_to_wedges, wedges_to_entities );
-
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Helper to make wedges
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 3 >*
-    = nullptr
->
-auto make_wedges( const MESH_DEFINITION & mesh_def )
-{
-
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
-  using connectivity_t = typename mesh_definition_t::connectivity_t;
-
-  // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
-
-  // get the connectvitiy from the cells to the vertices.  there is a
-  // wedge per cell, per vertex
-  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
-  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
-  const auto & cells_to_faces = mesh_def.entities(num_dims, 2);
-  const auto & faces_to_verts = mesh_def.entities(2, 0);
-  const auto & faces_to_edges = mesh_def.entities(2, 1);
-  const auto & faces_to_cells = mesh_def.entities(2, 3);
-  const auto & edges_to_verts = mesh_def.entities(1, 0);
-
-  auto num_verts = mesh_def.num_entities(0);
-  auto num_cells = mesh_def.num_entities(num_dims);
-
-  // count wedges
-  size_t num_wedges = 0;
-  for ( const auto & faces : cells_to_faces )
-    for ( auto f : faces ) {
-      const auto & edges = faces_to_edges.at(f);
-      num_wedges += 2*edges.size();
-    }
-
-  // create storage
-  std::map<size_t, connectivity_t> entities_to_wedges;
-  std::map<size_t, connectivity_t> wedges_to_entities;
-
-  // create entries for the connectivities we care about
-  auto & cells_to_wedges = entities_to_wedges[num_dims];
-  auto & wedges_to_verts = wedges_to_entities[0];
-  auto & wedges_to_edges = wedges_to_entities[1];
-  auto & wedges_to_faces = wedges_to_entities[2];
-  auto & wedges_to_cells = wedges_to_entities[num_dims];
-
-  // resize the underlying storage up front
-  cells_to_wedges.resize( num_cells );
-  wedges_to_verts.resize( num_wedges );
-  wedges_to_edges.resize( num_wedges );
-  wedges_to_faces.resize( num_wedges );
-  wedges_to_cells.resize( num_wedges );
-
-  // now make them
-  std::vector< size_t > wedge_ids;
-
-  for ( size_t cell_id=0, wedge_id=0; cell_id<num_cells; ++cell_id )
-  {
-    //-------------------------------------------------------------------------
-    // Create a predicate function to find edges given two vertices
-
-    // get the edges and vertices connected to this cell
-    const auto & cell_faces = cells_to_faces.at(cell_id);
-    const auto & cell_edges = cells_to_edges.at(cell_id);
-
-    //-------------------------------------------------------------------------
-    // Now loop over each vertex-pair forming an edge and assign wedges
-
-
-    // create some storage for the list of cell wedge ids
-    wedge_ids.clear();
-    // harder to estimate the size here, so dont bother.  After a few
-    // iterations sufficient size will be allocated
-    // wedge_ids.reserve( 2*edges.size() );
-
-    for ( auto face_id : cell_faces ) {
-
-      // copy the vertices/faces of this face
-      auto face_verts = faces_to_verts.at(face_id);
-      const auto & face_edges = faces_to_edges.at(face_id);
-
-      // check if this cell owns this face, if it doesnt, rotate the
-      // vertices
-      const auto & face_cells = faces_to_cells.at(face_id);
-      if ( face_cells.front() != cell_id )
-        std::reverse( face_verts.begin(), face_verts.end() );
-
-
-      //! create a temporary lambda function for searching for edges
-      //! \param[in] pa,pb  the point indexes of the edge to match
-      //! \return the edge id for that particular point pair
-      auto _find_edge = [&]( const auto & pa, const auto & pb  )
-      {
-        auto edge = std::find_if(
-          face_edges.begin(), face_edges.end(),
-          [&]( const auto & e )
-          {
-            auto verts = edges_to_verts.at(e);
-            assert( verts.size() == 2 && "should be two vertices per edge" );
-            return ( (verts[0] == pa && verts[1] == pb) ||
-                    (verts[0] == pb && verts[1] == pa) );
-          }
-        );
-        assert( edge != face_edges.end() && "should have found an edge");
-        return edge;
-      };
-
-
-
-      // find the first edge that goes from the last vertex to the first
-      auto edge0 = _find_edge( face_verts.front(), face_verts.back() );
-
-      // loop over the vertices in pairs
-      for (
-          auto v1=face_verts.begin(), v0 = std::prev(face_verts.end());
-          v1!=face_verts.end();
-          ++v1
-      ) {
-
-        // get the next vertex, if it goes off the end of the array, then
-        // make it start over
-        auto v2 = std::next(v1);
-        if ( v2==face_verts.end() ) v2 = face_verts.begin();
-
-        // then find the next edge
-        auto edge1 = _find_edge( *v1, *v2 );
-
-        // there are two wedges attached to this vertex.  set the
-        // connectivity for both
-        //
-        // the first point, this is the right (even) one
-        wedge_ids.emplace_back( wedge_id );
-        wedges_to_cells[wedge_id].emplace_back( cell_id );
-        wedges_to_faces[wedge_id].emplace_back( face_id );
-        wedges_to_edges[wedge_id].emplace_back( *edge0 );
-        wedges_to_verts[wedge_id].emplace_back( *v1 );
-        ++wedge_id;
-
-        // for the next point, this one is the left (odd) one
-        wedge_ids.emplace_back( wedge_id );
-        wedges_to_cells[wedge_id].emplace_back( cell_id );
-        wedges_to_faces[wedge_id].emplace_back( face_id );
-        wedges_to_edges[wedge_id].emplace_back( *edge1 );
-        wedges_to_verts[wedge_id].emplace_back( *v1 );
-        ++wedge_id;
-
-        // update the old vertex and edge (saves having to find it again)
-        v0 = v1;
-        edge0 = edge1;
-      } // verts
-
-    } // faces
-
-    // set the wedge connectivity for this cell
-    cells_to_wedges[cell_id] = wedge_ids;
-
-  } // cells
-
-  return std::make_pair( entities_to_wedges, wedges_to_entities );
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Helper to make sides
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  typename = std::enable_if_t<
-    std::decay_t<MESH_DEFINITION>::dimension() == 2
-  >
->
-auto make_sides( const MESH_DEFINITION & mesh_def )
-{
-
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
-  using connectivity_t = typename mesh_definition_t::connectivity_t;
-
-  // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
-
-  // get the connectvitiy from the cells to the vertices.  there is a
-  // sidee per cell, per vertex
-  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
-  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
-  const auto & edges_to_verts = mesh_def.entities(1, 0);
-
-  auto num_verts = mesh_def.num_entities(0);
-  auto num_cells = mesh_def.num_entities(num_dims);
-
-  // count sides
-  size_t num_sides = 0;
-  for ( const auto & edges : cells_to_edges )
-    num_sides += edges.size();
-
-  // create storage
-  std::map<size_t, connectivity_t> entities_to_sides;
-  std::map<size_t, connectivity_t> sides_to_entities;
-
-  // create entries for the connectivities we care about
-  auto & cells_to_sides = entities_to_sides[num_dims];
-  auto & sides_to_verts = sides_to_entities[0];
-  auto & sides_to_edges = sides_to_entities[1];
-  auto & sides_to_cells = sides_to_entities[num_dims];
-
-  // resize the underlying storage up front
-  cells_to_sides.resize( num_cells );
-  sides_to_verts.resize( num_sides );
-  sides_to_edges.resize( num_sides );
-  sides_to_cells.resize( num_sides );
-
-  // now make them
-  std::vector< size_t > side_ids;
-
-  for ( size_t cell_id=0, side_id=0; cell_id<num_cells; ++cell_id )
-  {
-    //-------------------------------------------------------------------------
-    // Create a predicate function to find edges given two vertices
-
-    // get the edges and vertices connected to this cell
-    const auto & edges = cells_to_edges.at(cell_id);
-    const auto & verts = cells_to_verts.at(cell_id);
-
-    //! create a temporary lambda function for searching for edges
-    //! \param[in] pa,pb  the point indexes of the edge to match
-    //! \return the edge id for that particular point pair
-    auto _find_edge = [&]( const auto & pa, const auto & pb  )
-    {
-      auto edge = std::find_if(
-        edges.begin(), edges.end(),
-        [&]( const auto & e )
-        {
-          auto verts = edges_to_verts.at(e);
-          assert( verts.size() == 2 && "should be two vertices per edge" );
-          return ( (verts[0] == pa && verts[1] == pb) ||
-                   (verts[0] == pb && verts[1] == pa) );
-        }
-      );
-      assert( edge != edges.end() && "should have found an edge");
-      return edge;
-    };
-
-    //-------------------------------------------------------------------------
-    // Now loop over each vertex-pair forming an edge and assign wedges
-
-
-    // create some storage for the list of cell wedge ids
-    side_ids.clear();
-    side_ids.reserve( edges.size() );
-
-    // loop over the vertices in pairs
-    for (
-        auto v1=verts.begin();
-        v1!=verts.end();
-        ++v1
-    ) {
-
-      // get the next vertex, if it goes off the end of the array, then
-      // make it start over
-      auto v2 = std::next(v1);
-      if ( v2==verts.end() ) v2 = verts.begin();
-
-      // then find the next edge
-      auto edge1 = _find_edge( *v1, *v2 );
-
-      // side consists of edge1 and centroid.
-      // Set the connectivity for both
-      side_ids.emplace_back( side_id );
-      sides_to_cells[side_id].emplace_back( cell_id );
-      sides_to_edges[side_id].emplace_back( *edge1 );
-      sides_to_verts[side_id].emplace_back( *v1 );
-      sides_to_verts[side_id].emplace_back( *v2 );
-      ++side_id;
-
-    } // verts
-
-    // set the wedge connectivity for this cell
-    cells_to_sides[cell_id] = side_ids;
-
-  } // cells
-
-  return std::make_pair( entities_to_sides, sides_to_entities );
-
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-/// \brief Helper to make wedges
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename MESH_DEFINITION,
-  std::enable_if_t< std::decay_t<MESH_DEFINITION>::dimension() == 3 >*
-    = nullptr
->
-auto make_sides( const MESH_DEFINITION & mesh_def )
-{
-
-  // not sure why this needs to be decayed
-  using mesh_definition_t = std::decay_t<MESH_DEFINITION>;
-  using connectivity_t = typename mesh_definition_t::connectivity_t;
-
-  // get the number of dimensions
-  constexpr auto num_dims = mesh_definition_t::dimension();
-
-  // get the connectvitiy from the cells to the vertices.  there is a
-  // wedge per cell, per vertex
-  const auto & cells_to_verts = mesh_def.entities(num_dims, 0);
-  const auto & cells_to_edges = mesh_def.entities(num_dims, 1);
-  const auto & cells_to_faces = mesh_def.entities(num_dims, 2);
-  const auto & faces_to_verts = mesh_def.entities(2, 0);
-  const auto & faces_to_edges = mesh_def.entities(2, 1);
-  const auto & faces_to_cells = mesh_def.entities(2, 3);
-  const auto & edges_to_verts = mesh_def.entities(1, 0);
-
-  auto num_verts = mesh_def.num_entities(0);
-  auto num_cells = mesh_def.num_entities(num_dims);
-
-  // count wedges
-  size_t num_sides1 = 0;
-  for ( const auto & edges : cells_to_edges )
-      num_sides1 += edges.size();
-
-  // count wedges
-  size_t num_sides = 0;
-  for ( const auto & faces : cells_to_faces )
-    for ( auto f : faces ) {
-      const auto & edges = faces_to_edges.at(f);
-      num_sides += edges.size();
-    }
-
-  // create storage
-  std::map<size_t, connectivity_t> entities_to_sides;
-  std::map<size_t, connectivity_t> sides_to_entities;
-
-  // create entries for the connectivities we care about
-  auto & cells_to_sides = entities_to_sides[num_dims];
-  auto & sides_to_verts = sides_to_entities[0];
-  auto & sides_to_edges = sides_to_entities[1];
-  auto & sides_to_faces = sides_to_entities[2];
-  auto & sides_to_cells = sides_to_entities[num_dims];
-
-  // resize the underlying storage up front
-  cells_to_sides.resize( num_cells );
-  sides_to_verts.resize( num_sides );
-  sides_to_edges.resize( num_sides );
-  sides_to_faces.resize( num_sides );
-  sides_to_cells.resize( num_sides );
-  
-  // now make them
-  std::vector< size_t > side_ids;
-
-  for ( size_t cell_id=0, side_id=0; cell_id<num_cells; ++cell_id )
-  {
-    //-------------------------------------------------------------------------
-    // Create a predicate function to find edges given two vertices
-
-    // get the edges and vertices connected to this cell
-    const auto & cell_faces = cells_to_faces.at(cell_id);
-    const auto & cell_edges = cells_to_edges.at(cell_id);
-
-    //-------------------------------------------------------------------------
-    // Now loop over each vertex-pair forming an edge and assign sids
-
-
-    // create some storage for the list of cell side ids
-    side_ids.clear();
-    // harder to estimate the size here, so dont bother.  After a few
-    // iterations sufficient size will be allocated
-    // wedge_ids.reserve( 2*edges.size() );
-
-    for ( auto face_id : cell_faces ) {
-
-      // copy the vertices/faces of this face
-      auto face_verts = faces_to_verts.at(face_id);
-      const auto & face_edges = faces_to_edges.at(face_id);
-
-      // check if this cell owns this face, if it doesnt, rotate the
-      // vertices
-      const auto & face_cells = faces_to_cells.at(face_id);
-      if ( face_cells.front() != cell_id )
-        std::reverse( face_verts.begin(), face_verts.end() );
-
-
-      //! create a temporary lambda function for searching for edges
-      //! \param[in] pa,pb  the point indexes of the edge to match
-      //! \return the edge id for that particular point pair
-      auto _find_edge = [&]( const auto & pa, const auto & pb  )
-      {
-        auto edge = std::find_if(
-          face_edges.begin(), face_edges.end(),
-          [&]( const auto & e )
-          {
-            auto verts = edges_to_verts.at(e);
-            assert( verts.size() == 2 && "should be two vertices per edge" );
-            return ( (verts[0] == pa && verts[1] == pb) ||
-                    (verts[0] == pb && verts[1] == pa) );
-          }
-        );
-        assert( edge != face_edges.end() && "should have found an edge");
-        return edge;
-      };
-
-
-
-      // find the first edge that goes from the last vertex to the first
-      auto edge0 = _find_edge( face_verts.front(), face_verts.back() );
-
-      // loop over the vertices in pairs
-      for (
-          auto v1=face_verts.begin();
-          v1!=face_verts.end();
-          ++v1
-      ) {
-
-        // get the next vertex, if it goes off the end of the array, then
-        // make it start over
-        auto v2 = std::next(v1);
-        if ( v2==face_verts.end() ) v2 = face_verts.begin();
-
-        // then find the next edge
-        auto edge1 = _find_edge( *v1, *v2 );
-
-        // there is a side attached to this edge.
-        // set the connectivity
-        side_ids.emplace_back( side_id );
-        sides_to_cells[side_id].emplace_back( cell_id );
-        sides_to_faces[side_id].emplace_back( face_id );
-        sides_to_edges[side_id].emplace_back( *edge1 );
-        sides_to_verts[side_id].emplace_back( *v1 );
-        sides_to_verts[side_id].emplace_back( *v2 );
-        ++side_id;
-
-      } // verts
-
-    } // faces
-
-    // set the wedge connectivity for this cell
-    cells_to_sides[cell_id] = side_ids;
-
-  } // cells
-
-  return std::make_pair( entities_to_sides, sides_to_entities );
-
-}
-
-////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
 void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
@@ -4107,6 +3420,12 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   using corner_t = burton_mesh_t::corner_t;
   using wedge_t = burton_mesh_t::wedge_t;
   using side_t = burton_mesh_t::side_t;
+
+  // Alias the index spaces type
+  using index_spaces = burton_mesh_t::index_spaces_t;
+
+  // Get the context instance.
+  auto & context = flecsi::execution::context_t::instance();
 
   // Create a communicator instance to get neighbor information.
   auto communicator = std::make_unique<flecsi::coloring::mpi_communicator_t>();
@@ -4139,6 +3458,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   // Here we pull the mesh definition out of the 
   using globals::mesh_def;
+  using globals::extra_mesh_info;
+  
+  extra_mesh_info = std::make_unique<extra_mesh_info_t>();
 
   if ( file_type == file_type_t::exodus )
     mesh_def = std::make_unique<exodus_definition_t>( filename_string );
@@ -4150,18 +3472,18 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     THROW_IMPLEMENTED_ERROR( "Unknown mesh file type" );
 
   // create a vector of colorings and color info for each dimensional entity
-  std::map< size_t, std::map< size_t, flecsi::coloring::index_coloring_t > >
-    entities;
-  std::map< size_t, std::map< size_t,  flecsi::coloring::coloring_info_t > >
-    entity_color_info;
+  auto & entities = context.coloring_map();
+  auto & gathered_color_info = context.coloring_info_map();
+
+  std::map< size_t,  flecsi::coloring::coloring_info_t > entity_color_info;
 
   //----------------------------------------------------------------------------
   // Cell Coloring
   //----------------------------------------------------------------------------
 
   // Cells index coloring.
-  auto & cells = entities[0][ num_dims ];
-  auto & cell_color_info = entity_color_info[0][ num_dims ];
+  auto & cells = entities[index_spaces::cells];
+  auto & cell_color_info = entity_color_info[index_spaces::cells];
   
   // distributed compressed row storage
   flecsi::coloring::dcrs_t dcrs;
@@ -4197,7 +3519,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // vertex is eneough to consider a cell as a neighbor.
   // FIXME: Here is where you would specify the depth of ghost cells.
   mesh_def->create_graph( num_dims, 0, 1, dcrs );
-  globals::cell_distribution = dcrs.distribution;
+  extra_mesh_info->cell_distribution = dcrs.distribution;
 
   // now we can build all the other connectivity
   mesh_def->build_connectivity();
@@ -4218,9 +3540,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     const auto & cells2entity = mesh_def->entities_crs(num_dims, i);
     const auto & local2global = mesh_def->local_to_global(i);
     const auto & global2local = mesh_def->global_to_local(i);
+    auto index_space_id = index_spaces::entity_map[0][i];
     flecsi::coloring::color_entities( cells2entity, local2global, global2local,
-        cells, entities[0][i], entity_color_info[0][i],
-        counts[std::make_pair(0,num_dims)][std::make_pair(0,i)] );
+        cells, entities[index_space_id], entity_color_info[index_space_id],
+        counts[{0,num_dims}][{0,i}] );
   }
   
  
@@ -4232,8 +3555,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // connectivitiy
   for ( int to_dim=0; to_dim<num_dims; ++to_dim ) {
       flecsi::coloring::ghost_connectivity( *mesh_def, num_dims, to_dim,
-          entities.at(0).at(num_dims), globals::ghost_ids[{0,num_dims}],
-          globals::ghost_connectivity[{0,num_dims}][{0,to_dim}] );
+          cells, extra_mesh_info->ghost_ids[{0,num_dims}],
+          extra_mesh_info->ghost_connectivity[{0,num_dims}][{0,to_dim}] );
   }
 
   // Need rest of counts
@@ -4258,10 +3581,11 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
       }
 
       // get the ghost connectivity and count it
-      auto & ghost_ids = globals::ghost_ids[{0,from_dim}];
-      auto & ghost_conn = globals::ghost_connectivity[{0,from_dim}][{0,to_dim}];
+      auto & ghost_ids = extra_mesh_info->ghost_ids[{0,from_dim}];
+      auto & ghost_conn = extra_mesh_info->ghost_connectivity[{0,from_dim}][{0,to_dim}];
+      auto from_is = index_spaces::entity_map[0][from_dim];
       flecsi::coloring::ghost_connectivity( *mesh_def, from_dim, to_dim,
-          entities.at(0).at(from_dim), ghost_ids, ghost_conn );
+          entities.at(from_is), ghost_ids, ghost_conn );
 
       // get the ghost entitiy connecitivity and count it.
       for ( size_t i=0; i<ghost_ids.size(); ++i ) {
@@ -4283,7 +3607,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
-  make_corners( *mesh_def, cells, entities, entity_color_info, counts);
+  make_corners( *mesh_def, *extra_mesh_info, entities, entity_color_info, counts);
 
 
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
@@ -4292,33 +3616,20 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // Add the results to the context
   //----------------------------------------------------------------------------
 
-  // Alias the index spaces type
-  using index_spaces = burton_mesh_t::index_spaces_t;
-
-  // Get the context instance.
-  auto & context = flecsi::execution::context_t::instance();
-
   // keep track of index spaces added
   std::vector<size_t> registered_index_spaces;
 
   // Gather the coloring info from all colors
   for ( int dom=0; dom<num_domains; ++dom ) {
-    // skip empty slots
-    if ( entities.count(dom) == 0 || entity_color_info.count(dom) == 0 )
-      continue;
     for ( int dim=0; dim<num_dims+1; ++dim ) {
       // skip empty slots
-      if ( entities.at(dom).count(dim) == 0 ||
-           entity_color_info.at(dom).count(dim) == 0 )
-        continue;
-      auto coloring_info =
-        communicator->gather_coloring_info(entity_color_info.at(dom).at(dim));
       auto index_space_id = index_spaces::entity_map[dom][dim];
-      context.add_coloring(
-        index_space_id,
-        entities.at(dom).at(dim),
-        coloring_info
-      );
+      if ( entities.count(index_space_id) == 0 ||
+           entity_color_info.count(index_space_id) == 0 )
+        continue;
+      // gather and set to context directly
+      gathered_color_info[index_space_id] = 
+        communicator->gather_coloring_info(entity_color_info[index_space_id]);
       // add index space to list
       registered_index_spaces.push_back( index_space_id );
     }
@@ -4363,9 +3674,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // add index subspace mappings
   //----------------------------------------------------------------------------
 
-  // the master list of all entity ids
-  const auto & cell_entities = entities.at(0).at(num_dims);
-
   // loop over all dimensions, getting the list of ids that are
   // connected to owned cells
   for ( int to_dim = 0; to_dim<num_dims; ++to_dim ) {
@@ -4374,12 +3682,12 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     // storage for subspace ids
     std::vector<size_t> ids;
     // get all exclusive and shared ids.
-    for ( auto c : cell_entities.exclusive ) {
+    for ( auto c : cells.exclusive ) {
       auto start = ents.offsets[c.offset];
       auto end = ents.offsets[c.offset+1];
       ids.insert( ids.end(), &ents.indices[start], &ents.indices[end] );
     }
-    for ( auto c : cell_entities.shared ) {
+    for ( auto c : cells.shared ) {
       auto start = ents.offsets[c.offset];
       auto end = ents.offsets[c.offset+1];
       ids.insert( ids.end(), &ents.indices[start], &ents.indices[end] );
@@ -4401,7 +3709,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     flecsi::execution::context_t::sparse_index_space_info_t isi;
     isi.max_entries_per_index = max_entries;
     // figure out the maximum number of entities
-    const auto & coloring = context.coloring( i );
+    const auto & coloring = entities.at(i);
     auto num_ents =
       coloring.exclusive.size() +
       coloring.shared.size() +
@@ -4444,13 +3752,14 @@ void initialize_mesh(
   
   // Here we pull the mesh definition out of the 
   using globals::mesh_def;
+  using globals::extra_mesh_info;
   
   if (rank == 0) std::cout << "Initializing mesh..." << std::flush;
 
   // fill the mesh
-  create_cells( *mesh_def, mesh );
+  create_cells( *mesh_def, *extra_mesh_info, mesh );
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
-  create_extras( *mesh_def, mesh );
+  create_extras( *mesh_def, *extra_mesh_info, mesh );
 #endif
 
 
@@ -4459,6 +3768,10 @@ void initialize_mesh(
 
   // create the subspaces
   create_subspaces( *mesh_def, mesh );
+
+  // delete any leftover global memory
+  mesh_def.reset();
+  extra_mesh_info.reset();
   
   if (rank == 0) std::cout << "done" << std::endl;
 
