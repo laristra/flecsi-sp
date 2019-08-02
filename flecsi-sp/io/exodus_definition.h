@@ -228,6 +228,99 @@ public:
           "Problem putting exodus file parameters, ex_put_init_ext() returned "
           << status);
   }
+    
+  //============================================================================
+  //! \brief write the global mapping a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \param [in] ids  The ids to write
+  //============================================================================
+  template<typename U, typename V>
+  static void write_node_map(int exo_id, const V & ids) {
+  
+    using ex_index_t = U;
+    std::vector<ex_index_t> mapping(ids.size());
+    std::transform( ids.begin(), ids.end(), mapping.begin(),
+        [](auto v){ return v+1; } );
+    auto status = ex_put_node_num_map(exo_id, mapping.data());
+    if (status)
+      clog_fatal(
+          "Problem putting node number map, ex_put_node_num_map() returned "
+          << status);
+
+  }
+  
+  //============================================================================
+  //! \brief read the global mapping from file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \param [in] ids  The ids to write
+  //============================================================================
+  template<typename U>
+  static auto read_node_map(int exo_id, size_t num_nodes) {
+    using ex_index_t = U;
+    std::vector<ex_index_t> mapping(num_nodes);
+    auto status = ex_get_node_num_map(exo_id, mapping.data());
+    if (status)
+      clog_fatal(
+          "Problem getting node number map, ex_get_elem_num_map() returned "
+          << status);
+    if constexpr (std::is_same_v<ex_index_t, index_t>) {
+      for ( auto & v : mapping ) v--;
+      return mapping;
+    }
+    else {
+      std::vector<index_t> ids;
+      ids.reserve(num_nodes);
+      for ( auto v : mapping ) ids.emplace_back(v-1);
+      return ids;
+    }
+  }
+  
+  //============================================================================
+  //! \brief write the global mapping a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \param [in] ids  The ids to write
+  //============================================================================
+  template<typename U, typename V>
+  static void write_element_map(int exo_id, const V & ids) {
+  
+    using ex_index_t = U;
+    std::vector<ex_index_t> mapping(ids.size());
+    std::transform( ids.begin(), ids.end(), mapping.begin(),
+        [](auto v){ return v+1; } );
+    auto status = ex_put_elem_num_map(exo_id, mapping.data());
+    if (status)
+      clog_fatal(
+          "Problem putting node number map, ex_put_elem_num_map() returned "
+          << status);
+
+  }
+
+  
+  //============================================================================
+  //! \brief read the global mapping from file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \param [in] ids  The ids to write
+  //============================================================================
+  template<typename U>
+  static auto read_element_map(int exo_id, size_t num_elem) {
+    using ex_index_t = U;
+    std::vector<ex_index_t> mapping(num_elem);
+    auto status = ex_get_elem_num_map(exo_id, mapping.data());
+    if (status)
+      clog_fatal(
+          "Problem getting node number map, ex_get_elem_num_map() returned "
+          << status);
+    if constexpr (std::is_same_v<ex_index_t, index_t>) {
+      for ( auto & v : mapping ) v--;
+      return mapping;
+    }
+    else {
+      std::vector<index_t> ids;
+      ids.reserve(num_elem);
+      for ( auto v : mapping ) ids.emplace_back(v-1);
+      return ids;
+    }
+  }
 
   //============================================================================
   //! \brief read the coordinates of the mesh from a file.
@@ -375,83 +468,138 @@ public:
       size_t blk_id,
       const std::string & name,
       ex_entity_type entity_type,
-      const char * entity_description,
+      const std::string & entity_description,
       size_t num_entities,
       ENTITY_CONN && entity_conn) {
 
     // some type aliases
     using ex_index_t = U;
 
-    // check if face data is provided instead of node data
-    auto is_face_data = (num_dims == 3 && entity_type == EX_ELEM_BLOCK);
+    //-------------------------------------------------------------------------
+    if ( entity_description == "nfaced" || entity_description == "nsided" )
+    {
 
-    // guess how many elements are in each connectivity slot
-    auto num_conn_guess = num_dims * num_dims;
+      // check if face data is provided instead of node data
+      auto is_face_data = (num_dims == 3 && entity_type == EX_ELEM_BLOCK);
 
-    // build the connectivitiy list for the block
-    vector<ex_index_t> entity_nodes;
-    vector<int> entity_node_counts;
-    entity_nodes.reserve(num_entities * num_conn_guess);
-    entity_node_counts.reserve(num_entities);
+      // guess how many elements are in each connectivity slot
+      auto num_conn_guess = num_dims * num_dims;
 
-    // temporary storage for each connecitivity slot
-    vector<ex_index_t> temp_entity_nodes;
-    temp_entity_nodes.reserve(num_conn_guess);
+      // build the connectivitiy list for the block
+      vector<ex_index_t> entity_nodes;
+      vector<int> entity_node_counts;
+      entity_nodes.reserve(num_entities * num_conn_guess);
+      entity_node_counts.reserve(num_entities);
 
-    for (size_t e = 0; e < num_entities; ++e) {
-      // get the connectivity from the user-provided function
-      std::forward<ENTITY_CONN>(entity_conn)(e, temp_entity_nodes);
-      // store them in the master list ( exodus wants 1-index arrays )
-      for (auto i : temp_entity_nodes)
-        entity_nodes.emplace_back(i + 1);
-      entity_node_counts.push_back(temp_entity_nodes.size());
-      // reset temp storage
-      temp_entity_nodes.clear();
+      // temporary storage for each connecitivity slot
+      vector<ex_index_t> temp_entity_nodes;
+      temp_entity_nodes.reserve(num_conn_guess);
+
+      for (size_t e = 0; e < num_entities; ++e) {
+        // get the connectivity from the user-provided function
+        std::forward<ENTITY_CONN>(entity_conn)(e, temp_entity_nodes);
+        // store them in the master list ( exodus wants 1-index arrays )
+        for (auto i : temp_entity_nodes)
+          entity_nodes.emplace_back(i + 1);
+        entity_node_counts.push_back(temp_entity_nodes.size());
+        // reset temp storage
+        temp_entity_nodes.clear();
+      }
+
+      // the total size needed to hold the element connectivity
+      ex_index_t num_nodes_this_blk = entity_nodes.size();
+      ex_index_t num_entries_this_blk = entity_node_counts.size();
+
+      // set the block header
+      ex_index_t num_attr_per_entry = 0;
+      ex_index_t num_nodes_per_entry = is_face_data ? 0 : num_nodes_this_blk;
+      ex_index_t num_edges_per_entry = 0;
+      ex_index_t num_faces_per_entry = is_face_data ? num_nodes_this_blk : 0;
+      auto status = ex_put_block(
+          exoid, entity_type, blk_id, entity_description.c_str(), num_entries_this_blk,
+          num_nodes_per_entry, num_edges_per_entry, num_faces_per_entry,
+          num_attr_per_entry);
+      if (status)
+        clog_fatal(
+            "Problem writing block to exodus file, "
+            << " ex_put_block() returned " << status);
+
+      // write the block name
+      status = ex_put_name(exoid, entity_type, blk_id, name.c_str());
+      if (status)
+        clog_fatal(
+            "Problem writing block name to exodus file, "
+            << " ex_put_name() returned " << status);
+
+      // write connectivity
+      auto node_conn = is_face_data ? nullptr : entity_nodes.data();
+      auto elem_edge_conn = nullptr;
+      auto elem_face_conn = is_face_data ? entity_nodes.data() : nullptr;
+      status = ex_put_conn(
+          exoid, entity_type, blk_id, node_conn, elem_edge_conn, elem_face_conn);
+      if (status)
+        clog_fatal(
+            "Problem writing block connectivity to exodus file, "
+            << " ex_put_conn() returned " << status);
+
+      // write counts
+      status = ex_put_entity_count_per_polyhedra(
+          exoid, entity_type, blk_id, entity_node_counts.data());
+      if (status)
+        clog_fatal(
+            "Problem writing block counts to exodus file, "
+            << " ex_put_entity_count_per_polyhedra() returned " << status);
+
     }
 
-    // the total size needed to hold the element connectivity
-    ex_index_t num_nodes_this_blk = entity_nodes.size();
-    ex_index_t num_entries_this_blk = entity_node_counts.size();
+    //-------------------------------------------------------------------------
+    else {
+      
+      vector<ex_index_t> entity_nodes, temp_entity_nodes;
+      
+      for (size_t e = 0; e < num_entities; ++e) {
+        temp_entity_nodes.clear();
+        // get the connectivity from the user-provided function
+        std::forward<ENTITY_CONN>(entity_conn)(e, temp_entity_nodes);
+        // store them in the master list ( exodus wants 1-index arrays )
+        for (auto i : temp_entity_nodes)
+          entity_nodes.emplace_back(i + 1);
+      }
 
-    // set the block header
-    ex_index_t num_attr_per_entry = 0;
-    ex_index_t num_nodes_per_entry = is_face_data ? 0 : num_nodes_this_blk;
-    ex_index_t num_edges_per_entry = 0;
-    ex_index_t num_faces_per_entry = is_face_data ? num_nodes_this_blk : 0;
-    auto status = ex_put_block(
-        exoid, entity_type, blk_id, entity_description, num_entries_this_blk,
-        num_nodes_per_entry, num_edges_per_entry, num_faces_per_entry,
-        num_attr_per_entry);
-    if (status)
-      clog_fatal(
-          "Problem writing block to exodus file, "
-          << " ex_put_block() returned " << status);
+      // write the block header
+      ex_index_t num_entries_this_blk = num_entities;
+      ex_index_t num_nodes_per_entry = temp_entity_nodes.size();
+      ex_index_t num_edges_per_entry = 0;
+      ex_index_t num_faces_per_entry = 0;
+      ex_index_t num_attr_per_entry = 0;
+      
+      auto status = ex_put_block(
+          exoid, entity_type, blk_id, entity_description.c_str(),
+          num_entries_this_blk, num_nodes_per_entry, num_edges_per_entry,
+          num_faces_per_entry, num_attr_per_entry);
+      if (status)
+        clog_fatal(
+            "Problem writing block to exodus file, "
+            << " ex_put_block() returned " << status);
 
-    // write the block name
-    status = ex_put_name(exoid, entity_type, blk_id, name.c_str());
-    if (status)
-      clog_fatal(
-          "Problem writing block name to exodus file, "
-          << " ex_put_name() returned " << status);
+      // write the block name
+      status = ex_put_name(exoid, entity_type, blk_id, name.c_str());
+      if (status)
+        clog_fatal(
+            "Problem writing block name to exodus file, "
+            << " ex_put_name() returned " << status);
 
-    // write connectivity
-    auto node_conn = is_face_data ? nullptr : entity_nodes.data();
-    auto elem_edge_conn = nullptr;
-    auto elem_face_conn = is_face_data ? entity_nodes.data() : nullptr;
-    status = ex_put_conn(
-        exoid, entity_type, blk_id, node_conn, elem_edge_conn, elem_face_conn);
-    if (status)
-      clog_fatal(
-          "Problem writing block connectivity to exodus file, "
-          << " ex_put_conn() returned " << status);
-
-    // write counts
-    status = ex_put_entity_count_per_polyhedra(
-        exoid, entity_type, blk_id, entity_node_counts.data());
-    if (status)
-      clog_fatal(
-          "Problem writing block counts to exodus file, "
-          << " ex_put_entity_count_per_polyhedra() returned " << status);
+      // write connectivity
+      auto node_conn = entity_nodes.data();
+      auto elem_edge_conn = nullptr;
+      auto elem_face_conn = nullptr;
+      status = ex_put_conn(
+          exoid, entity_type, blk_id, node_conn, elem_edge_conn, elem_face_conn);
+      if (status)
+        clog_fatal(
+            "Problem writing block connectivity to exodus file, "
+            << " ex_put_conn() returned " << status);
+    } // type
 
   }; // write block
 
@@ -572,8 +720,6 @@ public:
           strcasecmp("tet4", elem_type) == 0 ||
           strcasecmp("tetra", elem_type) == 0)
         return block_t::tet;
-      else if (strcasecmp("hex8", elem_type) == 0)
-        return block_t::hex;
       else if (strcasecmp("hex8", elem_type) == 0 ||
                strcasecmp("hex", elem_type) == 0)
         return block_t::hex;
@@ -644,10 +790,10 @@ public:
       int exoid,
       size_t blk_id,
       const std::string & name,
+      const std::string & entity_desc,
       size_t num_elems,
       CONN_TYPE && element_conn) {
 
-    auto entity_desc = (num_dims == 3) ? "nfaced" : "nsided";
     write_block<U>(
         exoid, blk_id, name, EX_ELEM_BLOCK, entity_desc, num_elems,
         std::forward<CONN_TYPE>(element_conn));
@@ -1043,8 +1189,8 @@ public:
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition(const std::string & filename) {
-    read(filename);
+  exodus_definition(const std::string & filename, bool serial=true) {
+    read(filename, serial);
   }
 
   /// Copy constructor (disabled)
@@ -1064,7 +1210,7 @@ public:
   //!
   //! \return Exodus error code. 0 on success.
   //============================================================================
-  void read(const std::string & name) {
+  void read(const std::string & name, bool serial) {
 
     clog(info) << "Reading mesh from: " << name << std::endl;
 
@@ -1075,15 +1221,6 @@ public:
     auto exoid = base_t::open(name, std::ios_base::in);
     if (exoid < 0)
       clog_fatal("Problem reading exodus file");
-  
-    //int nproc, nprocf;
-    //char ftype[2];
-    //auto err = ex_get_init_info(exoid, &nproc, &nprocf, ftype);
-    //std::cout << "err=" << err << std::endl;
-    //std::cout << "nproc=" << nproc << std::endl;
-    //std::cout << "nprocf=" << nprocf << std::endl;
-    //std::cout << ftype[0] << ftype[1] << std::endl;
-    //exit(-1);
 
     // get the initialization parameters
     auto exo_params = base_t::read_params(exoid);
@@ -1098,12 +1235,20 @@ public:
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
-    vector<index_t> cell_partitioning;
-    flecsi::coloring::subdivide( exo_params.num_elem, comm_size,
-        cell_partitioning );
+    // figure out the number of cells for this rank.
+    // if this is reading a bunch of exodus files, there is
+    // nothing to do
+    size_t num_cells = exo_params.num_elem;
+    size_t cell_min{0}, cell_max{num_cells-1};
 
-    auto cell_min = cell_partitioning[comm_rank];
-    auto cell_max = cell_partitioning[comm_rank+1] - 1;
+    if (serial) {
+      vector<index_t> cell_partitioning;
+      flecsi::coloring::subdivide( num_cells, comm_size, cell_partitioning );
+
+      cell_min = cell_partitioning[comm_rank];
+      cell_max = cell_partitioning[comm_rank+1] - 1;
+      num_cells = cell_max - cell_min + 1;
+    }
 
     constexpr auto num_dims = base_t::num_dims;
     auto & cell2vertices_ = local_connectivity_[num_dims][0];
@@ -1131,40 +1276,64 @@ public:
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
 
+      typename base_t::block_t block_type;
+      auto cell_start = cell2vertices_.size();
+
       vector<int> counts;
       if (int64) {
         vector<long long> indices;
-        base_t::template read_element_block<long long>(
+        block_type = base_t::template read_element_block<long long>(
             exoid, elem_blk_ids[iblk], counts, indices );
         detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
             cell2vertices_.offsets, cell2vertices_.indices );
-
       }
       else {
         vector<int> indices;
-        base_t::template read_element_block<int>(
+        block_type = base_t::template read_element_block<int>(
             exoid, elem_blk_ids[iblk], counts, indices );
         detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
             cell2vertices_.offsets, cell2vertices_.indices );
       }
+      
+      // add the block type
+      auto num_added = cell2vertices_.size() - cell_start;
+      for (size_t i=0; i<num_added; ++i) {
+        cell_block_id_.emplace_back(elem_blk_ids[iblk]);
+        cell_type_.emplace_back(block_type);
+      }
 
     }
-    
+
     // check some assertions
-    auto num_cells = cell_max - cell_min + 1;
     clog_assert(
         cell2vertices_.size() == num_cells,
         "Mismatch in read blocks");
     
-    // invert the global id to local id map
+    // create the local to global cell mapping
     auto & cell_local2global_ = local_to_global_[num_dims];
+    
+    // for serial files, make up the indices
+    if ( serial ) {
+      cell_local2global_.clear();
+      cell_local2global_.resize(num_cells);
+      for ( size_t i=0; i<num_cells; ++i ) {
+        cell_local2global_[i] = cell_min + i;
+      }
+    }
+    // read them for parallel files
+    else if (int64) {
+      cell_local2global_ =
+        base_t::template read_element_map<long long>(exoid, num_cells);
+    }
+    else {
+      cell_local2global_ =
+        base_t::template read_element_map<int>(exoid, num_cells);
+    }
+    
+    // invert the global id to local id map
     auto & cell_global2local_ = global_to_local_[num_dims];
-
-    cell_local2global_.clear();
-    cell_local2global_.resize(num_cells);
     for ( size_t i=0; i<num_cells; ++i ) {
-      auto global_id = cell_min + i;
-      cell_local2global_[i] = global_id;
+      auto global_id = cell_local2global_[i];
       cell_global2local_.emplace( std::make_pair( global_id, i ) );
     }
     
@@ -1181,47 +1350,196 @@ public:
     //--------------------------------------------------------------------------
     // Renumber vertices
 
-    // Throw away vertices that are not mine
-    size_t local_vertices{0};
+    // get the vertex maps
     auto & vertex_global2local_ = global_to_local_[0];
-    vertex_global2local_.clear();
-
-    for ( size_t i=0; i<num_cells; ++i ) {
-      for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
-        auto global_id = cell2vertices_.indices[j];
-        auto res = vertex_global2local_.emplace(
-            std::make_pair(global_id, local_vertices) );
-        if ( res.second ) local_vertices++;
-      }
-    }
-
-    // invert the global id to local id map
     auto & vertex_local2global_ = local_to_global_[0];
-    vertex_local2global_.clear();
-    vertex_local2global_.resize(local_vertices);
 
-    for ( const auto & global_local : vertex_global2local_ ) {
-      vertex_local2global_[global_local.second] = global_local.first;
-    }
-    
-    // convert element conectivity to local ids and extract only coordinates
-    // that are needed
-    vertices_.clear();
-    vertices_.resize(local_vertices*num_dims);
+    if ( serial ) {
 
-    for ( auto & v : cell2vertices_.indices ) {
-      auto global_id = v;
-      v = vertex_global2local_.at(global_id);
-      for ( int d=0; d<num_dims; ++d ) {
-        vertices_[ v*num_dims + d ] = 
-          coordinates[d * num_vertices + global_id];
+      // Throw away vertices that are not mine
+      size_t local_vertices{0};
+      vertex_global2local_.clear();
+
+      for ( size_t i=0; i<num_cells; ++i ) {
+        for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
+          auto global_id = cell2vertices_.indices[j];
+          auto res = vertex_global2local_.emplace(
+              std::make_pair(global_id, local_vertices) );
+          if ( res.second ) local_vertices++;
+        }
       }
-    }
+
+      // invert the global id to local id map
+      vertex_local2global_.clear();
+      vertex_local2global_.resize(local_vertices);
+
+      for ( const auto & global_local : vertex_global2local_ ) {
+        vertex_local2global_[global_local.second] = global_local.first;
+      }
+      
+      // convert element conectivity to local ids and extract only coordinates
+      // that are needed
+      vertices_.clear();
+      vertices_.resize(local_vertices*num_dims);
+
+      for ( auto & v : cell2vertices_.indices ) {
+        auto global_id = v;
+        v = vertex_global2local_.at(global_id);
+        for ( int d=0; d<num_dims; ++d ) {
+          vertices_[ v*num_dims + d ] = 
+            coordinates[d * num_vertices + global_id];
+        }
+      }
+    } // serial
+    // parallel
+    else {
+    
+      if (int64) {
+        vertex_local2global_ =
+          base_t::template read_node_map<long long>(exoid, num_vertices);
+      }
+      else {
+        vertex_local2global_ =
+          base_t::template read_node_map<int>(exoid, num_vertices);
+      }
+    
+      vertices_.clear();
+      vertices_.resize(num_vertices*num_dims);
+
+      for ( size_t i=0; i<num_vertices; ++i ) {
+        auto global_id = vertex_local2global_[i];
+        vertex_global2local_.emplace( std::make_pair( global_id, i ) );
+        for (int d=0; d<num_dims; ++d)
+          vertices_[i*num_dims + d] = coordinates[d*num_vertices + i];
+      }
+
+    } // parallel
 
     //--------------------------------------------------------------------------
     // close the file
     base_t::close(exoid);
 
+  }
+
+  //============================================================================
+  //! \brief Implementation of exodus mesh write for burton specialization.
+  //!
+  //! \param[in] name Read burton mesh \e m from \e name.
+  //! \param[out] m Populate burton mesh \e m with contents of \e name.
+  //!
+  //! \return Exodus error code. 0 on success.
+  //============================================================================
+  void write( const std::string & name ) const {
+    
+    // some mesh params
+    constexpr auto num_dims = dimension();
+    auto num_verts = num_entities(0);
+    auto num_cells = num_entities(num_dims);
+
+    //--------------------------------------------------------------------------
+    // Open file
+
+    // open the exodus file
+    auto exoid = base_t::open(name, std::ios_base::out);
+    
+    // figure out the unique block ids/types
+    std::map<index_t, typename base_t::block_t> blocks;
+    for ( size_t i=0; i<num_cells; ++i )
+      blocks[ cell_block_id_[i] ] = cell_type_[i];
+
+
+    // write the initialization parameters
+    auto exo_params = base_t::make_params();
+    exo_params.num_nodes = num_verts;
+    exo_params.num_node_sets = 0;
+    exo_params.num_elem_blk = blocks.size();
+    exo_params.num_elem = num_cells;
+
+    base_t::write_params(exoid, exo_params);
+
+    // check the integer type used in the exodus file
+    auto int64 = base_t::is_int64(exoid);
+
+    //--------------------------------------------------------------------------
+    // write coordinates
+    std::vector<real_t> coordinates(vertices_.size());
+    for ( int d=0; d<num_dims; ++d ){
+      for ( size_t i=0; i<num_verts; ++i ) {
+        coordinates[i + d*num_verts] = vertices_[d + i*num_dims];
+      }
+    }
+    base_t::write_point_coords(exoid, coordinates);
+
+    if (int64) { 
+      base_t::template write_node_map<long long>(exoid, local_to_global_.at(0));
+    }
+    else {
+      base_t::template write_node_map<int>(exoid, local_to_global_.at(0));
+    }
+
+    //--------------------------------------------------------------------------
+    // element blocks
+
+    const auto & cell_vertices = local_connectivity_.at(2).at(0);
+    const auto & cells_local2global = local_to_global_.at(num_dims);
+    
+    // need to keep track of global ids, since the order might change
+    std::vector<index_t> cell_global_ids;
+    cell_global_ids.reserve(num_cells);
+    
+    for ( auto [bid, btype] : blocks ) { 
+      
+      // figure the block string
+      std::string type_str;
+      switch (btype) {
+      case (base_t::block_t::quad):
+        type_str = "quad4";
+        break;
+      case (base_t::block_t::tri):
+        type_str = "tri3";
+        break;
+      default:
+        type_str = "nsided";
+      };
+      
+      // collect all cells with this block type
+      std::vector<index_t> cells_this_blk;
+      for ( size_t i=0; i<num_cells; ++i )
+        if (cell_block_id_[i] == bid) {
+          cells_this_blk.emplace_back(i);
+          cell_global_ids.emplace_back( cells_local2global[i] );
+        }
+      auto num_cells_this_blk = cells_this_blk.size();
+
+      // add the whole element block
+      auto cell_vertices_func = [&](auto c, auto & vert_list) {
+        auto local_id = cells_this_blk[c];
+        const auto & vs = cell_vertices.at(local_id);
+        vert_list.insert(vert_list.end(), vs.begin(), vs.end());
+      };
+
+      if (int64) {
+        base_t::template write_element_block<long long>(
+            exoid, bid, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+      }
+      else {
+        base_t::template write_element_block<int>(
+            exoid, bid, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+      }
+
+    }
+    
+    // write final element mapping
+    if (int64) {
+      base_t::template write_element_map<long long>(exoid, cell_global_ids);
+    }
+    else {
+      base_t::template write_element_map<int>(exoid, cell_global_ids);
+    }
+
+    //--------------------------------------------------------------------------
+    // close the file
+    base_t::close(exoid);
   }
 
 
@@ -1375,8 +1693,11 @@ public:
       
 
       // shift all local to global ids
-      for ( auto j=local_id; j<num_cells; ++j )
+      for ( auto j=local_id; j<num_cells; ++j ) {
         cell_local2global[j] = cell_local2global[j+1];
+        cell_type_[j] = cell_type_[j+1];
+        cell_block_id_[j] = cell_block_id_[j];
+      }
     
       // and the global mapping ( need to decrement entries )
       auto count = cell_global2local.erase( global_id );
@@ -1391,6 +1712,8 @@ public:
 
     // resize
     cell_local2global.resize(num_cells);
+    cell_block_id_.resize(num_cells);
+    cell_type_.resize(num_cells);
     
     // erase cells to vertices info
     cells2verts.erase(local_ids);
@@ -1516,6 +1839,9 @@ public:
     const auto & verts_local2global = local_to_global_.at(0);
     // add mesh global id to buffer
     flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
+    // add cell block info
+    flecsi::topology::cast_insert( &cell_block_id_[local_id], 1, buffer );
+    flecsi::topology::cast_insert( &cell_type_[local_id], 1, buffer );
     // add num verts to buffer
     flecsi::topology::cast_insert( &num_verts, 1, buffer );
     // add global vertex indices to buffer
@@ -1553,6 +1879,15 @@ public:
     cells_local2global.emplace_back( global_id );
     auto res = cells_global2local.emplace( std::make_pair(global_id, local_id) );
     assert( res.second && "Global id already exists but shouldn't" );
+    
+    // get cell info
+    size_t cell_block_id;
+    flecsi::topology::uncast( buffer, 1, &cell_block_id );
+    cell_block_id_.emplace_back(cell_block_id);
+
+    typename base_t::block_t cell_type;
+    flecsi::topology::uncast( buffer, 1, &cell_type );
+    cell_type_.emplace_back(cell_type);
     
     // get the number of vertices
     size_t num_verts;
@@ -1609,6 +1944,10 @@ private:
   //! \brief global/local id maps
   std::map<index_t, std::map<index_t, index_t>> global_to_local_;
   std::map<index_t, vector<index_t>> local_to_global_;
+  
+  //! regions
+  std::vector<index_t> cell_block_id_;
+  std::vector<typename base_t::block_t> cell_type_;
 
 };
 
@@ -1658,8 +1997,8 @@ public:
 
   //! \brief Constructor with filename
   //! \param [in] filename  The name of the file to load
-  exodus_definition(const std::string & filename) {
-    read(filename);
+  exodus_definition(const std::string & filename, bool serial=true) {
+    read(filename, serial);
   }
 
   /// Copy constructor (disabled)
@@ -1679,7 +2018,7 @@ public:
   //!
   //! \return Exodus error code. 0 on success.
   //============================================================================
-  void read(const std::string & name) {
+  void read(const std::string & name, bool serial) {
 
     clog(info) << "Reading mesh from: " << name << std::endl;
 
@@ -1704,14 +2043,85 @@ public:
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
-    vector<index_t> cell_partitioning;
-    flecsi::coloring::subdivide( exo_params.num_elem, comm_size,
-        cell_partitioning );
+    // figure out the number of cells for this rank.
+    // if this is reading a bunch of exodus files, there is
+    // nothing to do
+    size_t num_cells = exo_params.num_elem;
+    size_t cell_min{0}, cell_max{num_cells-1};
 
-    auto cell_min = cell_partitioning[comm_rank];
-    auto cell_max = cell_partitioning[comm_rank+1] - 1;
+    if (serial) {
+      vector<index_t> cell_partitioning;
+      flecsi::coloring::subdivide( num_cells, comm_size, cell_partitioning );
+
+      cell_min = cell_partitioning[comm_rank];
+      cell_max = cell_partitioning[comm_rank+1] - 1;
+      num_cells = cell_max - cell_min + 1;
+    }
 
     constexpr auto num_dims = base_t::num_dims;
+    
+    //--------------------------------------------------------------------------
+    // read face blocks
+
+    auto num_face_blk = exo_params.num_face_blk;
+    vector<index_t> face_blk_ids;
+
+    crs_t temp_face2vertices;
+
+    // get the face block ids
+    if (int64)
+      face_blk_ids = base_t::template read_block_ids<long long>(
+          exoid, EX_FACE_BLOCK, num_face_blk);
+    else
+      face_blk_ids = base_t::template read_block_ids<int>(
+          exoid, EX_FACE_BLOCK, num_face_blk);
+
+    // read each block (add all faces right now.  we will
+    // filter out the unused ones later
+    for (int iblk = 0; iblk < num_face_blk; iblk++) {
+      vector<int> counts;
+      // first get the vertices
+      if (int64) {
+        vector<long long> indices;
+        base_t::template read_face_block<long long>(
+            exoid, face_blk_ids[iblk], counts, indices);
+        for (auto & i : indices) i--;
+        for (size_t i=0, j=0; i<counts.size(); ++i) {
+          auto n = counts[i];
+          temp_face2vertices.append(&indices[j], &indices[j+n]);
+          j += n;
+        }
+      }
+      else {
+        vector<int> indices;
+        base_t::template read_face_block<int>(
+            exoid, face_blk_ids[iblk], counts, indices);
+        for (auto & i : indices) i--;
+        for (size_t i=0, j=0; i<counts.size(); ++i) {
+          auto n = counts[i];
+          temp_face2vertices.append(&indices[j], &indices[j+n]);
+          j += n;
+        }
+      }
+    }
+    
+    // sort the face vertices and add them to the search map
+    std::vector<index_t> sorted_vs;
+    for ( auto vs : temp_face2vertices ) {
+      sorted_vs.assign( vs.begin(), vs.end() );
+      auto face_id = sorted_vertices_to_faces_.size();
+      sorted_vertices_to_faces_.emplace( sorted_vs, face_id );
+    }
+    
+    //--------------------------------------------------------------------------
+    // read coordinates
+
+    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
+    clog_assert(
+        coordinates.size() == dimension() * exo_params.num_nodes,
+        "Mismatch in read vertices");
+
+    auto num_vertices = coordinates.size() / dimension();
     
     
     //--------------------------------------------------------------------------
@@ -1720,13 +2130,15 @@ public:
     // offsets always have initial zero
     auto & cell2vertices_ = local_connectivity_[num_dims][0];
     auto & cell2faces_ = local_connectivity_[num_dims][2];
-    auto & face2vertices_ = local_connectivity_[2][0];
 
     cell2vertices_.clear();
     cell2faces_.clear();
-    face2vertices_.clear();
     
     size_t cell_counter{0};
+
+    // need to keep track of full polygon connectivitiy
+    crs_t temp_cell2faces;
+    std::vector<index_t> temp_cellids;
 
     // the number of blocks and some storage for block ids
     auto num_elem_blk = exo_params.num_elem_blk;
@@ -1740,11 +2152,26 @@ public:
       elem_blk_ids = base_t::template read_block_ids<int>(
           exoid, EX_ELEM_BLOCK, num_elem_blk);
 
+    // a lambda to add face info
+    auto track_faces = [](auto counter_start, const auto & counts,
+        auto & indices, auto & cell2faces, auto & cellids )
+    {
+      for ( auto & i : indices ) i--;
+      for (size_t i=0, j=0; i<counts.size(); ++i)
+      {
+        auto n = counts[i];
+        cell2faces.append( &indices[j], &indices[j+n] );
+        cellids.emplace_back(counter_start + i);
+        j += n;
+      }
+    };
+
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
 
       typename base_t::block_t block_type;
       crs_t new_entities;
+      auto counter_start = cell_counter;
 
       if (int64) {
         vector<int> temp_counts;
@@ -1753,7 +2180,9 @@ public:
             exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
         detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
             cell_counter, new_entities.offsets, new_entities.indices );
-
+        if (block_type == base_t::block_t::polyhedron)
+          track_faces( counter_start, temp_counts, temp_indices,
+              temp_cell2faces, temp_cellids );
       }
       else {
         vector<int> temp_counts, temp_indices;
@@ -1761,6 +2190,9 @@ public:
             exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
         detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
             cell_counter, new_entities.offsets, new_entities.indices );
+        if (block_type == base_t::block_t::polyhedron)
+          track_faces( counter_start, temp_counts, temp_indices,
+              temp_cell2faces, temp_cellids );
       }
       
       //--------------------------------
@@ -1780,11 +2212,8 @@ public:
         for ( auto fs : new_entities )
           cell2faces_.append(fs.begin(), fs.end());
 
-        clog_fatal("NOT IMPLEMENTED YET");
-        //// collect the cell vertices
-        //detail::intersect(
-        //    results, // i.e. cell_faces for this block
-        //    face_vertices_ref, cell_vertices_ref);
+        // collect the cell vertices
+        detail::new_intersect(new_entities, temp_face2vertices, cell2vertices_);
 
       }
 
@@ -1799,7 +2228,7 @@ public:
         // build the connecitivity array
         detail::new_build_connectivity(
             new_entities, // i.e. cell_vertices for each block
-            cell2faces_, face2vertices_, 
+            cell2faces_, temp_face2vertices,
             sorted_vertices_to_faces_,
             [=](const auto & vs, auto & face_vs) {
               // hardcoded for hex
@@ -1822,84 +2251,202 @@ public:
 
       } // block type
 
+
+      // add the block type
+      for (size_t i=0; i<new_entities.size(); ++i) {
+        cell_block_id_.emplace_back(elem_blk_ids[iblk]);
+        cell_type_.emplace_back(block_type);
+      }
+
     } // blocks
     
     // check some assertions
-    auto num_cells = cell_max - cell_min + 1;
     clog_assert(
         cell2vertices_.size() == num_cells,
         "Mismatch in read blocks");
+
+    clog_assert( cell_block_id_.size() == num_cells, "Mismatch in block types" );
+    
+   
+    //--------------------------------------------------------------------------
+    // If there were face blocks, i.e. polyhedra, then we need to pick out the
+    // actual faces that were used.  We also need to flip any faces whose owner
+    // cell was discarded (.i.e. belongs to another proc).  Exodus does not
+    // tell you how a cell uses a face, so the conventioned used here is that
+    // the cell with the lowest id owns the face.
+
+    auto & face2vertices_ = local_connectivity_[2][0];
+
+    //--------------------------------
+    if (num_face_blk > 0) {
+
+      // reset storage
+      face2vertices_.clear();
+      sorted_vertices_to_faces_.clear(); // dont need anymore
+
+      // figure out which faces are actually indexed
+      std::vector<index_t> used_faces;
+      for ( auto fs : cell2faces_ )
+        used_faces.insert( used_faces.end(), fs.begin(), fs.end() );
+
+      std::sort(used_faces.begin(), used_faces.end());
+      auto last = std::unique(used_faces.begin(), used_faces.end());
+
+      // figure out the global owner of all the faces
+      std::map<index_t, index_t> temp_face2cell;
+      for ( size_t i=0; i<temp_cell2faces.size(); ++i )
+        for ( auto f : temp_cell2faces.at(i) ) {
+          temp_face2cell.try_emplace(f, temp_cellids[i] );
+        }
+
+      // flip any faces whose owner cells were discarded
+      for ( auto [fid, cid] : temp_face2cell ) {
+        if (cid < cell_min || cid > cell_max ) {
+          auto start = temp_face2vertices.offsets[fid];
+          auto end = temp_face2vertices.offsets[fid+1];
+          std::reverse( &temp_face2vertices.indices[start],
+              &temp_face2vertices.indices[end] );
+        }
+      }
+
+      // now remap the faces
+      std::map<size_t, size_t> old2new;
+      for ( auto fit=used_faces.begin(); fit != last; ++fit ) {
+        auto old_id = *fit;
+        auto new_id = face2vertices_.size();
+        old2new.emplace(old_id, new_id);
+        const auto & vs = temp_face2vertices[old_id];
+        face2vertices_.append(vs.begin(), vs.end());
+        sorted_vs.assign(vs.begin(), vs.end());
+        std::sort( sorted_vs.begin(), sorted_vs.end() );
+        sorted_vertices_to_faces_.emplace( sorted_vs, new_id );
+      }
+
+      // remap cell to faces
+      for ( auto & i : cell2faces_.indices ) i = old2new.at(i);
+      
+    } // num_face_blk
+
+    //--------------------------------
+    // if there wer no face blocks, then the created faces are correct
+    else {
+      std::swap( face2vertices_, temp_face2vertices );
+    }
+
+    //--------------------------------------------------------------------------
+    // Figure global cell ids
+    
+    // create the local to global cell mapping
+    auto & cell_local2global_ = local_to_global_[num_dims];
+    
+    // for serial files, make up the indices
+    if ( serial ) {
+      cell_local2global_.clear();
+      cell_local2global_.resize(num_cells);
+      for ( size_t i=0; i<num_cells; ++i ) {
+        cell_local2global_[i] = cell_min + i;
+      }
+    }
+    // read them for parallel files
+    else {
+      
+      if (int64) {
+        cell_local2global_ =
+          base_t::template read_element_map<long long>(exoid, num_cells);
+      }
+      else {
+        cell_local2global_ =
+          base_t::template read_element_map<int>(exoid, num_cells);
+      }
+
+    }
     
     // invert the global id to local id map
-    auto & cell_local2global_ = local_to_global_[num_dims];
     auto & cell_global2local_ = global_to_local_[num_dims];
-
-    cell_local2global_.clear();
-    cell_local2global_.resize(num_cells);
     for ( size_t i=0; i<num_cells; ++i ) {
-      auto global_id = cell_min + i;
-      cell_local2global_[i] = global_id;
+      auto global_id = cell_local2global_[i];
       cell_global2local_.emplace( std::make_pair( global_id, i ) );
     }
 
     //--------------------------------------------------------------------------
-    // read coordinates
-
-    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
-    clog_assert(
-        coordinates.size() == dimension() * exo_params.num_nodes,
-        "Mismatch in read vertices");
-
-    auto num_vertices = coordinates.size() / dimension();
-    
-    //--------------------------------------------------------------------------
     // Renumber vertices
 
-    // Throw away vertices that are not mine
-    size_t local_vertices{0};
+    // get the vertex maps
     auto & vertex_global2local_ = global_to_local_[0];
-    vertex_global2local_.clear();
-
-    for ( size_t i=0; i<num_cells; ++i ) {
-      for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
-        auto global_id = cell2vertices_.indices[j];
-        auto res = vertex_global2local_.emplace(
-            std::make_pair(global_id, local_vertices) );
-        if ( res.second ) local_vertices++;
-      }
-    }
-
-    // invert the global id to local id map
     auto & vertex_local2global_ = local_to_global_[0];
-    vertex_local2global_.clear();
-    vertex_local2global_.resize(local_vertices);
 
-    for ( const auto & global_local : vertex_global2local_ ) {
-      vertex_local2global_[global_local.second] = global_local.first;
-    }
-    
-    // convert element conectivity to local ids and extract only coordinates
-    // that are needed
-    vertices_.clear();
-    vertices_.resize(local_vertices*num_dims);
+    if ( serial ) {
 
-    for ( auto & v : cell2vertices_.indices ) {
-      auto global_id = v;
-      v = vertex_global2local_.at(global_id);
-      for ( int d=0; d<num_dims; ++d ) {
-        vertices_[ v*num_dims + d ] = 
-          coordinates[d * num_vertices + global_id];
+      // Throw away vertices that are not mine
+      size_t local_vertices{0};
+      vertex_global2local_.clear();
+
+      for ( size_t i=0; i<num_cells; ++i ) {
+        for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
+          auto global_id = cell2vertices_.indices[j];
+          auto res = vertex_global2local_.emplace(
+              std::make_pair(global_id, local_vertices) );
+          if ( res.second ) local_vertices++;
+        }
       }
-    }
+
+      // invert the global id to local id map
+      auto & vertex_local2global_ = local_to_global_[0];
+      vertex_local2global_.clear();
+      vertex_local2global_.resize(local_vertices);
+
+      for ( const auto & global_local : vertex_global2local_ ) {
+        vertex_local2global_[global_local.second] = global_local.first;
+      }
+
+      
+      // convert element conectivity to local ids and extract only coordinates
+      // that are needed
+      vertices_.clear();
+      vertices_.resize(local_vertices*num_dims);
+
+      for ( auto & v : cell2vertices_.indices ) {
+        auto global_id = v;
+        v = vertex_global2local_.at(global_id);
+        for ( int d=0; d<num_dims; ++d ) {
+          vertices_[ v*num_dims + d ] = 
+            coordinates[d * num_vertices + global_id];
+        }
+      }
     
-    for ( auto & v : face2vertices_.indices ) 
-      v = vertex_global2local_.at(v);
+      for ( auto & v : face2vertices_.indices ) 
+        v = vertex_global2local_.at(v);
+
+    } // serial
+    // parallel
+    else {
+
+      if (int64) {
+        vertex_local2global_ =
+          base_t::template read_node_map<long long>(exoid, num_vertices);
+      }
+      else {
+        vertex_local2global_ =
+          base_t::template read_node_map<int>(exoid, num_vertices);
+      }
+    
+      vertices_.clear();
+      vertices_.resize(num_vertices*num_dims);
+
+      for ( size_t i=0; i<num_vertices; ++i ) {
+        auto global_id = vertex_local2global_[i];
+        vertex_global2local_.emplace( std::make_pair( global_id, i ) );
+        for (int d=0; d<num_dims; ++d)
+          vertices_[i*num_dims + d] = coordinates[d*num_vertices + i];
+      }
+
+    } // parallel
 
     // determine face owners
     // The convention is the first cell to use the face is the owner.
     auto num_faces = face2vertices_.size();
     constexpr auto max_id = std::numeric_limits<size_t>::max();
-    face_owner_.clear();
+    //face_owner_.clear();
     face_owner_.resize( num_faces, max_id );
 
     for ( size_t c=0; c<num_cells; ++c ){
@@ -1910,52 +2457,257 @@ public:
       }
     }
 
-#if 0
     //--------------------------------------------------------------------------
-    // read face blocks
+    // close the file
+    base_t::close(exoid);
+  }
+  
+  //============================================================================
+  //! \brief Implementation of exodus mesh write for burton specialization.
+  //!
+  //! \param[in] name Read burton mesh \e m from \e name.
+  //! \param[out] m Populate burton mesh \e m with contents of \e name.
+  //!
+  //! \return Exodus error code. 0 on success.
+  //============================================================================
+  void write( const std::string & name ) const {
+    
+    //--------------------------------------------------------------------------
+    // Open file
 
-    // create 
-    auto & face2vertices_ = local_connectivity_[2][0];
-    face2vertices_.clear();
+    // open the exodus file
+    auto exoid = base_t::open(name, std::ios_base::out);
+    
+    // check the integer type used in the exodus file
+    auto int64 = base_t::is_int64(exoid);
 
-    auto num_face_blk = exo_params.num_face_blk;
-    vector<index_t> face_blk_ids;
+    
+    // some mesh params
+    constexpr auto num_dims = dimension();
+    auto num_verts = num_entities(0);
+    auto num_cells = num_entities(num_dims);
+    
 
-    // get the face block ids
-    if (int64)
-      face_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
-    else
-      face_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
+    //--------------------------------------------------------------------------
+    // Check blocks
 
-    // read each block
-    for (int iblk = 0; iblk < num_face_blk; iblk++) {
-      vector<int> counts;
-      // first get the vertices
-      if (int64) {
-        vector<long long> indices;
-        base_t::template read_face_block<long long>(
-            exoid, face_blk_ids[iblk], counts, indices);
+    // figure out the unique block ids/types
+    size_t max_block_id{0};
+    std::map<index_t, typename base_t::block_t> blocks;
+    for ( size_t i=0; i<num_cells; ++i ) {
+      max_block_id = std::max( max_block_id, cell_block_id_[i] );
+      blocks[ cell_block_id_[i] ] = cell_type_[i];
+    }
+    
+    // check if there are polyhedra, they need face blocks
+    bool has_polyhedra = false;
+    for ( auto [bid, btype] : blocks )
+      if ( btype == base_t::block_t::polyhedron ) {
+        has_polyhedra = true;
+        break;
       }
-      else {
-        vector<int> indices;
-        base_t::template read_face_block<int>(
-            exoid, face_blk_ids[iblk], counts, indices);
+    
+    //--------------------------------------------------------------------------
+    // setup the initialization parameters
+
+    auto exo_params = base_t::make_params();
+    exo_params.num_nodes = num_verts;
+    exo_params.num_node_sets = 0;
+    exo_params.num_elem = num_cells;
+    exo_params.num_face_blk = has_polyhedra ? 1 : 0;
+    exo_params.num_elem_blk = blocks.size();
+
+
+    //--------------------------------------------------------------------------
+    // face blocks
+      
+    const auto & cell_faces = local_connectivity_.at(3).at(2);
+    std::map< index_t, index_t > face_renumbering;
+
+    if ( has_polyhedra ) {
+        
+      auto face_blk_id = max_block_id + 1;
+      std::vector<index_t> faces_this_blk;
+    
+      const auto & face_vertices = local_connectivity_.at(2).at(0);
+      const auto & cell_faces = local_connectivity_.at(3).at(2);
+      const auto & cell_local2global = local_to_global_.at(num_dims);
+    
+      // Figure out first cell to use a face      
+      auto num_faces = face_vertices.size();
+      std::vector<bool> face_visited( num_faces, false );
+      std::vector<bool> face_flipped( num_faces, false );
+
+    for ( auto [bid, btype] : blocks ) { 
+      for ( size_t c=0; c<num_cells; ++c ){
+        if (cell_block_id_[c] != bid) continue;
+        for ( auto f : cell_faces.at(c) ) {
+          if ( face_visited[f] ) continue;
+          face_visited[f] = true;
+          face_flipped[f] = ( face_owner_[f] != cell_local2global[c] );
+        }
       }
-      // rotate the vertices so the lowest one is first
-      //for (auto & vs : face_vertices_ref) {
-      //  auto lowest = std::min_element(vs.begin(), vs.end());
-      //  std::rotate(vs.begin(), lowest, vs.end());
-      //}
     }
 
-#endif
+      // collect all faces
+      for ( auto [bid, btype] : blocks ) { 
+        if ( btype != base_t::block_t::polyhedron ) continue;
+      
+        // collect all cells with this block type
+        for ( size_t i=0; i<num_cells; ++i )
+          if (cell_block_id_[i] == bid) {
+            for ( auto f : cell_faces.at(i) ) {
+              faces_this_blk.emplace_back( f );
+            }
+          }
+      }
+
+      // sort the faces
+      std::sort( faces_this_blk.begin(), faces_this_blk.end() );
+      auto last = std::unique( faces_this_blk.begin(), faces_this_blk.end() );
+
+      // write the block
+      auto num_faces_this_blk = std::distance(faces_this_blk.begin(), last);
+      for ( auto i=0; i<num_faces_this_blk; ++i )
+        face_renumbering[ faces_this_blk[i] ] = i;
+    
+      // add the whole face block
+      auto face_vertices_func = [&](auto f, auto & vert_list) {
+        auto local_id = faces_this_blk[f];
+        const auto & vs = face_vertices.at(local_id);
+        // flip if someone else owns
+        if ( face_flipped[local_id] ) {
+          vert_list.insert(vert_list.end(), vs.rbegin(), vs.rend());
+        }
+        else {
+          vert_list.insert(vert_list.end(), vs.begin(), vs.end());
+        }
+      };
+    
+      // write the params before we write a face block
+      exo_params.num_face = num_faces_this_blk;
+      base_t::write_params(exoid, exo_params);
+
+      if (int64)
+        base_t::template write_face_block<long long>(
+            exoid, face_blk_id, "faces", num_faces_this_blk, face_vertices_func);
+      else
+        base_t::template write_face_block<int>(
+          exoid, face_blk_id, "faces", num_faces_this_blk, face_vertices_func);
+
+    } // has_polyhedra
+
+    else {
+
+      // just write the params
+      base_t::write_params(exoid, exo_params);
+
+    }
+
+    //--------------------------------------------------------------------------
+    // write coordinates
+    std::vector<real_t> coordinates(vertices_.size());
+    for ( int d=0; d<num_dims; ++d ){
+      for ( size_t i=0; i<num_verts; ++i ) {
+        coordinates[i + d*num_verts] = vertices_[d + i*num_dims];
+      }
+    }
+    base_t::write_point_coords(exoid, coordinates);
+
+    if (int64) { 
+      base_t::template write_node_map<long long>(exoid, local_to_global_.at(0));
+    }
+    else {
+      base_t::template write_node_map<int>(exoid, local_to_global_.at(0));
+    }
+    
+
+    //--------------------------------------------------------------------------
+    // element blocks
+
+    const auto & cell_vertices = local_connectivity_.at(3).at(0);
+    const auto & cells_local2global = local_to_global_.at(num_dims);
+
+    // need to keep track of global ids, since the order might change
+    std::vector<index_t> cell_global_ids;
+    cell_global_ids.reserve(num_cells);
+
+    size_t block_counter{1};
+    
+    for ( auto [bid, btype] : blocks ) { 
+
+      auto this_blk_id = bid;
+      
+      // collect all cells with this block type
+      std::vector<index_t> cells_this_blk;
+      for ( size_t i=0; i<num_cells; ++i )
+        if (cell_block_id_[i] == bid) {
+          cells_this_blk.emplace_back(i);
+          cell_global_ids.emplace_back( cells_local2global[i] );
+        }
+      auto num_cells_this_blk = cells_this_blk.size();
+      
+      //-----------------------------------------------------------------------
+      // polyhedra
+      if ( btype == base_t::block_t::polyhedron ) {
+
+        auto cell_faces_func = [&](auto c, auto & face_list) {
+          auto local_id = cells_this_blk[c];
+          const auto & fs = cell_faces[local_id];
+          for ( auto f : fs ) face_list.emplace_back( face_renumbering.at(f) );
+        };
+
+        if (int64)
+          base_t::template write_element_block<long long>(
+              exoid, this_blk_id, "cells", "nfaced", num_cells_this_blk, cell_faces_func);
+        else
+          base_t::template write_element_block<int>(
+            exoid, this_blk_id, "cells", "nfaced", num_cells_this_blk, cell_faces_func);
+
+      }
+
+      //-----------------------------------------------------------------------
+      // hex/tet
+      else {
+
+        std::string type_str = (btype == base_t::block_t::hex) ? "hex8" : "tet4"; 
+
+        // add the whole element block
+        auto cell_vertices_func = [&](auto c, auto & vert_list) {
+          auto local_id = cells_this_blk[c];
+          const auto & vs = cell_vertices.at(local_id);
+          vert_list.insert(vert_list.end(), vs.begin(), vs.end());
+        };
+
+        if (int64) {
+          base_t::template write_element_block<long long>(
+              exoid, this_blk_id, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+        }
+        else {
+          base_t::template write_element_block<int>(
+              exoid, this_blk_id, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+        }
+
+      } // type
+
+      // bump block counter
+      block_counter++;
+
+    }
+        
+    // write final element mapping
+    if (int64) {
+      base_t::template write_element_map<long long>(exoid, cell_global_ids);
+    }
+    else {
+      base_t::template write_element_map<int>(exoid, cell_global_ids);
+    }
 
     //--------------------------------------------------------------------------
     // close the file
     base_t::close(exoid);
   }
+
 
   //============================================================================
   // Required Overrides
@@ -2043,14 +2795,18 @@ public:
     const auto & cells_local2global = local_to_global_.at(num_dims);
     const auto & verts_local2global = local_to_global_.at(0);
 
+    // add mesh global id to buffer
+    flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
+
+    flecsi::topology::cast_insert( &cell_block_id_[local_id], 1, buffer );
+    flecsi::topology::cast_insert( &cell_type_[local_id], 1, buffer );
+
     //--------------------------------------------------------------------------
     // pack vertices
     {
       // get number of vertices
       const auto & vs = cells2verts.at(local_id);
       auto num_verts = vs.size();
-      // add mesh global id to buffer
-      flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
       // add num verts to buffer
       flecsi::topology::cast_insert( &num_verts, 1, buffer );
       // add global vertex indices to buffer
@@ -2121,6 +2877,15 @@ public:
     cells_local2global.emplace_back( global_id );
     auto res = cells_global2local.emplace( std::make_pair(global_id, local_id) );
     assert( res.second && "Global id already exists but shouldn't" );
+
+    // get cell info
+    size_t cell_block_id;
+    flecsi::topology::uncast( buffer, 1, &cell_block_id );
+    cell_block_id_.emplace_back(cell_block_id);
+
+    typename base_t::block_t cell_type;
+    flecsi::topology::uncast( buffer, 1, &cell_type );
+    cell_type_.emplace_back(cell_type);
    
     //--------------------------------------------------------------------------
     // verts
@@ -2260,8 +3025,11 @@ public:
       
 
       // shift all local to global ids
-      for ( auto j=local_id; j<num_cells; ++j )
+      for ( auto j=local_id; j<num_cells; ++j ) {
         cell_local2global[j] = cell_local2global[j+1];
+        cell_type_[j] = cell_type_[j+1];
+        cell_block_id_[j] = cell_block_id_[j];
+      }
     
       // and the global mapping ( need to decrement entries )
       auto count = cell_global2local.erase( global_id );
@@ -2276,6 +3044,8 @@ public:
 
     // resize
     cell_local2global.resize(num_cells);
+    cell_block_id_.resize(num_cells);
+    cell_type_.resize(num_cells);
     
     // erase cells to vertices info
     cells2verts.erase(local_ids);
@@ -2556,7 +3326,7 @@ private:
   //============================================================================
   // Private data
   //============================================================================
-
+  
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
 
@@ -2569,6 +3339,10 @@ private:
   //! \brief global/local id maps
   std::map<index_t, std::map<index_t, index_t>> global_to_local_;
   std::map<index_t, vector<index_t>> local_to_global_;
+
+  //! regions
+  std::vector<index_t> cell_block_id_;
+  std::vector<typename base_t::block_t> cell_type_;
 
 };
 

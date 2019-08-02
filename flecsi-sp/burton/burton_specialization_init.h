@@ -3434,7 +3434,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
 
   enum class file_type_t {
     exodus,
-    nemesis,
+    partitioned_exodus,
     unknown
   };
 
@@ -3442,12 +3442,16 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   auto get_file_type = []( auto str ) {
     auto base = ristra::utils::basename(str);
     auto i = base.rfind( '.', base.length() );
+    size_t cnt = 0;
     while ( i != std::string::npos ) {
       auto ext = base.substr(i+1, base.length()-1);
-      if ( ext == "g" || ext == "exo" ) return file_type_t::exodus;
-      else if ( ext == "par" ) return file_type_t::nemesis;
+      if ( ext == "g" || ext == "exo" ) {
+        if ( cnt != 0 ) return file_type_t::partitioned_exodus;
+        else            return file_type_t::exodus;
+      }
       base = base.substr(0, i);
       i = base.rfind( '.', base.length() );
+      ++cnt;
     }
     return file_type_t::unknown;
   };
@@ -3461,12 +3465,20 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   using globals::extra_mesh_info;
   
   extra_mesh_info = std::make_unique<extra_mesh_info_t>();
+  bool needs_partitioning{false};
 
-  if ( file_type == file_type_t::exodus )
+  if ( file_type == file_type_t::exodus ) {
     mesh_def = std::make_unique<exodus_definition_t>( filename_string );
-  else if ( file_type == file_type_t::nemesis ) {
-    filename_string += "." + std::to_string(rank);
-    mesh_def = std::make_unique<exodus_definition_t>( filename_string );
+    needs_partitioning = comm_size > 1;
+  }
+  else if ( file_type == file_type_t::partitioned_exodus ) {
+    // get extension, which should be number of ranks
+    auto ext = ristra::utils::file_extension(filename_string);
+    // how many digits in padded number
+    auto n = ext.size();
+    // figure out this processors filename 
+    auto my_filename = filename_string + "." + ristra::utils::zero_padded(rank, n);
+    mesh_def = std::make_unique<exodus_definition_t>( my_filename, false );
   }
   else
     THROW_IMPLEMENTED_ERROR( "Unknown mesh file type" );
@@ -3488,26 +3500,46 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // distributed compressed row storage
   flecsi::coloring::dcrs_t dcrs;
 
-  // if ( needs_repartitioning ) {
-#if 1
-  if ( rank == 0 ) std::cout << "Partitioning mesh..." << std::flush;
-  // Create the dCRS representation for the distributed colorer.
-  // This essentialy makes the graph of the dual mesh.
-  mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
+  if ( needs_partitioning ) {
 
-  // Create a colorer instance to generate the primary coloring.
-  auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
+    if ( rank == 0 ) std::cout << "Partitioning mesh..." << std::flush;
+    // Create the dCRS representation for the distributed colorer.
+    // This essentialy makes the graph of the dual mesh.
+    mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
 
-  // Create the primary coloring and partition the mesh.
-  auto partitioning = colorer->new_color(dcrs);
-  if ( rank == 0 ) std::cout << "done." << std::endl;
+    // Create a colorer instance to generate the primary coloring.
+    auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
 
-  // now migrate the entities to their respective ranks
-  if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
-  flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
-  if ( rank == 0 ) std::cout << "done." << std::endl;
-#endif
-  // } // needs_repartitioning
+    // Create the primary coloring and partition the mesh.
+    auto partitioning = colorer->new_color(dcrs);
+    if ( rank == 0 ) std::cout << "done." << std::endl;
+
+    // now migrate the entities to their respective ranks
+    if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
+    flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
+    if ( rank == 0 ) std::cout << "done." << std::endl;
+  
+  } // needs_partitioning
+  
+  //----------------------------------------------------------------------------
+  // Dump the partitioned mesh if requested
+  //----------------------------------------------------------------------------
+
+  // figure out this ranks file name
+  if ( file_type == file_type_t::exodus )
+  {
+    auto basename = ristra::utils::basename( filename_string );
+    auto output_prefix = ristra::utils::remove_extension( basename );
+    auto output_extension = ristra::utils::file_extension(basename); 
+    auto output_filename = output_prefix + "-partitioned." + output_extension + "." +
+    ristra::utils::zero_padded(comm_size) + "." +
+    ristra::utils::zero_padded(rank);
+    auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
+    if (rank == 0)
+      std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
+    exo_def->write( output_filename );
+  }
+
 
   //----------------------------------------------------------------------------
   // Cell Closure.  However many layers of ghost cells are needed are found
@@ -3721,10 +3753,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     isi.index_space = i;
     context.set_sparse_index_space_info(isi);
   }
+  
 
   clog(info) << "Finished mesh partitioning." << std::endl;
   if (rank == 0) std::cout << "Finished mesh partitioning." << std::endl;
-
 
 } // partition_mesh
 
@@ -3774,25 +3806,6 @@ void initialize_mesh(
   extra_mesh_info.reset();
   
   if (rank == 0) std::cout << "done" << std::endl;
-
-  ////----------------------------------------------------------------------------
-  //// Some debug
-  ////----------------------------------------------------------------------------
-  //
-  //// figure out this ranks file name
-  //auto basename = ristra::utils::basename( filename_string );
-  //auto output_prefix = ristra::utils::remove_extension( basename );
-  //auto output_filename = output_prefix + "-connectivity_rank" +
-  //  ristra::utils::zero_padded(rank) + ".txt";
-  //
-  //// dump to file
-  //if ( rank == 0 )
-  //  std::cout << "Dumping connectivity to: " << output_filename << std::endl;
-  //std::ofstream file( output_filename );
-  //mesh.dump( file );
-  //
-  //// close file
-  //file.close();
 
 } // initialize_mesh
 
