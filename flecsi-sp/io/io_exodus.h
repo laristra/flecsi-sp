@@ -10,7 +10,7 @@
 #pragma once
 
 // user includes
-#ifdef HAVE_EXODUS
+#ifdef FLECSI_SP_ENABLE_EXODUS
 #  include <flecsi-sp/io/exodus_definition.h>
 #endif
 
