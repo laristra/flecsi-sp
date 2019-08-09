@@ -39,7 +39,6 @@ struct burton_config_t {
 
   //! The number of mesh domains in the burton mesh.
   static constexpr size_t num_domains = 2;
-
   //! the constant string type
   using const_string_t = flecsi::utils::const_string_t;
 
@@ -60,6 +59,7 @@ struct burton_config_t {
 
   //! A space ("physics") vector type with real_t data and mesh dimension.
   using vector_t = ristra::math::vector<real_t, num_dimensions>;
+  
 
   //! \brief The locations of different bits that we set as flags
   enum bits : uint8_t

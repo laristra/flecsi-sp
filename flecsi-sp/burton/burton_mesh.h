@@ -66,7 +66,6 @@ public:
   static constexpr auto num_dimensions = config_t::num_dimensions;
   //! \brief the number of domains
   static constexpr auto num_domains = config_t::num_domains;
-
   //! a compile string type
   using const_string_t = typename config_t::const_string_t;
   
@@ -111,8 +110,7 @@ public:
 
   //! Side type.
   using side_t = typename types_t::side_t;
-
-
+ 
   //! the index spaces type
   using index_spaces_t = typename types_t::index_spaces_t;
   //! special subspace for 
@@ -130,7 +128,7 @@ public:
 
   //! the ownership ( exclusive, shared, ghost ) types
   using partition_t = flecsi::partition_t;
-
+  
   //! other special subsets that we have defined
   enum class subset_t {
     overlapping
@@ -1343,7 +1341,7 @@ public:
   //!---------------------------------------------------------------------------
   //! \brief Compute the goemetry.
   //!---------------------------------------------------------------------------
-  void update_geometry()
+  void update_geometry(real_t alpha=1,real_t axis=1)
   {
     // get the mesh info
     auto cs = cells();
@@ -1352,7 +1350,8 @@ public:
     auto num_cells = cs.size();
     auto num_faces = fs.size();
     auto num_edges = es.size();
-
+    
+    // default 
     #pragma omp parallel
     {
 
@@ -1385,11 +1384,10 @@ public:
       //--------------------------------------------------------------------------
       // compute cell parameters (in 2D and 3D, this must follow
       // edges and faces)
-
       if ( num_dimensions > 1 ) {
         #pragma omp for
         for ( counter_t i=0; i<num_cells; i++ )
-          cs[i]->update( this );
+          cs[i]->update( this, alpha,axis );
       }
 
       //--------------------------------------------------------------------------
@@ -1433,8 +1431,7 @@ public:
     } // end omp parallel
 
   }
-
-
+    
   //============================================================================
   //! \brief Install a boundary and tag the relatex entities.
   //============================================================================
