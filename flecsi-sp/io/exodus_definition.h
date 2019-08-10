@@ -460,7 +460,8 @@ public:
       int exoid,
       ex_entity_id blk_id,
       ex_entity_type entity_type,
-      connectivity_t & entities) {
+      connectivity_t & entities,
+      int &nelms_in_blk) {
     // some type aliases
     using ex_index_t = U;
 
@@ -475,6 +476,7 @@ public:
         exoid, entity_type, blk_id, elem_type, &num_elem_this_blk,
         &num_nodes_per_elem, &num_edges_per_elem, &num_faces_per_elem,
         &num_attr);
+    nelms_in_blk = num_elem_this_blk;
     if (status)
       clog_fatal("Problem reading block, ex_get_block() returned " << status);
 
@@ -634,7 +636,9 @@ public:
   static auto
   read_face_block(int exoid, ex_entity_id blk_id, connectivity_t & faces) {
 
-    return read_block<U>(exoid, blk_id, EX_FACE_BLOCK, faces);
+      int nelms(0);
+      
+      return read_block<U>(exoid, blk_id, EX_FACE_BLOCK, faces,nelms);
   }
 
   //============================================================================
@@ -664,9 +668,10 @@ public:
   static auto read_element_block(
       int exoid,
       ex_entity_id elem_blk_id,
-      connectivity_t & elements) {
+      connectivity_t & elements,
+      int &nelms_in_blk) {
 
-    return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, elements);
+      return read_block<U>(exoid, elem_blk_id, EX_ELEM_BLOCK, elements,nelms_in_blk);
   }
 
   //============================================================================
@@ -1125,13 +1130,18 @@ public:
           exoid, EX_ELEM_BLOCK, num_elem_blk);
 
     // read each block
+    cell_to_blk_id_.clear();
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
+        int nelms_in_blk(0);
       if (int64)
         base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            exoid, elem_blk_ids[iblk], cell_vertices_ref,nelms_in_blk);
       else
         base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], cell_vertices_ref);
+            exoid, elem_blk_ids[iblk], cell_vertices_ref,nelms_in_blk);
+
+      for(int i=0;i<nelms_in_blk;++i)
+          cell_to_blk_id_.push_back(iblk);
     }
 
     // check some assertions
@@ -1351,6 +1361,10 @@ public:
     return p;
   } // vertex
 
+  std::vector<int> &get_cell_to_blk_id()
+  {
+      return cell_to_blk_id_;
+  }
 private:
   //============================================================================
   // Private data
@@ -1361,6 +1375,7 @@ private:
 
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
+  vector<int> cell_to_blk_id_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1503,7 +1518,9 @@ public:
           exoid, EX_ELEM_BLOCK, num_elem_blk);
 
     // read each block
+    cell_to_blk_id_.clear();
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
+        int nelms_in_blk(0);
 
       // read the block info, the actual type may change based on
       // the type of the block
@@ -1511,10 +1528,13 @@ public:
       typename base_t::block_t block_type;
       if (int64)
         block_type = base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], results);
+            exoid, elem_blk_ids[iblk], results,nelms_in_blk);
       else
         block_type = base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], results);
+            exoid, elem_blk_ids[iblk], results,nelms_in_blk);
+
+      for(int i=0;i<nelms_in_blk;++i)
+          cell_to_blk_id_.push_back(iblk);
 
       //--------------------------------
       // make sure the block type isnt unknown
@@ -1824,6 +1844,10 @@ public:
     return p;
   } // vertex
 
+  std::vector<int> &get_cell_to_blk_id()
+  {
+      return cell_to_blk_id_;
+  }
 private:
   //============================================================================
   // Private data
@@ -1834,6 +1858,7 @@ private:
 
   //! \brief storage for vertex coordinates
   vector<real_t> vertices_;
+  vector<int> cell_to_blk_id_;
 };
 
 } // namespace io

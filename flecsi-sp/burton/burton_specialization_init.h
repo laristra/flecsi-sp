@@ -301,8 +301,12 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   // create the cells
   //----------------------------------------------------------------------------
 
+  std::vector<int> &cell_to_blk_id = mesh_def.get_cell_to_blk_id();
+  std::vector<int> region_ids;
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
+      // region id is unique block id from exodus.
+      region_ids.push_back(cell_to_blk_id[cm.second]);
     // get the list of vertices
     auto vs =
       mesh_def.entities( cell_t::dimension, vertex_t::dimension, cm.second );
@@ -318,6 +322,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_vs );
   }
+  mesh.set_regions(region_ids);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -426,7 +431,11 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   //----------------------------------------------------------------------------
 
   // create the cells
+  std::vector<int> &cell_to_blk_id = mesh_def.get_cell_to_blk_id();
+  std::vector<int> region_ids;
   for(auto & cm: cell_lid_to_mid) {
+      // region id is unique block id from exodus.
+      region_ids.push_back(cell_to_blk_id[cm.second]);
     // get the list of faces
     auto fs =
       mesh_def.entities( cell_t::dimension, face_t::dimension, cm.second );
@@ -442,6 +451,7 @@ void create_cells( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
     // create the cell
     auto c = mesh.create_cell( elem_fs );
   }
+  mesh.set_regions(region_ids);
 }
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -945,7 +945,8 @@ void set_regions(std::vector<int> &region_ids)
     for(auto c: cells())
     {
         int id = region_ids[c.id()];
-        c->set_region(id);
+        //c->set_region(id);
+        c->region() = id;
     }
     
 }
