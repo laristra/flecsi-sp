@@ -644,7 +644,7 @@ public:
 
       // create the element blocks
       base_t::template write_element_block<ex_index_t>( 
-        exoid, 1, "cells", num_elems,
+        exoid, 1, "cells", "nsided", num_elems,
         [&]( auto c, auto & face_list ) {
           for ( auto v : m.vertices(cs[c]) ) 
             face_list.emplace_back( v.id() );
@@ -672,7 +672,7 @@ public:
 
       // create the element blocks
       base_t::template write_element_block<ex_index_t>( 
-        exoid, 1, "cells", num_elems,
+        exoid, 1, "cells", "nfaced", num_elems,
         [&]( auto c, auto & face_list ) {
           for ( auto f : m.faces(cs[c]) ) 
             face_list.emplace_back( f.id() );
