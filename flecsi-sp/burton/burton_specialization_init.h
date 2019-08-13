@@ -228,6 +228,8 @@ void create_cells(
   
   const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
+  const auto & cell_region_ids = mesh_def.region_ids();
+
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
 
@@ -239,6 +241,9 @@ void create_cells(
 
     // search this ranks mesh definition for the matching offset
     auto r = flecsi::coloring::rank_owner( extra_mesh_info.cell_distribution, mid );
+
+    // set default region id
+    size_t region_id{0};
 
     // if i am the owner
     if ( r == rank ) {
@@ -259,6 +264,8 @@ void create_cells(
           return vertices[ flecsi_id ];
         }
       );
+      // get the region id
+      region_id = cell_region_ids[id] - 1;
     }
     // otherwise, it is a ghost cell
     else {
@@ -280,6 +287,7 @@ void create_cells(
     // if this is a ghost cell, it is junk for now
     auto c = mesh.create_cell( elem_vs );
     c->global_id().set_global(mid);
+    c->region() = region_id;
   }
 
 }
@@ -528,6 +536,8 @@ void create_cells(
     at({0,cell_t::dimension}).at({0,vertex_t::dimension});
   
   const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
+  
+  const auto & cell_region_ids = mesh_def.region_ids();
 
   // create the cells
   for(auto & cm: cell_lid_to_mid) {
@@ -537,6 +547,9 @@ void create_cells(
 
     // clear the list
     elem_vs.clear();
+
+    // set default region id
+    size_t region_id{0};
 
     // search this ranks mesh definition for the matching offset
     auto r = flecsi::coloring::rank_owner( extra_mesh_info.cell_distribution, mid );
@@ -560,6 +573,8 @@ void create_cells(
           return vertices[ flecsi_id ];
         }
       );
+      // get the region id
+      region_id = cell_region_ids[id]-1;
     }
     // otherwise, it is a ghost cell
     else {
@@ -581,6 +596,7 @@ void create_cells(
     // if this is a ghost cell, it is junk for now
     auto c = mesh.create_cell( elem_vs );
     c->global_id().set_global(mid);
+    c->region_id() = region_id;
   }
 
 }

@@ -1554,13 +1554,12 @@ struct burton_element_t<3,3>
   auto min_length() const
   { return min_length_; }
 
-
   //! set the region id
-  size_t & region()
+  auto & region()
   { return region_; }
 
   //! get the region id
-  size_t region() const
+  auto region() const
   { return region_; }
 
   //! the element type

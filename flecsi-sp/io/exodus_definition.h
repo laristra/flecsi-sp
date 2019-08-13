@@ -1929,6 +1929,9 @@ public:
 
   }
 
+  const std::vector<size_t> & region_ids() const override {
+    return cell_block_id_;
+  }
 
 private:
   //============================================================================
@@ -3320,6 +3323,10 @@ public:
 
   const std::vector<size_t> & face_owners() const override {
     return face_owner_;
+  }
+
+  const std::vector<size_t> & region_ids() const override {
+    return cell_block_id_;
   }
 
 private:
