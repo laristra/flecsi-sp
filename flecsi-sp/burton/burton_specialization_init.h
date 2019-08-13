@@ -596,7 +596,7 @@ void create_cells(
     // if this is a ghost cell, it is junk for now
     auto c = mesh.create_cell( elem_vs );
     c->global_id().set_global(mid);
-    c->region_id() = region_id;
+    c->region() = region_id;
   }
 
 }
