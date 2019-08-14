@@ -58,7 +58,7 @@ public:
   using base_t =
     flecsi_sp::io::exodus_base< MESH_TYPE::num_dimensions, real_t >;
 
-#ifdef HAVE_EXODUS
+#ifdef FLECSI_SP_ENABLE_EXODUS
 
   //============================================================================
   //! \brief write field data to the file
@@ -331,8 +331,6 @@ public:
 
   }
 
-#endif
-
   //============================================================================
   //! \brief write field data to the file
   //! \param [in] m  The mesh to extract field data from.
@@ -425,6 +423,8 @@ public:
     
   }
 
+#endif
+
 
   //============================================================================
   //!  \brief Implementation of exodus mesh write for burton specialization.
@@ -442,7 +442,7 @@ public:
     T * const d = nullptr
   ) {
 
-#ifdef HAVE_EXODUS
+#ifdef FLECSI_SP_ENABLE_EXODUS
 
     // alias some types
     using std::vector;
@@ -582,7 +582,7 @@ public:
     std::vector<std::string> &varname
   ) {
 
-#ifdef HAVE_EXODUS
+#ifdef FLECSI_SP_ENABLE_EXODUS
 
     // alias some types
     using std::vector;
