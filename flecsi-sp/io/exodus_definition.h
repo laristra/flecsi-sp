@@ -1696,7 +1696,7 @@ public:
       for ( auto j=local_id; j<num_cells; ++j ) {
         cell_local2global[j] = cell_local2global[j+1];
         cell_type_[j] = cell_type_[j+1];
-        cell_block_id_[j] = cell_block_id_[j];
+        cell_block_id_[j] = cell_block_id_[j+1];
       }
     
       // and the global mapping ( need to decrement entries )
@@ -3031,7 +3031,7 @@ public:
       for ( auto j=local_id; j<num_cells; ++j ) {
         cell_local2global[j] = cell_local2global[j+1];
         cell_type_[j] = cell_type_[j+1];
-        cell_block_id_[j] = cell_block_id_[j];
+        cell_block_id_[j] = cell_block_id_[j+1];
       }
     
       // and the global mapping ( need to decrement entries )
