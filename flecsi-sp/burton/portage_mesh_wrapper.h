@@ -105,6 +105,8 @@ public:
 
   using counter_t = typename mesh_t::counter_t;
 
+  using subset_t = typename mesh_t::subset_t;
+
   //! \brief The entity kind type
   using entity_kind_t = Portage::Entity_kind;
   //! \brief The entity type 
@@ -212,19 +214,19 @@ public:
   //! Number of owned faces in the mesh
   size_t num_owned_faces() const 
   {
-    return mesh_->num_faces();
+    return mesh_->num_faces(subset_t::overlapping);
   }
 
   //! Number of owned edges in the mesh
   size_t num_owned_edges() const 
   {
-    return mesh_->num_edges();
+    return mesh_->num_edges(subset_t::overlapping);
   }
 
   //! Number of owned nodes in the mesh
   size_t num_owned_nodes() const 
   {
-    return mesh_->num_vertices();
+    return mesh_->num_vertices(subset_t::overlapping);
   }
 
   //! Number of ghost cells in the mesh
@@ -236,13 +238,19 @@ public:
   //! Number of ghost faces in the mesh
   size_t num_ghost_faces() const 
   {
-    return 0;
+    return mesh_->num_faces() - mesh_->num_faces(subset_t::overlapping);
+  }
+
+  //! Number of ghost edges in the mesh
+  size_t num_ghost_edges() const 
+  {
+    return mesh_->num_edges() - mesh_->num_edges(subset_t::overlapping);
   }
 
   //! Number of ghost nodes in the mesh
   size_t num_ghost_nodes() const 
   {
-    return 0;
+    return mesh_->num_vertices() - mesh_->num_vertices(subset_t::overlapping);
   }
 
   //! Number of items of given entity
@@ -256,15 +264,36 @@ public:
   {
     switch(entity) {
       case entity_kind_t::NODE :
-        return num_owned_nodes();
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return mesh_->num_vertices();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_nodes();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_nodes();
+          }
       case entity_kind_t::EDGE :
-        return num_owned_edges();
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return mesh_->num_edges();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_edges();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_edges();
+          }
       case entity_kind_t::FACE :
-        return num_owned_faces();
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return mesh_->num_faces();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_faces();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_faces();
+          }
       case entity_kind_t::CELL :
         switch (entity_type) {
           case entity_type_t::ALL:
-            return mesh_->num_cells();
+            return num_owned_cells() + num_ghost_cells();
           case entity_type_t::PARALLEL_OWNED:
             return num_owned_cells();
           case entity_type_t::PARALLEL_GHOST:
@@ -337,7 +366,7 @@ public:
     auto c = cells_[cell_id];
     for (auto f : mesh_->faces(c)) {
       faces->emplace_back( f.id() );
-      face_dirs->emplace_back( mesh_->cells(f)[0] == c ? 1 : -1 );
+      face_dirs->emplace_back( f->is_flipped(c) ? -1 : 1 );
     }
   }
 
@@ -648,24 +677,26 @@ public:
     const auto & context = flecsi::execution::context_t::instance();
      if (kind == entity_kind_t::NODE)
      {
-       //auto ent = vertices_[id];
-       //auto gid = ent.global_id();
-       //return gid.global();
        const auto & local_to_global_id_map = 
        context.index_map( mesh_t::index_spaces_t::vertices );
        return local_to_global_id_map.at(id);
      }    
+     else if (kind == entity_kind_t::FACE)
+     { 
+       const auto & local_to_global_id_map = 
+       context.index_map( mesh_t::index_spaces_t::faces );
+       return local_to_global_id_map.at(id);
+     }
      else if (kind == entity_kind_t::CELL)
      { 
-       //auto ent = cells_[id];
-       //auto gid = ent.global_id();
-       //return gid.global();
        const auto & local_to_global_id_map = 
        context.index_map( mesh_t::index_spaces_t::cells );
        return local_to_global_id_map.at(id);
      }
-     else
-       return 0; 
+     else {
+       THROW_RUNTIME_ERROR("unknown kind");
+       return 0;
+     }
   }
 
   //============================================================================
