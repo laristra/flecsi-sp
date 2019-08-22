@@ -49,7 +49,7 @@ struct extra_mesh_info_t {
 };
   
 using mesh_definition_t =
-  flecsi::topology::mesh_definition_u< burton_mesh_t::num_dimensions >;
+  flecsi_sp::io::mesh_definition<burton_mesh_t::num_dimensions, burton_mesh_t::real_t>;
 
 
 namespace globals {
@@ -67,7 +67,7 @@ namespace globals {
 ////////////////////////////////////////////////////////////////////////////////
 template< typename MESH_TYPE >
 void create_cells(
-  flecsi::topology::mesh_definition_u<2> & mesh_def,
+  flecsi_sp::io::mesh_definition<2, burton_mesh_t::real_t> & mesh_def,
   extra_mesh_info_t & extra_mesh_info,
   MESH_TYPE & mesh )
 {
@@ -299,7 +299,7 @@ void create_cells(
 ////////////////////////////////////////////////////////////////////////////////
 template< typename MESH_TYPE >
 void create_cells(
-  flecsi::topology::mesh_definition_u<3> & mesh_def,
+  flecsi_sp::io::mesh_definition<3, burton_mesh_t::real_t> & mesh_def,
   extra_mesh_info_t & extra_mesh_info,
   MESH_TYPE & mesh )
 {
@@ -609,7 +609,7 @@ void create_cells(
 ////////////////////////////////////////////////////////////////////////////////
 template< typename MESH_TYPE >
 void create_extras(
-  flecsi::topology::mesh_definition_u<2> & mesh_def,
+  flecsi_sp::io::mesh_definition<2, burton_mesh_t::real_t> & mesh_def,
   extra_mesh_info_t & extra_mesh_info,
   MESH_TYPE & mesh )
 {
@@ -1107,7 +1107,7 @@ void create_extras(
 ////////////////////////////////////////////////////////////////////////////////
 template< typename MESH_TYPE >
 void create_extras(
-  flecsi::topology::mesh_definition_u<3> & mesh_def,
+  flecsi_sp::io::mesh_definition<3, burton_mesh_t::real_t> & mesh_def,
   extra_mesh_info_t & extra_mesh_info,
   MESH_TYPE & mesh )
 {
@@ -1885,7 +1885,7 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 /// \brief Helper to make corners
 ////////////////////////////////////////////////////////////////////////////////
 void make_corners(
-  flecsi::topology::mesh_definition_u<2> & mesh_def,
+  flecsi_sp::io::mesh_definition<2, burton_mesh_t::real_t> & mesh_def,
   extra_mesh_info_t & extra_mesh_info,
   std::map<size_t, flecsi::coloring::index_coloring_t> & coloring,
   std::map<size_t, flecsi::coloring::coloring_info_t> & coloring_info,
@@ -2583,7 +2583,7 @@ void make_corners(
 /// \brief Helper to make corners
 ////////////////////////////////////////////////////////////////////////////////
 void make_corners(
-  flecsi::topology::mesh_definition_u<3> & mesh_def,
+  flecsi_sp::io::mesh_definition<3, burton_mesh_t::real_t> & mesh_def,
   extra_mesh_info_t & extra_mesh_info,
   std::map<size_t, flecsi::coloring::index_coloring_t> & coloring,
   std::map<size_t, flecsi::coloring::coloring_info_t> & coloring_info,
