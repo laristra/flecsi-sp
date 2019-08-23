@@ -150,6 +150,14 @@ public:
     // initialized until the base class is constructed
     if ( mesh_t::num_dimensions == 3 )
       portage_mesh_aux_t::build_aux_entities(); 
+    
+    const auto & context = flecsi::execution::context_t::instance();
+    vert_local_to_global_id_map_ = 
+      &context.index_map( mesh_t::index_spaces_t::vertices );
+    face_local_to_global_id_map_ = 
+      &context.index_map( mesh_t::index_spaces_t::faces );
+    cell_local_to_global_id_map_ =
+      &context.index_map( mesh_t::index_spaces_t::cells );
 
   }
 
@@ -189,20 +197,6 @@ public:
       return cell_volumes_[cell_id];
     else
       return cells_[cell_id]->volume();
-  }
-
-  //! Dual cell area/volume
-  //! \param [in] node_id the node index
-  auto dual_cell_volume(size_t node_id) const 
-  {
-    //auto v = mesh_->vertices()[node_id];
-    //real_t vol = 0.0;
-    //for (auto corner : mesh_->corners(v))
-    //  vol += corner->area();
-    //return vol;
-
-    THROW_IMPLEMENTED_ERROR( "dual_cell_volume not implemented yet!" );
-    return 0.0;
   }
 
   //! Number of owned cells in the mesh
@@ -409,32 +403,6 @@ public:
       adj_cells->emplace_back(cell.id());
   }
 
-  //! @brief Get adjacent "dual cells" of a given "dual cell"
-  //!
-  //! \param [in] node_id  The node index
-  //! \param [in] type  The type of indexes to include (ghost, shared, 
-  //!   all, etc...) 
-  //! \param [in,out] adj_nodes  The list of node neighbors to populate
-  template < typename T >
-  void dual_cell_get_node_adj_cells(
-    size_t node_id,
-    entity_type_t const type,
-    std::vector<T> *adj_nodes
-  ) const 
-  {
-    auto this_node = vertices_[node_id];
-    adj_nodes->clear();
-    // Loop over cells associated with this node
-    for (auto cell : mesh_->cells(this_node)) {
-      // Loop over the nodes associated with this cell
-      for (auto node : mesh_->vertices(cell)) {
-        if (this_node != node)
-         {
-          adj_nodes->emplace_back(node.id());
-         }
-      }
-    }
-  }
 
   //!  \brief Check if entity is on the domain boundary
   //!  \param [in] type  The type of indexes to include (ghost, shared, 
@@ -548,28 +516,6 @@ public:
 
   }
 
-  //! \brief 2D version of coords of nodes of a dual cell
-  //! \param[in] node_id The ID of the node or dual cell in the dual mesh.
-  //! \param[in,out] pplist The vector of Wonton::Point objects containing the
-  //!   coordinates of a node in the dual mesh / cell in the regular mesh.  The
-  //!   length of the vector is equal to the number of nodes in the dual mesh
-  //!   cell with ID @c nodeid.
-  //!  
-  //! The vertices are ordered CCW. For node @c nodeid not on a
-  //! boundary, the vector @c pplist starts with a random vertex, but it is 
-  //! still ordered CCW. Use the dual_cell_coordinates_canonical_rotation() 
-  //! function to rotate the @c pplist into a canonical (unique) form.
-  //! 
-  //! \todo worry about boundary cases
-  void dual_cell_get_coordinates(
-    size_t node_id,
-    std::vector<point_t> *point_list
-  ) const
-  {
-    //raise_implemented_error("dual_cell_get_coordinates not implemented yet!");
-    std::cerr<<"dual_cell_get_coordinates not implemented yet!\n";
-  }
-
   //! \brief Centroid of a cell.
   //! \param[in]  cell_id The ID of the cell.
   //! \param[in,out] centroid The vector of coordinates of the cell @c cellid's
@@ -587,27 +533,149 @@ public:
       *centroid = make_point(this_cell->centroid());
   }
 
-  //! \brief Centroid of a dual cell.
-  //! \param[in] node_id The ID of the node in the normal mesh / cell in the 
-  //!   dual mesh.
-  //! \param[in,out] centroid The vector of coordinates of the node in the 
-  //!   normal mesh / the cell in the dual mesh with ID @c nodeid.  The length 
-  //!   of the vector is equal to the dimension of the mesh.
-  //!
-  //! \todo NOTE: THIS IS ASSUMED TO BE THE NODE COORDINATE BECAUSE
-  //!   THE NODAL VARIABLES LIVE THERE, BUT FOR DISTORTED GRIDS, THE
-  //!   NODE COORDINATED MAY NOT BE THE CENTROID OF THE DUAL CELL
-  void dual_cell_centroid(
-    size_t node_id,
-    point_t *centroid) const 
+
+  //============================================================================
+  //! \brief Facet a cells face
+  //============================================================================
+  void cell_get_facetization(
+      int const cellid,
+      std::vector<std::vector<int>> *facetpoints,
+      std::vector<point_3d_t> *points) const
   {
-    auto this_node = vertices_[node_id];
-    if ( node_coordinates_ )
-      *centroid = make_point(node_coordinates_[this_node]);
-    else
-      *centroid = make_point(this_node->coordinates());
+    auto c = cells_[cellid];
+    for (auto f : mesh_->faces(c)) {
+
+      const auto & vs = mesh_->vertices(f);
+      auto nv = vs.size();
+      auto add_one = (nv == 3) ? 0 : 1;
+      points->resize( nv + add_one );
+
+      // go backwards cause flipped
+      if ( f->is_flipped(c) ) {
+        for ( size_t i=nv, j=0; i --> 0; ++j)
+          node_get_coordinates(vs[i]->id(), &points->operator[](j));
+      }
+      // iterate through points forward
+      else {
+        for ( size_t i=0; i<nv; ++i ) 
+          node_get_coordinates(vs[i]->id(), &points->operator[](i));
+      }
+
+      // if there is only 3 vertices, it is a planar triangle
+      if ( nv == 3 ) {
+        facetpoints->resize(1);
+        facetpoints->front().reserve(3);
+        for ( size_t i=0; i<nv; ++i ) facetpoints->front().emplace_back(i);
+      }
+
+      // if there are more than 3 vertices, it might be non-planar,
+      // so subdivide the face about the face midpoint
+      else {
+
+        // figureout the last point
+        for ( size_t i=0; i<nv; ++i )
+          points->operator[](nv) += points->operator[](i);
+        points->operator[](nv) /= nv;
+
+        // now create facets
+        facetpoints->resize(nv);
+        for ( int i=0; i<nv-1; ++i )
+          facetpoints->operator[](i) = {i, i+1, int(nv)};
+        facetpoints->operator[](nv-1) = {int(nv-1), 0, int(nv)};
+
+      } // num verts
+    
+    } // face
   }
 
+  //============================================================================
+  //! \brief decompose a cell into tets
+  //============================================================================
+  void decompose_cell_into_tets(
+    int cellid,
+    std::vector<std::array<point_3d_t, 4>> *tcoords,
+    const bool planar_hex) const
+  {
+
+    // The tet's vertices are ordered in the following way:
+    //    3
+    //  / | \
+    // /  |  \
+    // 2--|---1
+    //  \ | /
+    //    0
+    
+    point_3d_t xc;
+    cell_centroid(cellid, &xc);
+      
+    auto c = cells_[cellid];
+    for (auto f : mesh_->faces(c)) {
+
+      const auto & vs = mesh_->vertices(f);
+      auto nv = vs.size();
+
+      // if there is only 3 vertices, it is a planar triangle
+      if ( nv == 3 ) {
+        // bump size by one
+        tcoords->resize( tcoords->size() + 1 );
+        auto & new_tet = tcoords->back();
+        // set tet vertices, for flipped faces
+        if ( f->is_flipped(c) ) {
+          for ( size_t i=nv, j=0; i --> 0; ++j)
+            node_get_coordinates(vs[i]->id(), &new_tet[j]);
+        }
+        // not flipped
+        else {
+          for ( int i=0; i<3; ++i )
+            node_get_coordinates(vs[i]->id(), &new_tet[i]);
+        }
+        // now set last point
+        new_tet[3] = xc;
+      }
+
+      // if there are more than 3 vertices, it might be non-planar,
+      // so subdivide the face about the face midpoint
+      else {
+        // each edge has a new tet
+        tcoords->reserve( tcoords->size() + nv );
+        // need to compute face midpoint
+        point_3d_t xm, xtmp1, xtmp2;
+        for ( auto v : vs ) {
+          node_get_coordinates(v->id(), &xtmp1);
+          xm += xtmp1;
+        }
+        xm /= nv;
+        // go backwards cause flipped
+        if ( f->is_flipped(c) ) {
+          node_get_coordinates(vs[nv-1]->id(), &xtmp1);
+          for ( size_t i=nv; i --> 1; ) {
+            node_get_coordinates(vs[i-1]->id(), &xtmp2);
+            std::array<point_3d_t, 4> new_tet = {xtmp2, xtmp1, xm, xc};
+            tcoords->emplace_back( std::move(new_tet) );
+            xtmp1 = xtmp2;
+          }
+          node_get_coordinates(vs[nv-1]->id(), &xtmp2);
+          std::array<point_3d_t, 4> new_tet = {xtmp2, xtmp1, xm, xc};
+          tcoords->emplace_back( std::move(new_tet) );
+        }
+        // iterate through points forward
+        else {
+          node_get_coordinates(vs[0]->id(), &xtmp1);
+          for ( size_t i=0; i<nv-1; ++i ) {
+            node_get_coordinates(vs[i+1]->id(), &xtmp2);
+            std::array<point_3d_t, 4> new_tet = {xtmp2, xtmp1, xm, xc};
+            tcoords->emplace_back( std::move(new_tet) );
+            xtmp1 = xtmp2;
+          }
+          node_get_coordinates(vs[0]->id(), &xtmp2);
+          std::array<point_3d_t, 4> new_tet = {xtmp2, xtmp1, xm, xc};
+          tcoords->emplace_back( std::move(new_tet) );
+        }
+
+      } // num vertices
+    
+    } // faces
+  }
 
   //============================================================================
   // Public Members Required By Portage
@@ -674,24 +742,17 @@ public:
   //! Get global id */
   int get_global_id(size_t id, entity_kind_t const kind) const
   {
-    const auto & context = flecsi::execution::context_t::instance();
      if (kind == entity_kind_t::NODE)
      {
-       const auto & local_to_global_id_map = 
-       context.index_map( mesh_t::index_spaces_t::vertices );
-       return local_to_global_id_map.at(id);
+       return vert_local_to_global_id_map_->at(id);
      }    
      else if (kind == entity_kind_t::FACE)
      { 
-       const auto & local_to_global_id_map = 
-       context.index_map( mesh_t::index_spaces_t::faces );
-       return local_to_global_id_map.at(id);
+       return face_local_to_global_id_map_->at(id);
      }
      else if (kind == entity_kind_t::CELL)
      { 
-       const auto & local_to_global_id_map = 
-       context.index_map( mesh_t::index_spaces_t::cells );
-       return local_to_global_id_map.at(id);
+       return cell_local_to_global_id_map_->at(id);
      }
      else {
        THROW_RUNTIME_ERROR("unknown kind");
@@ -718,6 +779,9 @@ private:
   const real_t * cell_volumes_ = nullptr;
   const vector_t * cell_centroids_ = nullptr;
 
+  const std::map<size_t, size_t> * vert_local_to_global_id_map_ = nullptr;
+  const std::map<size_t, size_t> * face_local_to_global_id_map_ = nullptr; 
+  const std::map<size_t, size_t> * cell_local_to_global_id_map_ = nullptr; 
 };
 
 

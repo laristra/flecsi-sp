@@ -258,7 +258,9 @@ public:
   //! data is not found in the state manager, a @c nullptr is returned.
   void mesh_add_data(entity_kind_t on_what, std::string const& name,
       double const **data) const
-  {}
+  {
+    THROW_RUNTIME_ERROR("mesh_add_data not implemented");
+  }
 
   //! \brief Add a scalar multi-valued data field on cells and initialize its
   //! material data to a single value
