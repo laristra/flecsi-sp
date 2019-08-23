@@ -11,7 +11,7 @@
 #include <flecsi-sp/io/detail.h>
 
 #include <flecsi/coloring/dcrs_utils.h>
-#include <flecsi/topology/mesh_definition.h>
+#include <flecsi/topology/parallel_mesh_definition.h>
 #include <flecsi/utils/logging.h>
 #include <flecsi/utils/logging.h>
 
@@ -34,6 +34,10 @@
 
 namespace flecsi_sp {
 namespace io {
+
+template <std::size_t DIM, typename REAL_TYPE >
+using mesh_definition =
+  flecsi::topology::parallel_mesh_definition_u<DIM, REAL_TYPE>;
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
@@ -816,7 +820,7 @@ class exodus_definition {};
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition<1, T> : public flecsi::topology::mesh_definition_u<1>
+class exodus_definition<1, T> : public mesh_definition<1, T>
 {
 
 public:
@@ -828,7 +832,7 @@ public:
   using base_t = exodus_base<1, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition_u<1>;
+  using mesh_definition_t = mesh_definition<1, T>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
@@ -1147,7 +1151,7 @@ private:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition<2, T> : public flecsi::topology::mesh_definition_u<2, T>
+class exodus_definition<2, T> : public mesh_definition<2, T>
 {
 
 public:
@@ -1159,7 +1163,7 @@ public:
   using base_t = exodus_base<2, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition_u<2>;
+  using mesh_definition_t = mesh_definition<2, T>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
@@ -1170,7 +1174,8 @@ public:
   //! the index type
   using index_t = typename base_t::index_t;
 
-  using typename flecsi::topology::mesh_definition_u<2, T>::byte_t;
+  //! the byte type
+  using typename mesh_definition_t::byte_t;
 
   //! the vector type
   template<typename U>
@@ -1929,6 +1934,11 @@ public:
 
   }
 
+  const std::vector<size_t> & face_owners() const override {
+    THROW_RUNTIME_ERROR( "Face owners not implemented in 2d" );
+    return face_owner_;
+  }
+
   const std::vector<size_t> & region_ids() const override {
     return cell_block_id_;
   }
@@ -1943,7 +1953,10 @@ private:
 
   //! \brief storage for cell to vertex connectivity
   std::map<index_t, std::map<index_t, crs_t>> local_connectivity_;
-        
+  
+  //!\ brief empty storage for face owners (only used in 3d right now)
+  std::vector<index_t> face_owner_;
+
   //! \brief global/local id maps
   std::map<index_t, std::map<index_t, index_t>> global_to_local_;
   std::map<index_t, vector<index_t>> local_to_global_;
@@ -1961,7 +1974,7 @@ private:
 /// io_base_t provides registrations of the exodus file extensions.
 ////////////////////////////////////////////////////////////////////////////////
 template<typename T>
-class exodus_definition<3, T> : public flecsi::topology::mesh_definition_u<3>
+class exodus_definition<3, T> : public mesh_definition<3, T>
 {
 
 public:
@@ -1973,7 +1986,7 @@ public:
   using base_t = exodus_base<3, T>;
 
   //! the instantiated mesh definition type
-  using mesh_definition_t = flecsi::topology::mesh_definition_u<3>;
+  using mesh_definition_t = mesh_definition<3, T>;
 
   //! the number of dimensions
   using mesh_definition_t::dimension;
@@ -1986,6 +1999,9 @@ public:
   //! the vector type
   template<typename U>
   using vector = typename base_t::template vector<U>;
+  
+  //! the byte type
+  using typename mesh_definition_t::byte_t;
 
   //! the connectivity type
   using connectivity_t = typename base_t::connectivity_t;
