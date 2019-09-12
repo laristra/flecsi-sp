@@ -10,10 +10,24 @@
 // hydro includes
 #include <cinch/logging/cinchlog.h>
 #include <flecsi-sp/burton/burton_specialization_init.h>
-#include <flecsi-sp/burton/burton_specialization_arguments.h>
+#include <ristra/initialization/arguments.h>
 
 namespace flecsi {
 namespace execution {
+ 
+// register command line arguments
+auto register_mesh_args = 
+  ristra::initialization::command_line_arguments_t::instance().register_group(
+    "mesh", "Mesh specialization parameters" );
+
+auto register_mesh_args_file = 
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<std::string>("mesh", "mesh-file,m", "Specify mesh file" );
+
+auto register_mesh_args_entries = 
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<int>( "mesh", "max-entries,e",
+        "Specify the maximum number of sparse entries" ); 
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -33,15 +47,16 @@ void specialization_tlt_init(int argc, char** argv)
   // Parse arguments
   //===========================================================================
 
-  auto args = flecsi_sp::burton::process_arguments( argc, argv );
+  // check command line arguments
+  auto & cmdl = ristra::initialization::command_line_arguments_t::instance();
+  auto args = cmdl.process_arguments(argc, argv);
+  const auto & variables = args.variables;
 
-  // process the simple ones
-  if ( args.count("h") )
-    return;
+  if ( variables.count("help") ) exit(0);
+  if ( args.error ) exit(-1);
 
   // get the input file
-  auto mesh_filename_string =
-    args.count("m") ? args.at("m") : std::string();
+  auto mesh_filename_string = variables.as<std::string>("mesh-file");
 
   // override any inputs if need be
   if ( !mesh_filename_string.empty() ) {
@@ -54,9 +69,8 @@ void specialization_tlt_init(int argc, char** argv)
   }
   
   // get the maximum number of entries
-  std::size_t max_entries =
-    args.count("e") ? std::stoi(args.at("e")) : 5;
-  if ( args.count("e") && rank == 0 )
+  std::size_t max_entries = variables.as<int>("max-entries", 5);
+  if ( variables.count("max-entries") && rank == 0 )
       std::cout << "Setting max_entries to \"" << max_entries << "\"." << std::endl;
 
   //===========================================================================
@@ -80,28 +94,11 @@ void specialization_spmd_init(int argc, char** argv)
 {
   clog(info) << "In specialization spimd init" << std::endl;
 
-  //===========================================================================
-  // Parse arguments
-  //===========================================================================
-
-  auto args = flecsi_sp::burton::process_arguments( argc, argv );
-  // Assume arguments are sanitized
-
-  // get the input file
-  auto mesh_filename_string =
-    args.count("m") ? args.at("m") : std::string();
-
-  // need to put the filename into a statically sized character array
-  auto mesh_filename = flecsi_sp::utils::to_char_array( mesh_filename_string );
-
-  //===========================================================================
-  // Load the mesh
-  //===========================================================================
-
   // get a mesh handle and call the initialization task
   auto mesh_handle = flecsi_get_client_handle(
       flecsi_sp::burton::burton_mesh_t, meshes, mesh0);
-  flecsi_execute_mpi_task(initialize_mesh, flecsi_sp::burton, mesh_handle);
+
+  flecsi_execute_task(initialize_mesh, flecsi_sp::burton, index, mesh_handle);
 }
 
 } // namespace

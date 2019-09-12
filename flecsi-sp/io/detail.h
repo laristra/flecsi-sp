@@ -291,6 +291,45 @@ void filter_block(
   }
 }
 
+template< typename T, typename U, typename V, typename W, typename X >
+void filter_sides(
+    size_t ss_id,
+    const T & side_set_node_cnt_list,
+    const T & side_set_node_list,
+    const T & side_set_elem_list,
+    size_t cell_min,
+    size_t cell_max,
+    U & side_id_,
+    V & element_to_sides_,
+    W & side_to_vertices_,
+    X & side_sets_ )
+{
+
+  auto num_side_in_set = side_set_elem_list.size();
+  
+  // filter sides for elementes i own
+  std::vector<size_t> vs;
+  for ( size_t j=0; j<num_side_in_set; ++j ) {
+    auto global_id = side_set_elem_list[j] - 1;
+    if (global_id >= cell_min && global_id <= cell_max )
+    {
+      auto & this_ss = side_sets_[ss_id];
+      // get the vertices
+      auto side_start = side_set_node_cnt_list[j];
+      auto side_end = side_set_node_cnt_list[j+1];
+      vs.clear();
+      vs.reserve(side_end - side_start);
+      for ( size_t k=side_start; k<side_end; ++k )
+        vs.emplace_back( side_set_node_list[k] - 1 );
+      // add side info
+      auto side_id = side_to_vertices_.size();
+      side_id_.emplace_back( ss_id-1 );
+      element_to_sides_[global_id].push_back(side_id);
+      side_to_vertices_.push_back(vs);
+    }
+  }
+
+}
 
 }  // namespace detail
 }  // namespace io

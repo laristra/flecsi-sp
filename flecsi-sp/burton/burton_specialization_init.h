@@ -156,6 +156,12 @@ void create_cells(
   auto num_owned_edges =
     edge_coloring.exclusive.size() + edge_coloring.shared.size();
 
+
+  // get the side vertices
+  const auto & side_vertices = mesh_def.side_vertices();
+  const auto & side_ids = mesh_def.side_ids();
+  std::vector<size_t> sides;
+
   // create the edges
   for(auto & em: edge_lid_to_mid) {
 
@@ -164,6 +170,7 @@ void create_cells(
 
     // clear the list
     elem_vs.clear();
+    sides.clear();
 
     // search this ranks mesh definition for the matching offset
     auto it = edge_global2local.find( mid );
@@ -187,6 +194,27 @@ void create_cells(
           return vertices[ flecsi_id ];
         }
       );
+
+      // convert to global for search
+      std::vector<size_t> sorted_vs( vs.begin(), vs.end() );
+      for ( auto & v : sorted_vs ) v = vert_local2global[v];
+      std::sort(sorted_vs.begin(), sorted_vs.end());
+
+      // find matching sides
+      for ( size_t is=0; is<side_vertices.size(); ++is ) {
+        const auto & test_vs = side_vertices.at(is);
+        bool match{false};
+        if ( test_vs[0] < test_vs[1] ) {
+          match = test_vs[0] == sorted_vs[0] && test_vs[1] == sorted_vs[1];
+        }
+        else {
+          match = test_vs[1] == sorted_vs[0] && test_vs[0] == sorted_vs[1];
+        }
+        if (match) {
+          sides.emplace_back( side_ids[is] );
+        }
+      }
+
     }
     
     // otherwise it is a ghost edge
@@ -211,6 +239,12 @@ void create_cells(
     // add the connectivity
     mesh.template init_entity<0, edge_t::dimension, vertex_t::dimension>(
         new_edge, elem_vs);
+    // add any tags
+    std::sort( sides.begin(), sides.end() );
+    auto last = std::unique( sides.begin(), sides.end() );
+    for ( auto it=sides.begin(); it != last; ++it ) {
+      new_edge->tag(*it);
+    }
   }
 
 
@@ -463,6 +497,19 @@ void create_cells(
   auto num_owned_faces =
     face_coloring.exclusive.size() + face_coloring.shared.size();
   
+  // get the side vertices
+  const auto & side_vertices = mesh_def.side_vertices();
+  const auto & side_ids = mesh_def.side_ids();
+  std::vector<size_t> sides;
+
+  auto num_sides = side_vertices.size();
+  std::vector< std::vector<size_t> > sorted_side_vertices( num_sides );
+  for ( size_t i=0; i<num_sides; ++i ) {
+    const auto & vs = side_vertices.at(i);
+    sorted_side_vertices[i].assign( vs.begin(), vs.end() );
+    std::sort( sorted_side_vertices[i].begin(), sorted_side_vertices[i].end() );
+  }
+  
   // create the faces
   for(auto & em: face_lid_to_mid) {
 
@@ -471,6 +518,7 @@ void create_cells(
 
     // clear the list
     elem_vs.clear();
+    sides.clear();
 
     // search this ranks mesh definition for the matching offset
     auto it = face_global2local.find( mid );
@@ -478,6 +526,7 @@ void create_cells(
     
     // the vertex exists on this rank so create it
     if ( is_mine && it != face_global2local.end() ) {
+
       // get the list of vertices
       auto id = it->second;
       const auto & vs = face_to_vertices.at(id);
@@ -498,6 +547,18 @@ void create_cells(
       // vertices
       //if ( face_owners[id] != cell_local2global[cell_id] )
       //  std::reverse( elem_vs.begin(), elem_vs.end() );
+      
+      // convert to global for search
+      std::vector<size_t> sorted_vs( vs.begin(), vs.end() );
+      for ( auto & v : sorted_vs ) v = vert_local2global[v];
+      std::sort(sorted_vs.begin(), sorted_vs.end());
+      
+      // find matching sides
+      for ( size_t is=0; is<sorted_side_vertices.size(); ++is ) {
+        const auto & test_vs = sorted_side_vertices.at(is);
+        if ( std::equal( sorted_vs.begin(), sorted_vs.end(), test_vs.begin() ) )
+          sides.emplace_back( side_ids[is] );
+      }
     }
     
     // otherwise it is a ghost face
@@ -520,6 +581,12 @@ void create_cells(
     auto f = mesh.create_face(elem_vs);
     f->global_id().set_global(mid);
     faces.emplace_back( f );
+    // add any tags
+    std::sort( sides.begin(), sides.end() );
+    auto last = std::unique( sides.begin(), sides.end() );
+    for ( auto it=sides.begin(); it != last; ++it ) {
+      f->tag(*it);
+    }
   }
 
 
@@ -3551,7 +3618,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     ristra::utils::zero_padded(comm_size) + "." +
     ristra::utils::zero_padded(rank);
     auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
-    if (rank == 0)
+    if (rank == 0 && comm_size > 1)
       std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
     exo_def->write( output_filename );
   }
@@ -3810,7 +3877,6 @@ void initialize_mesh(
   create_extras( *mesh_def, *extra_mesh_info, mesh );
 #endif
 
-
   // initialize the mesh
   mesh.init();
 
@@ -3829,14 +3895,8 @@ void initialize_mesh(
 // Task Registration
 ///////////////////////////////////////////////////////////////////////////////
 flecsi_register_mpi_task(partition_mesh, flecsi_sp::burton);
-flecsi_register_mpi_task(initialize_mesh, flecsi_sp::burton);
-
-///////////////////////////////////////////////////////////////////////////////
-// Clent Registration happens here because the specialization initialization
-// needs to know which mesh to access
-///////////////////////////////////////////////////////////////////////////////
-flecsi_register_data_client(burton_mesh_t, meshes, mesh0);
-
+flecsi_register_task(initialize_mesh, flecsi_sp::burton, loc,
+    index|flecsi::leaf);
 
 #ifdef BURTON_ENABLE_APPLICATION_TLT_INIT
 void application_tlt_init(int argc, char **argv);

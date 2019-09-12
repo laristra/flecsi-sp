@@ -82,6 +82,103 @@ public:
   //! An enumeration to keep track of element types
   enum class block_t { tri, quad, polygon, tet, hex, polyhedron, unknown };
 
+
+  struct side_set_info_t {
+    std::string label;
+    void pack(std::vector<unsigned char> & buffer) const
+    {
+      size_t len = label.size();
+      flecsi::topology::cast_insert( &len, 1, buffer );
+      flecsi::topology::cast_insert( label.c_str(), len, buffer );
+    }
+    void unpack(unsigned char const * & buffer)
+    {
+      size_t len;
+      flecsi::topology::uncast( buffer, 1, &len );
+      label.resize(len);
+      flecsi::topology::uncast( buffer, len, label.data() );
+    }
+
+    static void broadcast( std::map<size_t, side_set_info_t> & side_sets_ ) {
+
+      using byte_t = unsigned char;
+      auto num_side_sets = side_sets_.size();
+    
+      int comm_size, comm_rank;
+      MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+      MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+      
+      // now make sure everyone has all side set meta data
+      const auto mpi_size_t = flecsi::utils::mpi_typetraits_u<size_t>::type();
+      size_t tot_side_sets{0};
+      MPI_Allreduce(
+        &num_side_sets,
+        &tot_side_sets,
+        1,
+        mpi_size_t,
+        MPI_SUM,
+        MPI_COMM_WORLD);
+
+      if ( tot_side_sets > 0 ) {
+
+        // pack buffer
+        std::vector<byte_t> sendbuf;
+        for ( auto ss : side_sets_ ) {
+          flecsi::topology::cast_insert( &ss.first, 1, sendbuf );
+          ss.second.pack(sendbuf);
+        }
+
+        // exchange buffer sizes
+        int buf_len = sendbuf.size();
+        std::vector<int> recvcounts(comm_size);
+        MPI_Allgather(&buf_len, 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
+                MPI_COMM_WORLD);
+
+        // compute receive displacements
+        std::vector<int> recvdispls(comm_size+1);
+        recvdispls[0] = 0;
+        for ( size_t r=0; r<comm_size; ++r )
+          recvdispls[r+1] = recvdispls[r] + recvcounts[r]; 
+      
+        // exchange data
+        std::vector<byte_t> recvbuf(recvdispls[comm_size]);
+        MPI_Allgatherv(sendbuf.data(), buf_len, MPI_BYTE,
+          recvbuf.data(), recvcounts.data(), recvdispls.data(),
+          MPI_BYTE, MPI_COMM_WORLD);
+
+        // unpack
+        for ( size_t r=0; r<comm_size; ++r ) {
+      
+          auto start = recvdispls[r];
+          auto end = recvdispls[r+1];
+          const auto * buffer = &recvbuf[ start ];
+          const auto * buffer_end = &recvbuf[ end ];
+      
+          for ( size_t i=start; i<end; ) {
+
+            const auto * buffer_start = buffer;
+
+            // the side id
+            size_t side_id;
+            flecsi::topology::uncast( buffer, 1, &side_id );
+
+            // the side info
+            side_set_info_t new_ss;
+            new_ss.unpack( buffer );
+            side_sets_.try_emplace( side_id, std::move(new_ss) );
+
+            // increment pointer
+            i += std::distance( buffer_start, buffer );
+
+          }
+          // make sre we are at the right spot in the buffer
+          assert( buffer == buffer_end &&  "Unpacking mismatch" );
+        }
+      }
+    } // broadcast
+
+  };
+
   //============================================================================
   //! \brief open the file for reading or writing
   //! \param [in] name  The name of the file to open.
@@ -802,6 +899,122 @@ public:
         exoid, blk_id, name, EX_ELEM_BLOCK, entity_desc, num_elems,
         std::forward<CONN_TYPE>(element_conn));
   }
+  
+  template<typename U>
+  static auto
+  read_side_set_ids(int exoid, size_t num_side_sets) {
+    // some type aliases
+    using ex_index_t = U;
+
+    // final storage
+    vector<index_t> ids(num_side_sets);
+
+    if (num_side_sets > 0) {
+
+      // get the ids first
+      vector<ex_index_t> ss_ids(num_side_sets);
+      auto status = ex_get_side_set_ids(exoid, ss_ids.data());
+      if (status)
+        clog_fatal(
+            "Problem reading side set ids, ex_get_ids() returned " << status);
+
+      // now convert them
+      std::transform(
+          ss_ids.begin(), ss_ids.end(), ids.begin(),
+          [](auto id) { return id; });
+    }
+
+    // now return them
+    return ids;
+  }
+
+  static auto
+  read_side_set_names(int exoid, size_t num_side_sets) {
+
+    // final storage
+    vector<std::string> names(num_side_sets);
+
+    if (num_side_sets > 0) {
+
+      // get the ids first
+      auto ss_names = new char*[num_side_sets];
+      for (int i=0; i<num_side_sets; ++i)
+        ss_names[i] = new char[MAX_STR_LENGTH+1];
+      auto status = ex_get_names (exoid, EX_SIDE_SET, ss_names);
+      if (status)
+        clog_fatal(
+            "Problem reading side set names, ex_get_names() returned " << status);
+
+
+      for (int i = 0; i < num_side_sets; i++){
+        // if no label, use the id
+        if ( strlen(ss_names[i]) != 0 )
+          names [i] = ss_names[i];
+      }
+      
+      // can clean up ss names
+      for ( int i=0; i<num_side_sets; ++i ) delete[] ss_names[i];
+      delete[] ss_names;
+
+
+    }
+
+    // now return them
+    return names;
+  }
+
+  template<typename U>
+  static auto read_side_set(
+      int exoid,
+      ex_entity_id ss_id,
+      vector<U> & side_set_node_cnt_list,
+      vector<U> & side_set_node_list,
+      vector<U> & side_set_elem_list
+  ) {
+
+    // some type aliases
+    using ex_index_t = U;
+
+    // get side set params
+    ex_index_t num_side_in_set;
+    ex_index_t num_dist_fact_in_set;
+    auto status = ex_get_side_set_param(exoid, ss_id, &num_side_in_set,
+      &num_dist_fact_in_set);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set_param() returned " << status);
+
+    // get side set connectivitiy lenght
+    ex_index_t side_set_node_list_len;
+    status = ex_get_side_set_node_list_len(exoid, ss_id, &side_set_node_list_len);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set_node_list_len() returned " << status);
+
+    // get the actual connectivity
+    side_set_node_cnt_list.resize(num_side_in_set + 1);
+    side_set_node_list.resize( side_set_node_list_len);
+    status = ex_get_side_set_node_list(exoid, ss_id, side_set_node_cnt_list.data()+1,
+      side_set_node_list.data());
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set_node_list() returned " << status);
+
+    // convert to offsets
+    side_set_node_cnt_list[0] = 0;
+    for ( size_t j=0; j<num_side_in_set; ++j )
+      side_set_node_cnt_list[j+1] += side_set_node_cnt_list[j];
+
+    // now get the side set element data
+    side_set_elem_list.resize(num_side_in_set);
+    status = ex_get_side_set(exoid, ss_id, side_set_elem_list.data(), nullptr);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set() returned " << status);
+
+
+  }
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1341,7 +1554,7 @@ public:
       auto global_id = cell_local2global_[i];
       cell_global2local_.emplace( std::make_pair( global_id, i ) );
     }
-    
+
     //--------------------------------------------------------------------------
     // read coordinates
 
@@ -1419,6 +1632,60 @@ public:
       }
 
     } // parallel
+    
+    //--------------------------------------------------------------------------
+    // read side sets
+    auto num_side_sets = exo_params.num_side_sets;
+
+    if(num_side_sets > 0){
+
+      // get the side set ids
+      vector<index_t> ss_ids;
+      if (int64)
+        ss_ids = base_t::template read_side_set_ids<long long>(
+          exoid, num_side_sets);
+      else
+        ss_ids = base_t::template read_side_set_ids<int>(
+          exoid, num_side_sets);
+
+      // get the side set names
+      auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
+
+      for (int i = 0; i < num_side_sets; i++){
+        // if no label, use the id
+        if ( ss_names[i].empty() )
+          ss_names[i] = std::to_string( ss_ids[i] ); 
+        
+        if (int64) {
+          std::vector<long long> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
+          base_t::template read_side_set<long long>(
+            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+        
+          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
+            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
+            side_to_vertices_, side_sets_ );
+        }
+        else {
+          std::vector<int> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
+          base_t::template read_side_set<int>(
+            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+        
+          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
+            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
+            side_to_vertices_, side_sets_ );
+        }
+
+        // if this side set is used on this rank
+        auto sit = side_sets_.find(ss_ids[i]);
+        if ( sit != side_sets_.end() ) {
+          sit->second.label = ss_names[i];
+        }
+
+      } // for side set 
+
+    } // ss > 0
+
+    base_t::side_set_info_t::broadcast( side_sets_ );
 
     //--------------------------------------------------------------------------
     // close the file
@@ -1613,6 +1880,10 @@ public:
   }
 
 
+  const std::vector<std::vector<size_t>> &
+  entities(size_t from_dim, size_t to_dim) const override
+  { return empty_connectivity_; }
+
   const crs_t &
   entities_crs(size_t from_dim, size_t to_dim) const override {
     return local_connectivity_.at(from_dim).at(to_dim);
@@ -1676,6 +1947,9 @@ public:
     // erase any vertices that are no longer used.
     auto & cells2verts = local_connectivity_.at(num_dims).at(0);
     std::vector<index_t> check_vertices;
+
+    // erase any sides that are no longer used
+    std::vector<index_t> check_sides;
     
     // erase the local mapping
     auto & cell_local2global = local_to_global_.at(num_dims);
@@ -1710,6 +1984,14 @@ public:
       for ( auto & pair : cell_global2local )
         if ( pair.second>local_id )
           pair.second--;
+
+      // remove sides
+      auto sit = element_to_sides_.find( global_id );
+      if ( sit != element_to_sides_.end() ) {
+        const auto & sides = sit->second; 
+        check_sides.insert( check_sides.end(), sides.begin(), sides.end() );
+        element_to_sides_.erase(sit);
+      }
       
       // decrement number of cells
       num_cells--;
@@ -1732,8 +2014,7 @@ public:
 
     // find vertices that are no longer used
     std::vector<index_t> delete_vertices;
-    delete_vertices.reserve(
-        std::distance(check_vertices.begin(), check_vertices.end()) );
+    delete_vertices.reserve( std::distance(check_vertices.begin(), last) );
 
     for ( auto it = check_vertices.begin(); it != last; ++it ) {
       // mark unused first
@@ -1826,6 +2107,80 @@ public:
 
     } // delete vertices
     
+    //--------------------------------------------------------------------------
+    // Determine unused sides
+    
+    // sort sides to check and remove duplicates
+    std::sort( check_sides.begin(), check_sides.end() );
+    last = std::unique( check_sides.begin(), check_sides.end() );
+
+    // find vertices that are no longer used
+    std::vector<index_t> delete_sides;
+    delete_sides.reserve( std::distance(check_sides.begin(), last) );
+
+    for ( auto it = check_sides.begin(); it != last; ++it ) {
+      // mark unused first
+      bool used = false;
+      // iterate over all cell-vertices, and bounce if its used
+      for ( const auto & pair : element_to_sides_ ) {
+        for ( auto s : pair.second ) {
+          if ( s == *it ) {
+            used = true;
+            break;
+          }
+        }
+      }
+      // if vertex is unused, add to list to delete
+      if ( !used ) delete_sides.emplace_back( *it );
+    }
+    
+    //--------------------------------------------------------------------------
+    // Delete sides
+
+    num_remove = delete_sides.size();
+    if ( num_remove ) {
+
+      // current number of sides
+      auto num_sides = side_id_.size();
+
+      // delete side to vertex connectivity
+      side_to_vertices_.erase( delete_sides );
+
+      // storage for renumberings
+      vector<index_t>
+        old2new( num_sides, std::numeric_limits<size_t>::max() );
+      
+      // add the number of sides to the oend
+      delete_sides.emplace_back( num_sides );
+
+      // figure new numbering
+      size_t i{0};
+      size_t side_count = 0;
+
+      for (auto it=delete_sides.begin(); it != delete_sides.end(); ++it)
+      {
+        for ( ; i<*it; ++i ) {
+          // renumber side ids while you are at it
+          side_id_[ side_count ] = side_id_[ i ];
+          // store new numbering
+          old2new[i] = side_count;
+          side_count++;
+        }
+        i++;
+      }
+
+      // can resize side ids now
+      side_id_.resize( side_count );
+
+      // renumber element sides
+      for ( auto & pair : element_to_sides_ )
+        for ( auto & s : pair.second ) 
+          s = old2new[s];
+
+    }
+   
+    
+    
   }
 
   void pack(
@@ -1843,7 +2198,8 @@ public:
     const auto & cells_local2global = local_to_global_.at(num_dims);
     const auto & verts_local2global = local_to_global_.at(0);
     // add mesh global id to buffer
-    flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
+    auto global_id = cells_local2global[local_id];
+    flecsi::topology::cast_insert( &global_id, 1, buffer );
     // add cell block info
     flecsi::topology::cast_insert( &cell_block_id_[local_id], 1, buffer );
     flecsi::topology::cast_insert( &cell_type_[local_id], 1, buffer );
@@ -1861,6 +2217,24 @@ public:
       auto coord = vertices_.data() + lid*num_dims;
       flecsi::topology::cast_insert( coord, num_dims, buffer );
     }
+    // add side_sets to buffer
+    auto sit = element_to_sides_.find(global_id);
+    if ( sit != element_to_sides_.end() ) {
+      const auto & sides = sit->second;
+      size_t num_sides = sides.size();
+      flecsi::topology::cast_insert( &num_sides, 1, buffer );
+      for ( auto s : sides ) {
+        flecsi::topology::cast_insert( &side_id_[s], 1, buffer );
+        const auto & vs = side_to_vertices_.at(s);
+        auto n = vs.size();
+        flecsi::topology::cast_insert( &n, 1, buffer );
+        flecsi::topology::cast_insert( vs.begin(), n, buffer );
+      }
+    }
+    else {
+      size_t num_sides = 0;
+      flecsi::topology::cast_insert( &num_sides, 1, buffer );
+    } // has sides
   }
 
   void unpack(
@@ -1904,10 +2278,31 @@ public:
     cells2verts.offsets.emplace_back( end );
     cells2verts.indices.resize( end );
     flecsi::topology::uncast( buffer, num_verts, &cells2verts.indices[start] );
-
+    
     // unpack vertex coordinates
     vector<real_t> coords(num_dims*num_verts);
     flecsi::topology::uncast( buffer, coords.size(), coords.data() );
+
+    // retreive side_sets
+    size_t num_sides;
+    flecsi::topology::uncast( buffer, 1, &num_sides );
+    if ( num_sides > 0 ) {
+      auto & sides = element_to_sides_[global_id];
+      sides.reserve(sides.size() + num_sides);
+      for ( size_t i=0; i<num_sides; ++i ) {
+        size_t side_id;
+        flecsi::topology::uncast( buffer, 1, &side_id );
+        sides.emplace_back( side_id_.size() );
+        side_id_.emplace_back( side_id );
+        size_t nv;
+        flecsi::topology::uncast( buffer, 1, &nv );
+        auto st = side_to_vertices_.offsets.back();
+        auto en = st + nv;
+        side_to_vertices_.offsets.emplace_back( en );
+        side_to_vertices_.indices.resize( en );
+        flecsi::topology::uncast( buffer, nv, &side_to_vertices_.indices[st] );
+      }
+    } // has sides
 
     // need to convert global vertex ids to local ids
     auto & verts_local2global = local_to_global_.at(0);
@@ -1943,6 +2338,22 @@ public:
     return cell_block_id_;
   }
 
+  std::vector<size_t> element_sides(size_t id) const override {
+    auto it = element_to_sides_.find(id);
+    if ( it == element_to_sides_.end() )
+      return {};
+    else
+      return it->second;
+  }
+
+  virtual const flecsi::coloring::crs_t & side_vertices() const {
+    return side_to_vertices_;
+  }
+  
+  virtual const std::vector<size_t> & side_ids() const {
+    return side_id_;
+  }
+
 private:
   //============================================================================
   // Private data
@@ -1965,6 +2376,14 @@ private:
   std::vector<index_t> cell_block_id_;
   std::vector<typename base_t::block_t> cell_type_;
 
+  //! \brief need for now (but not used)
+  std::vector<std::vector<size_t>> empty_connectivity_;
+
+  std::map<size_t, typename base_t::side_set_info_t> side_sets_;
+  
+  std::map<size_t, std::vector<size_t>> element_to_sides_;
+  crs_t side_to_vertices_;
+  std::vector<size_t> side_id_;
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2477,6 +2896,59 @@ public:
     }
 
     //--------------------------------------------------------------------------
+    // read side sets
+    auto num_side_sets = exo_params.num_side_sets;
+
+    if(num_side_sets > 0){
+
+      // get the side set ids
+      vector<index_t> ss_ids;
+      if (int64)
+        ss_ids = base_t::template read_side_set_ids<long long>(
+          exoid, num_side_sets);
+      else
+        ss_ids = base_t::template read_side_set_ids<int>(
+          exoid, num_side_sets);
+
+      // get the side set names
+      auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
+
+      for (int i = 0; i < num_side_sets; i++){
+        // if no label, use the id
+        if ( ss_names[i].empty() )
+          ss_names[i] = std::to_string( ss_ids[i] ); 
+        
+        if (int64) {
+          std::vector<long long> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
+          base_t::template read_side_set<long long>(
+            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+        
+          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
+            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
+            side_to_vertices_, side_sets_ );
+        }
+        else {
+          std::vector<int> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
+          base_t::template read_side_set<int>(
+            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+        
+          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
+            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
+            side_to_vertices_, side_sets_ );
+        }
+
+        // if this side set is used on this rank
+        auto sit = side_sets_.find(ss_ids[i]);
+        if ( sit != side_sets_.end() ) {
+          sit->second.label = ss_names[i];
+        }
+
+      } // for side set 
+
+    } // ss > 0
+
+    base_t::side_set_info_t::broadcast( side_sets_ );
+    //--------------------------------------------------------------------------
     // close the file
     base_t::close(exoid);
   }
@@ -2755,6 +3227,9 @@ public:
     return global_to_local_.at(dim);
   }
 
+  const std::vector<std::vector<size_t>> &
+  entities(size_t from_dim, size_t to_dim) const override
+  { return empty_connectivity_; }
 
   const crs_t &
   entities_crs(size_t from_dim, size_t to_dim) const override {
@@ -2815,7 +3290,8 @@ public:
     const auto & verts_local2global = local_to_global_.at(0);
 
     // add mesh global id to buffer
-    flecsi::topology::cast_insert( &cells_local2global[local_id], 1, buffer );
+    auto global_id = cells_local2global[local_id];
+    flecsi::topology::cast_insert( &global_id, 1, buffer );
 
     flecsi::topology::cast_insert( &cell_block_id_[local_id], 1, buffer );
     flecsi::topology::cast_insert( &cell_type_[local_id], 1, buffer );
@@ -2864,9 +3340,32 @@ public:
           auto gid = verts_local2global[vid];
           flecsi::topology::cast_insert( &gid, 1, buffer );
         }
-      } // faces
+      } // face
 
-    }
+    } // faces
+
+    //--------------------------------------------------------------------------
+    // now pack sides
+    {
+      // add side_sets to buffer
+      auto sit = element_to_sides_.find(global_id);
+      if ( sit != element_to_sides_.end() ) {
+        const auto & sides = sit->second;
+        size_t num_sides = sides.size();
+        flecsi::topology::cast_insert( &num_sides, 1, buffer );
+        for ( auto s : sides ) {
+          flecsi::topology::cast_insert( &side_id_[s], 1, buffer );
+          const auto & vs = side_to_vertices_.at(s);
+          auto n = vs.size();
+          flecsi::topology::cast_insert( &n, 1, buffer );
+          flecsi::topology::cast_insert( vs.begin(), n, buffer );
+        }
+      }
+      else {
+        size_t num_sides = 0;
+        flecsi::topology::cast_insert( &num_sides, 1, buffer );
+      } // has sides
+    } // sides
   }
 
   void unpack(
@@ -2998,7 +3497,32 @@ public:
       cells2faces.append( fs.begin(), fs.end() );
 
     } // faces
-    
+   
+    //--------------------------------------------------------------------------
+    // sides
+    {
+      // retreive side_sets
+      size_t num_sides;
+      flecsi::topology::uncast( buffer, 1, &num_sides );
+      if ( num_sides > 0 ) {
+        auto & sides = element_to_sides_[global_id];
+        sides.reserve(sides.size() + num_sides);
+        for ( size_t i=0; i<num_sides; ++i ) {
+          size_t side_id;
+          flecsi::topology::uncast( buffer, 1, &side_id );
+          sides.emplace_back( side_id_.size() );
+          side_id_.emplace_back( side_id );
+          size_t nv;
+          flecsi::topology::uncast( buffer, 1, &nv );
+          auto st = side_to_vertices_.offsets.back();
+          auto en = st + nv;
+          side_to_vertices_.offsets.emplace_back( en );
+          side_to_vertices_.indices.resize( en );
+          flecsi::topology::uncast( buffer, nv, &side_to_vertices_.indices[st] );
+        }
+      } // has sides
+    } // sides
+  
   }
 
   void erase(
@@ -3021,7 +3545,7 @@ public:
     auto & cells2verts = local_connectivity_.at(num_dims).at(0);
     auto & cells2faces = local_connectivity_.at(num_dims).at(2);
     auto & faces2verts = local_connectivity_.at(2).at(0);
-    std::vector<index_t> check_vertices, check_faces;
+    std::vector<index_t> check_vertices, check_faces, check_sides;
     
     // erase the local mapping
     auto & cell_local2global = local_to_global_.at(num_dims);
@@ -3056,6 +3580,14 @@ public:
       for ( auto & pair : cell_global2local )
         if ( pair.second>local_id )
           pair.second--;
+      
+      // remove sides
+      auto sit = element_to_sides_.find( global_id );
+      if ( sit != element_to_sides_.end() ) {
+        const auto & sides = sit->second; 
+        check_sides.insert( check_sides.end(), sides.begin(), sides.end() );
+        element_to_sides_.erase(sit);
+      }
       
       // decrement number of cells
       num_cells--;
@@ -3294,6 +3826,79 @@ public:
       ++face_cnt;
     }
     
+    //--------------------------------------------------------------------------
+    // Determine unused sides
+    
+    // sort sides to check and remove duplicates
+    std::sort( check_sides.begin(), check_sides.end() );
+    auto last = std::unique( check_sides.begin(), check_sides.end() );
+
+    // find vertices that are no longer used
+    std::vector<index_t> delete_sides;
+    delete_sides.reserve( std::distance(check_sides.begin(), last) );
+
+    for ( auto it = check_sides.begin(); it != last; ++it ) {
+      // mark unused first
+      bool used = false;
+      // iterate over all cell-vertices, and bounce if its used
+      for ( const auto & pair : element_to_sides_ ) {
+        for ( auto s : pair.second ) {
+          if ( s == *it ) {
+            used = true;
+            break;
+          }
+        }
+      }
+      // if vertex is unused, add to list to delete
+      if ( !used ) delete_sides.emplace_back( *it );
+    }
+    
+    //--------------------------------------------------------------------------
+    // Delete sides
+
+    num_remove = delete_sides.size();
+    if ( num_remove ) {
+
+      // current number of sides
+      auto num_sides = side_id_.size();
+
+      // delete side to vertex connectivity
+      side_to_vertices_.erase( delete_sides );
+
+      // storage for renumberings
+      vector<index_t>
+        old2new( num_sides, std::numeric_limits<size_t>::max() );
+      
+      // add the number of sides to the oend
+      delete_sides.emplace_back( num_sides );
+
+      // figure new numbering
+      size_t i{0};
+      size_t side_count = 0;
+
+      for (auto it=delete_sides.begin(); it != delete_sides.end(); ++it)
+      {
+        for ( ; i<*it; ++i ) {
+          // renumber side ids while you are at it
+          side_id_[ side_count ] = side_id_[ i ];
+          // store new numbering
+          old2new[i] = side_count;
+          side_count++;
+        }
+        i++;
+      }
+
+      // can resize side ids now
+      side_id_.resize( side_count );
+
+      // renumber element sides
+      for ( auto & pair : element_to_sides_ )
+        for ( auto & s : pair.second ) 
+          s = old2new[s];
+
+    }
+   
+    
   }
 
   void build_connectivity() override {
@@ -3345,6 +3950,22 @@ public:
     return cell_block_id_;
   }
 
+  std::vector<size_t> element_sides(size_t id) const override {
+    auto it = element_to_sides_.find(id);
+    if ( it == element_to_sides_.end() )
+      return {};
+    else
+      return it->second;
+  }
+
+  virtual const flecsi::coloring::crs_t & side_vertices() const {
+    return side_to_vertices_;
+  }
+  
+  virtual const std::vector<size_t> & side_ids() const {
+    return side_id_;
+  }
+
 private:
   //============================================================================
   // Private data
@@ -3367,6 +3988,14 @@ private:
   std::vector<index_t> cell_block_id_;
   std::vector<typename base_t::block_t> cell_type_;
 
+  //! \brief need for now (but not used)
+  std::vector<std::vector<size_t>> empty_connectivity_;
+  
+  std::map<size_t, typename base_t::side_set_info_t> side_sets_;
+  
+  std::map<size_t, std::vector<size_t>> element_to_sides_;
+  crs_t side_to_vertices_;
+  std::vector<size_t> side_id_;
 };
 
 } // namespace io

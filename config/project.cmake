@@ -132,14 +132,15 @@ endif()
 # Boost is needed for program options
 #------------------------------------------------------------------------------#
 
-find_package(Boost COMPONENTS program_options QUIET)
-
+find_package(Boost COMPONENTS program_options REQUIRED)
 # this option overrides what will get set in cinch_load_extras()
 option(
   ENABLE_BOOST
   "Enable Boost program options for command-line flags"
-  ${Boost_FOUND}
+  ON
 )
+include_directories(${Boost_INCLUDE_DIRS})
+list(APPEND FLECSI_SP_LIBRARIES ${Boost_LIBRARIES})
 
 #------------------------------------------------------------------------------#
 # Load the cinch extras
