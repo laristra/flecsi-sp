@@ -1074,7 +1074,7 @@ public:
           );
           if ( fit != fs.end() ) {
             auto local_face_id = std::distance( fs.begin(), fit );
-            elem_list.emplace_back( local_id );
+            elem_list.emplace_back( local_id + 1 );
             side_list.emplace_back( local_face_id + 1 );
           }
         }
@@ -1726,6 +1726,7 @@ public:
       auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
 
       for (int i = 0; i < num_side_sets; i++){
+        
         // if no label, use the id
         if ( ss_names[i].empty() )
           ss_names[i] = std::to_string( ss_ids[i] ); 
@@ -1756,6 +1757,22 @@ public:
         }
 
       } // for side set 
+
+
+      // side connectivity is tracked via global ids for simplicity
+      if ( !serial ) {
+
+        for ( auto & v : side_to_vertices_.indices )
+          v = vertex_local2global_[v];
+
+        decltype(element_to_sides_) new_element_to_sides;
+        for ( auto && pair : element_to_sides_ ) {
+          auto global_id = cell_local2global_[pair.first];
+          new_element_to_sides.emplace( global_id, std::move(pair.second) );
+        }
+        std::swap( new_element_to_sides, element_to_sides_ );
+
+      } // parallel
 
     } // ss > 0
 
@@ -3045,6 +3062,22 @@ public:
         }
 
       } // for side set 
+      
+      // side connectivity is tracked via global ids for simplicity
+      if ( !serial ) {
+
+        for ( auto & v : side_to_vertices_.indices )
+          v = vertex_local2global_[v];
+
+        decltype(element_to_sides_) new_element_to_sides;
+        for ( auto && pair : element_to_sides_ ) {
+          auto global_id = cell_local2global_[pair.first];
+          new_element_to_sides.emplace( global_id, std::move(pair.second) );
+        }
+        std::swap( new_element_to_sides, element_to_sides_ );
+
+      } // parallel
+
 
     } // ss > 0
 
@@ -3109,6 +3142,9 @@ public:
     exo_params.num_face_blk = has_polyhedra ? 1 : 0;
     exo_params.num_elem_blk = blocks.size();
 
+    std::set<size_t> used_sides;
+    for ( auto s : side_id_ ) used_sides.emplace(s);
+    exo_params.num_side_sets = used_sides.size();
 
     //--------------------------------------------------------------------------
     // face blocks
@@ -3293,6 +3329,28 @@ public:
     }
     else {
       base_t::template write_element_map<int>(exoid, cell_global_ids);
+    }
+
+    //--------------------------------------------------------------------------
+    // Write side sets
+    const auto & cell_edges = local_connectivity_.at(2).at(1);
+    const auto & edge_vertices = local_connectivity_.at(1).at(0);
+    const auto & cells_global2local = global_to_local_.at(num_dims);
+    const auto & verts_global2local = global_to_local_.at(0);
+    for ( auto & ss : side_sets_ ) {
+
+      auto ss_id = ss.first;
+      auto label = ss.second.label;
+
+      if (int64)
+        base_t::template write_side_set<long long>(exoid, ss_id, side_id_,
+            element_to_sides_, side_to_vertices_, cell_edges, edge_vertices,
+            cells_global2local, verts_global2local);
+      else
+        base_t::template write_side_set<int>(exoid, ss_id, side_id_, element_to_sides_,
+            side_to_vertices_, cell_edges, edge_vertices,
+            cells_global2local, verts_global2local);
+
     }
 
     //--------------------------------------------------------------------------
