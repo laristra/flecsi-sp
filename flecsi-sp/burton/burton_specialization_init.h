@@ -556,7 +556,8 @@ void create_cells(
       // find matching sides
       for ( size_t is=0; is<sorted_side_vertices.size(); ++is ) {
         const auto & test_vs = sorted_side_vertices.at(is);
-        if ( std::equal( sorted_vs.begin(), sorted_vs.end(), test_vs.begin() ) )
+        if ( sorted_vs.size() == test_vs.size() &&
+             std::equal( sorted_vs.begin(), sorted_vs.end(), test_vs.begin() ) )
           sides.emplace_back( side_ids[is] );
       }
     }
@@ -3605,6 +3606,21 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   } // needs_partitioning
   
   //----------------------------------------------------------------------------
+  // Cell Closure.  However many layers of ghost cells are needed are found
+  // here.
+  //----------------------------------------------------------------------------
+  
+  // now that partitioning is over, recreate the dual graph so that we can
+  // determine ghost cells.  This time we want corner cells, so 1 shared 
+  // vertex is eneough to consider a cell as a neighbor.
+  // FIXME: Here is where you would specify the depth of ghost cells.
+  mesh_def->create_graph( num_dims, 0, 1, dcrs );
+  extra_mesh_info->cell_distribution = dcrs.distribution;
+
+  // now we can build all the other connectivity
+  mesh_def->build_connectivity();
+  
+  //----------------------------------------------------------------------------
   // Dump the partitioned mesh if requested
   //----------------------------------------------------------------------------
 
@@ -3624,21 +3640,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   }
 
 
-  //----------------------------------------------------------------------------
-  // Cell Closure.  However many layers of ghost cells are needed are found
-  // here.
-  //----------------------------------------------------------------------------
-  
-  // now that partitioning is over, recreate the dual graph so that we can
-  // determine ghost cells.  This time we want corner cells, so 1 shared 
-  // vertex is eneough to consider a cell as a neighbor.
-  // FIXME: Here is where you would specify the depth of ghost cells.
-  mesh_def->create_graph( num_dims, 0, 1, dcrs );
-  extra_mesh_info->cell_distribution = dcrs.distribution;
-
-  // now we can build all the other connectivity
-  mesh_def->build_connectivity();
-  
   //----------------------------------------------------------------------------
   // Identify exclusive, shared, and ghost for other entities
   //----------------------------------------------------------------------------

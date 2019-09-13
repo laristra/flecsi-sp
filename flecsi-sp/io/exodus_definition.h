@@ -811,18 +811,22 @@ public:
             << "returned " << status);
 
       // return element type
-      if (strcasecmp("tri3", elem_type) == 0)
+      if (
+          strcasecmp("tri", elem_type) == 0 ||
+          strcasecmp("tri3", elem_type) == 0)
         return block_t::tri;
       else if (
+          strcasecmp("quad", elem_type) == 0 ||
           strcasecmp("quad4", elem_type) == 0 ||
           strcasecmp("shell4", elem_type) == 0)
         return block_t::quad;
       else if (
-          strcasecmp("tet4", elem_type) == 0 ||
-          strcasecmp("tetra", elem_type) == 0)
+          strcasecmp("tet", elem_type) == 0 ||
+          strcasecmp("tet4", elem_type) == 0)
         return block_t::tet;
-      else if (strcasecmp("hex8", elem_type) == 0 ||
-               strcasecmp("hex", elem_type) == 0)
+      else if (
+          strcasecmp("hex", elem_type) == 0 ||
+          strcasecmp("hex8", elem_type) == 0)
         return block_t::hex;
       else {
         clog_fatal("Unknown block type, " << elem_type);
@@ -928,6 +932,7 @@ public:
     return ids;
   }
 
+
   static auto
   read_side_set_names(int exoid, size_t num_side_sets) {
 
@@ -1014,7 +1019,76 @@ public:
 
 
   }
+ 
+  template<typename U, typename V, typename W, typename X, typename Y>
+  static void
+  write_side_set(int exoid, size_t ss_id, const V & side_ids,
+      const W & element_sides, const X & side_vertices,
+      const X & element_faces, const X & face_vertices,
+      const Y & element_global_to_local, const Y & vertex_global_to_local )
+  {
+    // some type aliases
+    using ex_index_t = U;
 
+    // extract the sides we want
+    size_t num_sides{0};
+    for ( auto s : side_ids ) if (s+1==ss_id) num_sides+=1;
+    if ( num_sides == 0 ) return;
+
+    // final storage
+    auto status = ex_put_side_set_param(exoid, ss_id, num_sides, 0);
+    if (status)
+      clog_fatal(
+          "Problem writing side set, ex_put_side_set_param() returned " << status);
+    
+    std::vector< std::vector<index_t> > sorted_face_vs;
+    for ( size_t f=0; f<face_vertices.size(); ++f ) {
+      auto vs = face_vertices.at(f).vec();
+      std::sort( vs.begin(), vs.end() );
+      sorted_face_vs.emplace_back( vs );
+    }
+
+    // pick out the sides
+    std::vector<ex_index_t> elem_list;
+    std::vector<ex_index_t> side_list;
+    elem_list.reserve(num_sides);
+    side_list.reserve(num_sides);
+
+
+    for ( auto & side_pair : element_sides ) {
+      auto global_id = side_pair.first;
+      auto local_id = element_global_to_local.at( global_id );
+      for ( auto s : side_pair.second ) {
+        if (side_ids[s]+1==ss_id) {
+          // vertices
+          auto vs = side_vertices.at(s).vec();
+          for ( auto & v : vs ) v = vertex_global_to_local.at(v);
+          std::sort( vs.begin(), vs.end() );
+          // faces
+          auto fs = element_faces.at(local_id);
+          auto fit = std::find_if( fs.begin(), fs.end(),
+            [&](auto f) {
+              if ( vs.size() != sorted_face_vs[f].size() ) return false;
+              return std::equal( vs.begin(), vs.end(), sorted_face_vs[f].begin() );
+            }
+          );
+          if ( fit != fs.end() ) {
+            auto local_face_id = std::distance( fs.begin(), fit );
+            elem_list.emplace_back( local_id );
+            side_list.emplace_back( local_face_id + 1 );
+          }
+        }
+      }
+    } // side_pair
+
+    assert( elem_list.size() == num_sides && "side count mismatch" );
+    
+    status = ex_put_side_set (exoid, ss_id, elem_list.data(), side_list.data());
+    if (status)
+      clog_fatal(
+          "Problem writing side set, ex_put_side_set() returned " << status);
+
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1726,6 +1800,10 @@ public:
     exo_params.num_node_sets = 0;
     exo_params.num_elem_blk = blocks.size();
     exo_params.num_elem = num_cells;
+    
+    std::set<size_t> used_sides;
+    for ( auto s : side_id_ ) used_sides.emplace(s);
+    exo_params.num_side_sets = used_sides.size();
 
     base_t::write_params(exoid, exo_params);
 
@@ -1808,6 +1886,28 @@ public:
     else {
       base_t::template write_element_map<int>(exoid, cell_global_ids);
     }
+    
+    //--------------------------------------------------------------------------
+    // Write side sets
+    const auto & cell_edges = local_connectivity_.at(2).at(1);
+    const auto & edge_vertices = local_connectivity_.at(1).at(0);
+    const auto & cells_global2local = global_to_local_.at(num_dims);
+    const auto & verts_global2local = global_to_local_.at(0);
+    for ( auto & ss : side_sets_ ) {
+
+      auto ss_id = ss.first;
+      auto label = ss.second.label;
+
+      if (int64)
+        base_t::template write_side_set<long long>(exoid, ss_id, side_id_,
+            element_to_sides_, side_to_vertices_, cell_edges, edge_vertices,
+            cells_global2local, verts_global2local);
+      else
+        base_t::template write_side_set<int>(exoid, ss_id, side_id_, element_to_sides_,
+            side_to_vertices_, cell_edges, edge_vertices,
+            cells_global2local, verts_global2local);
+
+    }
 
     //--------------------------------------------------------------------------
     // close the file
@@ -1832,11 +1932,12 @@ public:
         sorted_vertices_to_edges,
         [](const auto & vs, auto & edge_vs) {
           for (
-            auto v0 = std::prev(vs.end()), v1 = vs.begin();
-            v1 != vs.end();
-            v0 = v1, ++v1
-          )
+            auto v0 = vs.begin(); v0 != vs.end(); ++v0
+          ) {
+            auto v1 = std::next(v0);
+            if (v1 == vs.end()) v1 = vs.begin();
             edge_vs.push_back({*v0, *v1});
+          }
         });
 
 
