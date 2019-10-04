@@ -1077,6 +1077,9 @@ public:
             elem_list.emplace_back( local_id + 1 );
             side_list.emplace_back( local_face_id + 1 );
           }
+          else {
+            clog_fatal( "Should not have gotten here, something wrong" );
+          }
         }
       }
     } // side_pair
@@ -3333,8 +3336,7 @@ public:
 
     //--------------------------------------------------------------------------
     // Write side sets
-    const auto & cell_edges = local_connectivity_.at(2).at(1);
-    const auto & edge_vertices = local_connectivity_.at(1).at(0);
+    const auto & face_vertices = local_connectivity_.at(2).at(0);
     const auto & cells_global2local = global_to_local_.at(num_dims);
     const auto & verts_global2local = global_to_local_.at(0);
     for ( auto & ss : side_sets_ ) {
@@ -3344,11 +3346,11 @@ public:
 
       if (int64)
         base_t::template write_side_set<long long>(exoid, ss_id, side_id_,
-            element_to_sides_, side_to_vertices_, cell_edges, edge_vertices,
+            element_to_sides_, side_to_vertices_, cell_faces, face_vertices,
             cells_global2local, verts_global2local);
       else
         base_t::template write_side_set<int>(exoid, ss_id, side_id_, element_to_sides_,
-            side_to_vertices_, cell_edges, edge_vertices,
+            side_to_vertices_, cell_faces, face_vertices,
             cells_global2local, verts_global2local);
 
     }
