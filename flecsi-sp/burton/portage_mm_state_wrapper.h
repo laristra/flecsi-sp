@@ -28,7 +28,7 @@ namespace burton {
 /// \brief Provides access to data stored in Flecsi_State
 ////////////////////////////////////////////////////////////////////////////////
 template< typename M >
-class portage_state_wrapper_t {
+class portage_mm_state_wrapper_t {
 
   //============================================================================
   // Typedefs
@@ -58,9 +58,17 @@ public:
   // Member Variables
   //============================================================================
 
-  std::map < std::string, double*> var_map;
-  std::map < std::string, std::string> type_map;
-  int number_materials=0;
+  std::map < std::string, double*> var_map_;
+  std::map < std::string, entity_kind_t> entity_map_;
+  std::map < std::string, field_type_t> type_map_;
+
+  std::vector<std::vector<int>> mat_cells_;
+  std::vector<std::vector<int>> cell_mat_ids_;
+  std::vector<std::vector<int>> cell_mat_offsets_;
+
+  std::vector<int> mat_data_offsets_;
+
+  int number_materials_=0;
 
   //============================================================================
   // Constructors
@@ -69,43 +77,64 @@ public:
   //!  \brief Default constructor.
   //!  \param[in] mesh The minimum coordinates of the domain.
   //!  \param[in] mesh The minimum coordinates of the domain.
-  explicit portage_state_wrapper_t(mesh_t & mesh) : mesh_(&mesh)
+  explicit portage_mm_state_wrapper_t(mesh_t & mesh) : mesh_(&mesh)
     {}
 
   //! Default constructor deleted
-  portage_state_wrapper_t() = default;
+  portage_mm_state_wrapper_t() = default;
 
   //! Default copy constructor
-  portage_state_wrapper_t(const portage_state_wrapper_t &) = default;
+  portage_mm_state_wrapper_t(const portage_mm_state_wrapper_t &) = default;
 
   //! Default assignment operator
-  portage_state_wrapper_t & operator=(const portage_state_wrapper_t &) = default;
+  portage_mm_state_wrapper_t & operator=(const portage_mm_state_wrapper_t &) = default;
 
+  //============================================================================  // Public Members
   //============================================================================
-  // Public Members
-  //============================================================================
 
-  //! \brief Add a field that needs to be remapped to the variable map
-  void add_cell_field( std::string var_name, double* data) {
-
-    var_map.insert( std::pair <std::string, double*> (var_name, data));
-    type_map.insert( std::pair < std::string, std::string> (var_name, "CELL"));
-
+  //! \brief Add a variable of entity type (cell) 
+  //! field that needs to be remapped to the variable map
+  void add_cell_field(
+    std::string var_name, double* data, 
+    entity_kind_t entity=entity_kind_t::CELL,
+    field_type_t type=field_type_t::MESH_FIELD)
+  {
+    var_map_.insert( std::pair <std::string, double*> (var_name, data));
+    entity_map_.insert( std::pair < std::string, entity_kind_t> 
+                       (var_name, entity));
+    type_map_.insert( std::pair < std::string, field_type_t> (var_name, type));
   }
 
   //! \brief Number of materials in problem
   int num_materials() const {
-    return number_materials;
+    return number_materials_;
   }
 
-  void num_materials(int num_mats){
-    number_materials = num_mats;
+  //! \brief Set the number of materials in problem
+  void set_materials(
+    int num_mats,
+    const std::vector< std::vector<int> > & mat_cells,
+    const std::vector< std::vector<int> > & cell_mats,
+    const std::vector< std::vector<int> > & cell_mat_offsets)
+  {
+    number_materials_ = num_mats;
+    mat_cells_ = mat_cells;
+    cell_mat_ids_ = cell_mats;
+    cell_mat_offsets_ = cell_mat_offsets;
+
+    mat_data_offsets_.resize(num_mats+1);
+    mat_data_offsets_[0] = 0;
+    for ( int i=0; i<num_mats; ++i )
+      mat_data_offsets_[i+1] = mat_data_offsets_[i] + mat_cells[i].size();
+
   }
 
   //! \brief Name of material
   std::string material_name(int matid) const {
+    // return something else if you wanted to keep track of whether or not
+    // the material has been added
     assert(matid >= 0 && matid < num_materials());
-    return "UNKNOWN";
+    return std::to_string(matid);
   }
 
   //! \brief Get number of cells containing a particular material
@@ -113,29 +142,29 @@ public:
   //! \return         Number of cells containing material 'matid'
   int mat_get_num_cells(int matid) const {
     assert(matid >= 0 && matid < num_materials());
-    return 0;
+    return mat_cells_[matid].size();
   }
 
   //! \brief Get cell indices containing a particular material
   //! \param matid    Index of material (0, num_materials()-1)
   //! \param matcells Cells containing material 'matid'
-  void mat_get_cells(int matid, std::vector<int> *matcells) const {
+  void mat_get_cells(int matid, std::vector<int> *matcells) const{
     assert(matid >= 0 && matid < num_materials());
-    matcells->clear();
+    *matcells = mat_cells_[matid];
   }
 
   //! \brief Get number of materials contained in a cell
   //! \param cellid  Index of cell in mesh
   //! \return        Number of materials in cell
   int cell_get_num_mats(int cellid) const {
-    return 0;
+    return cell_mat_ids_[cellid].size();
   }
 
   //! \brief Get the IDs of materials in a cell
   //! \param cellid    Index of cell in mesh
   //! \param cellmats  Indices of materials in cell
   void cell_get_mats(int cellid, std::vector<int> *cellmats) const {
-    cellmats->clear();
+    *cellmats = cell_mat_ids_[cellid];
   }
 
   //! \brief Get the local index of mesh cell in material cell list
@@ -143,19 +172,37 @@ public:
   //! \param matid       Material ID
   //! \return             Local cell index in material cell list
   int cell_index_in_material(int meshcell, int matid) const {
-    return -1;
+    const auto & mat_ids = cell_mat_ids_[meshcell];
+    auto it = std::find( mat_ids.begin(), mat_ids.end(), matid );
+    if (it == mat_ids.end())
+      THROW_RUNTIME_ERROR( "MAT_ITER not found " << meshcell << " " << matid );
+
+    int offset = std::distance(mat_ids.begin(), it);
+    int index = cell_mat_offsets_[meshcell][offset];
+    return index;
   }
+
   
   //! \brief Type of field (MESH_FIELD or MULTIMATERIAL_FIELD)
   //! \param[in] onwhat   Entity_kind that field is defined on
   //! \param[in] varname  Name of field
   //! \return             Field_type
-  field_type_t field_type(entity_kind_t on_what, std::string const& var_name)
-      const {
-    return field_type_t::MESH_FIELD;  // MULTI-MATERIAL FIELDS NOT ACCESSED YET
+  field_type_t field_type(entity_kind_t on_what, std::string const& var_name) const
+  {
+  
+    auto it = type_map_.find(var_name);
+    if ( it != type_map_.end() &&
+        entity_map_.find(var_name) != entity_map_.end() )
+    {
+      return it->second;
+    } else {
+      THROW_RUNTIME_ERROR( " Could not find state variable field type " <<
+        var_name << " on " << on_what );
+      //ASSUME MULTIMATERIAL_FIELD IF NOT FOUND (NO UNKNOWN_TYPE EXISTS)
+      return field_type_t::MULTIMATERIAL_FIELD;
+    }
   }
   
-
   //! \brief Get the entity type on which the given field is defined
   //! \param[in] var_name The string name of the data field
   //! \return The Entity_kind enum for the entity type on which the field is defined
@@ -166,64 +213,30 @@ public:
   //!        SIDE, WEDGE AND CORNER
   entity_kind_t get_entity(std::string const& var_name) const 
   {
-    
-    auto type = type_map.at(var_name);
-
-    if (type == "CELL"){
-      return entity_kind_t::CELL;
-    } else if (type == "NODE"){
-      return entity_kind_t::NODE;
+    auto it = entity_map_.find(var_name);
+    if ( it != entity_map_.end()){
+      return it->second;
     } else {
+      THROW_RUNTIME_ERROR( " Could not find state variable entity kind " <<
+          var_name << " " );
       return entity_kind_t::UNKNOWN_KIND;
     }
-
   }
-
 
   //! \brief Get pointer to scalar data
   //! \param[in] on_what The entity type on which to get the data
   //! \param[in] var_name The string name of the data field
   //! \param[in,out] data A pointer to an array of data
   template <class T>
-  void mesh_get_data(entity_kind_t on_what, std::string const& var_name, 
-                     T ** data) const {
-
-    *data = (var_map.at(var_name));
-    return;
-    // Ignore on_what here - the state manager knows where it lives
-    // based on its name
-    auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
-
-    // first check cells
-    auto cell_field_list = flecsi_get_handle(
-					     mesh_handle, hydro, remap_data, real_t, dense, 0);
-    if ( cell_field_list.index_space == burton_mesh_t::index_spaces_t::cells) {
-      
-      *data = (var_map.at(var_name));
-      return;
-
-    }
-
-    // now check nodes
-    auto nodal_field_list = flecsi_get_handle(
-					      mesh_handle, hydro, remap_data, real_t, dense, 0);
-
-    if ( nodal_field_list.index_space == burton_mesh_t::index_spaces_t::vertices) {
-      return;
-    }
-    // if we got here, there is something wrong
-    THROW_RUNTIME_ERROR( "Could not find variable to ReMAP!" );
+  void mesh_get_data(entity_kind_t on_what, std::string const& var_name,
+    T ** data) const
+  {
+    auto it = var_map_.find(var_name);
+    if ( it == var_map_.end() )
+      THROW_RUNTIME_ERROR( " Could not find state variable data for " <<
+          var_name );
+    *data = it->second;
   }
-
-  void check_map(std::string const & var_name) const {
-    auto search = var_map.find(var_name);
-    if (search != var_map.end()) {
-	    std::cout << "Found " << search->first << " " << search->second << '\n';
-    } else {
-	    std::cout << "Not found\n";
-    }
-  }
-
 
   //! \brief Get pointer to read-only scalar cell data for a particular material
   //! \param[in] var_name The string name of the data field
@@ -231,15 +244,22 @@ public:
   //! \param[out] data   vector containing the values corresponding to cells in the material
   void mat_get_celldata( std::string const& var_name, int matid,
     double const **data) const 
-  {}
+  {
+    auto it = var_map_.find(var_name);
+    if ( it != var_map_.end() ){
+      *data = it->second + mat_data_offsets_[matid];
+    } else {
+      THROW_RUNTIME_ERROR( " Could not find state variable " << var_name );
+    }
+  }
 
   // TEMPORARY: UNTIL THIS GETS TEMPLATED ON TYPE OF DATA
   void mat_get_celldata( std::string const& var_name, int matid, 
       Wonton::Point<2> const **data) const
-  {}
+  { THROW_RUNTIME_ERROR("mat_get_celldata not implemented"); }
   void mat_get_celldata(std::string const& var_name, int matid,
       Wonton::Point<3> const **data) const
-  {}
+  { THROW_RUNTIME_ERROR("mat_get_celldata not implemented"); }
 
 
   //! \brief Get pointer to read-write scalar data for a particular material
@@ -248,49 +268,14 @@ public:
   //! \param[in] matid   Index (not unique identifier) of the material
   //! \param[out] data   vector containing the values corresponding to cells in the material
   void mat_get_celldata(std::string const& var_name, int matid, double **data)
-  {}
-
-  //! \brief Get a pointer to data from the state manager with a given
-  //! variable @c name and on @c on_what mesh entities.
-  //! \param[in] on_what The Entity_kind (e.g. CELL) on which the data lives.
-  //! \param[in] name The name of the variable.
-  //! \param data A @c pointer to the const data array.  If the requested
-  //! data is not found in the state manager, a @c nullptr is returned.
-  void mesh_add_data(entity_kind_t on_what, std::string const& name,
-      double const **data) const
   {
-    THROW_RUNTIME_ERROR("mesh_add_data not implemented");
+    auto it = var_map_.find(var_name);
+    if ( it != var_map_.end() ){
+      *data = it->second + mat_data_offsets_[matid];
+    } else {
+      THROW_RUNTIME_ERROR( " Could not find state variable " << var_name );
+    }
   }
-
-  //! \brief Add a scalar multi-valued data field on cells and initialize its
-  //! material data to a single value
-  //! \param[in] var_name The name of the data field
-  //! \param[in] value Initialize with this value
-
-  //! The 2D array will be read and values copied according to which materials
-  //! are contained in which cells. If a material+cell combination is not active
-  //! providing a value for the array will have no effect. 
-  void mat_add_celldata(std::string const& var_name, double value) {
-  }
-
-
-  //! \brief Add a scalar multi-valued data field on cells and initialize its
-  //! material data according to a 2D array
-  //! \param[in] var_name The name of the data field
-  //! \param[in] layout  Whether 2D array is laid out with first index being
-  //! the cell (CELL_CENRIC) or material (MATERIAL CENTRIC)
-  //! \param[in] value Initialize with this value
-  //!
-  //! The 2D array will be read and values copied according to which
-  //! materials are contained in which cells. If a material+cell
-  //! combination is not active providing a value for the array will
-  //! have no effect.
-
-  void mat_add_celldata( std::string const& var_name, 
-      double const * const *values = nullptr, 
-      Portage::Data_layout layout = Portage::Data_layout::MATERIAL_CENTRIC )
-  {}
-
 
   //! \brief Add a scalar multi-valued data field on cells and add
   //! data to one of its materials
@@ -304,57 +289,97 @@ public:
 
   void mat_add_celldata(std::string const& var_name, int matid,
       double const * values)
-  {}
-
-
-  //! \brief Add a scalar multi-valued data field on cells and initialize one
-  //! of its material data to a uniform value
-  //! \param[in] var_name The name of the data field
-  //! \param[in] matid Index of material in the problem
-  //! \param[in] value Initialize with this value
-  //! Subsequent calls to this function with the same name will find the added
-  //! field and just add the data.
+  {
+    auto it = var_map_.find(var_name);
+    if ( it == var_map_.end() ){
+      auto offset = mat_data_offsets_[matid];
+      auto n = mat_cells_[matid].size();
+      for (size_t i=0; i < n; ++i) it->second[offset + i] = values[i];
+    }
+    else {
+      THROW_RUNTIME_ERROR( "Could not find " << var_name );
+    }
+  }
+  
+  /* //! \brief Add a scalar multi-valued data field on cells and initialize one */
+  /* //! of its material data to a uniform value */
+  /* //! \param[in] var_name The name of the data field */
+  /* //! \param[in] matid Index of material in the problem */
+  /* //! \param[in] value Initialize with this value */
+  /* //! Subsequent calls to this function with the same name will find the added */
+  /* //! field and just add the data. */
   template <typename T>
   void mat_add_celldata(std::string const& var_name, int matid, T const * const value)
-  {}
+  {
+    THROW_IMPLEMENTED_ERROR( "centroid setting not implemented yet" );
+  }
 
   //! \brief Add cells to material (or add material to cells)
   //! \param[in] matid  Material ID
   //! \param[in] newcells Vector of new cells in material
-  void mat_add_cells(int matid, std::vector<int> const& newcells)
-  {}
+  void mat_add_cells(int matid, std::vector<int> const & newcells)
+  {
+
+    // this version only sets the material cells?
+
+    // setting material cells is easy
+    auto num_mats = num_materials();
+    mat_cells_.resize( num_mats );
+    mat_cells_[matid] = newcells;
+
+    // need largest cell id for resizing
+    auto it = std::max_element( newcells.begin(), newcells.end() );
+    auto nc = *it + 1;
 
 
-  //! \brief Remove cells from material (or remove material from cells)
-  //! \param[in] matid  Material ID
-  //! \param[in] matcells Vector of to be removed cells
-  void mat_rem_cells(int matid, std::vector<int> const& delcells)
-  {}
+    // fill in all material ids, assume that the material id is monotonically
+    // increasing
+    cell_mat_ids_.resize( nc );
+    for ( auto c : newcells )
+      cell_mat_ids_[c].push_back(matid);
+
+    // fill in all material mesh ids, assume that the material id and cell id
+    // are increasing monotonically
+    cell_mat_offsets_.resize( nc );
+    size_t mat_cell_id{0};
+    for ( auto c : newcells ) {
+      cell_mat_offsets_[c].push_back(mat_cell_id);
+      mat_cell_id++;
+    }
+ 
+    // set offsets
+    mat_data_offsets_.resize(num_mats+1);
+    mat_data_offsets_[0] = 0;
+    for ( int i=0; i<num_mats; ++i )
+      mat_data_offsets_[i+1] = mat_data_offsets_[i] + mat_cells_[i].size();
+  }
 
 
   //! \brief Add a material to state
   //! \param[in] matname  Name of material
   //! \param[in] matcells Cells containing the material
   void add_material(std::string const& matname, std::vector<int> const& matcells)
-  {}
+  {
+    // supposed to create field storage here, but we assume it has already been
+    // sized for now.
+    auto matid = std::stoi( matname );
+    mat_add_cells( matid, matcells );
+  }
 
+  //! Get the size of a particular quantity
+  //! WARNING: this may not be the correct value for multi-material quantities
   int get_data_size(entity_kind_t on_what, std::string const& var_name) const
   {
     return mesh_->num_cells();
-    //    return (var_map_copy.at(var_name)).size();
-    //    THROW_RUNTIME_ERROR( "get_data_size not implemented yet!" );
   }
 
-
-
-  //!
   //! @brief Get the data type of the given field
   //! @param[in] var_name The string name of the data field
   //! @return A reference to the type_info struct for the field's data type
   const std::type_info& get_data_type(std::string const& var_name) const {
     return typeid(double);  // thats the only type we can represent
   }
-  
+
  private:
   
   //! \brief the flecsi mesh pointer
