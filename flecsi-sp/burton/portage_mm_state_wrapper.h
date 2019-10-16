@@ -62,10 +62,25 @@ class portage_mm_state_wrapper_t {
   mesh_t * mesh_ = nullptr;
 
   struct data_t {
+    const std::type_info & type_info;
+    size_t data_size = 0;
     entity_kind_t entity_kind = entity_kind_t::UNKNOWN_KIND;
     field_type_t field_type = field_type_t::UNKNOWN_TYPE_FIELD;
-    size_t data_size = 0;
     std::vector<byte_t> data;
+
+    data_t(
+        const std::type_info & ti,
+        size_t size,
+        entity_kind_t kind,
+        field_type_t type ) :
+      type_info(ti), data_size(size), entity_kind(kind), field_type(type)
+    {}
+    
+    data_t(
+        const std::type_info & ti,
+        size_t size ) :
+      type_info(ti), data_size(size)
+    {}
   };
 
   std::map < std::string, data_t > var_map_;
@@ -111,13 +126,10 @@ public:
     entity_kind_t entity=entity_kind_t::CELL,
     field_type_t type=field_type_t::MESH_FIELD)
   {
-    auto ret = var_map_.emplace( var_name, data_t{} );
+    auto ret = var_map_.emplace( var_name, data_t{typeid(T), sizeof(T), entity, type} );
     if (!ret.second) 
       THROW_RUNTIME_ERROR( var_name << " already registered" );
     auto & entry = ret.first->second;
-    entry.entity_kind = entity;
-    entry.field_type = type;
-    entry.data_size = sizeof(T);
 
     entry.data.resize(mat_data_offsets_.back() * sizeof(T));
     return reinterpret_cast<T*>(entry.data.data());
@@ -294,9 +306,8 @@ public:
     // add it if its not in the map
     auto it = var_map_.find(var_name);
     if ( it != var_map_.end() ){
-      auto ret = var_map_.emplace( var_name, data_t{} );
+      auto ret = var_map_.emplace( var_name, data_t{typeid(T), sizeof(T)} );
       it = ret.first;
-      it->second.data_size = sizeof(T);
     }
 
     auto offset = mat_data_offsets_[matid];
@@ -412,7 +423,11 @@ public:
   //! @param[in] var_name The string name of the data field
   //! @return A reference to the type_info struct for the field's data type
   const std::type_info& get_data_type(std::string const& var_name) const {
-    return typeid(double);  // thats the only type we can represent
+    auto it = var_map_.find(var_name);
+    if ( it == var_map_.end() )
+      THROW_RUNTIME_ERROR( " Could not find state variable data for " <<
+          var_name );
+    return it->second.type_info;  // thats the only type we can represent
   }
   
  };  // Flecsi_State_Wrapper
