@@ -359,14 +359,7 @@ void remap_tangram_test(
   portage_mm_state_wrapper_t<mesh_t> target_state_wrapper(mesh);
 
 
-  // Create temporary vectors for the data to be remapped
-  auto vec_len = num_mats * num_cells;
-  std::vector< double > density;
-  std::vector< double > remap_density(vec_len, 0);
-
-  std::vector< double > volfrac;
-  std::vector< double > remap_volfrac(vec_len, 0);
-
+  // Compute material/cell offsets
   std::vector< std::vector< int > > mat_cells(num_mats);
   std::vector< std::vector< int > > cell_mats(num_cells);
   std::vector< std::vector< int > > cell_mat_offsets(num_cells);
@@ -374,17 +367,9 @@ void remap_tangram_test(
   std::vector<int> mat_data_offsets;
   mat_data_offsets.reserve( num_mats );
 
-
-  std::vector< int > mat_cell_id{0};
-
-
-  // Fill the temporary vectors with the data that needs to be remapped
-  for (int m=0; m< num_mats; ++m){
+  for (size_t m=0; m<num_mats; ++m){
     size_t mat_cell_id = 0;
     for (auto c: velocity_handle.indices(m) ){
-      volfrac.push_back(volfrac_handle(c,m));
-      density.push_back(density_handle(c,m));
-      // determine material offsets
       mat_cells[m].push_back(c);
       cell_mats[c].push_back(m);
       cell_mat_offsets[c].push_back( mat_cell_id );
@@ -395,6 +380,7 @@ void remap_tangram_test(
 
   // Initialize material offsets and cells in wrappers
   source_state_wrapper.set_materials(num_mats, mat_cells, cell_mats, cell_mat_offsets );
+  
 
   // Create a vector of strings that correspond to the names of the variables
   //   that will be remapped
@@ -404,19 +390,30 @@ void remap_tangram_test(
 
   // First, set special internal fields
   auto volfrac_name = "mat_volfracs";
-  source_state_wrapper.add_cell_field(volfrac_name, volfrac.data(), entity_kind_t::CELL,
-      field_type_t::MULTIMATERIAL_FIELD);
-  target_state_wrapper.add_cell_field(volfrac_name, remap_volfrac.data(), entity_kind_t::CELL,
+  auto volfrac = source_state_wrapper.template add_cell_field<real_t>(
+      std::string{"mat_volfracs"}, entity_kind_t::CELL,
       field_type_t::MULTIMATERIAL_FIELD);
 
+  using tangram_point_t = Tangram::Point<num_dims>;
+  auto matcentroids = source_state_wrapper.template add_cell_field<tangram_point_t>(
+      std::string{"mat_centroids"}, entity_kind_t::CELL,
+      field_type_t::MULTIMATERIAL_FIELD);
 
   // now set fields to be reconstructed
   auto density_name = "density";
-  source_state_wrapper.add_cell_field(density_name, density.data(), entity_kind_t::CELL,
-      field_type_t::MULTIMATERIAL_FIELD);
-  target_state_wrapper.add_cell_field(density_name, remap_density.data(), entity_kind_t::CELL,
-      field_type_t::MULTIMATERIAL_FIELD);
+  auto density = source_state_wrapper.template add_cell_field<real_t>(
+      density_name, entity_kind_t::CELL, field_type_t::MULTIMATERIAL_FIELD);
   var_names.push_back(density_name);
+  
+  // Populate data to be remapped
+  size_t offset{0};
+  for (int m=0; m< num_mats; ++m){
+    for (auto c: velocity_handle.indices(m) ){
+      volfrac[offset] = volfrac_handle(c,m);
+      density[offset] = density_handle(c,m);
+      offset++;
+    }
+  }
 
 
   // Build remapper
@@ -432,6 +429,7 @@ void remap_tangram_test(
   remapper.set_limiter( Portage::Limiter_type::BARTH_JESPERSEN );
 
   // Do the remap 
+  std::cout << "REMAPPING" << std::endl;
   auto mpi_comm = MPI_COMM_WORLD;
   Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
   remapper.run( & mpiexecutor );
