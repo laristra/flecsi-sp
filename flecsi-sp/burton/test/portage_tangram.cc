@@ -54,7 +54,10 @@ namespace flecsi_sp {
 namespace burton {
 namespace test {
 
-
+template< typename T >
+real_t prescribed_function( const T & c ) {
+  return 1.0;
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 // Register the mesh state
@@ -232,7 +235,7 @@ auto make_remapper(
     Portage::MMDriver<
       Portage::SearchKDTree,
       Portage::IntersectR3D,
-      Portage::Interpolate_1stOrder,
+      Portage::Interpolate_2ndOrder,
       mesh_t::num_dimensions,
       portage_mesh_wrapper_t<mesh_t>,
       portage_mm_state_wrapper_t<mesh_t>,
@@ -300,7 +303,7 @@ void remap_tangram_test(
   using mesh_wrapper_t = flecsi_sp::burton::portage_mesh_wrapper_t<mesh_t>;
 
   constexpr auto num_dims = mesh_t::num_dimensions;
-  auto num_mats = 2; //(volfrac_handle.max_entries()) // WHY IS THIS 5?;
+  auto max_mats = volfrac_handle.max_entries(); // WHY IS THIS 5?;
   constexpr auto epsilon = config::test_tolerance;
 
   // some mesh parameters
@@ -360,14 +363,11 @@ void remap_tangram_test(
 
 
   // Compute material/cell offsets
-  std::vector< std::vector< int > > mat_cells(num_mats);
+  std::vector< std::vector< int > > mat_cells(max_mats);
   std::vector< std::vector< int > > cell_mats(num_cells);
   std::vector< std::vector< int > > cell_mat_offsets(num_cells);
 
-  std::vector<int> mat_data_offsets;
-  mat_data_offsets.reserve( num_mats );
-
-  for (size_t m=0; m<num_mats; ++m){
+  for (size_t m=0; m<max_mats; ++m){
     size_t mat_cell_id = 0;
     for (auto c: velocity_handle.indices(m) ){
       mat_cells[m].push_back(c);
@@ -379,7 +379,7 @@ void remap_tangram_test(
   }
 
   // Initialize material offsets and cells in wrappers
-  source_state_wrapper.set_materials(num_mats, mat_cells, cell_mats, cell_mat_offsets );
+  source_state_wrapper.set_materials(mat_cells, cell_mats, cell_mat_offsets );
   
 
   // Create a vector of strings that correspond to the names of the variables
@@ -407,10 +407,11 @@ void remap_tangram_test(
   
   // Populate data to be remapped
   size_t offset{0};
-  for (int m=0; m< num_mats; ++m){
+  for (int m=0; m<max_mats; ++m){
     for (auto c: velocity_handle.indices(m) ){
       volfrac[offset] = volfrac_handle(c,m);
       density[offset] = density_handle(c,m);
+      for ( int i=0; i<num_dims; ++i ) matcentroids[offset][i] = cells[c]->centroid()[i];
       offset++;
     }
   }
@@ -436,7 +437,7 @@ void remap_tangram_test(
 
   //---------------------------------------------------------------------------
   // Swap old for new data
-#if 0
+  
   // Checking conservation for remap test
   real_t total_density{0};
   real_t total_volume{0};
@@ -444,32 +445,28 @@ void remap_tangram_test(
   // Calculate totals for old data
   for (auto c: mesh.cells(flecsi::owned)) {
     for ( auto m : velocity_handle.entries(c) ) {
-      auto offset = scalar_index(c,m);
       total_density +=  c->volume() * volfrac_mutator(c,m) *  density_handle(c,m);
       total_volume +=  c->volume() * volfrac_mutator(c,m);
-      auto & vel = velocity_handle(c,m);
-      for (int dim=0; dim < num_dims; ++dim) {
-        total_velocity[dim] += c->volume() * volfrac_mutator(c,m) * vel[dim];
-      }
     }
   }
 
   // Swap old data for new data
-  for (int mat_num=0; mat_num < num_mats; ++mat_num){
-    mat_cells[mat_num].clear();
-    target_state_wrapper.mat_get_cells(mat_num,  &mat_cells[mat_num]);
-    double *mat_volfrac;
-    target_state_wrapper.mat_get_volfracs(mat_num, &mat_volfrac);
-    for (int count=0; count<mat_cells[mat_num].size(); ++count){
-      auto element = mat_cells[mat_num][count];
-      density_mutator(element, mat_num) = remap_density[count + scalar_index(0,mat_num)];
-      volfrac_mutator(element, mat_num) = mat_volfrac[count]; 
-      auto vel = velocity_mutator(0,0);
-      for (int dim=0; dim < num_dims; ++dim) {
-        auto dim_offset = vector_index(count, mat_num, dim);
-        vel[dim] = remap_velocity[dim_offset];
-      }
-      velocity_mutator(element, mat_num) = vel;
+  for (int mat_num=0; mat_num < max_mats; ++mat_num){
+  
+    real_t const * remap_density;
+    real_t const * remap_volfracs;
+    target_state_wrapper.mat_get_celldata( "density", mat_num, &remap_density ); 
+    target_state_wrapper.mat_get_celldata( "mat_volfracs", mat_num, &remap_volfracs ); 
+
+    auto & these_mat_cells = mat_cells[mat_num];
+    these_mat_cells.clear();
+    target_state_wrapper.mat_get_cells(mat_num, &these_mat_cells);
+
+    size_t count{0}; 
+    for ( auto c : these_mat_cells ) {
+      density_mutator(c, mat_num) = remap_density[count];
+      volfrac_mutator(c, mat_num) = remap_volfracs[count]; 
+      count++;
     }
   }
 
@@ -482,7 +479,6 @@ void remap_tangram_test(
 
   // Check conservation for remap test
   real_t total_remap_density{0};
-  vector_t total_remap_velocity{0};
   real_t total_remap_volume{0};
   // Calculate the L1 and L2 norms
   real_t total_vol = 0.0;
@@ -492,40 +488,19 @@ void remap_tangram_test(
   std::vector<double> vfrac_sum(num_cells, 0.0);
 
   std::vector<real_t> actual(num_cells, 0.0);
-  for (int mat_num=0; mat_num < num_mats; ++mat_num){
-    auto cells = mesh.cells(flecsi::owned);
-    for (int element: mat_cells[mat_num]){
+  for (int mat_num=0; mat_num < max_mats; ++mat_num){
+    for (auto element: mat_cells[mat_num]){
       auto c = cells[element];
       total_vol += c->volume() * volfrac_mutator(c,mat_num);
       actual[c.id()] += volfrac_mutator(c,mat_num) * density_mutator(c,mat_num);
       total_remap_density += c->volume() * volfrac_mutator(c,mat_num) * density_mutator(c,mat_num);
       vfrac_sum[c.id()] += volfrac_mutator(c,mat_num);
       total_remap_volume += c->volume() * volfrac_mutator(c,mat_num);
-      const auto & vel = velocity_mutator(c,mat_num);
-      for (int dim=0; dim<num_dims; ++dim) {
-        total_remap_velocity[dim] += c->volume() * volfrac_mutator(c,mat_num) * vel[dim];
-      }
     }
   }
   
   for (auto c: mesh.cells(flecsi::owned)){
-    real_t sum{0}, expected;
-  #ifdef CUBIC
-    for ( int i=0; i < num_dims; ++i)
-      sum += ((c->centroid())[i]+0.5);
-    expected = pow(sum,3.0);
-  #elif LINEAR
-    for ( int i=0; i < num_dims; ++i)
-      sum += ((c->centroid())[i]+0.5);
-    expected = sum * 2.0;
-  #elif COSINE
-    real_t arg = 10.0 * std::sqrt( pow((c->centroid())[0], 2) + pow((c->centroid())[1], 2) );
-    expected = 1.0 + (std::cos(arg) / 3.0);
-  #else
-    expected = 1.0;
-    //EXPECT_NEAR(expected, actual[c.id()], epsilon*10);
-  #endif
-  
+    auto expected = prescribed_function( c->centroid() );
     // L1,L2 errors
     auto each_error = std::abs(actual[c.id()] - expected);
     L1 +=  c->volume() * each_error; // L1
@@ -542,28 +517,20 @@ void remap_tangram_test(
   L2_sum = pow(L2_sum/total_vol_sum, 0.5); // L2
 
   if ( comm_rank == 0 ) {
-    printf("L1 Norm: %.20f, Total Volume: %f \n", L1_sum, total_vol_sum);
-    printf("L2 Norm: %.20f, Total Volume: %f \n", L2_sum, total_vol_sum);
+    printf("L1 Norm: %14.7e, Total Volume: %f \n", L1_sum, total_vol_sum);
+    printf("L2 Norm: %14.7e, Total Volume: %f \n", L2_sum, total_vol_sum);
     EXPECT_NEAR(L1_sum, 0.0, epsilon);
     EXPECT_NEAR(L2_sum, 0.0, epsilon);
   }
 
   // Verify conservation
   real_t total_density_sum{0}, total_remap_density_sum{0};
-  vector_t total_velocity_sum{0}, total_remap_velocity_sum{0};
   ret = MPI_Allreduce( &total_density, &total_density_sum, 1, MPI_DOUBLE, 
                        MPI_SUM, mpi_comm);
   ret = MPI_Allreduce( &total_remap_density, &total_remap_density_sum, 1, 
                        MPI_DOUBLE, MPI_SUM, mpi_comm);
-  ret = MPI_Allreduce( total_velocity.data(), total_velocity_sum.data(), 
-                       total_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
-  ret = MPI_Allreduce( total_remap_velocity.data(), total_remap_velocity_sum.data(), 
-                       total_remap_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
 
   EXPECT_NEAR( total_density_sum, total_remap_density_sum, epsilon);
-  for ( int i=0; i<num_dims; ++i)
-    EXPECT_NEAR( total_velocity_sum[i], total_remap_velocity_sum[i], epsilon);
-#endif
 }
 
 
@@ -572,7 +539,7 @@ void remap_tangram_test(
 /// \param [in] mesh       the mesh object
 /// \param [in] mat_state  a densely populated set of data
 ////////////////////////////////////////////////////////////////////////////////
-void initialize_flat(
+void initialize(
   utils::client_handle_r<mesh_t> mesh,
   utils::sparse_mutator<real_t> density,
   utils::sparse_mutator<real_t> vol_frac,
@@ -582,168 +549,23 @@ void initialize_flat(
   float num_cells_x = 32.0;
   for (auto c: mesh.cells(flecsi::owned)){
     c->update(&mesh);
-    auto centroid_x = (c->centroid())[0];
-    if (centroid_x < -6.05/num_cells_x){
+    const auto & centroid = c->centroid();
+    auto func = prescribed_function( centroid );
+    //if ( centroid[0] < -0.25 ) {
       m = 0;
-      vol_frac(c,m) = 1.0;
-      density(c,m) = 1.0;
-      velocity(c,m) = 1.0;
-    } else if (centroid_x > -4.95/num_cells_x){
-      m = 1;
-      vol_frac(c,m) = 1.0;
-      density(c,m) = 1.0;
-      velocity(c,m) = 1.0;
-    } else {
-      for ( int i=0; i < 2; ++i ){
-        vol_frac(c,i) = 0.5;
-        density(c,i) = 2.0;
-        velocity(c,i) = 2.0;
-      }
-    }
+      vol_frac(c,m) = 1;
+      density(c,m) = func;
+      velocity(c,m) = func;
+    //}
+    //else {
+    //  m = 1;
+    //  vol_frac(c,m) = 1;
+    //  density(c,m) = func;
+    //  velocity(c,m) = func;
+    //}
   }
 }
  
-void initialize_linear(
-  utils::client_handle_r<mesh_t> mesh,
-  utils::sparse_mutator<real_t> density,
-  utils::sparse_mutator<real_t> vol_frac,
-  utils::sparse_mutator<vector_t> velocity
-) {
-
-  real_t val;
-  int m = 0;
-  float num_cells_x = 32.0;
-  for (auto c: mesh.cells(flecsi::owned)){
-    c->update(&mesh);
-    auto centroid_x = c->centroid()[0];
-    real_t sum = 0.0;
-    // for ( int i=0; i < mesh_t::num_dimensions; i++)
-    //   sum += ((c->centroid())[i]+0.5);
-    sum = ((c->centroid())[0]+0.5);
-    val = sum * 1.0;
-    if (centroid_x < -6.05/num_cells_x){
-      m = 0;
-      density(c,m) = val;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = val;
-    } else if (centroid_x > -4.95/num_cells_x){
-      m = 1;
-      density(c,m) = val;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = val;
-    } else {
-      for (int m=0; m<2; ++m){
-        density(c,m) = val;
-        vol_frac(c,m) = 0.5;
-        velocity(c,m) = val;
-      }
-    }
-  }
-}
-
-void initialize_cubic(
-  utils::client_handle_r<mesh_t> mesh,
-  utils::sparse_mutator<real_t> density,
-  utils::sparse_mutator<real_t> vol_frac,
-  utils::sparse_mutator<vector_t> velocity
-) {
-
-  int m = 0;
-  int num_cells_x = 32;
-  int split = floor(num_cells_x/2);
-  for (auto c: mesh.cells(flecsi::owned)){
-    real_t sum = 0.0;
-    for ( int i=0; i < mesh_t::num_dimensions; i++)
-      sum += pow((c->centroid())[i]+0.5, 3.0);
-    auto val = sum;
-    if (c.id()%num_cells_x < split){
-      m = 0;
-      density(c,m) = val;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = val;
-    } else if (c.id()%num_cells_x > split) {
-      m = 1;
-      density(c,m) = val;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = val;
-    } else {
-      for (int m=0; m<2; ++m){
-        density(c,m) = val;
-        vol_frac(c,m) = 0.5;
-        velocity(c,m) = val;
-      }
-    }
-  }
-}
-
-void initialize_cosine(
-  utils::client_handle_r<mesh_t> mesh,
-  utils::sparse_mutator<real_t> density,
-  utils::sparse_mutator<real_t> vol_frac,
-  utils::sparse_mutator<vector_t> velocity
-) {
-
-  int m = 0;
-  int num_cells_x = 32;
-  int split = floor(num_cells_x/2);
-  for (auto c: mesh.cells(flecsi::owned)){
-    real_t sum = 0.0;
-    for ( int i=0; i < mesh_t::num_dimensions; i++)
-      sum += pow((c->centroid())[i], 2);
-    auto arg = 10.0 * std::sqrt( sum );
-    auto val = 1.0 + (std::cos(arg) / 3.0);
-    if (c.id()%num_cells_x < split){
-      m = 0;
-      density(c,m) = val;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = val;
-    } else if (c.id()%num_cells_x > split) {
-      m = 1;
-      density(c,m) = val;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = val;
-    } else {
-      for (int m=0; m<2; ++m){
-        density(c,m) = val;
-        vol_frac(c,m) = 0.5;
-        velocity(c,m) = val;
-      }
-    }
-  }
-}
-
-void initialize_step(
-  utils::client_handle_r<mesh_t> mesh,
-  utils::sparse_mutator<real_t> density,
-  utils::sparse_mutator<real_t> vol_frac,
-  utils::sparse_mutator<vector_t> velocity
-) {
-
-  int m = 0;
-  int num_cells_x = 32;
-  int split = floor(num_cells_x/2);
-  for (auto c: mesh.cells(flecsi::owned)){
-    real_t val;
-    if (c.id()%num_cells_x < split){
-      m = 0;
-      density(c,m) = 0.0;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = 0.0;
-    } else if (c.id()%num_cells_x > split) {
-      m = 1;
-      density(c,m) = 1.0;
-      vol_frac(c,m) = 1.0;
-      velocity(c,m) = 1.0;
-    } else {
-      for (int m=0; m<2; ++m){
-        density(c,m) = m;
-        vol_frac(c,m) = 0.5;
-        velocity(c,m) = m;
-      }
-    }
-  }
-}
-
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief modify the coordinates & solution
 //!
@@ -819,15 +641,7 @@ flecsi_register_task(output, flecsi_sp::burton::test, loc,
   single|flecsi::leaf);
 
 // Different Initialization Tasks
-flecsi_register_task(initialize_flat, flecsi_sp::burton::test, loc,
-  single|flecsi::leaf);
-flecsi_register_task(initialize_linear, flecsi_sp::burton::test, loc,
-  single|flecsi::leaf);
-flecsi_register_task(initialize_cubic, flecsi_sp::burton::test, loc,
-  single|flecsi::leaf);
-flecsi_register_task(initialize_cosine, flecsi_sp::burton::test, loc,
-  single|flecsi::leaf);
-flecsi_register_task(initialize_step, flecsi_sp::burton::test, loc,
+flecsi_register_task(initialize, flecsi_sp::burton::test, loc,
   single|flecsi::leaf);
 
 flecsi_register_task(restore, flecsi_sp::burton::test, loc,
@@ -864,52 +678,14 @@ void driver(int argc, char ** argv)
   auto volfrac_mutator  = flecsi_get_mutator(mesh_handle, hydro, volume_fraction,  real_t,   sparse, 0, num_materials);
   auto velocity_mutator = flecsi_get_mutator(mesh_handle, hydro, velocity, vector_t, sparse, 0, num_materials);
 
-#ifdef CUBIC
   flecsi_execute_task(
-          initialize_cubic,
+          initialize,
           flecsi_sp::burton::test,
           single,
           mesh_handle,
           density_mutator,
           volfrac_mutator,
           velocity_mutator);
-#elif LINEAR
-  flecsi_execute_task(
-          initialize_linear,
-          flecsi_sp::burton::test,
-          single,
-          mesh_handle,
-          density_mutator,
-          volfrac_mutator,
-          velocity_mutator);
-#elif STEP
-  flecsi_execute_task(
-          initialize_step,
-          flecsi_sp::burton::test,
-          single,
-          mesh_handle,
-          density_mutator,
-          volfrac_mutator,
-          velocity_mutator);
-#elif COSINE
-  flecsi_execute_task(
-          initialize_cosine,
-          flecsi_sp::burton::test,
-          single,
-          mesh_handle,
-          density_mutator,
-          volfrac_mutator,
-          velocity_mutator);
-#else
-  flecsi_execute_task(
-          initialize_flat,
-          flecsi_sp::burton::test,
-          single,
-          mesh_handle,
-          density_mutator,
-          volfrac_mutator,
-          velocity_mutator);
-#endif
   
   time_cnt++;
   flecsi_execute_task(

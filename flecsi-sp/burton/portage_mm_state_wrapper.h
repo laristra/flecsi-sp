@@ -142,19 +142,18 @@ public:
 
   //! \brief Set the number of materials in problem
   void set_materials(
-    int num_mats,
     const std::vector< std::vector<int> > & mat_cells,
     const std::vector< std::vector<int> > & cell_mats,
     const std::vector< std::vector<int> > & cell_mat_offsets)
   {
-    number_materials_ = num_mats;
+    number_materials_ = mat_cells.size();
     mat_cells_ = mat_cells;
     cell_mat_ids_ = cell_mats;
     cell_mat_offsets_ = cell_mat_offsets;
 
-    mat_data_offsets_.resize(num_mats+1);
+    mat_data_offsets_.resize(number_materials_+1);
     mat_data_offsets_[0] = 0;
-    for ( int i=0; i<num_mats; ++i )
+    for ( int i=0; i<number_materials_; ++i )
       mat_data_offsets_[i+1] = mat_data_offsets_[i] + mat_cells[i].size();
 
   }
@@ -163,7 +162,7 @@ public:
   std::string material_name(int matid) const {
     // return something else if you wanted to keep track of whether or not
     // the material has been added
-    assert(matid >= 0 && matid < num_materials());
+    if ( matid >= number_materials_ ) return {};
     return std::to_string(matid);
   }
 
@@ -171,7 +170,7 @@ public:
   //! \param matid    Index of material (0, num_materials()-1)
   //! \return         Number of cells containing material 'matid'
   int mat_get_num_cells(int matid) const {
-    assert(matid >= 0 && matid < num_materials());
+    if ( matid >= number_materials_ ) return 0;
     return mat_cells_[matid].size();
   }
 
@@ -179,7 +178,8 @@ public:
   //! \param matid    Index of material (0, num_materials()-1)
   //! \param matcells Cells containing material 'matid'
   void mat_get_cells(int matid, std::vector<int> *matcells) const{
-    assert(matid >= 0 && matid < num_materials());
+    matcells->clear();
+    if ( matid >= number_materials_ ) return;
     *matcells = mat_cells_[matid];
   }
 
@@ -280,7 +280,7 @@ public:
   //! \param[in] matid   Index (not unique identifier) of the material
   //! \param[out] data   vector containing the values corresponding to cells in the material
   template< typename T >
-  void mat_get_celldata(std::string const& var_name, int matid, T * * const values) const
+  void mat_get_celldata(std::string const& var_name, int matid, T const ** values) const
   {
     
     // add it if its not in the map
@@ -289,8 +289,13 @@ public:
       THROW_RUNTIME_ERROR( " Could not find state variable data for " <<
           var_name );
 
-    auto offset = mat_data_offsets_[matid];
-    *values = reinterpret_cast<T*>(it->second.data.data()) + offset;
+    if ( matid >= number_materials_ ) {
+      *values = nullptr;
+    }
+    else {
+      auto offset = mat_data_offsets_[matid];
+      *values = reinterpret_cast<const T*>(it->second.data.data()) + offset;
+    }
   }
 
 
@@ -299,13 +304,16 @@ public:
   //! \param[in] var_name The string name of the data field
   //! \param[in] matid   Index (not unique identifier) of the material
   //! \param[out] data   vector containing the values corresponding to cells in the material
-  template< typename T >
+  template<
+    typename T,
+    typename = typename std::enable_if_t< std::is_same_v< T, std::remove_const_t<T>> >
+  >
   void mat_get_celldata(std::string const& var_name, int matid, T **values)
   {
     
     // add it if its not in the map
     auto it = var_map_.find(var_name);
-    if ( it != var_map_.end() ){
+    if ( it == var_map_.end() ){
       auto ret = var_map_.emplace( var_name, data_t{typeid(T), sizeof(T)} );
       it = ret.first;
     }
