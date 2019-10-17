@@ -204,8 +204,7 @@ public:
   int cell_index_in_material(int meshcell, int matid) const {
     const auto & mat_ids = cell_mat_ids_[meshcell];
     auto it = std::find( mat_ids.begin(), mat_ids.end(), matid );
-    if (it == mat_ids.end())
-      THROW_RUNTIME_ERROR( "MAT_ITER not found " << meshcell << " " << matid );
+    if (it == mat_ids.end()) return -1;
 
     auto offset = std::distance(mat_ids.begin(), it);
     auto index = cell_mat_offsets_[meshcell][offset];

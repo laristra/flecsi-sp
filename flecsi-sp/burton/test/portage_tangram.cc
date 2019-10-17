@@ -56,7 +56,7 @@ namespace test {
 
 template< typename T >
 real_t prescribed_function( const T & c ) {
-  return 1.0;
+  return 2.0 + c[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -304,7 +304,7 @@ void remap_tangram_test(
 
   constexpr auto num_dims = mesh_t::num_dimensions;
   auto max_mats = volfrac_handle.max_entries(); // WHY IS THIS 5?;
-  constexpr auto epsilon = config::test_tolerance;
+  constexpr auto epsilon = 10*config::test_tolerance;
 
   // some mesh parameters
   const auto & cells = mesh.cells();
@@ -427,7 +427,7 @@ void remap_tangram_test(
 
   // Assign the remap varaible names for the portage driver
   remapper.set_remap_var_names(var_names);
-  remapper.set_limiter( Portage::Limiter_type::BARTH_JESPERSEN );
+  remapper.set_limiter( Portage::Limiter_type::NOLIMITER );
 
   // Do the remap 
   std::cout << "REMAPPING" << std::endl;
@@ -551,18 +551,14 @@ void initialize(
     c->update(&mesh);
     const auto & centroid = c->centroid();
     auto func = prescribed_function( centroid );
-    //if ( centroid[0] < -0.25 ) {
-      m = 0;
-      vol_frac(c,m) = 1;
+    std::vector<int> mats;
+    if (centroid[0] < -0.25) mats.push_back(0);
+    if (centroid[0] > -0.25) mats.push_back(1);
+    for ( auto m : mats ) {
+      vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
       density(c,m) = func;
       velocity(c,m) = func;
-    //}
-    //else {
-    //  m = 1;
-    //  vol_frac(c,m) = 1;
-    //  density(c,m) = func;
-    //  velocity(c,m) = func;
-    //}
+    }
   }
 }
  
