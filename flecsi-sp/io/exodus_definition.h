@@ -1698,7 +1698,7 @@ public:
       
 
       // shift all local to global ids
-      for ( auto j=local_id; j<num_cells; ++j ) {
+      for ( auto j=local_id; j<num_cells-1; ++j ) {
         cell_local2global[j] = cell_local2global[j+1];
         cell_type_[j] = cell_type_[j+1];
         cell_block_id_[j] = cell_block_id_[j+1];
@@ -1771,7 +1771,7 @@ public:
         auto global_id = vert_local2global[local_id];
 
         // shift all local to global ids, and vertices
-        for ( auto j=local_id; j<vertex_count; ++j ) {
+        for ( auto j=local_id; j<vertex_count-1; ++j ) {
           vert_local2global[j] = vert_local2global[j+1];
           for ( int d=0; d<num_dims; ++d )
             vertices_[ j*num_dims + d ] = vertices_[ (j+1)*num_dims + d ];
@@ -3044,7 +3044,7 @@ public:
       
 
       // shift all local to global ids
-      for ( auto j=local_id; j<num_cells; ++j ) {
+      for ( auto j=local_id; j<num_cells-1; ++j ) {
         cell_local2global[j] = cell_local2global[j+1];
         cell_type_[j] = cell_type_[j+1];
         cell_block_id_[j] = cell_block_id_[j+1];
@@ -3220,7 +3220,7 @@ public:
         auto global_id = vert_local2global[local_id];
 
         // shift all local to global ids, and vertices
-        for ( auto j=local_id; j<vertex_count; ++j ) {
+        for ( auto j=local_id; j<vertex_count-1; ++j ) {
           vert_local2global[j] = vert_local2global[j+1];
           for ( int d=0; d<num_dims; ++d )
             vertices_[ j*num_dims + d ] = vertices_[ (j+1)*num_dims + d ];
