@@ -44,8 +44,11 @@ static auto parse_arguments(
   // if no arguments, set c to -1 to skip while lop
   int c = ( argc > 1 ) ? 0 : -1;
 
+  // make a copy to avoid getopt permuting invalid options
+  std::vector<char*> argvcopy(argv, argv + argc);
+
   while (c != -1) {
-    c = getopt_long(argc, argv, short_options, long_options, &option_index);
+    c = getopt_long(argc, argvcopy.data(), short_options, long_options, &option_index);
     auto c_char = static_cast<char>(c);
     auto c_str = ristra::utils::to_string( c_char );
     // finished with arguments
