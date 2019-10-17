@@ -370,40 +370,43 @@ public:
   {
 
     // store the last material and increment materials
+    auto old_num_mats = number_materials_;
     number_materials_ = matid + 1;
-
-    // this version only sets the material cells?
-
-    // setting material cells is easy
     mat_cells_.resize( number_materials_ );
-    mat_cells_[matid] = newcells;
-
-    // need largest cell id for resizing
-    auto it = std::max_element( newcells.begin(), newcells.end() );
-    auto nc = *it + 1;
 
 
-    // fill in all material ids, assume that the material id is monotonically
-    // increasing
-    cell_mat_ids_.resize( nc );
-    for ( auto c : newcells )
-      cell_mat_ids_[c].push_back(matid);
+    // nothing to do if new cells is empty
+    if ( newcells.size() ) {
 
-    // fill in all material mesh ids, assume that the material id and cell id
-    // are increasing monotonically
-    cell_mat_offsets_.resize( nc );
-    size_t mat_cell_id{0};
-    for ( auto c : newcells ) {
-      cell_mat_offsets_[c].push_back(mat_cell_id);
-      mat_cell_id++;
-    }
+      // setting material cells is easy
+      mat_cells_[matid] = newcells;
+
+      // need largest cell id for resizing
+      auto it = std::max_element( newcells.begin(), newcells.end() );
+      auto nc = *it + 1;
+
+
+      // fill in all material ids, assume that the material id is monotonically
+      // increasing
+      cell_mat_ids_.resize( nc );
+      for ( auto c : newcells )
+        cell_mat_ids_[c].push_back(matid);
+
+      // fill in all material mesh ids, assume that the material id and cell id
+      // are increasing monotonically
+      cell_mat_offsets_.resize( nc );
+      size_t mat_cell_id{0};
+      for ( auto c : newcells ) {
+        cell_mat_offsets_[c].push_back(mat_cell_id);
+        mat_cell_id++;
+      }
+
+    } // newcells not empty
  
     // set offsets for next rang of materials.
-    // Just redo them all since the number of materials is small
     mat_data_offsets_.resize(number_materials_+1);
-
-    mat_data_offsets_[0] = 0;
-    for ( auto i=0; i<number_materials_; ++i )
+    if (old_num_mats == 0) mat_data_offsets_[0] = 0;
+    for ( auto i=old_num_mats; i<number_materials_; ++i )
       mat_data_offsets_[i+1] = mat_data_offsets_[i] + mat_cells_[i].size();
   }
 
