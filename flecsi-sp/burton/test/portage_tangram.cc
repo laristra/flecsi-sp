@@ -429,10 +429,21 @@ void remap_tangram_test(
   remapper.set_remap_var_names(var_names);
   remapper.set_limiter( Portage::Limiter_type::NOLIMITER );
 
-  // Do the remap 
-  std::cout << "REMAPPING" << std::endl;
   auto mpi_comm = MPI_COMM_WORLD;
   Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
+  bool all_convex = false;
+  std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
+  auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
+								     tols,
+								     all_convex);  
+  source_state_wrapper.build_centroids(source_mesh_wrapper,
+                                       source_interface_reconstructor,
+                                       &mpiexecutor);
+
+  // Do the remap 
+  std::cout << "REMAPPING" << std::endl;
+  // auto mpi_comm = MPI_COMM_WORLD;
+  // Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
   remapper.run( & mpiexecutor );
 
   //---------------------------------------------------------------------------
@@ -549,17 +560,40 @@ void initialize(
   float num_cells_x = 32.0;
   for (auto c: mesh.cells(flecsi::owned)){
     c->update(&mesh);
-    const auto & centroid = c->centroid();
-    auto func = prescribed_function( centroid );
-    std::vector<int> mats;
-    if (centroid[0] < -0.25) mats.push_back(0);
-    if (centroid[0] > -0.25) mats.push_back(1);
-    for ( auto m : mats ) {
-      vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
-      density(c,m) = func;
-      velocity(c,m) = func;
+    auto centroid_x = (c->centroid())[0];
+    if (centroid_x < -6.05/num_cells_x){
+      m = 0;
+      vol_frac(c,m) = 1.0;
+      density(c,m) = 1.0;
+      velocity(c,m) = 1.0;
+    } else if (centroid_x > -4.95/num_cells_x){
+      m = 1;
+      vol_frac(c,m) = 1.0;
+      density(c,m) = 1.0;
+      velocity(c,m) = 1.0;
+    } else {
+      for ( int i=0; i < 2; ++i ){
+        vol_frac(c,i) = 0.5;
+        density(c,i) = 2.0;
+        velocity(c,i) = 2.0;
+      }
     }
   }
+  // int m = 0;
+  // float num_cells_x = 32.0;
+  // for (auto c: mesh.cells(flecsi::owned)){
+  //   c->update(&mesh);
+  //   const auto & centroid = c->centroid();
+  //   auto func = prescribed_function( centroid );
+  //   std::vector<int> mats;
+  //   if (centroid[0] < -0.25) mats.push_back(0);
+  //   if (centroid[0] > -0.25) mats.push_back(1);
+  //   for ( auto m : mats ) {
+  //     vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
+  //     density(c,m) = func;
+  //     velocity(c,m) = func;
+  //   }
+  // }
 }
  
 ////////////////////////////////////////////////////////////////////////////////
