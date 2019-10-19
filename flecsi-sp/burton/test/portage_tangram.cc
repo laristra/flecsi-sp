@@ -56,7 +56,7 @@ namespace test {
 
 template< typename T >
 real_t prescribed_function( const T & c ) {
-  return 2.0 + c[0];
+  return 2.0*c[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -411,7 +411,6 @@ void remap_tangram_test(
       volfrac[offset] = volfrac_handle(c,m);
       density[offset] = density_handle(c,m);
       for ( int i=0; i<num_dims; ++i ) matcentroids[offset][i] = cells[c]->centroid()[i];
-      std::cout << matcentroids[offset] << std::endl;
       offset++;
     }
   }
@@ -430,19 +429,12 @@ void remap_tangram_test(
                                                             &mpiexecutor);
   offset = {0};
   for (int m=0; m<max_mats; ++m){
-    std::cout << "HERE " << m << std::endl;
     for (auto c: velocity_handle.indices(m) ){
       int index = source_state_wrapper.cell_index_in_material(c,m);
-      std::cout << "HERE " << c << " " << m << " " << index <<  std::endl;
-      std::cout << centroid_list[m][index] << std::endl;
-      std::cout << " |  " << matcentroids[offset] << std::endl;      
       matcentroids[offset] = centroid_list[m][index];        
       offset++;
-      std::cout << "HERE " << c << " " << m << std::endl;
     }
-    std::cout << "HERE " << m << std::endl;
   }
-  std::cout << "HERE test" << std::endl;
 
   // Build remapper
   auto remapper = make_remapper(
@@ -572,44 +564,19 @@ void initialize(
   utils::sparse_mutator<real_t> vol_frac,
   utils::sparse_mutator<vector_t> velocity
 ) {
-  int m = 0;
-  float num_cells_x = 32.0;
   for (auto c: mesh.cells(flecsi::owned)){
     c->update(&mesh);
-    auto centroid_x = (c->centroid())[0];
-    if (centroid_x < -6.05/num_cells_x){
-      m = 0;
-      vol_frac(c,m) = 1.0;
-      density(c,m) = 1.0;
-      velocity(c,m) = 1.0;
-    } else if (centroid_x > -4.95/num_cells_x){
-      m = 1;
-      vol_frac(c,m) = 1.0;
-      density(c,m) = 1.0;
-      velocity(c,m) = 1.0;
-    } else {
-      for ( int i=0; i < 2; ++i ){
-        vol_frac(c,i) = 0.5;
-        density(c,i) = 1.0;
-        velocity(c,i) = 1.0;
-      }
+    const auto & centroid = c->centroid();
+    auto func = prescribed_function( centroid );
+    std::vector<int> mats;
+    if (centroid[0] < -0.205) mats.push_back(0);
+    if (centroid[0] > -0.255) mats.push_back(1);
+    for ( auto m : mats ) {
+      vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
+      density(c,m) = func;
+      velocity(c,m) = func;
     }
   }
-  // int m = 0;
-  // float num_cells_x = 32.0;
-  // for (auto c: mesh.cells(flecsi::owned)){
-  //   c->update(&mesh);
-  //   const auto & centroid = c->centroid();
-  //   auto func = prescribed_function( centroid );
-  //   std::vector<int> mats;
-  //   if (centroid[0] < -0.25) mats.push_back(0);
-  //   if (centroid[0] > -0.25) mats.push_back(1);
-  //   for ( auto m : mats ) {
-  //     vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
-  //     density(c,m) = func;
-  //     velocity(c,m) = func;
-  //   }
-  // }
 }
  
 ////////////////////////////////////////////////////////////////////////////////
