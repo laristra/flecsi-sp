@@ -380,7 +380,6 @@ void remap_tangram_test(
 
   // Initialize material offsets and cells in wrappers
   source_state_wrapper.set_materials(mat_cells, cell_mats, cell_mat_offsets );
-  
 
   // Create a vector of strings that correspond to the names of the variables
   //   that will be remapped
@@ -412,10 +411,38 @@ void remap_tangram_test(
       volfrac[offset] = volfrac_handle(c,m);
       density[offset] = density_handle(c,m);
       for ( int i=0; i<num_dims; ++i ) matcentroids[offset][i] = cells[c]->centroid()[i];
+      std::cout << matcentroids[offset] << std::endl;
       offset++;
     }
   }
 
+  // Get the material centroid values via Tangram
+  auto mpi_comm = MPI_COMM_WORLD;
+  Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
+  bool all_convex = false;
+  std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
+  auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
+  								     tols,
+  								     all_convex);  
+
+  auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
+                                                            source_interface_reconstructor,
+                                                            &mpiexecutor);
+  offset = {0};
+  for (int m=0; m<max_mats; ++m){
+    std::cout << "HERE " << m << std::endl;
+    for (auto c: velocity_handle.indices(m) ){
+      int index = source_state_wrapper.cell_index_in_material(c,m);
+      std::cout << "HERE " << c << " " << m << " " << index <<  std::endl;
+      std::cout << centroid_list[m][index] << std::endl;
+      std::cout << " |  " << matcentroids[offset] << std::endl;      
+      matcentroids[offset] = centroid_list[m][index];        
+      offset++;
+      std::cout << "HERE " << c << " " << m << std::endl;
+    }
+    std::cout << "HERE " << m << std::endl;
+  }
+  std::cout << "HERE test" << std::endl;
 
   // Build remapper
   auto remapper = make_remapper(
@@ -428,17 +455,6 @@ void remap_tangram_test(
   // Assign the remap varaible names for the portage driver
   remapper.set_remap_var_names(var_names);
   remapper.set_limiter( Portage::Limiter_type::NOLIMITER );
-
-  auto mpi_comm = MPI_COMM_WORLD;
-  Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
-  bool all_convex = false;
-  std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
-  auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
-								     tols,
-								     all_convex);  
-  source_state_wrapper.build_centroids(source_mesh_wrapper,
-                                       source_interface_reconstructor,
-                                       &mpiexecutor);
 
   // Do the remap 
   std::cout << "REMAPPING" << std::endl;
@@ -574,8 +590,8 @@ void initialize(
     } else {
       for ( int i=0; i < 2; ++i ){
         vol_frac(c,i) = 0.5;
-        density(c,i) = 2.0;
-        velocity(c,i) = 2.0;
+        density(c,i) = 1.0;
+        velocity(c,i) = 1.0;
       }
     }
   }

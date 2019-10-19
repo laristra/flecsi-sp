@@ -165,7 +165,7 @@ public:
   //! \brief Populate the material centroids
   template<typename mesh_wrapper_t,
     typename reconstructor_t>
-    void build_centroids(mesh_wrapper_t & source_mesh_wrapper,
+    auto build_centroids(mesh_wrapper_t & source_mesh_wrapper,
                          reconstructor_t & source_interface_reconstructor,
                          Wonton::Executor_type const *executor = nullptr){
     auto cells = mesh_->cells();
@@ -192,14 +192,16 @@ public:
       cellmatpoly_list = source_interface_reconstructor->cell_matpoly_ptrs();
 
     auto count = 0;
-    std::vector <Tangram::Point<num_dims>> centroid_list;
+    std::vector<std::vector<Tangram::Point<num_dims>>> 
+      centroid_list(number_materials_);
     for (auto cmp: cellmatpoly_list){
       if (cmp == NULL){
+        int matid = this->cell_mat_ids_[cells[count]][0];
 	Tangram::Point<num_dims> temp_centroid;
         for (int dim=0; dim<num_dims; ++dim){
           temp_centroid[dim] = cells[count]->centroid()[dim];
 	}
-        centroid_list.push_back(temp_centroid);
+        centroid_list[matid].push_back(temp_centroid);
       } else {
 	std::vector< real_t > mat_vols(number_materials_, 0.0);
 	std::vector< Tangram::Point<num_dims> > mat_centroid(number_materials_);
@@ -217,12 +219,13 @@ public:
             mat_centroid[matid][dim] /= mat_vols[matid];
 	  }
           if (mat_vols[matid] > tolerance_){
-            centroid_list.push_back(mat_centroid[matid]);
+            centroid_list[matid].push_back(mat_centroid[matid]);
 	  }
 	}
       }
       count++;
     }
+    return centroid_list;
   } 
 
   //! \brief Name of material
