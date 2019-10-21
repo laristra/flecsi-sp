@@ -303,7 +303,7 @@ void remap_tangram_test(
   using mesh_wrapper_t = flecsi_sp::burton::portage_mesh_wrapper_t<mesh_t>;
 
   constexpr auto num_dims = mesh_t::num_dimensions;
-  auto max_mats = volfrac_handle.max_entries(); // WHY IS THIS 5?;
+  auto max_mats = volfrac_handle.max_entries(); 
   constexpr auto epsilon = 10*config::test_tolerance;
 
   // some mesh parameters
@@ -423,10 +423,11 @@ void remap_tangram_test(
   auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
   								     tols,
   								     all_convex);  
-
+  // Create the mat centroid list
   auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
                                                             source_interface_reconstructor,
                                                             &mpiexecutor);
+  // Hand-off mat centroid list to matcentroid pointer object
   offset = {0};
   for (int m=0; m<max_mats; ++m){
     for (auto c: velocity_handle.indices(m) ){
@@ -450,8 +451,6 @@ void remap_tangram_test(
 
   // Do the remap 
   std::cout << "REMAPPING" << std::endl;
-  // auto mpi_comm = MPI_COMM_WORLD;
-  // Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
   remapper.run( & mpiexecutor );
 
   //---------------------------------------------------------------------------
@@ -569,8 +568,12 @@ void initialize(
     const auto & centroid = c->centroid();
     auto func = prescribed_function( centroid );
     std::vector<int> mats;
+    // MM initalization
     if (centroid[0] < -0.205) mats.push_back(0);
     if (centroid[0] > -0.255) mats.push_back(1);
+    // Single material initialization
+    // if (centroid[0] < -0.25) mats.push_back(0);
+    // if (centroid[0] > -0.25) mats.push_back(1);
     for ( auto m : mats ) {
       vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
       density(c,m) = func;
