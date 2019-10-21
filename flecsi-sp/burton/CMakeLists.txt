@@ -221,4 +221,22 @@ if (FLECSI_SP_ENABLE_PORTAGE)
     THREADS 2
     LIBRARIES FleCSI-SP
   )
+
+  cinch_add_unit(flecsi_sp_burton_portage_tangram_2d
+    ARGUMENTS
+    -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
+    SOURCES
+      test/portage_tangram.cc
+      burton_specialization_init.cc
+      ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+      ${FLECSI_SP_RUNTIME_DRIVER}
+    DEFINES
+      -DFLECSI_SP_BURTON_MESH_DIMENSION=2
+      -DFLECSI_ENABLE_SPECIALIZATION_TLT_INIT
+      -DFLECSI_ENABLE_SPECIALIZATION_SPMD_INIT
+      -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
+    POLICY ${FLECSI_SP_UNIT_POLICY}
+    THREADS 1
+    LIBRARIES FleCSI-SP
+  )
 endif()
