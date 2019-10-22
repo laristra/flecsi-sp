@@ -168,60 +168,65 @@ public:
     auto build_centroids(mesh_wrapper_t & source_mesh_wrapper,
                          reconstructor_t & source_interface_reconstructor,
                          Wonton::Executor_type const *executor = nullptr){
+
     auto cells = mesh_->cells();
+    auto num_cells = cells.size();
     constexpr auto num_dims = mesh_wrapper_t::mesh_t::num_dimensions;
+
+    double const * matfracptr;
+    mat_get_celldata("mat_volfracs", 0, &matfracptr);
 
     std::vector<int> cell_num_mats;
     std::vector<int> cell_mat_ids;
     std::vector<double> cell_mat_volfracs;
-    for (auto c: cells){
-      cell_num_mats.push_back(this->cell_mat_ids_[c.id()].size());
-      for (auto m: this->cell_mat_ids_[c.id()]){
-        double const * matfracptr;
-        mat_get_celldata("mat_volfracs", m, &matfracptr);
-        auto index = cell_index_in_material(c.id(), m);
+    for ( size_t c=0; c<num_cells; ++c ){
+      cell_num_mats.push_back(this->cell_mat_ids_[c].size());
+      for (auto m: this->cell_mat_ids_[c]){
+        auto index = cell_index_in_material(c, m);
         cell_mat_ids.push_back(m);
-	cell_mat_volfracs.push_back(matfracptr[index]);
+        cell_mat_volfracs.push_back(matfracptr[ mat_data_offsets_[m] + index]);
       }
     }
+
     source_interface_reconstructor->set_volume_fractions(cell_num_mats,
 							 cell_mat_ids,
 							 cell_mat_volfracs);
     source_interface_reconstructor->reconstruct(executor);
+
     std::vector<std::shared_ptr<Tangram::CellMatPoly<2>>> const
       cellmatpoly_list = source_interface_reconstructor->cell_matpoly_ptrs();
 
     auto count = 0;
-    std::vector<std::vector<Tangram::Point<num_dims>>> 
-      centroid_list(number_materials_);
+    std::vector<std::vector<Tangram::Point<num_dims>>> centroid_list(number_materials_);
+
     for (auto cmp: cellmatpoly_list){
       if (cmp == NULL){
-        int matid = this->cell_mat_ids_[cells[count]][0];
-	Tangram::Point<num_dims> temp_centroid;
+        int matid = this->cell_mat_ids_[count][0];
+        Tangram::Point<num_dims> temp_centroid;
         for (int dim=0; dim<num_dims; ++dim){
           temp_centroid[dim] = cells[count]->centroid()[dim];
-	}
+	      }    
         centroid_list[matid].push_back(temp_centroid);
-      } else {
-	std::vector< real_t > mat_vols(number_materials_, 0.0);
-	std::vector< Tangram::Point<num_dims> > mat_centroid(number_materials_);
-	for (int k=0; k<cmp->num_matpolys(); ++k){
+      }
+      else {
+        std::vector< bool > has_mat( number_materials_, false );
+        std::vector< real_t > mat_vols(number_materials_, 0.0);
+        std::vector< Tangram::Point<num_dims> > mat_centroid(number_materials_);
+	      for (int k=0; k<cmp->num_matpolys(); ++k) {
           auto matid = cmp->matpoly_matid(k);
-          mat_vols[matid] += cmp->matpoly_volume(k);
-	  Tangram::Point<num_dims> matpoly_centroid = cmp->matpoly_centroid(k);
-          for (int dim=0; dim<num_dims; ++dim){
-            mat_centroid[matid][dim] = matpoly_centroid[dim] 
-                                       * cmp->matpoly_volume(k);
-	  }
-	}
-        for (int matid=0; matid<number_materials_; ++matid){
-          for (int dim=0; dim<num_dims; ++dim){
-            mat_centroid[matid][dim] /= mat_vols[matid];
-	  }
-          if (mat_vols[matid] > tolerance_){
+          auto mat_vol = cmp->matpoly_volume(k);
+          auto matpoly_centroid = cmp->matpoly_centroid(k);
+          has_mat[matid] = true;
+          mat_vols[matid] += mat_vol;
+          for (int dim=0; dim<num_dims; ++dim)
+            mat_centroid[matid][dim] += mat_vol * matpoly_centroid[dim];
+	      }
+        for (int matid=0; matid<number_materials_; ++matid) {
+          if ( has_mat[matid] ) {
+            for (int dim=0; dim<num_dims; ++dim) mat_centroid[matid][dim] /= mat_vols[matid];
             centroid_list[matid].push_back(mat_centroid[matid]);
-	  }
-	}
+          }
+	      }
       }
       count++;
     }

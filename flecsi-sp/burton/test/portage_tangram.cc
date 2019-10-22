@@ -56,7 +56,7 @@ namespace test {
 
 template< typename T >
 real_t prescribed_function( const T & c ) {
-  return 2.0*c[0];
+  return 2.0 + c[0];
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -409,8 +409,6 @@ void remap_tangram_test(
   for (int m=0; m<max_mats; ++m){
     for (auto c: velocity_handle.indices(m) ){
       volfrac[offset] = volfrac_handle(c,m);
-      density[offset] = density_handle(c,m);
-      for ( int i=0; i<num_dims; ++i ) matcentroids[offset][i] = cells[c]->centroid()[i];
       offset++;
     }
   }
@@ -428,12 +426,14 @@ void remap_tangram_test(
                                                             source_interface_reconstructor,
                                                             &mpiexecutor);
   // Hand-off mat centroid list to matcentroid pointer object
-  offset = {0};
+  offset = 0;
   for (int m=0; m<max_mats; ++m){
+    auto mat_index = 0;
     for (auto c: velocity_handle.indices(m) ){
-      int index = source_state_wrapper.cell_index_in_material(c,m);
-      matcentroids[offset] = centroid_list[m][index];        
+      matcentroids[offset] = centroid_list[m][mat_index]; 
+      density[offset] = prescribed_function( centroid_list[m][mat_index] );
       offset++;
+      mat_index++;
     }
   }
 
@@ -450,7 +450,6 @@ void remap_tangram_test(
   remapper.set_limiter( Portage::Limiter_type::NOLIMITER );
 
   // Do the remap 
-  std::cout << "REMAPPING" << std::endl;
   remapper.run( & mpiexecutor );
 
   //---------------------------------------------------------------------------
@@ -497,7 +496,6 @@ void remap_tangram_test(
 
   // Check conservation for remap test
   real_t total_remap_density{0};
-  real_t total_remap_volume{0};
   // Calculate the L1 and L2 norms
   real_t total_vol = 0.0;
   real_t L1 = 0.0;
@@ -513,11 +511,11 @@ void remap_tangram_test(
       actual[c.id()] += volfrac_mutator(c,mat_num) * density_mutator(c,mat_num);
       total_remap_density += c->volume() * volfrac_mutator(c,mat_num) * density_mutator(c,mat_num);
       vfrac_sum[c.id()] += volfrac_mutator(c,mat_num);
-      total_remap_volume += c->volume() * volfrac_mutator(c,mat_num);
     }
   }
   
   for (auto c: mesh.cells(flecsi::owned)){
+    EXPECT_NEAR( vfrac_sum[c], 1.0, epsilon );
     auto expected = prescribed_function( c->centroid() );
     // L1,L2 errors
     auto each_error = std::abs(actual[c.id()] - expected);
@@ -539,6 +537,7 @@ void remap_tangram_test(
     printf("L2 Norm: %14.7e, Total Volume: %f \n", L2_sum, total_vol_sum);
     EXPECT_NEAR(L1_sum, 0.0, epsilon);
     EXPECT_NEAR(L2_sum, 0.0, epsilon);
+    EXPECT_NEAR( total_vol_sum, 1.0, epsilon );
   }
 
   // Verify conservation
@@ -569,8 +568,8 @@ void initialize(
     auto func = prescribed_function( centroid );
     std::vector<int> mats;
     // MM initalization
-    if (centroid[0] < -0.205) mats.push_back(0);
-    if (centroid[0] > -0.255) mats.push_back(1);
+    if (centroid[0] < -0.21875) mats.push_back(0);
+    if (centroid[0] > -0.25) mats.push_back(1);
     // Single material initialization
     // if (centroid[0] < -0.25) mats.push_back(0);
     // if (centroid[0] > -0.25) mats.push_back(1);
