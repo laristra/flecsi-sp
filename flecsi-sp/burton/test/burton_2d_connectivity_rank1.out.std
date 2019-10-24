@@ -12067,13 +12067,13 @@ For each vertex:
     ----Faces:
     ++++ face id: 1087
     ++++ face id: 1088
-    ++++ face id: 1090
     ++++ face id: 1007
+    ++++ face id: 1090
     ----Edges:
     ++++ edge id: 1087
     ++++ edge id: 1088
-    ++++ edge id: 1090
     ++++ edge id: 1007
+    ++++ edge id: 1090
 ^^^^^^^^Vertex id: 562
     ----Cells:
     ++++ cell id: 528
@@ -12093,13 +12093,13 @@ For each vertex:
     ++++ cell id: 480
     ++++ cell id: 481
     ----Faces:
-    ++++ face id: 1090
     ++++ face id: 1009
+    ++++ face id: 1090
     ++++ face id: 1091
     ++++ face id: 1106
     ----Edges:
-    ++++ edge id: 1090
     ++++ edge id: 1009
+    ++++ edge id: 1090
     ++++ edge id: 1091
     ++++ edge id: 1106
 ^^^^^^^^Vertex id: 564
@@ -12121,13 +12121,13 @@ For each vertex:
     ++++ cell id: 481
     ++++ cell id: 482
     ----Faces:
-    ++++ face id: 1091
     ++++ face id: 1011
+    ++++ face id: 1091
     ++++ face id: 1092
     ++++ face id: 1108
     ----Edges:
-    ++++ edge id: 1091
     ++++ edge id: 1011
+    ++++ edge id: 1091
     ++++ edge id: 1092
     ++++ edge id: 1108
 ^^^^^^^^Vertex id: 566
@@ -12149,13 +12149,13 @@ For each vertex:
     ++++ cell id: 482
     ++++ cell id: 483
     ----Faces:
-    ++++ face id: 1092
     ++++ face id: 1013
+    ++++ face id: 1092
     ++++ face id: 1093
     ++++ face id: 1110
     ----Edges:
-    ++++ edge id: 1092
     ++++ edge id: 1013
+    ++++ edge id: 1092
     ++++ edge id: 1093
     ++++ edge id: 1110
 ^^^^^^^^Vertex id: 568
@@ -12177,13 +12177,13 @@ For each vertex:
     ++++ cell id: 483
     ++++ cell id: 484
     ----Faces:
-    ++++ face id: 1093
     ++++ face id: 1015
+    ++++ face id: 1093
     ++++ face id: 1094
     ++++ face id: 1112
     ----Edges:
-    ++++ edge id: 1093
     ++++ edge id: 1015
+    ++++ edge id: 1093
     ++++ edge id: 1094
     ++++ edge id: 1112
 ^^^^^^^^Vertex id: 570
@@ -12205,13 +12205,13 @@ For each vertex:
     ++++ cell id: 484
     ++++ cell id: 485
     ----Faces:
-    ++++ face id: 1094
     ++++ face id: 1017
+    ++++ face id: 1094
     ++++ face id: 1095
     ++++ face id: 1114
     ----Edges:
-    ++++ edge id: 1094
     ++++ edge id: 1017
+    ++++ edge id: 1094
     ++++ edge id: 1095
     ++++ edge id: 1114
 ^^^^^^^^Vertex id: 572
@@ -12233,13 +12233,13 @@ For each vertex:
     ++++ cell id: 485
     ++++ cell id: 486
     ----Faces:
-    ++++ face id: 1095
     ++++ face id: 1019
+    ++++ face id: 1095
     ++++ face id: 1096
     ++++ face id: 1116
     ----Edges:
-    ++++ edge id: 1095
     ++++ edge id: 1019
+    ++++ edge id: 1095
     ++++ edge id: 1096
     ++++ edge id: 1116
 ^^^^^^^^Vertex id: 574
@@ -12261,13 +12261,13 @@ For each vertex:
     ++++ cell id: 486
     ++++ cell id: 487
     ----Faces:
-    ++++ face id: 1096
     ++++ face id: 1021
+    ++++ face id: 1096
     ++++ face id: 1097
     ++++ face id: 1118
     ----Edges:
-    ++++ edge id: 1096
     ++++ edge id: 1021
+    ++++ edge id: 1096
     ++++ edge id: 1097
     ++++ edge id: 1118
 ^^^^^^^^Vertex id: 576
@@ -12289,13 +12289,13 @@ For each vertex:
     ++++ cell id: 487
     ++++ cell id: 488
     ----Faces:
-    ++++ face id: 1097
     ++++ face id: 1023
+    ++++ face id: 1097
     ++++ face id: 1098
     ++++ face id: 1120
     ----Edges:
-    ++++ edge id: 1097
     ++++ edge id: 1023
+    ++++ edge id: 1097
     ++++ edge id: 1098
     ++++ edge id: 1120
 ^^^^^^^^Vertex id: 578
@@ -12317,13 +12317,13 @@ For each vertex:
     ++++ cell id: 488
     ++++ cell id: 489
     ----Faces:
-    ++++ face id: 1098
     ++++ face id: 1025
+    ++++ face id: 1098
     ++++ face id: 1099
     ++++ face id: 1122
     ----Edges:
-    ++++ edge id: 1098
     ++++ edge id: 1025
+    ++++ edge id: 1098
     ++++ edge id: 1099
     ++++ edge id: 1122
 ^^^^^^^^Vertex id: 580
@@ -12345,13 +12345,13 @@ For each vertex:
     ++++ cell id: 489
     ++++ cell id: 490
     ----Faces:
-    ++++ face id: 1099
     ++++ face id: 1027
+    ++++ face id: 1099
     ++++ face id: 1100
     ++++ face id: 1124
     ----Edges:
-    ++++ edge id: 1099
     ++++ edge id: 1027
+    ++++ edge id: 1099
     ++++ edge id: 1100
     ++++ edge id: 1124
 ^^^^^^^^Vertex id: 582
@@ -12373,13 +12373,13 @@ For each vertex:
     ++++ cell id: 490
     ++++ cell id: 491
     ----Faces:
-    ++++ face id: 1100
     ++++ face id: 1029
+    ++++ face id: 1100
     ++++ face id: 1101
     ++++ face id: 1126
     ----Edges:
-    ++++ edge id: 1100
     ++++ edge id: 1029
+    ++++ edge id: 1100
     ++++ edge id: 1101
     ++++ edge id: 1126
 ^^^^^^^^Vertex id: 584
@@ -12401,13 +12401,13 @@ For each vertex:
     ++++ cell id: 491
     ++++ cell id: 492
     ----Faces:
-    ++++ face id: 1101
     ++++ face id: 1031
+    ++++ face id: 1101
     ++++ face id: 1102
     ++++ face id: 1128
     ----Edges:
-    ++++ edge id: 1101
     ++++ edge id: 1031
+    ++++ edge id: 1101
     ++++ edge id: 1102
     ++++ edge id: 1128
 ^^^^^^^^Vertex id: 586
@@ -12429,13 +12429,13 @@ For each vertex:
     ++++ cell id: 492
     ++++ cell id: 493
     ----Faces:
-    ++++ face id: 1102
     ++++ face id: 1033
+    ++++ face id: 1102
     ++++ face id: 1103
     ++++ face id: 1130
     ----Edges:
-    ++++ edge id: 1102
     ++++ edge id: 1033
+    ++++ edge id: 1102
     ++++ edge id: 1103
     ++++ edge id: 1130
 ^^^^^^^^Vertex id: 588
@@ -12457,13 +12457,13 @@ For each vertex:
     ++++ cell id: 493
     ++++ cell id: 494
     ----Faces:
-    ++++ face id: 1103
     ++++ face id: 1035
+    ++++ face id: 1103
     ++++ face id: 1104
     ++++ face id: 1132
     ----Edges:
-    ++++ edge id: 1103
     ++++ edge id: 1035
+    ++++ edge id: 1103
     ++++ edge id: 1104
     ++++ edge id: 1132
 ^^^^^^^^Vertex id: 590
@@ -12485,13 +12485,13 @@ For each vertex:
     ++++ cell id: 494
     ++++ cell id: 495
     ----Faces:
-    ++++ face id: 1104
     ++++ face id: 1037
+    ++++ face id: 1104
     ++++ face id: 1105
     ++++ face id: 1134
     ----Edges:
-    ++++ edge id: 1104
     ++++ edge id: 1037
+    ++++ edge id: 1104
     ++++ edge id: 1105
     ++++ edge id: 1134
 ^^^^^^^^Vertex id: 592
@@ -12508,12 +12508,12 @@ For each vertex:
     ++++ cell id: 543
     ++++ cell id: 495
     ----Faces:
-    ++++ face id: 1105
     ++++ face id: 1039
+    ++++ face id: 1105
     ++++ face id: 1136
     ----Edges:
-    ++++ edge id: 1105
     ++++ edge id: 1039
+    ++++ edge id: 1105
     ++++ edge id: 1136
 For each edge:
 ^^^^^^^^Edge id: 0
@@ -35922,13 +35922,13 @@ For each cell:
     ++++ vertex id: 253
 ^^^^^^^^Cell id: 480
     ----Faces:
-    ++++ face id: 1090
     ++++ face id: 1007
+    ++++ face id: 1090
     ++++ face id: 1008
     ++++ face id: 1009
     ----Edges:
-    ++++ edge id: 1090
     ++++ edge id: 1007
+    ++++ edge id: 1090
     ++++ edge id: 1008
     ++++ edge id: 1009
     ----Vertices:
