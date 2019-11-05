@@ -135,7 +135,12 @@ public:
       THROW_RUNTIME_ERROR( var_name << " already registered" );
     auto & entry = ret.first->second;
 
-    entry.data.resize(mat_data_offsets_.back() * sizeof(T));
+    if ( type == field_type_t::MESH_FIELD ) {
+      entry.data.resize( mesh_->num_cells() * sizeof(T) );
+    }
+    else {
+      entry.data.resize(mat_data_offsets_.back() * sizeof(T));
+    }
     return reinterpret_cast<T*>(entry.data.data());
   }
 
