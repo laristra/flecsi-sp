@@ -1565,11 +1565,13 @@ public:
         sorted_vertices_to_edges,
         [](const auto & vs, auto & edge_vs) {
           for (
-            auto v0 = std::prev(vs.end()), v1 = vs.begin();
-            v1 != vs.end();
-            v0 = v1, ++v1
-          )
+            auto v0 = vs.begin(), v1 = std::next(v0);
+            v0 != vs.end();
+            ++v0, ++v1
+          ) {
+            if (v1 == vs.end()) { v1 = vs.begin(); }
             edge_vs.push_back({*v0, *v1});
+          }
         });
 
 

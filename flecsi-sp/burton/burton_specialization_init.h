@@ -139,9 +139,18 @@ void create_cells(
   const auto & edge_coloring = context.coloring( index_spaces::edges );
   
   const auto & edge_lid_to_mid = context.index_map( index_spaces::edges );
-  const auto & edges = context.coloring( index_spaces::edges );
+  const auto & edge_mid_to_lid = context.reverse_index_map(
+    index_spaces::edges
+  );
+
+  //const auto & edges = context.coloring( index_spaces::edges );
+  std::vector< edge_t * > edges;
+  edges.reserve( edge_lid_to_mid.size() );
+  
   
   const auto & edge_global2local = mesh_def.global_to_local(edge_t::dimension);
+  const auto & edge_local2global = mesh_def.local_to_global(edge_t::dimension);
+
   const auto & edge_to_vertices =
       mesh_def.entities_crs( edge_t::dimension, vertex_t::dimension );
   
@@ -151,6 +160,7 @@ void create_cells(
   
   // create a list of vertex pointers
   std::vector< vertex_t * > elem_vs;
+  std::vector< edge_t * > elem_es;
   
   // assume numbering goes, exlusive, then shared, then ghost
   auto num_owned_edges =
@@ -208,6 +218,7 @@ void create_cells(
     // make the edge
     auto new_edge = mesh.template make<edge_t>();
     new_edge->global_id().set_global(mid);
+    edges.emplace_back(new_edge);
     // add the connectivity
     mesh.template init_entity<0, edge_t::dimension, vertex_t::dimension>(
         new_edge, elem_vs);
@@ -221,10 +232,14 @@ void create_cells(
   // get the list of vertices
   const auto & cell_to_vertices =
       mesh_def.entities_crs( cell_t::dimension, vertex_t::dimension );
+  const auto & cell_to_edges =
+      mesh_def.entities_crs( cell_t::dimension, edge_t::dimension );
   
   const auto & ghost_cells = extra_mesh_info.ghost_ids.at({0,cell_t::dimension});
   const auto & ghost_cell2vertex = extra_mesh_info.ghost_connectivity.
     at({0,cell_t::dimension}).at({0,vertex_t::dimension});
+  const auto & ghost_cell2edge = extra_mesh_info.ghost_connectivity.
+    at({0,cell_t::dimension}).at({0,edge_t::dimension});
   
   const auto & cell_lid_to_mid = context.index_map( index_spaces::cells );
 
@@ -238,6 +253,7 @@ void create_cells(
 
     // clear the list
     elem_vs.clear();
+    elem_es.clear();
 
     // search this ranks mesh definition for the matching offset
     auto r = flecsi::coloring::rank_owner( extra_mesh_info.cell_distribution, mid );
@@ -251,8 +267,10 @@ void create_cells(
       auto id = mid - extra_mesh_info.cell_distribution[rank];
       // get the list of vertices
       const auto & vs = cell_to_vertices.at(id);
+      const auto & es = cell_to_edges.at(id);
       // create a list of vertex pointers
       elem_vs.resize( vs.size() );
+      elem_es.resize( es.size() );
       // transform the list of vertices to mesh ids
       std::transform(
         vs.begin(),
@@ -262,6 +280,16 @@ void create_cells(
           auto global_id = vert_local2global[v];
           auto flecsi_id = vertex_mid_to_lid.at(global_id);
           return vertices[ flecsi_id ];
+        }
+      );
+      std::transform(
+        es.begin(),
+        es.end(),
+        elem_es.begin(),
+        [&](auto e) {
+          auto global_id = edge_local2global[e];
+          auto flecsi_id = edge_mid_to_lid.at(global_id);
+          return edges[ flecsi_id ];
         }
       );
       // get the region id
@@ -275,11 +303,17 @@ void create_cells(
       auto i = std::distance( ghost_cells.begin(), it );
       // reserve space
       const auto & vs = ghost_cell2vertex.at(i);
+      const auto & es = ghost_cell2edge.at(i);
       elem_vs.reserve( vs.size() );
+      elem_es.reserve( es.size() );
       // now convert my global ids to flecsi local ids
       for ( auto v : vs ) {
         auto id = vertex_mid_to_lid.at(v);
         elem_vs.emplace_back( vertices[id] );
+      }
+      for ( auto e : es ) {
+        auto id = edge_mid_to_lid.at(e);
+        elem_es.emplace_back( edges[id] );
       }
     }
 
@@ -288,6 +322,9 @@ void create_cells(
     auto c = mesh.create_cell( elem_vs );
     c->global_id().set_global(mid);
     c->region() = region_id;
+    // add the connectivity
+    mesh.template init_entity<cell_t::domain, edge_t::domain, 
+      cell_t::dimension, edge_t::dimension>(c, elem_es);
   }
 
 }
