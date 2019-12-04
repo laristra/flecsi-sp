@@ -1682,8 +1682,8 @@ public:
     auto & cell_local2global = local_to_global_.at(num_dims);
     auto & cell_global2local = global_to_local_.at(num_dims);
 
-    auto num_remove = local_ids.size();
     auto num_cells = cell_local2global.size();
+    size_t num_remove = 0;
 
     auto delete_it = local_ids.begin();
     
@@ -1699,6 +1699,7 @@ public:
           cell_global2local.erase( global_id );
 
           delete_it++;
+          num_remove++;
           continue;
         }
       }
@@ -1740,8 +1741,6 @@ public:
     //--------------------------------------------------------------------------
     // Delete vertices
     
-    size_t deleted_vertices = 0;
-
     if ( has_unused_vertices ) {
    
       // erase the local mapping
@@ -1752,6 +1751,8 @@ public:
       vector<index_t>
         old2new( num_vertices, std::numeric_limits<size_t>::max() );
     
+      size_t deleted_vertices = 0;
+
       for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_vertices; ++old_local_id )
       {
     
@@ -2977,6 +2978,7 @@ public:
         && "entries to delete are not sorted" );
 
     constexpr auto num_dims = base_t::num_dims;
+    constexpr auto max_id = std::numeric_limits<size_t>::max();
 
     //--------------------------------------------------------------------------
     // Erase elements
@@ -2985,47 +2987,44 @@ public:
     auto & cells2verts = local_connectivity_.at(num_dims).at(0);
     auto & cells2faces = local_connectivity_.at(num_dims).at(2);
     auto & faces2verts = local_connectivity_.at(2).at(0);
-    std::vector<index_t> check_vertices, check_faces;
     
     // erase the local mapping
     auto & cell_local2global = local_to_global_.at(num_dims);
     auto & cell_global2local = global_to_local_.at(num_dims);
 
-    auto num_remove = local_ids.size();
     auto num_cells = cell_local2global.size();
+    size_t num_remove = 0;
 
-    for (auto i = num_remove; i-- > 0; ) {
-
-      // get global and local id
-      auto local_id = local_ids[i];
-      auto global_id = cell_local2global[local_id];
-
-      // add vertices to check to the list
-      for ( auto v : cells2verts.at(local_id) )
-        check_vertices.emplace_back(v);
-      for ( auto f : cells2faces.at(local_id) )
-        check_faces.emplace_back(f);
-      
-
-      // shift all local to global ids
-      for ( auto j=local_id; j<num_cells-1; ++j ) {
-        cell_local2global[j] = cell_local2global[j+1];
-        cell_type_[j] = cell_type_[j+1];
-        cell_block_id_[j] = cell_block_id_[j+1];
-      }
+    auto delete_it = local_ids.begin();
     
-      // and the global mapping ( need to decrement entries )
-      auto count = cell_global2local.erase( global_id );
-      assert( count > 0 && "global id not found!" );
-      for ( auto & pair : cell_global2local )
-        if ( pair.second>local_id )
-          pair.second--;
+    for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_cells; ++old_local_id )
+    {
       
-      // decrement number of cells
-      num_cells--;
+      auto global_id = cell_local2global[old_local_id];
+      
+      // skip deleted items
+      if ( delete_it != local_ids.end() ) {
+        if ( *delete_it == old_local_id ) {
+      
+          cell_global2local.erase( global_id );
+
+          delete_it++;
+          num_remove++;
+          continue;
+        }
+      }
+
+      // keep otherwise
+      cell_local2global[new_local_id] = cell_local2global[old_local_id];
+      cell_type_[new_local_id] = cell_type_[old_local_id];
+      cell_block_id_[new_local_id] = cell_block_id_[old_local_id];
+      cell_global2local[global_id] = new_local_id;
+      new_local_id ++;
+
     }
 
     // resize
+    num_cells -= num_remove;
     cell_local2global.resize(num_cells);
     cell_block_id_.resize(num_cells);
     cell_type_.resize(num_cells);
@@ -3035,90 +3034,67 @@ public:
     cells2faces.erase(local_ids);
 
     //--------------------------------------------------------------------------
-    // Determine unused vertices/faces
-    
-    auto remove_duplicates = [](auto & list) {
-      std::sort( list.begin(), list.end() );
-      auto last = std::unique( list.begin(), list.end() );
-      list.erase( last, list.end() );
-    };
+    // Determine unused faces
+   
+    auto num_faces = faces2verts.size();
+    std::vector<size_t> counts( num_faces, 0 );
 
-    // sort vertices to check and remove duplicates
-    remove_duplicates( check_vertices );
-    remove_duplicates( check_faces );
+    for ( auto i : cells2faces.indices ) counts[i]++; 
+
+    bool has_unused_faces = false;
+    for ( size_t i=0; i<num_faces; ++i ) {
+      if ( counts[i] == 0 ) {
+        has_unused_faces = true;
+        break;
+      }
+    }
     
     //--------------------------------------------------------------------------
     // Delete faces
     
-    // find faces that are no longer used
-    std::vector<index_t> delete_items;
-    delete_items.reserve( check_faces.size() );
+    if ( has_unused_faces ) {
     
-    for ( auto f_rm : check_faces ) {
-      // mark unused first
-      bool used = false;
-      // iterate over all cell-vertices, and bounce if its used
-      for ( auto f : cells2faces.indices ) {
-        if ( f == f_rm ) {
-          used = true;
-          break;
-        }
-      }
-      // if face is unused, add to list to delete
-      if ( !used ) delete_items.emplace_back( f_rm );
-    }
-    
-    // Now actually delete
-    if ( !delete_items.empty() ) {
-      
-      // store the number of faces
-      auto num_faces = faces2verts.size();
-      num_remove = delete_items.size();
-    
-      // delete face to vertex connectivity
-      faces2verts.erase(delete_items);
-      
-      // renumber cell to face connectivity
       // storage for renumberings
-      constexpr auto max_id = std::numeric_limits<size_t>::max();
-      vector<index_t> old2new( num_faces, max_id );
-      
-      // add the number of faces to the end for the logic below to work
-      delete_items.emplace_back( num_faces );
-    
-      // figure new numbering
-      size_t i{0}, face_count{0};
+      vector<index_t>
+        old2new( num_faces, std::numeric_limits<size_t>::max() );
 
-      for (auto it=delete_items.begin(); it != delete_items.end(); ++it)
+      std::vector<size_t> deleted_faces;
+      deleted_faces.reserve( num_faces );
+
+      for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_faces; ++old_local_id )
       {
-        for ( ; i<*it; ++i ) {
-          old2new[i] = face_count;
-          face_count++;
+    
+        // skip deleted items
+        if ( counts[old_local_id] == 0 ) {
+            deleted_faces.emplace_back( old_local_id );
+            continue;
         }
-        i++;
+
+        // keep otherwise
+        face_owner_[new_local_id] = face_owner_[old_local_id];
+
+        old2new[ old_local_id ] = new_local_id;
+        
+        new_local_id++;
+        
       }
-      
-      assert( face_count == num_faces - num_remove &&
-          "Face deletion messed up" );
+   
+      // resize
+      num_faces -= deleted_faces.size();
+      face_owner_.resize(num_faces);
+   
+      // delete face to vertex connectivity
+      faces2verts.erase(deleted_faces);
 
       // renumber cell connectivity
       for ( auto & i : cells2faces.indices ) {
         i = old2new[i];
-        assert( i<face_count && "Messed up renumbering #1" );
+        assert( i<num_faces && "Messed up renumbering #1" );
       }
 
-
-      // renumber face owners
-      vector<index_t> new_face_owner(face_count);
-      for ( size_t old_id=0; old_id<num_faces; ++old_id ) {
-        auto new_id = old2new[old_id];
-        if ( new_id != max_id )
-          new_face_owner[new_id] = face_owner_[old_id];
-      }
-      std::swap( new_face_owner, face_owner_ );
 
       // reverse any vertices whose owner was deleted
-      for ( size_t f=0; f<face_count; ++f ) {
+      for ( size_t f=0; f<num_faces; ++f ) {
         // get the old owner
         auto owner_id = face_owner_[f];
         // if it isn't the global list, reverse it
@@ -3132,7 +3108,7 @@ public:
       }
    
       // figure out any of the reset face owners
-      for ( size_t c=0; c<cells2verts.size(); ++c ){
+      for ( size_t c=0; c<num_cells; ++c ){
         for ( auto f : cells2faces.at(c) ) {
           if ( face_owner_[f] == max_id ) {
             face_owner_[f] = cell_local2global[c];
@@ -3140,106 +3116,85 @@ public:
         }
       }
 
-    } // remove faces
+    } // has unused faces
+    
+    //--------------------------------------------------------------------------
+    // Determine unused vertices
+    
+    auto num_vertices = vertices_.size() / num_dims;
+    counts.resize( num_vertices);
+    std::fill( counts.begin(), counts.end(), 0 );
+    
+    for ( auto i : cells2verts.indices ) counts[i]++; 
+    bool has_unused_vertices = false;
+    for ( size_t i=0; i<num_vertices; ++i ) {
+      if ( counts[i] == 0 ) {
+        has_unused_vertices = true;
+        break;
+      }
+    }
     
 
     //--------------------------------------------------------------------------
     // Delete vertices
 
-    // find vertices that are no longer used
-    delete_items.reserve( check_vertices.size() );
-    delete_items.clear();
-
-    for ( auto v_rm : check_vertices ) {
-      // mark unused first
-      bool used = false;
-      // iterate over all cell-vertices, and bounce if its used
-      for ( auto v : cells2verts.indices ) {
-        if ( v == v_rm ) {
-          used = true;
-          break;
-        }
-      }
-      // if vertex is unused, add to list to delete
-      if ( !used ) delete_items.emplace_back( v_rm );
-    }
-    
-    if ( !delete_items.empty() ) {
+    if ( has_unused_vertices ) {
    
       //------------
       // Delete
     
-      num_remove = delete_items.size();
-
       // erase the local mapping
-      auto num_vertices = vertices_.size() / num_dims;
       auto & vert_local2global = local_to_global_.at(0);
       auto & vert_global2local = global_to_local_.at(0);
-
-      auto vertex_count = num_vertices;
-      for (auto i = num_remove; i-- > 0; ) {
-
-        // get global and local id
-        auto local_id = delete_items[i];
-        auto global_id = vert_local2global[local_id];
-
-        // shift all local to global ids, and vertices
-        for ( auto j=local_id; j<vertex_count-1; ++j ) {
-          vert_local2global[j] = vert_local2global[j+1];
-          for ( int d=0; d<num_dims; ++d )
-            vertices_[ j*num_dims + d ] = vertices_[ (j+1)*num_dims + d ];
-        }
-      
-        // and delete the global mapping
-        auto count = vert_global2local.erase( global_id );
-        assert( count > 0 && "global id not found!" );
-        for ( auto & pair : vert_global2local )
-          if ( pair.second>local_id )
-            pair.second--;
-        
-        // decrement number of vertices
-        vertex_count--;
-      }
-
-      // resize
-      vert_local2global.resize(vertex_count);
-      vertices_.resize(vertex_count*num_dims);
-      
-      //------------
-      // Renumber
       
       // storage for renumberings
       vector<index_t>
         old2new( num_vertices, std::numeric_limits<size_t>::max() );
-      
-      // add the number of vertices to the end for the logic below to work
-      delete_items.emplace_back( num_vertices );
 
-      // figure new numbering
-      size_t i{0};
-      vertex_count = 0;
+      size_t deleted_vertices = 0;
 
-      for (auto it=delete_items.begin(); it != delete_items.end(); ++it)
+      for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_vertices; ++old_local_id )
       {
-        for ( ; i<*it; ++i ) {
-          old2new[i] = vertex_count;
-          vertex_count++;
+    
+        // get global and local id
+        auto global_id = vert_local2global[old_local_id];
+      
+        // skip deleted items
+        if ( counts[old_local_id] == 0 ) {
+            vert_global2local.erase( global_id );
+            deleted_vertices++;
+            continue;
         }
-        i++;
-      }
- 
-      assert( vertex_count == num_vertices - num_remove &&
-          "Vertex deletion messed up" );
 
+        // keep otherwise
+        for ( int d=0; d<num_dims; ++d )
+          vertices_[ new_local_id*num_dims + d ] = vertices_[ old_local_id*num_dims + d ];
+        vert_local2global[new_local_id] = vert_local2global[old_local_id];
+        vert_global2local[global_id] = new_local_id;
+
+        old2new[ old_local_id ] = new_local_id;
+        
+        new_local_id++;
+        
+      }
+
+      // resize
+      num_vertices -= deleted_vertices;
+      vert_local2global.resize(num_vertices);
+      vertices_.resize(num_vertices*num_dims);
+      
+      //------------
+      // Renumber
+      
       // renumber cell connectivity
       for ( auto & i : cells2verts.indices ) {
         i = old2new[i];
-        assert( i< vertex_count && "Messed up renumbering #1" );
+        assert( i< num_vertices && "Messed up renumbering #1" );
       }
       // renumber face connectivity
       for ( auto & i : faces2verts.indices ) {
         i = old2new[i];
-        assert( i< vertex_count && "Messed up renumbering #1" );
+        assert( i< num_vertices && "Messed up renumbering #1" );
       }
 
     } // delete vertices
