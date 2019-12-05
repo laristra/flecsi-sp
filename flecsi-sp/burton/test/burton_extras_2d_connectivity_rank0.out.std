@@ -179,9 +179,9 @@ Vertices in mesh:
 ----------- vertex id: 177 with coordinates ( 0.341443 0.341183 )
 ----------- vertex id: 178 with coordinates ( 0.280889 0.330201 )
 Edges in mesh:
------------ edge id: 0 with midpoint ( 3.32951e-17 0.54375 )
------------ edge id: 1 with midpoint ( 0.0636703 0.541367 )
------------ edge id: 2 with midpoint ( 0.0324203 0.585117 )
+----------- edge id: 0 with midpoint ( 0.0636703 0.541367 )
+----------- edge id: 1 with midpoint ( 0.0324203 0.585117 )
+----------- edge id: 2 with midpoint ( 3.32951e-17 0.54375 )
 ----------- edge id: 3 with midpoint ( 0.127166 0.539084 )
 ----------- edge id: 4 with midpoint ( 0.0970866 0.580451 )
 ----------- edge id: 5 with midpoint ( 0.189914 0.537825 )
@@ -347,10 +347,10 @@ Edges in mesh:
 ----------- edge id: 165 with midpoint ( 0.448302 0.479517 )
 ----------- edge id: 166 with midpoint ( 0.479552 0.479517 )
 ----------- edge id: 167 with midpoint ( 0.479552 0.448267 )
------------ edge id: 168 with midpoint ( 0.234411 0.472927 )
------------ edge id: 169 with midpoint ( 0.265926 0.472513 )
------------ edge id: 170 with midpoint ( 0.329296 0.472295 )
------------ edge id: 171 with midpoint ( 0.297176 0.472513 )
+----------- edge id: 168 with midpoint ( 0.265926 0.472513 )
+----------- edge id: 169 with midpoint ( 0.234411 0.472927 )
+----------- edge id: 170 with midpoint ( 0.297176 0.472513 )
+----------- edge id: 171 with midpoint ( 0.329296 0.472295 )
 ----------- edge id: 172 with midpoint ( 0.391797 0.474676 )
 ----------- edge id: 173 with midpoint ( 0.423047 0.474676 )
 ----------- edge id: 174 with midpoint ( 0.474713 0.42291 )
@@ -436,24 +436,24 @@ Edges in mesh:
 ----------- edge id: 254 with midpoint ( 0.5 0.28125 )
 ----------- edge id: 255 with midpoint ( 0.53701 0.253583 )
 ----------- edge id: 256 with midpoint ( 0.5728 0.288432 )
------------ edge id: 257 with midpoint ( 1.10548 0.329299 )
------------ edge id: 258 with midpoint ( 1.13787 0.378718 )
------------ edge id: 259 with midpoint ( 1.07975 0.408514 )
------------ edge id: 260 with midpoint ( 1.04736 0.359095 )
+----------- edge id: 257 with midpoint ( 1.13787 0.378718 )
+----------- edge id: 258 with midpoint ( 1.07975 0.408514 )
+----------- edge id: 259 with midpoint ( 1.04736 0.359095 )
+----------- edge id: 260 with midpoint ( 1.10548 0.329299 )
 ----------- edge id: 261 with midpoint ( 0.607217 0.32363 )
 ----------- edge id: 262 with midpoint ( 0.611056 0.261058 )
 ----------- edge id: 263 with midpoint ( 0.645473 0.296256 )
------------ edge id: 264 with midpoint ( 1.01508 0.312623 )
------------ edge id: 265 with midpoint ( 0.992175 0.387792 )
------------ edge id: 266 with midpoint ( 0.959887 0.341321 )
+----------- edge id: 264 with midpoint ( 0.992175 0.387792 )
+----------- edge id: 265 with midpoint ( 0.959887 0.341321 )
+----------- edge id: 266 with midpoint ( 1.01508 0.312623 )
 ----------- edge id: 267 with midpoint ( 0.678812 0.331571 )
 ----------- edge id: 268 with midpoint ( 0.685683 0.268962 )
------------ edge id: 269 with midpoint ( 0.927258 0.298276 )
------------ edge id: 270 with midpoint ( 0.908045 0.368932 )
------------ edge id: 271 with midpoint ( 0.172203 0.47305 )
------------ edge id: 272 with midpoint ( 0.140953 0.47305 )
------------ edge id: 273 with midpoint ( 0.472542 0.329359 )
------------ edge id: 274 with midpoint ( 0.472542 0.360609 )
+----------- edge id: 269 with midpoint ( 0.908045 0.368932 )
+----------- edge id: 270 with midpoint ( 0.927258 0.298276 )
+----------- edge id: 271 with midpoint ( 0.140953 0.47305 )
+----------- edge id: 272 with midpoint ( 0.172203 0.47305 )
+----------- edge id: 273 with midpoint ( 0.472542 0.360609 )
+----------- edge id: 274 with midpoint ( 0.472542 0.329359 )
 ----------- edge id: 275 with midpoint ( 2.87027e-17 0.46875 )
 ----------- edge id: 276 with midpoint ( 0.03125 0.46875 )
 ----------- edge id: 277 with midpoint ( 0.0598396 0.458232 )
@@ -476,8 +476,8 @@ Edges in mesh:
 ----------- edge id: 294 with midpoint ( 0.751537 0.340707 )
 ----------- edge id: 295 with midpoint ( 0.795283 0.313393 )
 ----------- edge id: 296 with midpoint ( 0.827605 0.352892 )
------------ edge id: 297 with midpoint ( 0.203004 0.419278 )
------------ edge id: 298 with midpoint ( 0.234403 0.418178 )
+----------- edge id: 297 with midpoint ( 0.234403 0.418178 )
+----------- edge id: 298 with midpoint ( 0.203004 0.419278 )
 ----------- edge id: 299 with midpoint ( 0.250337 0.44544 )
 ----------- edge id: 300 with midpoint ( 0.447255 0.377269 )
 ----------- edge id: 301 with midpoint ( 0.417361 0.396582 )
@@ -491,8 +491,8 @@ Edges in mesh:
 ----------- edge id: 309 with midpoint ( 0.298202 0.417165 )
 ----------- edge id: 310 with midpoint ( 0.330322 0.416947 )
 ----------- edge id: 311 with midpoint ( 0.472568 0.297357 )
------------ edge id: 312 with midpoint ( 0.47224 0.234247 )
------------ edge id: 313 with midpoint ( 0.472568 0.266107 )
+----------- edge id: 312 with midpoint ( 0.472568 0.266107 )
+----------- edge id: 313 with midpoint ( 0.47224 0.234247 )
 ----------- edge id: 314 with midpoint ( 0.47224 0.202997 )
 ----------- edge id: 315 with midpoint ( 0.5 0.21875 )
 ----------- edge id: 316 with midpoint ( 0.537841 0.191028 )
@@ -511,36 +511,36 @@ Edges in mesh:
 ----------- edge id: 329 with midpoint ( 0.0885762 0.368313 )
 ----------- edge id: 330 with midpoint ( 0.44511 0.314216 )
 ----------- edge id: 331 with midpoint ( 0.444807 0.250354 )
------------ edge id: 332 with midpoint ( 0.0573506 0.382542 )
------------ edge id: 333 with midpoint ( 0.0884048 0.402236 )
+----------- edge id: 332 with midpoint ( 0.0884048 0.402236 )
+----------- edge id: 333 with midpoint ( 0.0573506 0.382542 )
 ----------- edge id: 334 with midpoint ( 0.028761 0.361809 )
------------ edge id: 335 with midpoint ( 0.138268 0.417054 )
------------ edge id: 336 with midpoint ( 0.111895 0.41902 )
+----------- edge id: 335 with midpoint ( 0.111895 0.41902 )
+----------- edge id: 336 with midpoint ( 0.138268 0.417054 )
 ----------- edge id: 337 with midpoint ( 0.189463 0.34315 )
 ----------- edge id: 338 with midpoint ( 0.417798 0.298781 )
 ----------- edge id: 339 with midpoint ( 0.14131 0.36679 )
 ----------- edge id: 340 with midpoint ( 0.153409 0.390354 )
 ----------- edge id: 341 with midpoint ( 0.417772 0.330783 )
 ----------- edge id: 342 with midpoint ( 0.387878 0.350095 )
------------ edge id: 343 with midpoint ( 0.363369 0.363014 )
------------ edge id: 344 with midpoint ( 0.365952 0.328265 )
------------ edge id: 345 with midpoint ( 0.265437 0.360352 )
------------ edge id: 346 with midpoint ( 0.232961 0.365616 )
------------ edge id: 347 with midpoint ( 0.248413 0.335465 )
+----------- edge id: 343 with midpoint ( 0.365952 0.328265 )
+----------- edge id: 344 with midpoint ( 0.363369 0.363014 )
+----------- edge id: 345 with midpoint ( 0.232961 0.365616 )
+----------- edge id: 346 with midpoint ( 0.248413 0.335465 )
+----------- edge id: 347 with midpoint ( 0.265437 0.360352 )
 ----------- edge id: 348 with midpoint ( 0.327997 0.365244 )
 ----------- edge id: 349 with midpoint ( 0.175088 0.369136 )
 ----------- edge id: 350 with midpoint ( 0.201562 0.366715 )
------------ edge id: 351 with midpoint ( 0.311166 0.335692 )
------------ edge id: 352 with midpoint ( 0.297721 0.359752 )
+----------- edge id: 351 with midpoint ( 0.297721 0.359752 )
+----------- edge id: 352 with midpoint ( 0.311166 0.335692 )
 ----------- edge id: 353 with midpoint ( 0.728101 0.240131 )
 ----------- edge id: 354 with midpoint ( 0.892119 0.256433 )
 ----------- edge id: 355 with midpoint ( 0.773909 0.210495 )
 ----------- edge id: 356 with midpoint ( 0.8576 0.217371 )
 ----------- edge id: 357 with midpoint ( 0.808574 0.247327 )
 Faces in mesh:
------------ faces id: 0 with centroid ( 3.32951e-17 0.54375 )
------------ faces id: 1 with centroid ( 0.0636703 0.541367 )
------------ faces id: 2 with centroid ( 0.0324203 0.585117 )
+----------- faces id: 0 with centroid ( 0.0636703 0.541367 )
+----------- faces id: 1 with centroid ( 0.0324203 0.585117 )
+----------- faces id: 2 with centroid ( 3.32951e-17 0.54375 )
 ----------- faces id: 3 with centroid ( 0.127166 0.539084 )
 ----------- faces id: 4 with centroid ( 0.0970866 0.580451 )
 ----------- faces id: 5 with centroid ( 0.189914 0.537825 )
@@ -706,10 +706,10 @@ Faces in mesh:
 ----------- faces id: 165 with centroid ( 0.448302 0.479517 )
 ----------- faces id: 166 with centroid ( 0.479552 0.479517 )
 ----------- faces id: 167 with centroid ( 0.479552 0.448267 )
------------ faces id: 168 with centroid ( 0.234411 0.472927 )
------------ faces id: 169 with centroid ( 0.265926 0.472513 )
------------ faces id: 170 with centroid ( 0.329296 0.472295 )
------------ faces id: 171 with centroid ( 0.297176 0.472513 )
+----------- faces id: 168 with centroid ( 0.265926 0.472513 )
+----------- faces id: 169 with centroid ( 0.234411 0.472927 )
+----------- faces id: 170 with centroid ( 0.297176 0.472513 )
+----------- faces id: 171 with centroid ( 0.329296 0.472295 )
 ----------- faces id: 172 with centroid ( 0.391797 0.474676 )
 ----------- faces id: 173 with centroid ( 0.423047 0.474676 )
 ----------- faces id: 174 with centroid ( 0.474713 0.42291 )
@@ -795,24 +795,24 @@ Faces in mesh:
 ----------- faces id: 254 with centroid ( 0.5 0.28125 )
 ----------- faces id: 255 with centroid ( 0.53701 0.253583 )
 ----------- faces id: 256 with centroid ( 0.5728 0.288432 )
------------ faces id: 257 with centroid ( 1.10548 0.329299 )
------------ faces id: 258 with centroid ( 1.13787 0.378718 )
------------ faces id: 259 with centroid ( 1.07975 0.408514 )
------------ faces id: 260 with centroid ( 1.04736 0.359095 )
+----------- faces id: 257 with centroid ( 1.13787 0.378718 )
+----------- faces id: 258 with centroid ( 1.07975 0.408514 )
+----------- faces id: 259 with centroid ( 1.04736 0.359095 )
+----------- faces id: 260 with centroid ( 1.10548 0.329299 )
 ----------- faces id: 261 with centroid ( 0.607217 0.32363 )
 ----------- faces id: 262 with centroid ( 0.611056 0.261058 )
 ----------- faces id: 263 with centroid ( 0.645473 0.296256 )
------------ faces id: 264 with centroid ( 1.01508 0.312623 )
------------ faces id: 265 with centroid ( 0.992175 0.387792 )
------------ faces id: 266 with centroid ( 0.959887 0.341321 )
+----------- faces id: 264 with centroid ( 0.992175 0.387792 )
+----------- faces id: 265 with centroid ( 0.959887 0.341321 )
+----------- faces id: 266 with centroid ( 1.01508 0.312623 )
 ----------- faces id: 267 with centroid ( 0.678812 0.331571 )
 ----------- faces id: 268 with centroid ( 0.685683 0.268962 )
------------ faces id: 269 with centroid ( 0.927258 0.298276 )
------------ faces id: 270 with centroid ( 0.908045 0.368932 )
------------ faces id: 271 with centroid ( 0.172203 0.47305 )
------------ faces id: 272 with centroid ( 0.140953 0.47305 )
------------ faces id: 273 with centroid ( 0.472542 0.329359 )
------------ faces id: 274 with centroid ( 0.472542 0.360609 )
+----------- faces id: 269 with centroid ( 0.908045 0.368932 )
+----------- faces id: 270 with centroid ( 0.927258 0.298276 )
+----------- faces id: 271 with centroid ( 0.140953 0.47305 )
+----------- faces id: 272 with centroid ( 0.172203 0.47305 )
+----------- faces id: 273 with centroid ( 0.472542 0.360609 )
+----------- faces id: 274 with centroid ( 0.472542 0.329359 )
 ----------- faces id: 275 with centroid ( 2.87027e-17 0.46875 )
 ----------- faces id: 276 with centroid ( 0.03125 0.46875 )
 ----------- faces id: 277 with centroid ( 0.0598396 0.458232 )
@@ -835,8 +835,8 @@ Faces in mesh:
 ----------- faces id: 294 with centroid ( 0.751537 0.340707 )
 ----------- faces id: 295 with centroid ( 0.795283 0.313393 )
 ----------- faces id: 296 with centroid ( 0.827605 0.352892 )
------------ faces id: 297 with centroid ( 0.203004 0.419278 )
------------ faces id: 298 with centroid ( 0.234403 0.418178 )
+----------- faces id: 297 with centroid ( 0.234403 0.418178 )
+----------- faces id: 298 with centroid ( 0.203004 0.419278 )
 ----------- faces id: 299 with centroid ( 0.250337 0.44544 )
 ----------- faces id: 300 with centroid ( 0.447255 0.377269 )
 ----------- faces id: 301 with centroid ( 0.417361 0.396582 )
@@ -850,8 +850,8 @@ Faces in mesh:
 ----------- faces id: 309 with centroid ( 0.298202 0.417165 )
 ----------- faces id: 310 with centroid ( 0.330322 0.416947 )
 ----------- faces id: 311 with centroid ( 0.472568 0.297357 )
------------ faces id: 312 with centroid ( 0.47224 0.234247 )
------------ faces id: 313 with centroid ( 0.472568 0.266107 )
+----------- faces id: 312 with centroid ( 0.472568 0.266107 )
+----------- faces id: 313 with centroid ( 0.47224 0.234247 )
 ----------- faces id: 314 with centroid ( 0.47224 0.202997 )
 ----------- faces id: 315 with centroid ( 0.5 0.21875 )
 ----------- faces id: 316 with centroid ( 0.537841 0.191028 )
@@ -870,27 +870,27 @@ Faces in mesh:
 ----------- faces id: 329 with centroid ( 0.0885762 0.368313 )
 ----------- faces id: 330 with centroid ( 0.44511 0.314216 )
 ----------- faces id: 331 with centroid ( 0.444807 0.250354 )
------------ faces id: 332 with centroid ( 0.0573506 0.382542 )
------------ faces id: 333 with centroid ( 0.0884048 0.402236 )
+----------- faces id: 332 with centroid ( 0.0884048 0.402236 )
+----------- faces id: 333 with centroid ( 0.0573506 0.382542 )
 ----------- faces id: 334 with centroid ( 0.028761 0.361809 )
------------ faces id: 335 with centroid ( 0.138268 0.417054 )
------------ faces id: 336 with centroid ( 0.111895 0.41902 )
+----------- faces id: 335 with centroid ( 0.111895 0.41902 )
+----------- faces id: 336 with centroid ( 0.138268 0.417054 )
 ----------- faces id: 337 with centroid ( 0.189463 0.34315 )
 ----------- faces id: 338 with centroid ( 0.417798 0.298781 )
 ----------- faces id: 339 with centroid ( 0.14131 0.36679 )
 ----------- faces id: 340 with centroid ( 0.153409 0.390354 )
 ----------- faces id: 341 with centroid ( 0.417772 0.330783 )
 ----------- faces id: 342 with centroid ( 0.387878 0.350095 )
------------ faces id: 343 with centroid ( 0.363369 0.363014 )
------------ faces id: 344 with centroid ( 0.365952 0.328265 )
------------ faces id: 345 with centroid ( 0.265437 0.360352 )
------------ faces id: 346 with centroid ( 0.232961 0.365616 )
------------ faces id: 347 with centroid ( 0.248413 0.335465 )
+----------- faces id: 343 with centroid ( 0.365952 0.328265 )
+----------- faces id: 344 with centroid ( 0.363369 0.363014 )
+----------- faces id: 345 with centroid ( 0.232961 0.365616 )
+----------- faces id: 346 with centroid ( 0.248413 0.335465 )
+----------- faces id: 347 with centroid ( 0.265437 0.360352 )
 ----------- faces id: 348 with centroid ( 0.327997 0.365244 )
 ----------- faces id: 349 with centroid ( 0.175088 0.369136 )
 ----------- faces id: 350 with centroid ( 0.201562 0.366715 )
------------ faces id: 351 with centroid ( 0.311166 0.335692 )
------------ faces id: 352 with centroid ( 0.297721 0.359752 )
+----------- faces id: 351 with centroid ( 0.297721 0.359752 )
+----------- faces id: 352 with centroid ( 0.311166 0.335692 )
 ----------- faces id: 353 with centroid ( 0.728101 0.240131 )
 ----------- faces id: 354 with centroid ( 0.892119 0.256433 )
 ----------- faces id: 355 with centroid ( 0.773909 0.210495 )
@@ -3094,13 +3094,13 @@ For each vertex:
     ++++ cell id: 33
     ++++ cell id: 34
     ----Faces:
+    ++++ face id: 0
     ++++ face id: 1
-    ++++ face id: 2
     ++++ face id: 4
     ++++ face id: 97
     ----Edges:
+    ++++ edge id: 0
     ++++ edge id: 1
-    ++++ edge id: 2
     ++++ edge id: 4
     ++++ edge id: 97
     ----Corners:
@@ -3122,11 +3122,11 @@ For each vertex:
     ++++ cell id: 0
     ++++ cell id: 33
     ----Faces:
-    ++++ face id: 0
+    ++++ face id: 1
     ++++ face id: 2
     ++++ face id: 96
     ----Edges:
-    ++++ edge id: 0
+    ++++ edge id: 1
     ++++ edge id: 2
     ++++ edge id: 96
     ----Corners:
@@ -6542,12 +6542,12 @@ For each vertex:
     ++++ cell id: 0
     ++++ cell id: 137
     ----Faces:
-    ++++ face id: 0
     ++++ face id: 247
+    ++++ face id: 2
     ++++ face id: 275
     ----Edges:
-    ++++ edge id: 0
     ++++ edge id: 247
+    ++++ edge id: 2
     ++++ edge id: 275
     ----Corners:
     ++++ corner id: 0
@@ -6567,14 +6567,14 @@ For each vertex:
     ++++ cell id: 142
     ----Faces:
     ++++ face id: 247
-    ++++ face id: 1
+    ++++ face id: 0
     ++++ face id: 248
     ++++ face id: 276
     ++++ face id: 277
     ++++ face id: 278
     ----Edges:
     ++++ edge id: 247
-    ++++ edge id: 1
+    ++++ edge id: 0
     ++++ edge id: 248
     ++++ edge id: 276
     ++++ edge id: 277
@@ -6610,13 +6610,13 @@ For each vertex:
     ++++ face id: 248
     ++++ face id: 3
     ++++ face id: 249
-    ++++ face id: 272
+    ++++ face id: 271
     ++++ face id: 280
     ----Edges:
     ++++ edge id: 248
     ++++ edge id: 3
     ++++ edge id: 249
-    ++++ edge id: 272
+    ++++ edge id: 271
     ++++ edge id: 280
     ----Corners:
     ++++ corner id: 5
@@ -6646,13 +6646,13 @@ For each vertex:
     ++++ face id: 249
     ++++ face id: 5
     ++++ face id: 7
-    ++++ face id: 271
+    ++++ face id: 272
     ++++ face id: 281
     ----Edges:
     ++++ edge id: 249
     ++++ edge id: 5
     ++++ edge id: 7
-    ++++ edge id: 271
+    ++++ edge id: 272
     ++++ edge id: 281
     ----Corners:
     ++++ corner id: 9
@@ -6682,13 +6682,13 @@ For each vertex:
     ++++ face id: 28
     ++++ face id: 250
     ++++ face id: 251
-    ++++ face id: 274
+    ++++ face id: 273
     ++++ face id: 279
     ----Edges:
     ++++ edge id: 28
     ++++ edge id: 250
     ++++ edge id: 251
-    ++++ edge id: 274
+    ++++ edge id: 273
     ++++ edge id: 279
     ----Corners:
     ++++ corner id: 41
@@ -6748,13 +6748,13 @@ For each vertex:
     ++++ face id: 251
     ++++ face id: 252
     ++++ face id: 254
-    ++++ face id: 273
+    ++++ face id: 274
     ++++ face id: 311
     ----Edges:
     ++++ edge id: 251
     ++++ edge id: 252
     ++++ edge id: 254
-    ++++ edge id: 273
+    ++++ edge id: 274
     ++++ edge id: 311
     ----Corners:
     ++++ corner id: 488
@@ -6875,11 +6875,11 @@ For each vertex:
     ++++ cell id: 173
     ----Faces:
     ++++ face id: 257
-    ++++ face id: 258
+    ++++ face id: 260
     ++++ face id: 319
     ----Edges:
     ++++ edge id: 257
-    ++++ edge id: 258
+    ++++ edge id: 260
     ++++ edge id: 319
     ----Corners:
     ++++ corner id: 495
@@ -6896,14 +6896,14 @@ For each vertex:
     ++++ cell id: 173
     ++++ cell id: 175
     ----Faces:
-    ++++ face id: 257
+    ++++ face id: 259
     ++++ face id: 260
-    ++++ face id: 264
+    ++++ face id: 266
     ++++ face id: 320
     ----Edges:
-    ++++ edge id: 257
+    ++++ edge id: 259
     ++++ edge id: 260
-    ++++ edge id: 264
+    ++++ edge id: 266
     ++++ edge id: 320
     ----Corners:
     ++++ corner id: 498
@@ -6924,12 +6924,12 @@ For each vertex:
     ++++ cell id: 127
     ++++ cell id: 11
     ----Faces:
+    ++++ face id: 257
     ++++ face id: 258
-    ++++ face id: 259
     ++++ face id: 30
     ----Edges:
+    ++++ edge id: 257
     ++++ edge id: 258
-    ++++ edge id: 259
     ++++ edge id: 30
     ----Corners:
     ++++ corner id: 496
@@ -6946,15 +6946,15 @@ For each vertex:
     ++++ cell id: 129
     ++++ cell id: 47
     ----Faces:
+    ++++ face id: 258
     ++++ face id: 259
-    ++++ face id: 260
     ++++ face id: 32
-    ++++ face id: 265
+    ++++ face id: 264
     ----Edges:
+    ++++ edge id: 258
     ++++ edge id: 259
-    ++++ edge id: 260
     ++++ edge id: 32
-    ++++ edge id: 265
+    ++++ edge id: 264
     ----Corners:
     ++++ corner id: 497
     ++++ corner id: 47
@@ -7036,14 +7036,14 @@ For each vertex:
     ++++ cell id: 175
     ++++ cell id: 177
     ----Faces:
-    ++++ face id: 264
+    ++++ face id: 265
     ++++ face id: 266
-    ++++ face id: 269
+    ++++ face id: 270
     ++++ face id: 324
     ----Edges:
-    ++++ edge id: 264
+    ++++ edge id: 265
     ++++ edge id: 266
-    ++++ edge id: 269
+    ++++ edge id: 270
     ++++ edge id: 324
     ----Corners:
     ++++ corner id: 506
@@ -7066,15 +7066,15 @@ For each vertex:
     ++++ cell id: 131
     ++++ cell id: 80
     ----Faces:
+    ++++ face id: 264
     ++++ face id: 265
-    ++++ face id: 266
     ++++ face id: 125
-    ++++ face id: 270
+    ++++ face id: 269
     ----Edges:
+    ++++ edge id: 264
     ++++ edge id: 265
-    ++++ edge id: 266
     ++++ edge id: 125
-    ++++ edge id: 270
+    ++++ edge id: 269
     ----Corners:
     ++++ corner id: 505
     ++++ corner id: 191
@@ -7156,12 +7156,12 @@ For each vertex:
     ++++ cell id: 177
     ++++ cell id: 179
     ----Faces:
-    ++++ face id: 269
+    ++++ face id: 270
     ++++ face id: 354
     ++++ face id: 291
     ++++ face id: 293
     ----Edges:
-    ++++ edge id: 269
+    ++++ edge id: 270
     ++++ edge id: 354
     ++++ edge id: 291
     ++++ edge id: 293
@@ -7186,12 +7186,12 @@ For each vertex:
     ++++ cell id: 133
     ++++ cell id: 107
     ----Faces:
-    ++++ face id: 270
+    ++++ face id: 269
     ++++ face id: 293
     ++++ face id: 202
     ++++ face id: 296
     ----Edges:
-    ++++ edge id: 270
+    ++++ edge id: 269
     ++++ edge id: 293
     ++++ edge id: 202
     ++++ edge id: 296
@@ -7246,13 +7246,13 @@ For each vertex:
     ++++ cell id: 178
     ++++ cell id: 179
     ----Faces:
-    ++++ face id: 290
     ++++ face id: 357
+    ++++ face id: 290
     ++++ face id: 291
     ++++ face id: 295
     ----Edges:
-    ++++ edge id: 290
     ++++ edge id: 357
+    ++++ edge id: 290
     ++++ edge id: 291
     ++++ edge id: 295
     ----Corners:
@@ -7277,13 +7277,13 @@ For each vertex:
     ----Faces:
     ++++ face id: 275
     ++++ face id: 276
-    ++++ face id: 282
     ++++ face id: 327
+    ++++ face id: 282
     ----Edges:
     ++++ edge id: 275
     ++++ edge id: 276
-    ++++ edge id: 282
     ++++ edge id: 327
+    ++++ edge id: 282
     ----Corners:
     ++++ corner id: 533
     ++++ corner id: 536
@@ -7305,15 +7305,15 @@ For each vertex:
     ++++ cell id: 160
     ----Faces:
     ++++ face id: 277
-    ++++ face id: 282
     ++++ face id: 328
+    ++++ face id: 282
     ++++ face id: 332
     ++++ face id: 333
     ++++ face id: 284
     ----Edges:
     ++++ edge id: 277
-    ++++ edge id: 282
     ++++ edge id: 328
+    ++++ edge id: 282
     ++++ edge id: 332
     ++++ edge id: 333
     ++++ edge id: 284
@@ -7348,15 +7348,15 @@ For each vertex:
     ----Faces:
     ++++ face id: 271
     ++++ face id: 272
-    ++++ face id: 335
     ++++ face id: 283
+    ++++ face id: 336
     ++++ face id: 285
     ++++ face id: 303
     ----Edges:
     ++++ edge id: 271
     ++++ edge id: 272
-    ++++ edge id: 335
     ++++ edge id: 283
+    ++++ edge id: 336
     ++++ edge id: 285
     ++++ edge id: 303
     ----Corners:
@@ -7435,14 +7435,14 @@ For each vertex:
     ++++ face id: 349
     ++++ face id: 350
     ++++ face id: 289
-    ++++ face id: 297
+    ++++ face id: 298
     ----Edges:
     ++++ edge id: 340
     ++++ edge id: 285
     ++++ edge id: 349
     ++++ edge id: 350
     ++++ edge id: 289
-    ++++ edge id: 297
+    ++++ edge id: 298
     ----Corners:
     ++++ corner id: 526
     ++++ corner id: 571
@@ -7473,17 +7473,17 @@ For each vertex:
     ++++ cell id: 171
     ----Faces:
     ++++ face id: 345
-    ++++ face id: 346
+    ++++ face id: 347
     ++++ face id: 288
     ++++ face id: 289
-    ++++ face id: 298
+    ++++ face id: 297
     ++++ face id: 307
     ----Edges:
     ++++ edge id: 345
-    ++++ edge id: 346
+    ++++ edge id: 347
     ++++ edge id: 288
     ++++ edge id: 289
-    ++++ edge id: 298
+    ++++ edge id: 297
     ++++ edge id: 307
     ----Corners:
     ++++ corner id: 527
@@ -7514,14 +7514,14 @@ For each vertex:
     ++++ cell id: 146
     ++++ cell id: 150
     ----Faces:
-    ++++ face id: 168
+    ++++ face id: 169
     ++++ face id: 281
     ++++ face id: 297
     ++++ face id: 298
     ++++ face id: 299
     ++++ face id: 303
     ----Edges:
-    ++++ edge id: 168
+    ++++ edge id: 169
     ++++ edge id: 281
     ++++ edge id: 297
     ++++ edge id: 298
@@ -7556,15 +7556,15 @@ For each vertex:
     ++++ cell id: 148
     ++++ cell id: 149
     ----Faces:
-    ++++ face id: 169
-    ++++ face id: 171
+    ++++ face id: 168
+    ++++ face id: 170
     ++++ face id: 299
     ++++ face id: 302
     ++++ face id: 307
     ++++ face id: 309
     ----Edges:
-    ++++ edge id: 169
-    ++++ edge id: 171
+    ++++ edge id: 168
+    ++++ edge id: 170
     ++++ edge id: 299
     ++++ edge id: 302
     ++++ edge id: 307
@@ -7598,15 +7598,15 @@ For each vertex:
     ++++ cell id: 122
     ++++ cell id: 123
     ----Faces:
-    ++++ face id: 279
     ++++ face id: 174
+    ++++ face id: 279
     ++++ face id: 300
     ++++ face id: 301
     ++++ face id: 304
     ++++ face id: 245
     ----Edges:
-    ++++ edge id: 279
     ++++ edge id: 174
+    ++++ edge id: 279
     ++++ edge id: 300
     ++++ edge id: 301
     ++++ edge id: 304
@@ -7641,17 +7641,17 @@ For each vertex:
     ++++ cell id: 164
     ++++ cell id: 166
     ----Faces:
-    ++++ face id: 286
     ++++ face id: 342
-    ++++ face id: 343
+    ++++ face id: 286
+    ++++ face id: 344
     ++++ face id: 287
     ++++ face id: 301
     ++++ face id: 305
     ++++ face id: 308
     ----Edges:
-    ++++ edge id: 286
     ++++ edge id: 342
-    ++++ edge id: 343
+    ++++ edge id: 286
+    ++++ edge id: 344
     ++++ edge id: 287
     ++++ edge id: 301
     ++++ edge id: 305
@@ -7688,14 +7688,14 @@ For each vertex:
     ++++ cell id: 149
     ++++ cell id: 151
     ----Faces:
-    ++++ face id: 170
+    ++++ face id: 171
     ++++ face id: 175
     ++++ face id: 302
     ++++ face id: 306
     ++++ face id: 308
     ++++ face id: 310
     ----Edges:
-    ++++ edge id: 170
+    ++++ edge id: 171
     ++++ edge id: 175
     ++++ edge id: 302
     ++++ edge id: 306
@@ -7774,13 +7774,13 @@ For each vertex:
     ++++ face id: 278
     ++++ face id: 280
     ++++ face id: 283
-    ++++ face id: 336
+    ++++ face id: 335
     ++++ face id: 284
     ----Edges:
     ++++ edge id: 278
     ++++ edge id: 280
     ++++ edge id: 283
-    ++++ edge id: 336
+    ++++ edge id: 335
     ++++ edge id: 284
     ----Corners:
     ++++ corner id: 543
@@ -7808,16 +7808,16 @@ For each vertex:
     ++++ cell id: 169
     ++++ cell id: 170
     ----Faces:
-    ++++ face id: 287
     ++++ face id: 348
-    ++++ face id: 352
+    ++++ face id: 287
+    ++++ face id: 351
     ++++ face id: 288
     ++++ face id: 309
     ++++ face id: 310
     ----Edges:
-    ++++ edge id: 287
     ++++ edge id: 348
-    ++++ edge id: 352
+    ++++ edge id: 287
+    ++++ edge id: 351
     ++++ edge id: 288
     ++++ edge id: 309
     ++++ edge id: 310
@@ -8044,14 +8044,14 @@ For each vertex:
     ++++ cell id: 167
     ----Faces:
     ++++ face id: 329
-    ++++ face id: 333
+    ++++ face id: 332
     ++++ face id: 335
     ++++ face id: 336
     ++++ face id: 339
     ++++ face id: 340
     ----Edges:
     ++++ edge id: 329
-    ++++ edge id: 333
+    ++++ edge id: 332
     ++++ edge id: 335
     ++++ edge id: 336
     ++++ edge id: 339
@@ -8079,11 +8079,11 @@ For each vertex:
     ++++ cell id: 156
     ----Faces:
     ++++ face id: 329
-    ++++ face id: 332
+    ++++ face id: 333
     ++++ face id: 334
     ----Edges:
     ++++ edge id: 329
-    ++++ edge id: 332
+    ++++ edge id: 333
     ++++ edge id: 334
     ----Corners:
     ++++ corner id: 586
@@ -8101,13 +8101,13 @@ For each vertex:
     ++++ cell id: 162
     ----Faces:
     ++++ face id: 311
-    ++++ face id: 313
+    ++++ face id: 312
     ++++ face id: 330
     ++++ face id: 331
     ++++ face id: 338
     ----Edges:
     ++++ edge id: 311
-    ++++ edge id: 313
+    ++++ edge id: 312
     ++++ edge id: 330
     ++++ edge id: 331
     ++++ edge id: 338
@@ -8130,11 +8130,11 @@ For each vertex:
     ++++ cell id: 154
     ++++ cell id: 158
     ----Faces:
-    ++++ face id: 312
+    ++++ face id: 313
     ++++ face id: 314
     ++++ face id: 331
     ----Edges:
-    ++++ edge id: 312
+    ++++ edge id: 313
     ++++ edge id: 314
     ++++ edge id: 331
     ----Corners:
@@ -8152,13 +8152,13 @@ For each vertex:
     ++++ cell id: 171
     ----Faces:
     ++++ face id: 337
+    ++++ face id: 345
     ++++ face id: 346
-    ++++ face id: 347
     ++++ face id: 350
     ----Edges:
     ++++ edge id: 337
+    ++++ edge id: 345
     ++++ edge id: 346
-    ++++ edge id: 347
     ++++ edge id: 350
     ----Corners:
     ++++ corner id: 617
@@ -8200,12 +8200,12 @@ For each vertex:
     ++++ face id: 338
     ++++ face id: 341
     ++++ face id: 342
-    ++++ face id: 344
+    ++++ face id: 343
     ----Edges:
     ++++ edge id: 338
     ++++ edge id: 341
     ++++ edge id: 342
-    ++++ edge id: 344
+    ++++ edge id: 343
     ----Corners:
     ++++ corner id: 607
     ++++ corner id: 611
@@ -8226,12 +8226,12 @@ For each vertex:
     ++++ face id: 343
     ++++ face id: 344
     ++++ face id: 348
-    ++++ face id: 351
+    ++++ face id: 352
     ----Edges:
     ++++ edge id: 343
     ++++ edge id: 344
     ++++ edge id: 348
-    ++++ edge id: 351
+    ++++ edge id: 352
     ----Corners:
     ++++ corner id: 613
     ++++ corner id: 620
@@ -8249,12 +8249,12 @@ For each vertex:
     ++++ cell id: 169
     ++++ cell id: 170
     ----Faces:
-    ++++ face id: 345
+    ++++ face id: 346
     ++++ face id: 347
     ++++ face id: 351
     ++++ face id: 352
     ----Edges:
-    ++++ edge id: 345
+    ++++ edge id: 346
     ++++ edge id: 347
     ++++ edge id: 351
     ++++ edge id: 352
@@ -8273,18 +8273,6 @@ For each edge:
 ^^^^^^^^Edge id: 0
     ----Cells:
     ++++ cell id: 0
-    ----Vertices:
-    ++++ vertex id: 1
-    ++++ vertex id: 122
-    ----Corners:
-    ++++ corner id: 0
-    ++++ corner id: 3
-    ----Wedges:
-    ++++ wedge id: 0
-    ++++ wedge id: 7
-^^^^^^^^Edge id: 1
-    ----Cells:
-    ++++ cell id: 0
     ++++ cell id: 1
     ----Vertices:
     ++++ vertex id: 123
@@ -8299,7 +8287,7 @@ For each edge:
     ++++ wedge id: 4
     ++++ wedge id: 8
     ++++ wedge id: 15
-^^^^^^^^Edge id: 2
+^^^^^^^^Edge id: 1
     ----Cells:
     ++++ cell id: 0
     ++++ cell id: 33
@@ -8316,6 +8304,18 @@ For each edge:
     ++++ wedge id: 6
     ++++ wedge id: 267
     ++++ wedge id: 268
+^^^^^^^^Edge id: 2
+    ----Cells:
+    ++++ cell id: 0
+    ----Vertices:
+    ++++ vertex id: 1
+    ++++ vertex id: 122
+    ----Corners:
+    ++++ corner id: 0
+    ++++ corner id: 3
+    ----Wedges:
+    ++++ wedge id: 0
+    ++++ wedge id: 7
 ^^^^^^^^Edge id: 3
     ----Cells:
     ++++ cell id: 1
@@ -11004,23 +11004,6 @@ For each edge:
 ^^^^^^^^Edge id: 168
     ----Cells:
     ++++ cell id: 114
-    ++++ cell id: 119
-    ----Vertices:
-    ++++ vertex id: 4
-    ++++ vertex id: 152
-    ----Corners:
-    ++++ corner id: 454
-    ++++ corner id: 456
-    ++++ corner id: 469
-    ++++ corner id: 471
-    ----Wedges:
-    ++++ wedge id: 908
-    ++++ wedge id: 913
-    ++++ wedge id: 938
-    ++++ wedge id: 943
-^^^^^^^^Edge id: 169
-    ----Cells:
-    ++++ cell id: 114
     ++++ cell id: 120
     ----Vertices:
     ++++ vertex id: 153
@@ -11035,24 +11018,24 @@ For each edge:
     ++++ wedge id: 912
     ++++ wedge id: 944
     ++++ wedge id: 949
-^^^^^^^^Edge id: 170
+^^^^^^^^Edge id: 169
     ----Cells:
-    ++++ cell id: 115
-    ++++ cell id: 118
+    ++++ cell id: 114
+    ++++ cell id: 119
     ----Vertices:
-    ++++ vertex id: 156
-    ++++ vertex id: 6
+    ++++ vertex id: 4
+    ++++ vertex id: 152
     ----Corners:
-    ++++ corner id: 457
-    ++++ corner id: 459
-    ++++ corner id: 467
-    ++++ corner id: 468
+    ++++ corner id: 454
+    ++++ corner id: 456
+    ++++ corner id: 469
+    ++++ corner id: 471
     ----Wedges:
-    ++++ wedge id: 914
-    ++++ wedge id: 919
-    ++++ wedge id: 935
-    ++++ wedge id: 936
-^^^^^^^^Edge id: 171
+    ++++ wedge id: 908
+    ++++ wedge id: 913
+    ++++ wedge id: 938
+    ++++ wedge id: 943
+^^^^^^^^Edge id: 170
     ----Cells:
     ++++ cell id: 115
     ++++ cell id: 120
@@ -11069,6 +11052,23 @@ For each edge:
     ++++ wedge id: 916
     ++++ wedge id: 945
     ++++ wedge id: 946
+^^^^^^^^Edge id: 171
+    ----Cells:
+    ++++ cell id: 115
+    ++++ cell id: 118
+    ----Vertices:
+    ++++ vertex id: 156
+    ++++ vertex id: 6
+    ----Corners:
+    ++++ corner id: 457
+    ++++ corner id: 459
+    ++++ corner id: 467
+    ++++ corner id: 468
+    ----Wedges:
+    ++++ wedge id: 914
+    ++++ wedge id: 919
+    ++++ wedge id: 935
+    ++++ wedge id: 936
 ^^^^^^^^Edge id: 172
     ----Cells:
     ++++ cell id: 116
@@ -12517,23 +12517,6 @@ For each edge:
 ^^^^^^^^Edge id: 257
     ----Cells:
     ++++ cell id: 127
-    ++++ cell id: 173
-    ----Vertices:
-    ++++ vertex id: 133
-    ++++ vertex id: 132
-    ----Corners:
-    ++++ corner id: 495
-    ++++ corner id: 498
-    ++++ corner id: 642
-    ++++ corner id: 643
-    ----Wedges:
-    ++++ wedge id: 990
-    ++++ wedge id: 997
-    ++++ wedge id: 1285
-    ++++ wedge id: 1286
-^^^^^^^^Edge id: 258
-    ----Cells:
-    ++++ cell id: 127
     ----Vertices:
     ++++ vertex id: 132
     ++++ vertex id: 134
@@ -12543,7 +12526,7 @@ For each edge:
     ----Wedges:
     ++++ wedge id: 991
     ++++ wedge id: 992
-^^^^^^^^Edge id: 259
+^^^^^^^^Edge id: 258
     ----Cells:
     ++++ cell id: 127
     ++++ cell id: 11
@@ -12560,7 +12543,7 @@ For each edge:
     ++++ wedge id: 994
     ++++ wedge id: 88
     ++++ wedge id: 95
-^^^^^^^^Edge id: 260
+^^^^^^^^Edge id: 259
     ----Cells:
     ++++ cell id: 127
     ++++ cell id: 129
@@ -12577,6 +12560,23 @@ For each edge:
     ++++ wedge id: 996
     ++++ wedge id: 1007
     ++++ wedge id: 1008
+^^^^^^^^Edge id: 260
+    ----Cells:
+    ++++ cell id: 127
+    ++++ cell id: 173
+    ----Vertices:
+    ++++ vertex id: 133
+    ++++ vertex id: 132
+    ----Corners:
+    ++++ corner id: 495
+    ++++ corner id: 498
+    ++++ corner id: 642
+    ++++ corner id: 643
+    ----Wedges:
+    ++++ wedge id: 990
+    ++++ wedge id: 997
+    ++++ wedge id: 1285
+    ++++ wedge id: 1286
 ^^^^^^^^Edge id: 261
     ----Cells:
     ++++ cell id: 46
@@ -12631,23 +12631,6 @@ For each edge:
 ^^^^^^^^Edge id: 264
     ----Cells:
     ++++ cell id: 129
-    ++++ cell id: 175
-    ----Vertices:
-    ++++ vertex id: 138
-    ++++ vertex id: 133
-    ----Corners:
-    ++++ corner id: 503
-    ++++ corner id: 506
-    ++++ corner id: 650
-    ++++ corner id: 651
-    ----Wedges:
-    ++++ wedge id: 1006
-    ++++ wedge id: 1013
-    ++++ wedge id: 1301
-    ++++ wedge id: 1302
-^^^^^^^^Edge id: 265
-    ----Cells:
-    ++++ cell id: 129
     ++++ cell id: 47
     ----Vertices:
     ++++ vertex id: 135
@@ -12662,7 +12645,7 @@ For each edge:
     ++++ wedge id: 1010
     ++++ wedge id: 376
     ++++ wedge id: 383
-^^^^^^^^Edge id: 266
+^^^^^^^^Edge id: 265
     ----Cells:
     ++++ cell id: 129
     ++++ cell id: 131
@@ -12679,6 +12662,23 @@ For each edge:
     ++++ wedge id: 1012
     ++++ wedge id: 1023
     ++++ wedge id: 1024
+^^^^^^^^Edge id: 266
+    ----Cells:
+    ++++ cell id: 129
+    ++++ cell id: 175
+    ----Vertices:
+    ++++ vertex id: 138
+    ++++ vertex id: 133
+    ----Corners:
+    ++++ corner id: 503
+    ++++ corner id: 506
+    ++++ corner id: 650
+    ++++ corner id: 651
+    ----Wedges:
+    ++++ wedge id: 1006
+    ++++ wedge id: 1013
+    ++++ wedge id: 1301
+    ++++ wedge id: 1302
 ^^^^^^^^Edge id: 267
     ----Cells:
     ++++ cell id: 79
@@ -12716,23 +12716,6 @@ For each edge:
 ^^^^^^^^Edge id: 269
     ----Cells:
     ++++ cell id: 131
-    ++++ cell id: 177
-    ----Vertices:
-    ++++ vertex id: 142
-    ++++ vertex id: 138
-    ----Corners:
-    ++++ corner id: 511
-    ++++ corner id: 514
-    ++++ corner id: 658
-    ++++ corner id: 659
-    ----Wedges:
-    ++++ wedge id: 1022
-    ++++ wedge id: 1029
-    ++++ wedge id: 1317
-    ++++ wedge id: 1318
-^^^^^^^^Edge id: 270
-    ----Cells:
-    ++++ cell id: 131
     ++++ cell id: 80
     ----Vertices:
     ++++ vertex id: 139
@@ -12747,24 +12730,24 @@ For each edge:
     ++++ wedge id: 1026
     ++++ wedge id: 640
     ++++ wedge id: 647
-^^^^^^^^Edge id: 271
+^^^^^^^^Edge id: 270
     ----Cells:
-    ++++ cell id: 134
-    ++++ cell id: 144
+    ++++ cell id: 131
+    ++++ cell id: 177
     ----Vertices:
-    ++++ vertex id: 148
-    ++++ vertex id: 125
+    ++++ vertex id: 142
+    ++++ vertex id: 138
     ----Corners:
-    ++++ corner id: 523
-    ++++ corner id: 525
-    ++++ corner id: 553
-    ++++ corner id: 554
+    ++++ corner id: 511
+    ++++ corner id: 514
+    ++++ corner id: 658
+    ++++ corner id: 659
     ----Wedges:
-    ++++ wedge id: 1046
-    ++++ wedge id: 1051
-    ++++ wedge id: 1107
-    ++++ wedge id: 1108
-^^^^^^^^Edge id: 272
+    ++++ wedge id: 1022
+    ++++ wedge id: 1029
+    ++++ wedge id: 1317
+    ++++ wedge id: 1318
+^^^^^^^^Edge id: 271
     ----Cells:
     ++++ cell id: 134
     ++++ cell id: 143
@@ -12781,24 +12764,24 @@ For each edge:
     ++++ wedge id: 1050
     ++++ wedge id: 1100
     ++++ wedge id: 1105
-^^^^^^^^Edge id: 273
+^^^^^^^^Edge id: 272
     ----Cells:
-    ++++ cell id: 136
-    ++++ cell id: 153
+    ++++ cell id: 134
+    ++++ cell id: 144
     ----Vertices:
-    ++++ vertex id: 149
-    ++++ vertex id: 128
+    ++++ vertex id: 148
+    ++++ vertex id: 125
     ----Corners:
-    ++++ corner id: 529
-    ++++ corner id: 531
-    ++++ corner id: 580
-    ++++ corner id: 582
+    ++++ corner id: 523
+    ++++ corner id: 525
+    ++++ corner id: 553
+    ++++ corner id: 554
     ----Wedges:
-    ++++ wedge id: 1058
-    ++++ wedge id: 1063
-    ++++ wedge id: 1160
-    ++++ wedge id: 1165
-^^^^^^^^Edge id: 274
+    ++++ wedge id: 1046
+    ++++ wedge id: 1051
+    ++++ wedge id: 1107
+    ++++ wedge id: 1108
+^^^^^^^^Edge id: 273
     ----Cells:
     ++++ cell id: 136
     ++++ cell id: 141
@@ -12815,6 +12798,23 @@ For each edge:
     ++++ wedge id: 1062
     ++++ wedge id: 1088
     ++++ wedge id: 1093
+^^^^^^^^Edge id: 274
+    ----Cells:
+    ++++ cell id: 136
+    ++++ cell id: 153
+    ----Vertices:
+    ++++ vertex id: 149
+    ++++ vertex id: 128
+    ----Corners:
+    ++++ corner id: 529
+    ++++ corner id: 531
+    ++++ corner id: 580
+    ++++ corner id: 582
+    ----Wedges:
+    ++++ wedge id: 1058
+    ++++ wedge id: 1063
+    ++++ wedge id: 1160
+    ++++ wedge id: 1165
 ^^^^^^^^Edge id: 275
     ----Cells:
     ++++ cell id: 137
@@ -13187,23 +13187,6 @@ For each edge:
 ^^^^^^^^Edge id: 297
     ----Cells:
     ++++ cell id: 135
-    ++++ cell id: 150
-    ----Vertices:
-    ++++ vertex id: 152
-    ++++ vertex id: 150
-    ----Corners:
-    ++++ corner id: 526
-    ++++ corner id: 528
-    ++++ corner id: 571
-    ++++ corner id: 572
-    ----Wedges:
-    ++++ wedge id: 1052
-    ++++ wedge id: 1057
-    ++++ wedge id: 1143
-    ++++ wedge id: 1144
-^^^^^^^^Edge id: 298
-    ----Cells:
-    ++++ cell id: 135
     ++++ cell id: 146
     ----Vertices:
     ++++ vertex id: 151
@@ -13218,6 +13201,23 @@ For each edge:
     ++++ wedge id: 1056
     ++++ wedge id: 1118
     ++++ wedge id: 1123
+^^^^^^^^Edge id: 298
+    ----Cells:
+    ++++ cell id: 135
+    ++++ cell id: 150
+    ----Vertices:
+    ++++ vertex id: 152
+    ++++ vertex id: 150
+    ----Corners:
+    ++++ corner id: 526
+    ++++ corner id: 528
+    ++++ corner id: 571
+    ++++ corner id: 572
+    ----Wedges:
+    ++++ wedge id: 1052
+    ++++ wedge id: 1057
+    ++++ wedge id: 1143
+    ++++ wedge id: 1144
 ^^^^^^^^Edge id: 299
     ----Cells:
     ++++ cell id: 114
@@ -13442,23 +13442,6 @@ For each edge:
 ^^^^^^^^Edge id: 312
     ----Cells:
     ++++ cell id: 154
-    ++++ cell id: 158
-    ----Vertices:
-    ++++ vertex id: 173
-    ++++ vertex id: 130
-    ----Corners:
-    ++++ corner id: 583
-    ++++ corner id: 585
-    ++++ corner id: 596
-    ++++ corner id: 597
-    ----Wedges:
-    ++++ wedge id: 1166
-    ++++ wedge id: 1171
-    ++++ wedge id: 1193
-    ++++ wedge id: 1194
-^^^^^^^^Edge id: 313
-    ----Cells:
-    ++++ cell id: 154
     ++++ cell id: 157
     ----Vertices:
     ++++ vertex id: 130
@@ -13473,6 +13456,23 @@ For each edge:
     ++++ wedge id: 1168
     ++++ wedge id: 1185
     ++++ wedge id: 1186
+^^^^^^^^Edge id: 313
+    ----Cells:
+    ++++ cell id: 154
+    ++++ cell id: 158
+    ----Vertices:
+    ++++ vertex id: 173
+    ++++ vertex id: 130
+    ----Corners:
+    ++++ corner id: 583
+    ++++ corner id: 585
+    ++++ corner id: 596
+    ++++ corner id: 597
+    ----Wedges:
+    ++++ wedge id: 1166
+    ++++ wedge id: 1171
+    ++++ wedge id: 1193
+    ++++ wedge id: 1194
 ^^^^^^^^Edge id: 314
     ----Cells:
     ++++ cell id: 158
@@ -13727,23 +13727,6 @@ For each edge:
 ^^^^^^^^Edge id: 332
     ----Cells:
     ++++ cell id: 155
-    ++++ cell id: 156
-    ----Vertices:
-    ++++ vertex id: 147
-    ++++ vertex id: 171
-    ----Corners:
-    ++++ corner id: 586
-    ++++ corner id: 588
-    ++++ corner id: 589
-    ++++ corner id: 591
-    ----Wedges:
-    ++++ wedge id: 1172
-    ++++ wedge id: 1177
-    ++++ wedge id: 1178
-    ++++ wedge id: 1183
-^^^^^^^^Edge id: 333
-    ----Cells:
-    ++++ cell id: 155
     ++++ cell id: 160
     ----Vertices:
     ++++ vertex id: 170
@@ -13758,6 +13741,23 @@ For each edge:
     ++++ wedge id: 1176
     ++++ wedge id: 1202
     ++++ wedge id: 1207
+^^^^^^^^Edge id: 333
+    ----Cells:
+    ++++ cell id: 155
+    ++++ cell id: 156
+    ----Vertices:
+    ++++ vertex id: 147
+    ++++ vertex id: 171
+    ----Corners:
+    ++++ corner id: 586
+    ++++ corner id: 588
+    ++++ corner id: 589
+    ++++ corner id: 591
+    ----Wedges:
+    ++++ wedge id: 1172
+    ++++ wedge id: 1177
+    ++++ wedge id: 1178
+    ++++ wedge id: 1183
 ^^^^^^^^Edge id: 334
     ----Cells:
     ++++ cell id: 156
@@ -13771,23 +13771,6 @@ For each edge:
     ++++ wedge id: 1181
     ++++ wedge id: 1182
 ^^^^^^^^Edge id: 335
-    ----Cells:
-    ++++ cell id: 159
-    ++++ cell id: 161
-    ----Vertices:
-    ++++ vertex id: 170
-    ++++ vertex id: 148
-    ----Corners:
-    ++++ corner id: 598
-    ++++ corner id: 600
-    ++++ corner id: 604
-    ++++ corner id: 606
-    ----Wedges:
-    ++++ wedge id: 1196
-    ++++ wedge id: 1201
-    ++++ wedge id: 1208
-    ++++ wedge id: 1213
-^^^^^^^^Edge id: 336
     ----Cells:
     ++++ cell id: 159
     ++++ cell id: 160
@@ -13804,6 +13787,23 @@ For each edge:
     ++++ wedge id: 1200
     ++++ wedge id: 1203
     ++++ wedge id: 1204
+^^^^^^^^Edge id: 336
+    ----Cells:
+    ++++ cell id: 159
+    ++++ cell id: 161
+    ----Vertices:
+    ++++ vertex id: 170
+    ++++ vertex id: 148
+    ----Corners:
+    ++++ corner id: 598
+    ++++ corner id: 600
+    ++++ corner id: 604
+    ++++ corner id: 606
+    ----Wedges:
+    ++++ wedge id: 1196
+    ++++ wedge id: 1201
+    ++++ wedge id: 1208
+    ++++ wedge id: 1213
 ^^^^^^^^Edge id: 337
     ----Cells:
     ++++ cell id: 168
@@ -13894,6 +13894,18 @@ For each edge:
 ^^^^^^^^Edge id: 343
     ----Cells:
     ++++ cell id: 164
+    ----Vertices:
+    ++++ vertex id: 177
+    ++++ vertex id: 176
+    ----Corners:
+    ++++ corner id: 613
+    ++++ corner id: 614
+    ----Wedges:
+    ++++ wedge id: 1227
+    ++++ wedge id: 1228
+^^^^^^^^Edge id: 344
+    ----Cells:
+    ++++ cell id: 164
     ++++ cell id: 166
     ----Vertices:
     ++++ vertex id: 155
@@ -13908,36 +13920,7 @@ For each edge:
     ++++ wedge id: 1231
     ++++ wedge id: 1241
     ++++ wedge id: 1242
-^^^^^^^^Edge id: 344
-    ----Cells:
-    ++++ cell id: 164
-    ----Vertices:
-    ++++ vertex id: 177
-    ++++ vertex id: 176
-    ----Corners:
-    ++++ corner id: 613
-    ++++ corner id: 614
-    ----Wedges:
-    ++++ wedge id: 1227
-    ++++ wedge id: 1228
 ^^^^^^^^Edge id: 345
-    ----Cells:
-    ++++ cell id: 165
-    ++++ cell id: 170
-    ----Vertices:
-    ++++ vertex id: 178
-    ++++ vertex id: 151
-    ----Corners:
-    ++++ corner id: 616
-    ++++ corner id: 618
-    ++++ corner id: 632
-    ++++ corner id: 633
-    ----Wedges:
-    ++++ wedge id: 1232
-    ++++ wedge id: 1237
-    ++++ wedge id: 1265
-    ++++ wedge id: 1266
-^^^^^^^^Edge id: 346
     ----Cells:
     ++++ cell id: 165
     ++++ cell id: 171
@@ -13954,7 +13937,7 @@ For each edge:
     ++++ wedge id: 1234
     ++++ wedge id: 1268
     ++++ wedge id: 1273
-^^^^^^^^Edge id: 347
+^^^^^^^^Edge id: 346
     ----Cells:
     ++++ cell id: 165
     ----Vertices:
@@ -13966,6 +13949,23 @@ For each edge:
     ----Wedges:
     ++++ wedge id: 1235
     ++++ wedge id: 1236
+^^^^^^^^Edge id: 347
+    ----Cells:
+    ++++ cell id: 165
+    ++++ cell id: 170
+    ----Vertices:
+    ++++ vertex id: 178
+    ++++ vertex id: 151
+    ----Corners:
+    ++++ corner id: 616
+    ++++ corner id: 618
+    ++++ corner id: 632
+    ++++ corner id: 633
+    ----Wedges:
+    ++++ wedge id: 1232
+    ++++ wedge id: 1237
+    ++++ wedge id: 1265
+    ++++ wedge id: 1266
 ^^^^^^^^Edge id: 348
     ----Cells:
     ++++ cell id: 166
@@ -14020,18 +14020,6 @@ For each edge:
 ^^^^^^^^Edge id: 351
     ----Cells:
     ++++ cell id: 169
-    ----Vertices:
-    ++++ vertex id: 178
-    ++++ vertex id: 177
-    ----Corners:
-    ++++ corner id: 628
-    ++++ corner id: 630
-    ----Wedges:
-    ++++ wedge id: 1256
-    ++++ wedge id: 1261
-^^^^^^^^Edge id: 352
-    ----Cells:
-    ++++ cell id: 169
     ++++ cell id: 170
     ----Vertices:
     ++++ vertex id: 159
@@ -14046,6 +14034,18 @@ For each edge:
     ++++ wedge id: 1260
     ++++ wedge id: 1262
     ++++ wedge id: 1267
+^^^^^^^^Edge id: 352
+    ----Cells:
+    ++++ cell id: 169
+    ----Vertices:
+    ++++ vertex id: 178
+    ++++ vertex id: 177
+    ----Corners:
+    ++++ corner id: 628
+    ++++ corner id: 630
+    ----Wedges:
+    ++++ wedge id: 1256
+    ++++ wedge id: 1261
 ^^^^^^^^Edge id: 353
     ----Cells:
     ++++ cell id: 176
@@ -14125,18 +14125,6 @@ For each face:
 ^^^^^^^^Face id: 0
     ----Cells:
     ++++ cell id: 0
-    ----Vertices:
-    ++++ vertex id: 1
-    ++++ vertex id: 122
-    ----Corners:
-    ++++ corner id: 0
-    ++++ corner id: 3
-    ----Wedges:
-    ++++ wedge id: 0
-    ++++ wedge id: 7
-^^^^^^^^Face id: 1
-    ----Cells:
-    ++++ cell id: 0
     ++++ cell id: 1
     ----Vertices:
     ++++ vertex id: 123
@@ -14151,7 +14139,7 @@ For each face:
     ++++ wedge id: 4
     ++++ wedge id: 8
     ++++ wedge id: 15
-^^^^^^^^Face id: 2
+^^^^^^^^Face id: 1
     ----Cells:
     ++++ cell id: 0
     ++++ cell id: 33
@@ -14168,6 +14156,18 @@ For each face:
     ++++ wedge id: 6
     ++++ wedge id: 267
     ++++ wedge id: 268
+^^^^^^^^Face id: 2
+    ----Cells:
+    ++++ cell id: 0
+    ----Vertices:
+    ++++ vertex id: 1
+    ++++ vertex id: 122
+    ----Corners:
+    ++++ corner id: 0
+    ++++ corner id: 3
+    ----Wedges:
+    ++++ wedge id: 0
+    ++++ wedge id: 7
 ^^^^^^^^Face id: 3
     ----Cells:
     ++++ cell id: 1
@@ -16856,23 +16856,6 @@ For each face:
 ^^^^^^^^Face id: 168
     ----Cells:
     ++++ cell id: 114
-    ++++ cell id: 119
-    ----Vertices:
-    ++++ vertex id: 4
-    ++++ vertex id: 152
-    ----Corners:
-    ++++ corner id: 454
-    ++++ corner id: 456
-    ++++ corner id: 469
-    ++++ corner id: 471
-    ----Wedges:
-    ++++ wedge id: 908
-    ++++ wedge id: 913
-    ++++ wedge id: 938
-    ++++ wedge id: 943
-^^^^^^^^Face id: 169
-    ----Cells:
-    ++++ cell id: 114
     ++++ cell id: 120
     ----Vertices:
     ++++ vertex id: 153
@@ -16887,24 +16870,24 @@ For each face:
     ++++ wedge id: 912
     ++++ wedge id: 944
     ++++ wedge id: 949
-^^^^^^^^Face id: 170
+^^^^^^^^Face id: 169
     ----Cells:
-    ++++ cell id: 115
-    ++++ cell id: 118
+    ++++ cell id: 114
+    ++++ cell id: 119
     ----Vertices:
-    ++++ vertex id: 156
-    ++++ vertex id: 6
+    ++++ vertex id: 4
+    ++++ vertex id: 152
     ----Corners:
-    ++++ corner id: 457
-    ++++ corner id: 459
-    ++++ corner id: 467
-    ++++ corner id: 468
+    ++++ corner id: 454
+    ++++ corner id: 456
+    ++++ corner id: 469
+    ++++ corner id: 471
     ----Wedges:
-    ++++ wedge id: 914
-    ++++ wedge id: 919
-    ++++ wedge id: 935
-    ++++ wedge id: 936
-^^^^^^^^Face id: 171
+    ++++ wedge id: 908
+    ++++ wedge id: 913
+    ++++ wedge id: 938
+    ++++ wedge id: 943
+^^^^^^^^Face id: 170
     ----Cells:
     ++++ cell id: 115
     ++++ cell id: 120
@@ -16921,6 +16904,23 @@ For each face:
     ++++ wedge id: 916
     ++++ wedge id: 945
     ++++ wedge id: 946
+^^^^^^^^Face id: 171
+    ----Cells:
+    ++++ cell id: 115
+    ++++ cell id: 118
+    ----Vertices:
+    ++++ vertex id: 156
+    ++++ vertex id: 6
+    ----Corners:
+    ++++ corner id: 457
+    ++++ corner id: 459
+    ++++ corner id: 467
+    ++++ corner id: 468
+    ----Wedges:
+    ++++ wedge id: 914
+    ++++ wedge id: 919
+    ++++ wedge id: 935
+    ++++ wedge id: 936
 ^^^^^^^^Face id: 172
     ----Cells:
     ++++ cell id: 116
@@ -18369,23 +18369,6 @@ For each face:
 ^^^^^^^^Face id: 257
     ----Cells:
     ++++ cell id: 127
-    ++++ cell id: 173
-    ----Vertices:
-    ++++ vertex id: 133
-    ++++ vertex id: 132
-    ----Corners:
-    ++++ corner id: 495
-    ++++ corner id: 498
-    ++++ corner id: 642
-    ++++ corner id: 643
-    ----Wedges:
-    ++++ wedge id: 990
-    ++++ wedge id: 997
-    ++++ wedge id: 1285
-    ++++ wedge id: 1286
-^^^^^^^^Face id: 258
-    ----Cells:
-    ++++ cell id: 127
     ----Vertices:
     ++++ vertex id: 132
     ++++ vertex id: 134
@@ -18395,7 +18378,7 @@ For each face:
     ----Wedges:
     ++++ wedge id: 991
     ++++ wedge id: 992
-^^^^^^^^Face id: 259
+^^^^^^^^Face id: 258
     ----Cells:
     ++++ cell id: 127
     ++++ cell id: 11
@@ -18412,7 +18395,7 @@ For each face:
     ++++ wedge id: 994
     ++++ wedge id: 88
     ++++ wedge id: 95
-^^^^^^^^Face id: 260
+^^^^^^^^Face id: 259
     ----Cells:
     ++++ cell id: 127
     ++++ cell id: 129
@@ -18429,6 +18412,23 @@ For each face:
     ++++ wedge id: 996
     ++++ wedge id: 1007
     ++++ wedge id: 1008
+^^^^^^^^Face id: 260
+    ----Cells:
+    ++++ cell id: 127
+    ++++ cell id: 173
+    ----Vertices:
+    ++++ vertex id: 133
+    ++++ vertex id: 132
+    ----Corners:
+    ++++ corner id: 495
+    ++++ corner id: 498
+    ++++ corner id: 642
+    ++++ corner id: 643
+    ----Wedges:
+    ++++ wedge id: 990
+    ++++ wedge id: 997
+    ++++ wedge id: 1285
+    ++++ wedge id: 1286
 ^^^^^^^^Face id: 261
     ----Cells:
     ++++ cell id: 46
@@ -18483,23 +18483,6 @@ For each face:
 ^^^^^^^^Face id: 264
     ----Cells:
     ++++ cell id: 129
-    ++++ cell id: 175
-    ----Vertices:
-    ++++ vertex id: 138
-    ++++ vertex id: 133
-    ----Corners:
-    ++++ corner id: 503
-    ++++ corner id: 506
-    ++++ corner id: 650
-    ++++ corner id: 651
-    ----Wedges:
-    ++++ wedge id: 1006
-    ++++ wedge id: 1013
-    ++++ wedge id: 1301
-    ++++ wedge id: 1302
-^^^^^^^^Face id: 265
-    ----Cells:
-    ++++ cell id: 129
     ++++ cell id: 47
     ----Vertices:
     ++++ vertex id: 135
@@ -18514,7 +18497,7 @@ For each face:
     ++++ wedge id: 1010
     ++++ wedge id: 376
     ++++ wedge id: 383
-^^^^^^^^Face id: 266
+^^^^^^^^Face id: 265
     ----Cells:
     ++++ cell id: 129
     ++++ cell id: 131
@@ -18531,6 +18514,23 @@ For each face:
     ++++ wedge id: 1012
     ++++ wedge id: 1023
     ++++ wedge id: 1024
+^^^^^^^^Face id: 266
+    ----Cells:
+    ++++ cell id: 129
+    ++++ cell id: 175
+    ----Vertices:
+    ++++ vertex id: 138
+    ++++ vertex id: 133
+    ----Corners:
+    ++++ corner id: 503
+    ++++ corner id: 506
+    ++++ corner id: 650
+    ++++ corner id: 651
+    ----Wedges:
+    ++++ wedge id: 1006
+    ++++ wedge id: 1013
+    ++++ wedge id: 1301
+    ++++ wedge id: 1302
 ^^^^^^^^Face id: 267
     ----Cells:
     ++++ cell id: 79
@@ -18568,23 +18568,6 @@ For each face:
 ^^^^^^^^Face id: 269
     ----Cells:
     ++++ cell id: 131
-    ++++ cell id: 177
-    ----Vertices:
-    ++++ vertex id: 142
-    ++++ vertex id: 138
-    ----Corners:
-    ++++ corner id: 511
-    ++++ corner id: 514
-    ++++ corner id: 658
-    ++++ corner id: 659
-    ----Wedges:
-    ++++ wedge id: 1022
-    ++++ wedge id: 1029
-    ++++ wedge id: 1317
-    ++++ wedge id: 1318
-^^^^^^^^Face id: 270
-    ----Cells:
-    ++++ cell id: 131
     ++++ cell id: 80
     ----Vertices:
     ++++ vertex id: 139
@@ -18599,24 +18582,24 @@ For each face:
     ++++ wedge id: 1026
     ++++ wedge id: 640
     ++++ wedge id: 647
-^^^^^^^^Face id: 271
+^^^^^^^^Face id: 270
     ----Cells:
-    ++++ cell id: 134
-    ++++ cell id: 144
+    ++++ cell id: 131
+    ++++ cell id: 177
     ----Vertices:
-    ++++ vertex id: 148
-    ++++ vertex id: 125
+    ++++ vertex id: 142
+    ++++ vertex id: 138
     ----Corners:
-    ++++ corner id: 523
-    ++++ corner id: 525
-    ++++ corner id: 553
-    ++++ corner id: 554
+    ++++ corner id: 511
+    ++++ corner id: 514
+    ++++ corner id: 658
+    ++++ corner id: 659
     ----Wedges:
-    ++++ wedge id: 1046
-    ++++ wedge id: 1051
-    ++++ wedge id: 1107
-    ++++ wedge id: 1108
-^^^^^^^^Face id: 272
+    ++++ wedge id: 1022
+    ++++ wedge id: 1029
+    ++++ wedge id: 1317
+    ++++ wedge id: 1318
+^^^^^^^^Face id: 271
     ----Cells:
     ++++ cell id: 134
     ++++ cell id: 143
@@ -18633,24 +18616,24 @@ For each face:
     ++++ wedge id: 1050
     ++++ wedge id: 1100
     ++++ wedge id: 1105
-^^^^^^^^Face id: 273
+^^^^^^^^Face id: 272
     ----Cells:
-    ++++ cell id: 136
-    ++++ cell id: 153
+    ++++ cell id: 134
+    ++++ cell id: 144
     ----Vertices:
-    ++++ vertex id: 149
-    ++++ vertex id: 128
+    ++++ vertex id: 148
+    ++++ vertex id: 125
     ----Corners:
-    ++++ corner id: 529
-    ++++ corner id: 531
-    ++++ corner id: 580
-    ++++ corner id: 582
+    ++++ corner id: 523
+    ++++ corner id: 525
+    ++++ corner id: 553
+    ++++ corner id: 554
     ----Wedges:
-    ++++ wedge id: 1058
-    ++++ wedge id: 1063
-    ++++ wedge id: 1160
-    ++++ wedge id: 1165
-^^^^^^^^Face id: 274
+    ++++ wedge id: 1046
+    ++++ wedge id: 1051
+    ++++ wedge id: 1107
+    ++++ wedge id: 1108
+^^^^^^^^Face id: 273
     ----Cells:
     ++++ cell id: 136
     ++++ cell id: 141
@@ -18667,6 +18650,23 @@ For each face:
     ++++ wedge id: 1062
     ++++ wedge id: 1088
     ++++ wedge id: 1093
+^^^^^^^^Face id: 274
+    ----Cells:
+    ++++ cell id: 136
+    ++++ cell id: 153
+    ----Vertices:
+    ++++ vertex id: 149
+    ++++ vertex id: 128
+    ----Corners:
+    ++++ corner id: 529
+    ++++ corner id: 531
+    ++++ corner id: 580
+    ++++ corner id: 582
+    ----Wedges:
+    ++++ wedge id: 1058
+    ++++ wedge id: 1063
+    ++++ wedge id: 1160
+    ++++ wedge id: 1165
 ^^^^^^^^Face id: 275
     ----Cells:
     ++++ cell id: 137
@@ -19039,23 +19039,6 @@ For each face:
 ^^^^^^^^Face id: 297
     ----Cells:
     ++++ cell id: 135
-    ++++ cell id: 150
-    ----Vertices:
-    ++++ vertex id: 152
-    ++++ vertex id: 150
-    ----Corners:
-    ++++ corner id: 526
-    ++++ corner id: 528
-    ++++ corner id: 571
-    ++++ corner id: 572
-    ----Wedges:
-    ++++ wedge id: 1052
-    ++++ wedge id: 1057
-    ++++ wedge id: 1143
-    ++++ wedge id: 1144
-^^^^^^^^Face id: 298
-    ----Cells:
-    ++++ cell id: 135
     ++++ cell id: 146
     ----Vertices:
     ++++ vertex id: 151
@@ -19070,6 +19053,23 @@ For each face:
     ++++ wedge id: 1056
     ++++ wedge id: 1118
     ++++ wedge id: 1123
+^^^^^^^^Face id: 298
+    ----Cells:
+    ++++ cell id: 135
+    ++++ cell id: 150
+    ----Vertices:
+    ++++ vertex id: 152
+    ++++ vertex id: 150
+    ----Corners:
+    ++++ corner id: 526
+    ++++ corner id: 528
+    ++++ corner id: 571
+    ++++ corner id: 572
+    ----Wedges:
+    ++++ wedge id: 1052
+    ++++ wedge id: 1057
+    ++++ wedge id: 1143
+    ++++ wedge id: 1144
 ^^^^^^^^Face id: 299
     ----Cells:
     ++++ cell id: 114
@@ -19294,23 +19294,6 @@ For each face:
 ^^^^^^^^Face id: 312
     ----Cells:
     ++++ cell id: 154
-    ++++ cell id: 158
-    ----Vertices:
-    ++++ vertex id: 173
-    ++++ vertex id: 130
-    ----Corners:
-    ++++ corner id: 583
-    ++++ corner id: 585
-    ++++ corner id: 596
-    ++++ corner id: 597
-    ----Wedges:
-    ++++ wedge id: 1166
-    ++++ wedge id: 1171
-    ++++ wedge id: 1193
-    ++++ wedge id: 1194
-^^^^^^^^Face id: 313
-    ----Cells:
-    ++++ cell id: 154
     ++++ cell id: 157
     ----Vertices:
     ++++ vertex id: 130
@@ -19325,6 +19308,23 @@ For each face:
     ++++ wedge id: 1168
     ++++ wedge id: 1185
     ++++ wedge id: 1186
+^^^^^^^^Face id: 313
+    ----Cells:
+    ++++ cell id: 154
+    ++++ cell id: 158
+    ----Vertices:
+    ++++ vertex id: 173
+    ++++ vertex id: 130
+    ----Corners:
+    ++++ corner id: 583
+    ++++ corner id: 585
+    ++++ corner id: 596
+    ++++ corner id: 597
+    ----Wedges:
+    ++++ wedge id: 1166
+    ++++ wedge id: 1171
+    ++++ wedge id: 1193
+    ++++ wedge id: 1194
 ^^^^^^^^Face id: 314
     ----Cells:
     ++++ cell id: 158
@@ -19579,23 +19579,6 @@ For each face:
 ^^^^^^^^Face id: 332
     ----Cells:
     ++++ cell id: 155
-    ++++ cell id: 156
-    ----Vertices:
-    ++++ vertex id: 147
-    ++++ vertex id: 171
-    ----Corners:
-    ++++ corner id: 586
-    ++++ corner id: 588
-    ++++ corner id: 589
-    ++++ corner id: 591
-    ----Wedges:
-    ++++ wedge id: 1172
-    ++++ wedge id: 1177
-    ++++ wedge id: 1178
-    ++++ wedge id: 1183
-^^^^^^^^Face id: 333
-    ----Cells:
-    ++++ cell id: 155
     ++++ cell id: 160
     ----Vertices:
     ++++ vertex id: 170
@@ -19610,6 +19593,23 @@ For each face:
     ++++ wedge id: 1176
     ++++ wedge id: 1202
     ++++ wedge id: 1207
+^^^^^^^^Face id: 333
+    ----Cells:
+    ++++ cell id: 155
+    ++++ cell id: 156
+    ----Vertices:
+    ++++ vertex id: 147
+    ++++ vertex id: 171
+    ----Corners:
+    ++++ corner id: 586
+    ++++ corner id: 588
+    ++++ corner id: 589
+    ++++ corner id: 591
+    ----Wedges:
+    ++++ wedge id: 1172
+    ++++ wedge id: 1177
+    ++++ wedge id: 1178
+    ++++ wedge id: 1183
 ^^^^^^^^Face id: 334
     ----Cells:
     ++++ cell id: 156
@@ -19623,23 +19623,6 @@ For each face:
     ++++ wedge id: 1181
     ++++ wedge id: 1182
 ^^^^^^^^Face id: 335
-    ----Cells:
-    ++++ cell id: 159
-    ++++ cell id: 161
-    ----Vertices:
-    ++++ vertex id: 170
-    ++++ vertex id: 148
-    ----Corners:
-    ++++ corner id: 598
-    ++++ corner id: 600
-    ++++ corner id: 604
-    ++++ corner id: 606
-    ----Wedges:
-    ++++ wedge id: 1196
-    ++++ wedge id: 1201
-    ++++ wedge id: 1208
-    ++++ wedge id: 1213
-^^^^^^^^Face id: 336
     ----Cells:
     ++++ cell id: 159
     ++++ cell id: 160
@@ -19656,6 +19639,23 @@ For each face:
     ++++ wedge id: 1200
     ++++ wedge id: 1203
     ++++ wedge id: 1204
+^^^^^^^^Face id: 336
+    ----Cells:
+    ++++ cell id: 159
+    ++++ cell id: 161
+    ----Vertices:
+    ++++ vertex id: 170
+    ++++ vertex id: 148
+    ----Corners:
+    ++++ corner id: 598
+    ++++ corner id: 600
+    ++++ corner id: 604
+    ++++ corner id: 606
+    ----Wedges:
+    ++++ wedge id: 1196
+    ++++ wedge id: 1201
+    ++++ wedge id: 1208
+    ++++ wedge id: 1213
 ^^^^^^^^Face id: 337
     ----Cells:
     ++++ cell id: 168
@@ -19746,6 +19746,18 @@ For each face:
 ^^^^^^^^Face id: 343
     ----Cells:
     ++++ cell id: 164
+    ----Vertices:
+    ++++ vertex id: 177
+    ++++ vertex id: 176
+    ----Corners:
+    ++++ corner id: 613
+    ++++ corner id: 614
+    ----Wedges:
+    ++++ wedge id: 1227
+    ++++ wedge id: 1228
+^^^^^^^^Face id: 344
+    ----Cells:
+    ++++ cell id: 164
     ++++ cell id: 166
     ----Vertices:
     ++++ vertex id: 155
@@ -19760,36 +19772,7 @@ For each face:
     ++++ wedge id: 1231
     ++++ wedge id: 1241
     ++++ wedge id: 1242
-^^^^^^^^Face id: 344
-    ----Cells:
-    ++++ cell id: 164
-    ----Vertices:
-    ++++ vertex id: 177
-    ++++ vertex id: 176
-    ----Corners:
-    ++++ corner id: 613
-    ++++ corner id: 614
-    ----Wedges:
-    ++++ wedge id: 1227
-    ++++ wedge id: 1228
 ^^^^^^^^Face id: 345
-    ----Cells:
-    ++++ cell id: 165
-    ++++ cell id: 170
-    ----Vertices:
-    ++++ vertex id: 178
-    ++++ vertex id: 151
-    ----Corners:
-    ++++ corner id: 616
-    ++++ corner id: 618
-    ++++ corner id: 632
-    ++++ corner id: 633
-    ----Wedges:
-    ++++ wedge id: 1232
-    ++++ wedge id: 1237
-    ++++ wedge id: 1265
-    ++++ wedge id: 1266
-^^^^^^^^Face id: 346
     ----Cells:
     ++++ cell id: 165
     ++++ cell id: 171
@@ -19806,7 +19789,7 @@ For each face:
     ++++ wedge id: 1234
     ++++ wedge id: 1268
     ++++ wedge id: 1273
-^^^^^^^^Face id: 347
+^^^^^^^^Face id: 346
     ----Cells:
     ++++ cell id: 165
     ----Vertices:
@@ -19818,6 +19801,23 @@ For each face:
     ----Wedges:
     ++++ wedge id: 1235
     ++++ wedge id: 1236
+^^^^^^^^Face id: 347
+    ----Cells:
+    ++++ cell id: 165
+    ++++ cell id: 170
+    ----Vertices:
+    ++++ vertex id: 178
+    ++++ vertex id: 151
+    ----Corners:
+    ++++ corner id: 616
+    ++++ corner id: 618
+    ++++ corner id: 632
+    ++++ corner id: 633
+    ----Wedges:
+    ++++ wedge id: 1232
+    ++++ wedge id: 1237
+    ++++ wedge id: 1265
+    ++++ wedge id: 1266
 ^^^^^^^^Face id: 348
     ----Cells:
     ++++ cell id: 166
@@ -19872,18 +19872,6 @@ For each face:
 ^^^^^^^^Face id: 351
     ----Cells:
     ++++ cell id: 169
-    ----Vertices:
-    ++++ vertex id: 178
-    ++++ vertex id: 177
-    ----Corners:
-    ++++ corner id: 628
-    ++++ corner id: 630
-    ----Wedges:
-    ++++ wedge id: 1256
-    ++++ wedge id: 1261
-^^^^^^^^Face id: 352
-    ----Cells:
-    ++++ cell id: 169
     ++++ cell id: 170
     ----Vertices:
     ++++ vertex id: 159
@@ -19898,6 +19886,18 @@ For each face:
     ++++ wedge id: 1260
     ++++ wedge id: 1262
     ++++ wedge id: 1267
+^^^^^^^^Face id: 352
+    ----Cells:
+    ++++ cell id: 169
+    ----Vertices:
+    ++++ vertex id: 178
+    ++++ vertex id: 177
+    ----Corners:
+    ++++ corner id: 628
+    ++++ corner id: 630
+    ----Wedges:
+    ++++ wedge id: 1256
+    ++++ wedge id: 1261
 ^^^^^^^^Face id: 353
     ----Cells:
     ++++ cell id: 176
@@ -19976,13 +19976,13 @@ For each face:
 For each cell:
 ^^^^^^^^Cell id: 0
     ----Faces:
-    ++++ face id: 0
     ++++ face id: 247
+    ++++ face id: 0
     ++++ face id: 1
     ++++ face id: 2
     ----Edges:
-    ++++ edge id: 0
     ++++ edge id: 247
+    ++++ edge id: 0
     ++++ edge id: 1
     ++++ edge id: 2
     ----Vertices:
@@ -20006,15 +20006,15 @@ For each cell:
     ++++ wedge id: 7
 ^^^^^^^^Cell id: 1
     ----Faces:
-    ++++ face id: 1
     ++++ face id: 248
     ++++ face id: 3
     ++++ face id: 4
+    ++++ face id: 0
     ----Edges:
-    ++++ edge id: 1
     ++++ edge id: 248
     ++++ edge id: 3
     ++++ edge id: 4
+    ++++ edge id: 0
     ----Vertices:
     ++++ vertex id: 123
     ++++ vertex id: 124
@@ -20036,15 +20036,15 @@ For each cell:
     ++++ wedge id: 15
 ^^^^^^^^Cell id: 2
     ----Faces:
-    ++++ face id: 3
     ++++ face id: 249
     ++++ face id: 5
     ++++ face id: 6
+    ++++ face id: 3
     ----Edges:
-    ++++ edge id: 3
     ++++ edge id: 249
     ++++ edge id: 5
     ++++ edge id: 6
+    ++++ edge id: 3
     ----Vertices:
     ++++ vertex id: 124
     ++++ vertex id: 125
@@ -20066,15 +20066,15 @@ For each cell:
     ++++ wedge id: 23
 ^^^^^^^^Cell id: 3
     ----Faces:
-    ++++ face id: 5
     ++++ face id: 7
     ++++ face id: 8
     ++++ face id: 9
+    ++++ face id: 5
     ----Edges:
-    ++++ edge id: 5
     ++++ edge id: 7
     ++++ edge id: 8
     ++++ edge id: 9
+    ++++ edge id: 5
     ----Vertices:
     ++++ vertex id: 125
     ++++ vertex id: 4
@@ -20096,15 +20096,15 @@ For each cell:
     ++++ wedge id: 31
 ^^^^^^^^Cell id: 4
     ----Faces:
-    ++++ face id: 8
     ++++ face id: 10
     ++++ face id: 11
     ++++ face id: 12
+    ++++ face id: 8
     ----Edges:
-    ++++ edge id: 8
     ++++ edge id: 10
     ++++ edge id: 11
     ++++ edge id: 12
+    ++++ edge id: 8
     ----Vertices:
     ++++ vertex id: 4
     ++++ vertex id: 6
@@ -20126,15 +20126,15 @@ For each cell:
     ++++ wedge id: 39
 ^^^^^^^^Cell id: 5
     ----Faces:
-    ++++ face id: 11
     ++++ face id: 13
     ++++ face id: 14
     ++++ face id: 15
+    ++++ face id: 11
     ----Edges:
-    ++++ edge id: 11
     ++++ edge id: 13
     ++++ edge id: 14
     ++++ edge id: 15
+    ++++ edge id: 11
     ----Vertices:
     ++++ vertex id: 6
     ++++ vertex id: 8
@@ -20156,15 +20156,15 @@ For each cell:
     ++++ wedge id: 47
 ^^^^^^^^Cell id: 6
     ----Faces:
-    ++++ face id: 14
     ++++ face id: 16
     ++++ face id: 17
     ++++ face id: 18
+    ++++ face id: 14
     ----Edges:
-    ++++ edge id: 14
     ++++ edge id: 16
     ++++ edge id: 17
     ++++ edge id: 18
+    ++++ edge id: 14
     ----Vertices:
     ++++ vertex id: 8
     ++++ vertex id: 10
@@ -20186,15 +20186,15 @@ For each cell:
     ++++ wedge id: 55
 ^^^^^^^^Cell id: 7
     ----Faces:
-    ++++ face id: 17
     ++++ face id: 19
     ++++ face id: 20
     ++++ face id: 21
+    ++++ face id: 17
     ----Edges:
-    ++++ edge id: 17
     ++++ edge id: 19
     ++++ edge id: 20
     ++++ edge id: 21
+    ++++ edge id: 17
     ----Vertices:
     ++++ vertex id: 10
     ++++ vertex id: 12
@@ -20216,15 +20216,15 @@ For each cell:
     ++++ wedge id: 63
 ^^^^^^^^Cell id: 8
     ----Faces:
-    ++++ face id: 20
     ++++ face id: 22
     ++++ face id: 23
     ++++ face id: 24
+    ++++ face id: 20
     ----Edges:
-    ++++ edge id: 20
     ++++ edge id: 22
     ++++ edge id: 23
     ++++ edge id: 24
+    ++++ edge id: 20
     ----Vertices:
     ++++ vertex id: 12
     ++++ vertex id: 14
@@ -20246,15 +20246,15 @@ For each cell:
     ++++ wedge id: 71
 ^^^^^^^^Cell id: 9
     ----Faces:
-    ++++ face id: 22
     ++++ face id: 25
     ++++ face id: 26
     ++++ face id: 27
+    ++++ face id: 22
     ----Edges:
-    ++++ edge id: 22
     ++++ edge id: 25
     ++++ edge id: 26
     ++++ edge id: 27
+    ++++ edge id: 22
     ----Vertices:
     ++++ vertex id: 12
     ++++ vertex id: 16
@@ -20276,15 +20276,15 @@ For each cell:
     ++++ wedge id: 79
 ^^^^^^^^Cell id: 10
     ----Faces:
-    ++++ face id: 26
     ++++ face id: 28
     ++++ face id: 250
     ++++ face id: 29
+    ++++ face id: 26
     ----Edges:
-    ++++ edge id: 26
     ++++ edge id: 28
     ++++ edge id: 250
     ++++ edge id: 29
+    ++++ edge id: 26
     ----Vertices:
     ++++ vertex id: 16
     ++++ vertex id: 126
@@ -20306,15 +20306,15 @@ For each cell:
     ++++ wedge id: 87
 ^^^^^^^^Cell id: 11
     ----Faces:
-    ++++ face id: 259
     ++++ face id: 30
     ++++ face id: 31
     ++++ face id: 32
+    ++++ face id: 258
     ----Edges:
-    ++++ edge id: 259
     ++++ edge id: 30
     ++++ edge id: 31
     ++++ edge id: 32
+    ++++ edge id: 258
     ----Vertices:
     ++++ vertex id: 134
     ++++ vertex id: 18
@@ -20336,15 +20336,15 @@ For each cell:
     ++++ wedge id: 95
 ^^^^^^^^Cell id: 12
     ----Faces:
-    ++++ face id: 31
     ++++ face id: 33
     ++++ face id: 34
     ++++ face id: 35
+    ++++ face id: 31
     ----Edges:
-    ++++ edge id: 31
     ++++ edge id: 33
     ++++ edge id: 34
     ++++ edge id: 35
+    ++++ edge id: 31
     ----Vertices:
     ++++ vertex id: 18
     ++++ vertex id: 20
@@ -20366,15 +20366,15 @@ For each cell:
     ++++ wedge id: 103
 ^^^^^^^^Cell id: 13
     ----Faces:
-    ++++ face id: 34
     ++++ face id: 36
     ++++ face id: 37
     ++++ face id: 38
+    ++++ face id: 34
     ----Edges:
-    ++++ edge id: 34
     ++++ edge id: 36
     ++++ edge id: 37
     ++++ edge id: 38
+    ++++ edge id: 34
     ----Vertices:
     ++++ vertex id: 20
     ++++ vertex id: 22
@@ -20396,15 +20396,15 @@ For each cell:
     ++++ wedge id: 111
 ^^^^^^^^Cell id: 14
     ----Faces:
-    ++++ face id: 37
     ++++ face id: 39
     ++++ face id: 40
     ++++ face id: 41
+    ++++ face id: 37
     ----Edges:
-    ++++ edge id: 37
     ++++ edge id: 39
     ++++ edge id: 40
     ++++ edge id: 41
+    ++++ edge id: 37
     ----Vertices:
     ++++ vertex id: 22
     ++++ vertex id: 24
@@ -20426,15 +20426,15 @@ For each cell:
     ++++ wedge id: 119
 ^^^^^^^^Cell id: 15
     ----Faces:
-    ++++ face id: 40
     ++++ face id: 42
     ++++ face id: 43
     ++++ face id: 44
+    ++++ face id: 40
     ----Edges:
-    ++++ edge id: 40
     ++++ edge id: 42
     ++++ edge id: 43
     ++++ edge id: 44
+    ++++ edge id: 40
     ----Vertices:
     ++++ vertex id: 24
     ++++ vertex id: 26
@@ -20456,15 +20456,15 @@ For each cell:
     ++++ wedge id: 127
 ^^^^^^^^Cell id: 16
     ----Faces:
-    ++++ face id: 43
     ++++ face id: 45
     ++++ face id: 46
     ++++ face id: 47
+    ++++ face id: 43
     ----Edges:
-    ++++ edge id: 43
     ++++ edge id: 45
     ++++ edge id: 46
     ++++ edge id: 47
+    ++++ edge id: 43
     ----Vertices:
     ++++ vertex id: 26
     ++++ vertex id: 28
@@ -20486,15 +20486,15 @@ For each cell:
     ++++ wedge id: 135
 ^^^^^^^^Cell id: 17
     ----Faces:
-    ++++ face id: 46
     ++++ face id: 48
     ++++ face id: 49
     ++++ face id: 50
+    ++++ face id: 46
     ----Edges:
-    ++++ edge id: 46
     ++++ edge id: 48
     ++++ edge id: 49
     ++++ edge id: 50
+    ++++ edge id: 46
     ----Vertices:
     ++++ vertex id: 28
     ++++ vertex id: 30
@@ -20516,15 +20516,15 @@ For each cell:
     ++++ wedge id: 143
 ^^^^^^^^Cell id: 18
     ----Faces:
-    ++++ face id: 49
     ++++ face id: 51
     ++++ face id: 52
     ++++ face id: 53
+    ++++ face id: 49
     ----Edges:
-    ++++ edge id: 49
     ++++ edge id: 51
     ++++ edge id: 52
     ++++ edge id: 53
+    ++++ edge id: 49
     ----Vertices:
     ++++ vertex id: 30
     ++++ vertex id: 32
@@ -20546,15 +20546,15 @@ For each cell:
     ++++ wedge id: 151
 ^^^^^^^^Cell id: 19
     ----Faces:
-    ++++ face id: 52
     ++++ face id: 54
     ++++ face id: 55
     ++++ face id: 56
+    ++++ face id: 52
     ----Edges:
-    ++++ edge id: 52
     ++++ edge id: 54
     ++++ edge id: 55
     ++++ edge id: 56
+    ++++ edge id: 52
     ----Vertices:
     ++++ vertex id: 32
     ++++ vertex id: 34
@@ -20576,15 +20576,15 @@ For each cell:
     ++++ wedge id: 159
 ^^^^^^^^Cell id: 20
     ----Faces:
-    ++++ face id: 55
     ++++ face id: 57
     ++++ face id: 58
     ++++ face id: 59
+    ++++ face id: 55
     ----Edges:
-    ++++ edge id: 55
     ++++ edge id: 57
     ++++ edge id: 58
     ++++ edge id: 59
+    ++++ edge id: 55
     ----Vertices:
     ++++ vertex id: 34
     ++++ vertex id: 36
@@ -20606,15 +20606,15 @@ For each cell:
     ++++ wedge id: 167
 ^^^^^^^^Cell id: 21
     ----Faces:
-    ++++ face id: 58
     ++++ face id: 60
     ++++ face id: 61
     ++++ face id: 62
+    ++++ face id: 58
     ----Edges:
-    ++++ edge id: 58
     ++++ edge id: 60
     ++++ edge id: 61
     ++++ edge id: 62
+    ++++ edge id: 58
     ----Vertices:
     ++++ vertex id: 36
     ++++ vertex id: 38
@@ -20636,15 +20636,15 @@ For each cell:
     ++++ wedge id: 175
 ^^^^^^^^Cell id: 22
     ----Faces:
-    ++++ face id: 61
     ++++ face id: 63
     ++++ face id: 64
     ++++ face id: 65
+    ++++ face id: 61
     ----Edges:
-    ++++ edge id: 61
     ++++ edge id: 63
     ++++ edge id: 64
     ++++ edge id: 65
+    ++++ edge id: 61
     ----Vertices:
     ++++ vertex id: 38
     ++++ vertex id: 40
@@ -20666,15 +20666,15 @@ For each cell:
     ++++ wedge id: 183
 ^^^^^^^^Cell id: 23
     ----Faces:
-    ++++ face id: 64
     ++++ face id: 66
     ++++ face id: 67
     ++++ face id: 68
+    ++++ face id: 64
     ----Edges:
-    ++++ edge id: 64
     ++++ edge id: 66
     ++++ edge id: 67
     ++++ edge id: 68
+    ++++ edge id: 64
     ----Vertices:
     ++++ vertex id: 40
     ++++ vertex id: 42
@@ -20696,15 +20696,15 @@ For each cell:
     ++++ wedge id: 191
 ^^^^^^^^Cell id: 24
     ----Faces:
-    ++++ face id: 67
     ++++ face id: 69
     ++++ face id: 70
     ++++ face id: 71
+    ++++ face id: 67
     ----Edges:
-    ++++ edge id: 67
     ++++ edge id: 69
     ++++ edge id: 70
     ++++ edge id: 71
+    ++++ edge id: 67
     ----Vertices:
     ++++ vertex id: 42
     ++++ vertex id: 44
@@ -20726,15 +20726,15 @@ For each cell:
     ++++ wedge id: 199
 ^^^^^^^^Cell id: 25
     ----Faces:
-    ++++ face id: 70
     ++++ face id: 72
     ++++ face id: 73
     ++++ face id: 74
+    ++++ face id: 70
     ----Edges:
-    ++++ edge id: 70
     ++++ edge id: 72
     ++++ edge id: 73
     ++++ edge id: 74
+    ++++ edge id: 70
     ----Vertices:
     ++++ vertex id: 44
     ++++ vertex id: 46
@@ -20756,15 +20756,15 @@ For each cell:
     ++++ wedge id: 207
 ^^^^^^^^Cell id: 26
     ----Faces:
-    ++++ face id: 73
     ++++ face id: 75
     ++++ face id: 76
     ++++ face id: 77
+    ++++ face id: 73
     ----Edges:
-    ++++ edge id: 73
     ++++ edge id: 75
     ++++ edge id: 76
     ++++ edge id: 77
+    ++++ edge id: 73
     ----Vertices:
     ++++ vertex id: 46
     ++++ vertex id: 48
@@ -20786,15 +20786,15 @@ For each cell:
     ++++ wedge id: 215
 ^^^^^^^^Cell id: 27
     ----Faces:
-    ++++ face id: 76
     ++++ face id: 78
     ++++ face id: 79
     ++++ face id: 80
+    ++++ face id: 76
     ----Edges:
-    ++++ edge id: 76
     ++++ edge id: 78
     ++++ edge id: 79
     ++++ edge id: 80
+    ++++ edge id: 76
     ----Vertices:
     ++++ vertex id: 48
     ++++ vertex id: 50
@@ -20816,15 +20816,15 @@ For each cell:
     ++++ wedge id: 223
 ^^^^^^^^Cell id: 28
     ----Faces:
-    ++++ face id: 80
     ++++ face id: 81
     ++++ face id: 82
     ++++ face id: 83
+    ++++ face id: 80
     ----Edges:
-    ++++ edge id: 80
     ++++ edge id: 81
     ++++ edge id: 82
     ++++ edge id: 83
+    ++++ edge id: 80
     ----Vertices:
     ++++ vertex id: 51
     ++++ vertex id: 52
@@ -20846,15 +20846,15 @@ For each cell:
     ++++ wedge id: 231
 ^^^^^^^^Cell id: 29
     ----Faces:
-    ++++ face id: 82
     ++++ face id: 84
     ++++ face id: 85
     ++++ face id: 86
+    ++++ face id: 82
     ----Edges:
-    ++++ edge id: 82
     ++++ edge id: 84
     ++++ edge id: 85
     ++++ edge id: 86
+    ++++ edge id: 82
     ----Vertices:
     ++++ vertex id: 52
     ++++ vertex id: 54
@@ -20876,15 +20876,15 @@ For each cell:
     ++++ wedge id: 239
 ^^^^^^^^Cell id: 30
     ----Faces:
-    ++++ face id: 85
     ++++ face id: 87
     ++++ face id: 88
     ++++ face id: 89
+    ++++ face id: 85
     ----Edges:
-    ++++ edge id: 85
     ++++ edge id: 87
     ++++ edge id: 88
     ++++ edge id: 89
+    ++++ edge id: 85
     ----Vertices:
     ++++ vertex id: 54
     ++++ vertex id: 56
@@ -20906,15 +20906,15 @@ For each cell:
     ++++ wedge id: 247
 ^^^^^^^^Cell id: 31
     ----Faces:
-    ++++ face id: 88
     ++++ face id: 90
     ++++ face id: 91
     ++++ face id: 92
+    ++++ face id: 88
     ----Edges:
-    ++++ edge id: 88
     ++++ edge id: 90
     ++++ edge id: 91
     ++++ edge id: 92
+    ++++ edge id: 88
     ----Vertices:
     ++++ vertex id: 56
     ++++ vertex id: 58
@@ -20936,15 +20936,15 @@ For each cell:
     ++++ wedge id: 255
 ^^^^^^^^Cell id: 32
     ----Faces:
-    ++++ face id: 91
     ++++ face id: 93
     ++++ face id: 94
     ++++ face id: 95
+    ++++ face id: 91
     ----Edges:
-    ++++ edge id: 91
     ++++ edge id: 93
     ++++ edge id: 94
     ++++ edge id: 95
+    ++++ edge id: 91
     ----Vertices:
     ++++ vertex id: 58
     ++++ vertex id: 60
@@ -20966,15 +20966,15 @@ For each cell:
     ++++ wedge id: 263
 ^^^^^^^^Cell id: 33
     ----Faces:
-    ++++ face id: 94
     ++++ face id: 96
-    ++++ face id: 2
+    ++++ face id: 1
     ++++ face id: 97
+    ++++ face id: 94
     ----Edges:
-    ++++ edge id: 94
     ++++ edge id: 96
-    ++++ edge id: 2
+    ++++ edge id: 1
     ++++ edge id: 97
+    ++++ edge id: 94
     ----Vertices:
     ++++ vertex id: 60
     ++++ vertex id: 1
@@ -20997,14 +20997,14 @@ For each cell:
 ^^^^^^^^Cell id: 34
     ----Faces:
     ++++ face id: 4
-    ++++ face id: 97
     ++++ face id: 98
     ++++ face id: 99
+    ++++ face id: 97
     ----Edges:
     ++++ edge id: 4
-    ++++ edge id: 97
     ++++ edge id: 98
     ++++ edge id: 99
+    ++++ edge id: 97
     ----Vertices:
     ++++ vertex id: 0
     ++++ vertex id: 2
@@ -21027,14 +21027,14 @@ For each cell:
 ^^^^^^^^Cell id: 35
     ----Faces:
     ++++ face id: 6
-    ++++ face id: 98
     ++++ face id: 100
     ++++ face id: 101
+    ++++ face id: 98
     ----Edges:
     ++++ edge id: 6
-    ++++ edge id: 98
     ++++ edge id: 100
     ++++ edge id: 101
+    ++++ edge id: 98
     ----Vertices:
     ++++ vertex id: 2
     ++++ vertex id: 3
@@ -21057,14 +21057,14 @@ For each cell:
 ^^^^^^^^Cell id: 36
     ----Faces:
     ++++ face id: 9
-    ++++ face id: 100
     ++++ face id: 102
     ++++ face id: 103
+    ++++ face id: 100
     ----Edges:
     ++++ edge id: 9
-    ++++ edge id: 100
     ++++ edge id: 102
     ++++ edge id: 103
+    ++++ edge id: 100
     ----Vertices:
     ++++ vertex id: 3
     ++++ vertex id: 5
@@ -21087,14 +21087,14 @@ For each cell:
 ^^^^^^^^Cell id: 37
     ----Faces:
     ++++ face id: 12
-    ++++ face id: 102
     ++++ face id: 104
     ++++ face id: 105
+    ++++ face id: 102
     ----Edges:
     ++++ edge id: 12
-    ++++ edge id: 102
     ++++ edge id: 104
     ++++ edge id: 105
+    ++++ edge id: 102
     ----Vertices:
     ++++ vertex id: 5
     ++++ vertex id: 7
@@ -21117,14 +21117,14 @@ For each cell:
 ^^^^^^^^Cell id: 38
     ----Faces:
     ++++ face id: 15
-    ++++ face id: 104
     ++++ face id: 106
     ++++ face id: 107
+    ++++ face id: 104
     ----Edges:
     ++++ edge id: 15
-    ++++ edge id: 104
     ++++ edge id: 106
     ++++ edge id: 107
+    ++++ edge id: 104
     ----Vertices:
     ++++ vertex id: 7
     ++++ vertex id: 9
@@ -21147,14 +21147,14 @@ For each cell:
 ^^^^^^^^Cell id: 39
     ----Faces:
     ++++ face id: 18
-    ++++ face id: 106
     ++++ face id: 108
     ++++ face id: 109
+    ++++ face id: 106
     ----Edges:
     ++++ edge id: 18
-    ++++ edge id: 106
     ++++ edge id: 108
     ++++ edge id: 109
+    ++++ edge id: 106
     ----Vertices:
     ++++ vertex id: 9
     ++++ vertex id: 11
@@ -21177,14 +21177,14 @@ For each cell:
 ^^^^^^^^Cell id: 40
     ----Faces:
     ++++ face id: 21
-    ++++ face id: 108
     ++++ face id: 110
     ++++ face id: 111
+    ++++ face id: 108
     ----Edges:
     ++++ edge id: 21
-    ++++ edge id: 108
     ++++ edge id: 110
     ++++ edge id: 111
+    ++++ edge id: 108
     ----Vertices:
     ++++ vertex id: 11
     ++++ vertex id: 13
@@ -21207,14 +21207,14 @@ For each cell:
 ^^^^^^^^Cell id: 41
     ----Faces:
     ++++ face id: 24
-    ++++ face id: 110
     ++++ face id: 112
     ++++ face id: 113
+    ++++ face id: 110
     ----Edges:
     ++++ edge id: 24
-    ++++ edge id: 110
     ++++ edge id: 112
     ++++ edge id: 113
+    ++++ edge id: 110
     ----Vertices:
     ++++ vertex id: 13
     ++++ vertex id: 15
@@ -21236,15 +21236,15 @@ For each cell:
     ++++ wedge id: 335
 ^^^^^^^^Cell id: 42
     ----Faces:
-    ++++ face id: 112
     ++++ face id: 114
     ++++ face id: 115
     ++++ face id: 116
+    ++++ face id: 112
     ----Edges:
-    ++++ edge id: 112
     ++++ edge id: 114
     ++++ edge id: 115
     ++++ edge id: 116
+    ++++ edge id: 112
     ----Vertices:
     ++++ vertex id: 15
     ++++ vertex id: 70
@@ -21267,14 +21267,14 @@ For each cell:
 ^^^^^^^^Cell id: 43
     ----Faces:
     ++++ face id: 23
-    ++++ face id: 114
     ++++ face id: 117
     ++++ face id: 118
+    ++++ face id: 114
     ----Edges:
     ++++ edge id: 23
-    ++++ edge id: 114
     ++++ edge id: 117
     ++++ edge id: 118
+    ++++ edge id: 114
     ----Vertices:
     ++++ vertex id: 15
     ++++ vertex id: 14
@@ -21297,14 +21297,14 @@ For each cell:
 ^^^^^^^^Cell id: 44
     ----Faces:
     ++++ face id: 27
-    ++++ face id: 117
     ++++ face id: 119
     ++++ face id: 120
+    ++++ face id: 117
     ----Edges:
     ++++ edge id: 27
-    ++++ edge id: 117
     ++++ edge id: 119
     ++++ edge id: 120
+    ++++ edge id: 117
     ----Vertices:
     ++++ vertex id: 14
     ++++ vertex id: 17
@@ -21327,14 +21327,14 @@ For each cell:
 ^^^^^^^^Cell id: 45
     ----Faces:
     ++++ face id: 29
-    ++++ face id: 119
     ++++ face id: 121
     ++++ face id: 122
+    ++++ face id: 119
     ----Edges:
     ++++ edge id: 29
-    ++++ edge id: 119
     ++++ edge id: 121
     ++++ edge id: 122
+    ++++ edge id: 119
     ----Vertices:
     ++++ vertex id: 17
     ++++ vertex id: 127
@@ -21357,14 +21357,14 @@ For each cell:
 ^^^^^^^^Cell id: 46
     ----Faces:
     ++++ face id: 253
-    ++++ face id: 121
     ++++ face id: 261
     ++++ face id: 123
+    ++++ face id: 121
     ----Edges:
     ++++ edge id: 253
-    ++++ edge id: 121
     ++++ edge id: 261
     ++++ edge id: 123
+    ++++ edge id: 121
     ----Vertices:
     ++++ vertex id: 127
     ++++ vertex id: 129
@@ -21387,14 +21387,14 @@ For each cell:
 ^^^^^^^^Cell id: 47
     ----Faces:
     ++++ face id: 32
-    ++++ face id: 265
     ++++ face id: 124
     ++++ face id: 125
+    ++++ face id: 264
     ----Edges:
     ++++ edge id: 32
-    ++++ edge id: 265
     ++++ edge id: 124
     ++++ edge id: 125
+    ++++ edge id: 264
     ----Vertices:
     ++++ vertex id: 135
     ++++ vertex id: 19
@@ -21417,14 +21417,14 @@ For each cell:
 ^^^^^^^^Cell id: 48
     ----Faces:
     ++++ face id: 35
-    ++++ face id: 124
     ++++ face id: 126
     ++++ face id: 127
+    ++++ face id: 124
     ----Edges:
     ++++ edge id: 35
-    ++++ edge id: 124
     ++++ edge id: 126
     ++++ edge id: 127
+    ++++ edge id: 124
     ----Vertices:
     ++++ vertex id: 19
     ++++ vertex id: 21
@@ -21447,14 +21447,14 @@ For each cell:
 ^^^^^^^^Cell id: 49
     ----Faces:
     ++++ face id: 38
-    ++++ face id: 126
     ++++ face id: 128
     ++++ face id: 129
+    ++++ face id: 126
     ----Edges:
     ++++ edge id: 38
-    ++++ edge id: 126
     ++++ edge id: 128
     ++++ edge id: 129
+    ++++ edge id: 126
     ----Vertices:
     ++++ vertex id: 21
     ++++ vertex id: 23
@@ -21477,14 +21477,14 @@ For each cell:
 ^^^^^^^^Cell id: 50
     ----Faces:
     ++++ face id: 41
-    ++++ face id: 128
     ++++ face id: 130
     ++++ face id: 131
+    ++++ face id: 128
     ----Edges:
     ++++ edge id: 41
-    ++++ edge id: 128
     ++++ edge id: 130
     ++++ edge id: 131
+    ++++ edge id: 128
     ----Vertices:
     ++++ vertex id: 23
     ++++ vertex id: 25
@@ -21507,14 +21507,14 @@ For each cell:
 ^^^^^^^^Cell id: 51
     ----Faces:
     ++++ face id: 44
-    ++++ face id: 130
     ++++ face id: 132
     ++++ face id: 133
+    ++++ face id: 130
     ----Edges:
     ++++ edge id: 44
-    ++++ edge id: 130
     ++++ edge id: 132
     ++++ edge id: 133
+    ++++ edge id: 130
     ----Vertices:
     ++++ vertex id: 25
     ++++ vertex id: 27
@@ -21536,15 +21536,15 @@ For each cell:
     ++++ wedge id: 415
 ^^^^^^^^Cell id: 52
     ----Faces:
-    ++++ face id: 47
     ++++ face id: 50
     ++++ face id: 134
     ++++ face id: 132
+    ++++ face id: 47
     ----Edges:
-    ++++ edge id: 47
     ++++ edge id: 50
     ++++ edge id: 134
     ++++ edge id: 132
+    ++++ edge id: 47
     ----Vertices:
     ++++ vertex id: 29
     ++++ vertex id: 31
@@ -21567,14 +21567,14 @@ For each cell:
 ^^^^^^^^Cell id: 53
     ----Faces:
     ++++ face id: 53
-    ++++ face id: 134
     ++++ face id: 135
     ++++ face id: 176
+    ++++ face id: 134
     ----Edges:
     ++++ edge id: 53
-    ++++ edge id: 134
     ++++ edge id: 135
     ++++ edge id: 176
+    ++++ edge id: 134
     ----Vertices:
     ++++ vertex id: 31
     ++++ vertex id: 33
@@ -21597,14 +21597,14 @@ For each cell:
 ^^^^^^^^Cell id: 54
     ----Faces:
     ++++ face id: 56
-    ++++ face id: 135
     ++++ face id: 136
     ++++ face id: 177
+    ++++ face id: 135
     ----Edges:
     ++++ edge id: 56
-    ++++ edge id: 135
     ++++ edge id: 136
     ++++ edge id: 177
+    ++++ edge id: 135
     ----Vertices:
     ++++ vertex id: 33
     ++++ vertex id: 35
@@ -21627,14 +21627,14 @@ For each cell:
 ^^^^^^^^Cell id: 55
     ----Faces:
     ++++ face id: 59
-    ++++ face id: 136
     ++++ face id: 137
     ++++ face id: 178
+    ++++ face id: 136
     ----Edges:
     ++++ edge id: 59
-    ++++ edge id: 136
     ++++ edge id: 137
     ++++ edge id: 178
+    ++++ edge id: 136
     ----Vertices:
     ++++ vertex id: 35
     ++++ vertex id: 37
@@ -21657,14 +21657,14 @@ For each cell:
 ^^^^^^^^Cell id: 56
     ----Faces:
     ++++ face id: 62
-    ++++ face id: 137
     ++++ face id: 138
     ++++ face id: 179
+    ++++ face id: 137
     ----Edges:
     ++++ edge id: 62
-    ++++ edge id: 137
     ++++ edge id: 138
     ++++ edge id: 179
+    ++++ edge id: 137
     ----Vertices:
     ++++ vertex id: 37
     ++++ vertex id: 39
@@ -21687,14 +21687,14 @@ For each cell:
 ^^^^^^^^Cell id: 57
     ----Faces:
     ++++ face id: 65
-    ++++ face id: 138
     ++++ face id: 139
     ++++ face id: 180
+    ++++ face id: 138
     ----Edges:
     ++++ edge id: 65
-    ++++ edge id: 138
     ++++ edge id: 139
     ++++ edge id: 180
+    ++++ edge id: 138
     ----Vertices:
     ++++ vertex id: 39
     ++++ vertex id: 41
@@ -21717,14 +21717,14 @@ For each cell:
 ^^^^^^^^Cell id: 58
     ----Faces:
     ++++ face id: 68
-    ++++ face id: 139
     ++++ face id: 140
     ++++ face id: 181
+    ++++ face id: 139
     ----Edges:
     ++++ edge id: 68
-    ++++ edge id: 139
     ++++ edge id: 140
     ++++ edge id: 181
+    ++++ edge id: 139
     ----Vertices:
     ++++ vertex id: 41
     ++++ vertex id: 43
@@ -21747,14 +21747,14 @@ For each cell:
 ^^^^^^^^Cell id: 59
     ----Faces:
     ++++ face id: 71
-    ++++ face id: 140
     ++++ face id: 141
     ++++ face id: 182
+    ++++ face id: 140
     ----Edges:
     ++++ edge id: 71
-    ++++ edge id: 140
     ++++ edge id: 141
     ++++ edge id: 182
+    ++++ edge id: 140
     ----Vertices:
     ++++ vertex id: 43
     ++++ vertex id: 45
@@ -21777,14 +21777,14 @@ For each cell:
 ^^^^^^^^Cell id: 60
     ----Faces:
     ++++ face id: 74
-    ++++ face id: 141
     ++++ face id: 142
     ++++ face id: 183
+    ++++ face id: 141
     ----Edges:
     ++++ edge id: 74
-    ++++ edge id: 141
     ++++ edge id: 142
     ++++ edge id: 183
+    ++++ edge id: 141
     ----Vertices:
     ++++ vertex id: 45
     ++++ vertex id: 47
@@ -21807,14 +21807,14 @@ For each cell:
 ^^^^^^^^Cell id: 61
     ----Faces:
     ++++ face id: 77
-    ++++ face id: 142
     ++++ face id: 83
     ++++ face id: 143
+    ++++ face id: 142
     ----Edges:
     ++++ edge id: 77
-    ++++ edge id: 142
     ++++ edge id: 83
     ++++ edge id: 143
+    ++++ edge id: 142
     ----Vertices:
     ++++ vertex id: 47
     ++++ vertex id: 49
@@ -21837,14 +21837,14 @@ For each cell:
 ^^^^^^^^Cell id: 62
     ----Faces:
     ++++ face id: 86
-    ++++ face id: 143
     ++++ face id: 144
     ++++ face id: 184
+    ++++ face id: 143
     ----Edges:
     ++++ edge id: 86
-    ++++ edge id: 143
     ++++ edge id: 144
     ++++ edge id: 184
+    ++++ edge id: 143
     ----Vertices:
     ++++ vertex id: 53
     ++++ vertex id: 55
@@ -21867,14 +21867,14 @@ For each cell:
 ^^^^^^^^Cell id: 63
     ----Faces:
     ++++ face id: 89
-    ++++ face id: 144
     ++++ face id: 145
     ++++ face id: 185
+    ++++ face id: 144
     ----Edges:
     ++++ edge id: 89
-    ++++ edge id: 144
     ++++ edge id: 145
     ++++ edge id: 185
+    ++++ edge id: 144
     ----Vertices:
     ++++ vertex id: 55
     ++++ vertex id: 57
@@ -21897,14 +21897,14 @@ For each cell:
 ^^^^^^^^Cell id: 64
     ----Faces:
     ++++ face id: 92
-    ++++ face id: 145
     ++++ face id: 146
     ++++ face id: 186
+    ++++ face id: 145
     ----Edges:
     ++++ edge id: 92
-    ++++ edge id: 145
     ++++ edge id: 146
     ++++ edge id: 186
+    ++++ edge id: 145
     ----Vertices:
     ++++ vertex id: 57
     ++++ vertex id: 59
@@ -21927,14 +21927,14 @@ For each cell:
 ^^^^^^^^Cell id: 65
     ----Faces:
     ++++ face id: 95
-    ++++ face id: 146
     ++++ face id: 99
     ++++ face id: 147
+    ++++ face id: 146
     ----Edges:
     ++++ edge id: 95
-    ++++ edge id: 146
     ++++ edge id: 99
     ++++ edge id: 147
+    ++++ edge id: 146
     ----Vertices:
     ++++ vertex id: 59
     ++++ vertex id: 61
@@ -21957,14 +21957,14 @@ For each cell:
 ^^^^^^^^Cell id: 66
     ----Faces:
     ++++ face id: 101
-    ++++ face id: 147
     ++++ face id: 148
     ++++ face id: 187
+    ++++ face id: 147
     ----Edges:
     ++++ edge id: 101
-    ++++ edge id: 147
     ++++ edge id: 148
     ++++ edge id: 187
+    ++++ edge id: 147
     ----Vertices:
     ++++ vertex id: 62
     ++++ vertex id: 63
@@ -21987,14 +21987,14 @@ For each cell:
 ^^^^^^^^Cell id: 67
     ----Faces:
     ++++ face id: 103
-    ++++ face id: 148
     ++++ face id: 149
     ++++ face id: 188
+    ++++ face id: 148
     ----Edges:
     ++++ edge id: 103
-    ++++ edge id: 148
     ++++ edge id: 149
     ++++ edge id: 188
+    ++++ edge id: 148
     ----Vertices:
     ++++ vertex id: 63
     ++++ vertex id: 64
@@ -22017,14 +22017,14 @@ For each cell:
 ^^^^^^^^Cell id: 68
     ----Faces:
     ++++ face id: 105
-    ++++ face id: 149
     ++++ face id: 150
     ++++ face id: 189
+    ++++ face id: 149
     ----Edges:
     ++++ edge id: 105
-    ++++ edge id: 149
     ++++ edge id: 150
     ++++ edge id: 189
+    ++++ edge id: 149
     ----Vertices:
     ++++ vertex id: 64
     ++++ vertex id: 65
@@ -22047,14 +22047,14 @@ For each cell:
 ^^^^^^^^Cell id: 69
     ----Faces:
     ++++ face id: 107
-    ++++ face id: 150
     ++++ face id: 151
     ++++ face id: 190
+    ++++ face id: 150
     ----Edges:
     ++++ edge id: 107
-    ++++ edge id: 150
     ++++ edge id: 151
     ++++ edge id: 190
+    ++++ edge id: 150
     ----Vertices:
     ++++ vertex id: 65
     ++++ vertex id: 66
@@ -22077,14 +22077,14 @@ For each cell:
 ^^^^^^^^Cell id: 70
     ----Faces:
     ++++ face id: 109
-    ++++ face id: 151
     ++++ face id: 152
     ++++ face id: 191
+    ++++ face id: 151
     ----Edges:
     ++++ edge id: 109
-    ++++ edge id: 151
     ++++ edge id: 152
     ++++ edge id: 191
+    ++++ edge id: 151
     ----Vertices:
     ++++ vertex id: 66
     ++++ vertex id: 67
@@ -22107,14 +22107,14 @@ For each cell:
 ^^^^^^^^Cell id: 71
     ----Faces:
     ++++ face id: 111
-    ++++ face id: 152
     ++++ face id: 153
     ++++ face id: 192
+    ++++ face id: 152
     ----Edges:
     ++++ edge id: 111
-    ++++ edge id: 152
     ++++ edge id: 153
     ++++ edge id: 192
+    ++++ edge id: 152
     ----Vertices:
     ++++ vertex id: 67
     ++++ vertex id: 68
@@ -22137,14 +22137,14 @@ For each cell:
 ^^^^^^^^Cell id: 72
     ----Faces:
     ++++ face id: 113
-    ++++ face id: 153
     ++++ face id: 154
     ++++ face id: 193
+    ++++ face id: 153
     ----Edges:
     ++++ edge id: 113
-    ++++ edge id: 153
     ++++ edge id: 154
     ++++ edge id: 193
+    ++++ edge id: 153
     ----Vertices:
     ++++ vertex id: 68
     ++++ vertex id: 69
@@ -22167,14 +22167,14 @@ For each cell:
 ^^^^^^^^Cell id: 73
     ----Faces:
     ++++ face id: 116
-    ++++ face id: 154
     ++++ face id: 155
     ++++ face id: 194
+    ++++ face id: 154
     ----Edges:
     ++++ edge id: 116
-    ++++ edge id: 154
     ++++ edge id: 155
     ++++ edge id: 194
+    ++++ edge id: 154
     ----Vertices:
     ++++ vertex id: 69
     ++++ vertex id: 71
@@ -22196,15 +22196,15 @@ For each cell:
     ++++ wedge id: 591
 ^^^^^^^^Cell id: 74
     ----Faces:
-    ++++ face id: 155
     ++++ face id: 156
     ++++ face id: 195
     ++++ face id: 196
+    ++++ face id: 155
     ----Edges:
-    ++++ edge id: 155
     ++++ edge id: 156
     ++++ edge id: 195
     ++++ edge id: 196
+    ++++ edge id: 155
     ----Vertices:
     ++++ vertex id: 71
     ++++ vertex id: 99
@@ -22227,14 +22227,14 @@ For each cell:
 ^^^^^^^^Cell id: 75
     ----Faces:
     ++++ face id: 115
-    ++++ face id: 156
     ++++ face id: 157
     ++++ face id: 197
+    ++++ face id: 156
     ----Edges:
     ++++ edge id: 115
-    ++++ edge id: 156
     ++++ edge id: 157
     ++++ edge id: 197
+    ++++ edge id: 156
     ----Vertices:
     ++++ vertex id: 71
     ++++ vertex id: 70
@@ -22257,14 +22257,14 @@ For each cell:
 ^^^^^^^^Cell id: 76
     ----Faces:
     ++++ face id: 118
-    ++++ face id: 157
     ++++ face id: 158
     ++++ face id: 198
+    ++++ face id: 157
     ----Edges:
     ++++ edge id: 118
-    ++++ edge id: 157
     ++++ edge id: 158
     ++++ edge id: 198
+    ++++ edge id: 157
     ----Vertices:
     ++++ vertex id: 70
     ++++ vertex id: 72
@@ -22287,14 +22287,14 @@ For each cell:
 ^^^^^^^^Cell id: 77
     ----Faces:
     ++++ face id: 120
-    ++++ face id: 158
     ++++ face id: 159
     ++++ face id: 199
+    ++++ face id: 158
     ----Edges:
     ++++ edge id: 120
-    ++++ edge id: 158
     ++++ edge id: 159
     ++++ edge id: 199
+    ++++ edge id: 158
     ----Vertices:
     ++++ vertex id: 72
     ++++ vertex id: 73
@@ -22317,14 +22317,14 @@ For each cell:
 ^^^^^^^^Cell id: 78
     ----Faces:
     ++++ face id: 122
-    ++++ face id: 159
     ++++ face id: 160
     ++++ face id: 200
+    ++++ face id: 159
     ----Edges:
     ++++ edge id: 122
-    ++++ edge id: 159
     ++++ edge id: 160
     ++++ edge id: 200
+    ++++ edge id: 159
     ----Vertices:
     ++++ vertex id: 73
     ++++ vertex id: 74
@@ -22347,14 +22347,14 @@ For each cell:
 ^^^^^^^^Cell id: 79
     ----Faces:
     ++++ face id: 123
-    ++++ face id: 160
     ++++ face id: 267
     ++++ face id: 201
+    ++++ face id: 160
     ----Edges:
     ++++ edge id: 123
-    ++++ edge id: 160
     ++++ edge id: 267
     ++++ edge id: 201
+    ++++ edge id: 160
     ----Vertices:
     ++++ vertex id: 74
     ++++ vertex id: 136
@@ -22377,14 +22377,14 @@ For each cell:
 ^^^^^^^^Cell id: 80
     ----Faces:
     ++++ face id: 125
-    ++++ face id: 270
     ++++ face id: 161
     ++++ face id: 202
+    ++++ face id: 269
     ----Edges:
     ++++ edge id: 125
-    ++++ edge id: 270
     ++++ edge id: 161
     ++++ edge id: 202
+    ++++ edge id: 269
     ----Vertices:
     ++++ vertex id: 139
     ++++ vertex id: 75
@@ -22407,14 +22407,14 @@ For each cell:
 ^^^^^^^^Cell id: 81
     ----Faces:
     ++++ face id: 127
-    ++++ face id: 161
     ++++ face id: 162
     ++++ face id: 203
+    ++++ face id: 161
     ----Edges:
     ++++ edge id: 127
-    ++++ edge id: 161
     ++++ edge id: 162
     ++++ edge id: 203
+    ++++ edge id: 161
     ----Vertices:
     ++++ vertex id: 75
     ++++ vertex id: 76
@@ -22437,14 +22437,14 @@ For each cell:
 ^^^^^^^^Cell id: 82
     ----Faces:
     ++++ face id: 129
-    ++++ face id: 162
     ++++ face id: 163
     ++++ face id: 204
+    ++++ face id: 162
     ----Edges:
     ++++ edge id: 129
-    ++++ edge id: 162
     ++++ edge id: 163
     ++++ edge id: 204
+    ++++ edge id: 162
     ----Vertices:
     ++++ vertex id: 76
     ++++ vertex id: 77
@@ -22467,14 +22467,14 @@ For each cell:
 ^^^^^^^^Cell id: 83
     ----Faces:
     ++++ face id: 131
-    ++++ face id: 163
     ++++ face id: 164
     ++++ face id: 205
+    ++++ face id: 163
     ----Edges:
     ++++ edge id: 131
-    ++++ edge id: 163
     ++++ edge id: 164
     ++++ edge id: 205
+    ++++ edge id: 163
     ----Vertices:
     ++++ vertex id: 77
     ++++ vertex id: 78
@@ -22497,14 +22497,14 @@ For each cell:
 ^^^^^^^^Cell id: 84
     ----Faces:
     ++++ face id: 133
-    ++++ face id: 164
     ++++ face id: 206
     ++++ face id: 197
+    ++++ face id: 164
     ----Edges:
     ++++ edge id: 133
-    ++++ edge id: 164
     ++++ edge id: 206
     ++++ edge id: 197
+    ++++ edge id: 164
     ----Vertices:
     ++++ vertex id: 78
     ++++ vertex id: 79
@@ -22527,14 +22527,14 @@ For each cell:
 ^^^^^^^^Cell id: 85
     ----Faces:
     ++++ face id: 176
-    ++++ face id: 206
     ++++ face id: 207
     ++++ face id: 195
+    ++++ face id: 206
     ----Edges:
     ++++ edge id: 176
-    ++++ edge id: 206
     ++++ edge id: 207
     ++++ edge id: 195
+    ++++ edge id: 206
     ----Vertices:
     ++++ vertex id: 79
     ++++ vertex id: 80
@@ -22557,14 +22557,14 @@ For each cell:
 ^^^^^^^^Cell id: 86
     ----Faces:
     ++++ face id: 177
-    ++++ face id: 207
     ++++ face id: 208
     ++++ face id: 209
+    ++++ face id: 207
     ----Edges:
     ++++ edge id: 177
-    ++++ edge id: 207
     ++++ edge id: 208
     ++++ edge id: 209
+    ++++ edge id: 207
     ----Vertices:
     ++++ vertex id: 80
     ++++ vertex id: 81
@@ -22587,14 +22587,14 @@ For each cell:
 ^^^^^^^^Cell id: 87
     ----Faces:
     ++++ face id: 178
-    ++++ face id: 208
     ++++ face id: 210
     ++++ face id: 211
+    ++++ face id: 208
     ----Edges:
     ++++ edge id: 178
-    ++++ edge id: 208
     ++++ edge id: 210
     ++++ edge id: 211
+    ++++ edge id: 208
     ----Vertices:
     ++++ vertex id: 81
     ++++ vertex id: 82
@@ -22617,14 +22617,14 @@ For each cell:
 ^^^^^^^^Cell id: 88
     ----Faces:
     ++++ face id: 179
-    ++++ face id: 210
     ++++ face id: 212
     ++++ face id: 213
+    ++++ face id: 210
     ----Edges:
     ++++ edge id: 179
-    ++++ edge id: 210
     ++++ edge id: 212
     ++++ edge id: 213
+    ++++ edge id: 210
     ----Vertices:
     ++++ vertex id: 82
     ++++ vertex id: 83
@@ -22647,14 +22647,14 @@ For each cell:
 ^^^^^^^^Cell id: 89
     ----Faces:
     ++++ face id: 180
-    ++++ face id: 212
     ++++ face id: 214
     ++++ face id: 215
+    ++++ face id: 212
     ----Edges:
     ++++ edge id: 180
-    ++++ edge id: 212
     ++++ edge id: 214
     ++++ edge id: 215
+    ++++ edge id: 212
     ----Vertices:
     ++++ vertex id: 83
     ++++ vertex id: 84
@@ -22677,14 +22677,14 @@ For each cell:
 ^^^^^^^^Cell id: 90
     ----Faces:
     ++++ face id: 181
-    ++++ face id: 214
     ++++ face id: 216
     ++++ face id: 217
+    ++++ face id: 214
     ----Edges:
     ++++ edge id: 181
-    ++++ edge id: 214
     ++++ edge id: 216
     ++++ edge id: 217
+    ++++ edge id: 214
     ----Vertices:
     ++++ vertex id: 84
     ++++ vertex id: 85
@@ -22707,14 +22707,14 @@ For each cell:
 ^^^^^^^^Cell id: 91
     ----Faces:
     ++++ face id: 182
-    ++++ face id: 216
     ++++ face id: 218
     ++++ face id: 219
+    ++++ face id: 216
     ----Edges:
     ++++ edge id: 182
-    ++++ edge id: 216
     ++++ edge id: 218
     ++++ edge id: 219
+    ++++ edge id: 216
     ----Vertices:
     ++++ vertex id: 85
     ++++ vertex id: 86
@@ -22737,14 +22737,14 @@ For each cell:
 ^^^^^^^^Cell id: 92
     ----Faces:
     ++++ face id: 183
-    ++++ face id: 218
     ++++ face id: 184
     ++++ face id: 220
+    ++++ face id: 218
     ----Edges:
     ++++ edge id: 183
-    ++++ edge id: 218
     ++++ edge id: 184
     ++++ edge id: 220
+    ++++ edge id: 218
     ----Vertices:
     ++++ vertex id: 86
     ++++ vertex id: 87
@@ -22767,14 +22767,14 @@ For each cell:
 ^^^^^^^^Cell id: 93
     ----Faces:
     ++++ face id: 185
-    ++++ face id: 220
     ++++ face id: 221
     ++++ face id: 222
+    ++++ face id: 220
     ----Edges:
     ++++ edge id: 185
-    ++++ edge id: 220
     ++++ edge id: 221
     ++++ edge id: 222
+    ++++ edge id: 220
     ----Vertices:
     ++++ vertex id: 88
     ++++ vertex id: 89
@@ -22797,14 +22797,14 @@ For each cell:
 ^^^^^^^^Cell id: 94
     ----Faces:
     ++++ face id: 186
-    ++++ face id: 221
     ++++ face id: 187
     ++++ face id: 223
+    ++++ face id: 221
     ----Edges:
     ++++ edge id: 186
-    ++++ edge id: 221
     ++++ edge id: 187
     ++++ edge id: 223
+    ++++ edge id: 221
     ----Vertices:
     ++++ vertex id: 89
     ++++ vertex id: 90
@@ -22827,14 +22827,14 @@ For each cell:
 ^^^^^^^^Cell id: 95
     ----Faces:
     ++++ face id: 198
-    ++++ face id: 205
     ++++ face id: 224
     ++++ face id: 225
+    ++++ face id: 205
     ----Edges:
     ++++ edge id: 198
-    ++++ edge id: 205
     ++++ edge id: 224
     ++++ edge id: 225
+    ++++ edge id: 205
     ----Vertices:
     ++++ vertex id: 101
     ++++ vertex id: 102
@@ -22857,14 +22857,14 @@ For each cell:
 ^^^^^^^^Cell id: 96
     ----Faces:
     ++++ face id: 199
-    ++++ face id: 224
     ++++ face id: 226
     ++++ face id: 227
+    ++++ face id: 224
     ----Edges:
     ++++ edge id: 199
-    ++++ edge id: 224
     ++++ edge id: 226
     ++++ edge id: 227
+    ++++ edge id: 224
     ----Vertices:
     ++++ vertex id: 102
     ++++ vertex id: 103
@@ -22887,14 +22887,14 @@ For each cell:
 ^^^^^^^^Cell id: 97
     ----Faces:
     ++++ face id: 200
-    ++++ face id: 226
     ++++ face id: 228
     ++++ face id: 229
+    ++++ face id: 226
     ----Edges:
     ++++ edge id: 200
-    ++++ edge id: 226
     ++++ edge id: 228
     ++++ edge id: 229
+    ++++ edge id: 226
     ----Vertices:
     ++++ vertex id: 103
     ++++ vertex id: 104
@@ -22917,14 +22917,14 @@ For each cell:
 ^^^^^^^^Cell id: 98
     ----Faces:
     ++++ face id: 201
-    ++++ face id: 228
     ++++ face id: 294
     ++++ face id: 230
+    ++++ face id: 228
     ----Edges:
     ++++ edge id: 201
-    ++++ edge id: 228
     ++++ edge id: 294
     ++++ edge id: 230
+    ++++ edge id: 228
     ----Vertices:
     ++++ vertex id: 104
     ++++ vertex id: 140
@@ -22947,14 +22947,14 @@ For each cell:
 ^^^^^^^^Cell id: 99
     ----Faces:
     ++++ face id: 188
-    ++++ face id: 223
     ++++ face id: 231
     ++++ face id: 232
+    ++++ face id: 223
     ----Edges:
     ++++ edge id: 188
-    ++++ edge id: 223
     ++++ edge id: 231
     ++++ edge id: 232
+    ++++ edge id: 223
     ----Vertices:
     ++++ vertex id: 91
     ++++ vertex id: 92
@@ -22977,14 +22977,14 @@ For each cell:
 ^^^^^^^^Cell id: 100
     ----Faces:
     ++++ face id: 189
-    ++++ face id: 231
     ++++ face id: 233
     ++++ face id: 234
+    ++++ face id: 231
     ----Edges:
     ++++ edge id: 189
-    ++++ edge id: 231
     ++++ edge id: 233
     ++++ edge id: 234
+    ++++ edge id: 231
     ----Vertices:
     ++++ vertex id: 92
     ++++ vertex id: 93
@@ -23007,14 +23007,14 @@ For each cell:
 ^^^^^^^^Cell id: 101
     ----Faces:
     ++++ face id: 190
-    ++++ face id: 233
     ++++ face id: 235
     ++++ face id: 236
+    ++++ face id: 233
     ----Edges:
     ++++ edge id: 190
-    ++++ edge id: 233
     ++++ edge id: 235
     ++++ edge id: 236
+    ++++ edge id: 233
     ----Vertices:
     ++++ vertex id: 93
     ++++ vertex id: 94
@@ -23037,14 +23037,14 @@ For each cell:
 ^^^^^^^^Cell id: 102
     ----Faces:
     ++++ face id: 191
-    ++++ face id: 235
     ++++ face id: 237
     ++++ face id: 238
+    ++++ face id: 235
     ----Edges:
     ++++ edge id: 191
-    ++++ edge id: 235
     ++++ edge id: 237
     ++++ edge id: 238
+    ++++ edge id: 235
     ----Vertices:
     ++++ vertex id: 94
     ++++ vertex id: 95
@@ -23067,14 +23067,14 @@ For each cell:
 ^^^^^^^^Cell id: 103
     ----Faces:
     ++++ face id: 192
-    ++++ face id: 237
     ++++ face id: 239
     ++++ face id: 213
+    ++++ face id: 237
     ----Edges:
     ++++ edge id: 192
-    ++++ edge id: 237
     ++++ edge id: 239
     ++++ edge id: 213
+    ++++ edge id: 237
     ----Vertices:
     ++++ vertex id: 95
     ++++ vertex id: 96
@@ -23097,14 +23097,14 @@ For each cell:
 ^^^^^^^^Cell id: 104
     ----Faces:
     ++++ face id: 193
-    ++++ face id: 239
     ++++ face id: 240
     ++++ face id: 211
+    ++++ face id: 239
     ----Edges:
     ++++ edge id: 193
-    ++++ edge id: 239
     ++++ edge id: 240
     ++++ edge id: 211
+    ++++ edge id: 239
     ----Vertices:
     ++++ vertex id: 96
     ++++ vertex id: 97
@@ -23127,14 +23127,14 @@ For each cell:
 ^^^^^^^^Cell id: 105
     ----Faces:
     ++++ face id: 194
-    ++++ face id: 240
     ++++ face id: 196
     ++++ face id: 209
+    ++++ face id: 240
     ----Edges:
     ++++ edge id: 194
-    ++++ edge id: 240
     ++++ edge id: 196
     ++++ edge id: 209
+    ++++ edge id: 240
     ----Vertices:
     ++++ vertex id: 97
     ++++ vertex id: 98
@@ -23157,14 +23157,14 @@ For each cell:
 ^^^^^^^^Cell id: 106
     ----Faces:
     ++++ face id: 215
-    ++++ face id: 238
     ++++ face id: 241
     ++++ face id: 236
+    ++++ face id: 238
     ----Edges:
     ++++ edge id: 215
-    ++++ edge id: 238
     ++++ edge id: 241
     ++++ edge id: 236
+    ++++ edge id: 238
     ----Vertices:
     ++++ vertex id: 110
     ++++ vertex id: 111
@@ -23187,14 +23187,14 @@ For each cell:
 ^^^^^^^^Cell id: 107
     ----Faces:
     ++++ face id: 202
-    ++++ face id: 296
     ++++ face id: 242
     ++++ face id: 230
+    ++++ face id: 296
     ----Edges:
     ++++ edge id: 202
-    ++++ edge id: 296
     ++++ edge id: 242
     ++++ edge id: 230
+    ++++ edge id: 296
     ----Vertices:
     ++++ vertex id: 143
     ++++ vertex id: 105
@@ -23217,14 +23217,14 @@ For each cell:
 ^^^^^^^^Cell id: 108
     ----Faces:
     ++++ face id: 203
-    ++++ face id: 242
     ++++ face id: 243
     ++++ face id: 229
+    ++++ face id: 242
     ----Edges:
     ++++ edge id: 203
-    ++++ edge id: 242
     ++++ edge id: 243
     ++++ edge id: 229
+    ++++ edge id: 242
     ----Vertices:
     ++++ vertex id: 105
     ++++ vertex id: 106
@@ -23246,15 +23246,15 @@ For each cell:
     ++++ wedge id: 871
 ^^^^^^^^Cell id: 109
     ----Faces:
-    ++++ face id: 227
     ++++ face id: 243
     ++++ face id: 204
     ++++ face id: 225
+    ++++ face id: 227
     ----Edges:
-    ++++ edge id: 227
     ++++ edge id: 243
     ++++ edge id: 204
     ++++ edge id: 225
+    ++++ edge id: 227
     ----Vertices:
     ++++ vertex id: 116
     ++++ vertex id: 106
@@ -23277,14 +23277,14 @@ For each cell:
 ^^^^^^^^Cell id: 110
     ----Faces:
     ++++ face id: 234
-    ++++ face id: 244
     ++++ face id: 241
     ++++ face id: 217
+    ++++ face id: 244
     ----Edges:
     ++++ edge id: 234
-    ++++ edge id: 244
     ++++ edge id: 241
     ++++ edge id: 217
+    ++++ edge id: 244
     ----Vertices:
     ++++ vertex id: 118
     ++++ vertex id: 119
@@ -23307,14 +23307,14 @@ For each cell:
 ^^^^^^^^Cell id: 111
     ----Faces:
     ++++ face id: 219
-    ++++ face id: 244
     ++++ face id: 222
     ++++ face id: 232
+    ++++ face id: 244
     ----Edges:
     ++++ edge id: 219
-    ++++ edge id: 244
     ++++ edge id: 222
     ++++ edge id: 232
+    ++++ edge id: 244
     ----Vertices:
     ++++ vertex id: 112
     ++++ vertex id: 113
@@ -23336,13 +23336,13 @@ For each cell:
     ++++ wedge id: 895
 ^^^^^^^^Cell id: 112
     ----Faces:
-    ++++ face id: 19
     ++++ face id: 165
     ++++ face id: 166
+    ++++ face id: 19
     ----Edges:
-    ++++ edge id: 19
     ++++ edge id: 165
     ++++ edge id: 166
+    ++++ edge id: 19
     ----Vertices:
     ++++ vertex id: 10
     ++++ vertex id: 121
@@ -23360,13 +23360,13 @@ For each cell:
     ++++ wedge id: 901
 ^^^^^^^^Cell id: 113
     ----Faces:
-    ++++ face id: 166
     ++++ face id: 167
     ++++ face id: 25
+    ++++ face id: 166
     ----Edges:
-    ++++ edge id: 166
     ++++ edge id: 167
     ++++ edge id: 25
+    ++++ edge id: 166
     ----Vertices:
     ++++ vertex id: 121
     ++++ vertex id: 16
@@ -23384,12 +23384,12 @@ For each cell:
     ++++ wedge id: 907
 ^^^^^^^^Cell id: 114
     ----Faces:
-    ++++ face id: 168
     ++++ face id: 299
+    ++++ face id: 168
     ++++ face id: 169
     ----Edges:
-    ++++ edge id: 168
     ++++ edge id: 299
+    ++++ edge id: 168
     ++++ edge id: 169
     ----Vertices:
     ++++ vertex id: 152
@@ -23409,12 +23409,12 @@ For each cell:
 ^^^^^^^^Cell id: 115
     ----Faces:
     ++++ face id: 170
-    ++++ face id: 171
     ++++ face id: 302
+    ++++ face id: 171
     ----Edges:
     ++++ edge id: 170
-    ++++ edge id: 171
     ++++ edge id: 302
+    ++++ edge id: 171
     ----Vertices:
     ++++ vertex id: 6
     ++++ vertex id: 153
@@ -23432,13 +23432,13 @@ For each cell:
     ++++ wedge id: 919
 ^^^^^^^^Cell id: 116
     ----Faces:
-    ++++ face id: 16
     ++++ face id: 172
     ++++ face id: 173
+    ++++ face id: 16
     ----Edges:
-    ++++ edge id: 16
     ++++ edge id: 172
     ++++ edge id: 173
+    ++++ edge id: 16
     ----Vertices:
     ++++ vertex id: 8
     ++++ vertex id: 157
@@ -23457,12 +23457,12 @@ For each cell:
 ^^^^^^^^Cell id: 117
     ----Faces:
     ++++ face id: 28
-    ++++ face id: 279
     ++++ face id: 174
+    ++++ face id: 279
     ----Edges:
     ++++ edge id: 28
-    ++++ edge id: 279
     ++++ edge id: 174
+    ++++ edge id: 279
     ----Vertices:
     ++++ vertex id: 126
     ++++ vertex id: 16
@@ -23481,12 +23481,12 @@ For each cell:
 ^^^^^^^^Cell id: 118
     ----Faces:
     ++++ face id: 13
+    ++++ face id: 171
     ++++ face id: 175
-    ++++ face id: 170
     ----Edges:
     ++++ edge id: 13
+    ++++ edge id: 171
     ++++ edge id: 175
-    ++++ edge id: 170
     ----Vertices:
     ++++ vertex id: 8
     ++++ vertex id: 6
@@ -23505,12 +23505,12 @@ For each cell:
 ^^^^^^^^Cell id: 119
     ----Faces:
     ++++ face id: 7
-    ++++ face id: 168
     ++++ face id: 281
+    ++++ face id: 169
     ----Edges:
     ++++ edge id: 7
-    ++++ edge id: 168
     ++++ edge id: 281
+    ++++ edge id: 169
     ----Vertices:
     ++++ vertex id: 4
     ++++ vertex id: 125
@@ -23528,13 +23528,13 @@ For each cell:
     ++++ wedge id: 943
 ^^^^^^^^Cell id: 120
     ----Faces:
-    ++++ face id: 169
-    ++++ face id: 171
+    ++++ face id: 170
     ++++ face id: 10
+    ++++ face id: 168
     ----Edges:
-    ++++ edge id: 169
-    ++++ edge id: 171
+    ++++ edge id: 170
     ++++ edge id: 10
+    ++++ edge id: 168
     ----Vertices:
     ++++ vertex id: 153
     ++++ vertex id: 6
@@ -23553,12 +23553,12 @@ For each cell:
 ^^^^^^^^Cell id: 121
     ----Faces:
     ++++ face id: 172
-    ++++ face id: 306
     ++++ face id: 175
+    ++++ face id: 306
     ----Edges:
     ++++ edge id: 172
-    ++++ edge id: 306
     ++++ edge id: 175
+    ++++ edge id: 306
     ----Vertices:
     ++++ vertex id: 157
     ++++ vertex id: 8
@@ -23577,12 +23577,12 @@ For each cell:
 ^^^^^^^^Cell id: 122
     ----Faces:
     ++++ face id: 174
-    ++++ face id: 245
     ++++ face id: 167
+    ++++ face id: 245
     ----Edges:
     ++++ edge id: 174
-    ++++ edge id: 245
     ++++ edge id: 167
+    ++++ edge id: 245
     ----Vertices:
     ++++ vertex id: 154
     ++++ vertex id: 16
@@ -23601,12 +23601,12 @@ For each cell:
 ^^^^^^^^Cell id: 123
     ----Faces:
     ++++ face id: 304
-    ++++ face id: 246
     ++++ face id: 245
+    ++++ face id: 246
     ----Edges:
     ++++ edge id: 304
-    ++++ edge id: 246
     ++++ edge id: 245
+    ++++ edge id: 246
     ----Vertices:
     ++++ vertex id: 157
     ++++ vertex id: 154
@@ -23624,13 +23624,13 @@ For each cell:
     ++++ wedge id: 967
 ^^^^^^^^Cell id: 124
     ----Faces:
-    ++++ face id: 173
     ++++ face id: 246
     ++++ face id: 165
+    ++++ face id: 173
     ----Edges:
-    ++++ edge id: 173
     ++++ edge id: 246
     ++++ edge id: 165
+    ++++ edge id: 173
     ----Vertices:
     ++++ vertex id: 157
     ++++ vertex id: 121
@@ -23648,15 +23648,15 @@ For each cell:
     ++++ wedge id: 973
 ^^^^^^^^Cell id: 125
     ----Faces:
-    ++++ face id: 250
     ++++ face id: 251
     ++++ face id: 252
     ++++ face id: 253
+    ++++ face id: 250
     ----Edges:
-    ++++ edge id: 250
     ++++ edge id: 251
     ++++ edge id: 252
     ++++ edge id: 253
+    ++++ edge id: 250
     ----Vertices:
     ++++ vertex id: 126
     ++++ vertex id: 128
@@ -23678,15 +23678,15 @@ For each cell:
     ++++ wedge id: 981
 ^^^^^^^^Cell id: 126
     ----Faces:
-    ++++ face id: 252
     ++++ face id: 254
     ++++ face id: 255
     ++++ face id: 256
+    ++++ face id: 252
     ----Edges:
-    ++++ edge id: 252
     ++++ edge id: 254
     ++++ edge id: 255
     ++++ edge id: 256
+    ++++ edge id: 252
     ----Vertices:
     ++++ vertex id: 128
     ++++ vertex id: 130
@@ -23739,14 +23739,14 @@ For each cell:
 ^^^^^^^^Cell id: 128
     ----Faces:
     ++++ face id: 256
-    ++++ face id: 261
     ++++ face id: 262
     ++++ face id: 263
+    ++++ face id: 261
     ----Edges:
     ++++ edge id: 256
-    ++++ edge id: 261
     ++++ edge id: 262
     ++++ edge id: 263
+    ++++ edge id: 261
     ----Vertices:
     ++++ vertex id: 129
     ++++ vertex id: 131
@@ -23768,12 +23768,12 @@ For each cell:
     ++++ wedge id: 1005
 ^^^^^^^^Cell id: 129
     ----Faces:
-    ++++ face id: 260
+    ++++ face id: 259
     ++++ face id: 264
     ++++ face id: 265
     ++++ face id: 266
     ----Edges:
-    ++++ edge id: 260
+    ++++ edge id: 259
     ++++ edge id: 264
     ++++ edge id: 265
     ++++ edge id: 266
@@ -23799,14 +23799,14 @@ For each cell:
 ^^^^^^^^Cell id: 130
     ----Faces:
     ++++ face id: 263
-    ++++ face id: 267
     ++++ face id: 268
     ++++ face id: 292
+    ++++ face id: 267
     ----Edges:
     ++++ edge id: 263
-    ++++ edge id: 267
     ++++ edge id: 268
     ++++ edge id: 292
+    ++++ edge id: 267
     ----Vertices:
     ++++ vertex id: 136
     ++++ vertex id: 137
@@ -23828,15 +23828,15 @@ For each cell:
     ++++ wedge id: 1021
 ^^^^^^^^Cell id: 131
     ----Faces:
-    ++++ face id: 266
+    ++++ face id: 265
     ++++ face id: 269
-    ++++ face id: 270
     ++++ face id: 293
+    ++++ face id: 270
     ----Edges:
-    ++++ edge id: 266
+    ++++ edge id: 265
     ++++ edge id: 269
-    ++++ edge id: 270
     ++++ edge id: 293
+    ++++ edge id: 270
     ----Vertices:
     ++++ vertex id: 138
     ++++ vertex id: 139
@@ -23859,14 +23859,14 @@ For each cell:
 ^^^^^^^^Cell id: 132
     ----Faces:
     ++++ face id: 292
-    ++++ face id: 294
     ++++ face id: 290
     ++++ face id: 295
+    ++++ face id: 294
     ----Edges:
     ++++ edge id: 292
-    ++++ edge id: 294
     ++++ edge id: 290
     ++++ edge id: 295
+    ++++ edge id: 294
     ----Vertices:
     ++++ vertex id: 140
     ++++ vertex id: 141
@@ -23888,15 +23888,15 @@ For each cell:
     ++++ wedge id: 1037
 ^^^^^^^^Cell id: 133
     ----Faces:
-    ++++ face id: 291
     ++++ face id: 293
     ++++ face id: 296
     ++++ face id: 295
+    ++++ face id: 291
     ----Edges:
-    ++++ edge id: 291
     ++++ edge id: 293
     ++++ edge id: 296
     ++++ edge id: 295
+    ++++ edge id: 291
     ----Vertices:
     ++++ vertex id: 142
     ++++ vertex id: 143
@@ -23990,13 +23990,13 @@ For each cell:
     ++++ wedge id: 1063
 ^^^^^^^^Cell id: 137
     ----Faces:
-    ++++ face id: 247
     ++++ face id: 275
     ++++ face id: 276
+    ++++ face id: 247
     ----Edges:
-    ++++ edge id: 247
     ++++ edge id: 275
     ++++ edge id: 276
+    ++++ edge id: 247
     ----Vertices:
     ++++ vertex id: 122
     ++++ vertex id: 146
@@ -24015,12 +24015,12 @@ For each cell:
 ^^^^^^^^Cell id: 138
     ----Faces:
     ++++ face id: 276
-    ++++ face id: 277
     ++++ face id: 282
+    ++++ face id: 277
     ----Edges:
     ++++ edge id: 276
-    ++++ edge id: 277
     ++++ edge id: 282
+    ++++ edge id: 277
     ----Vertices:
     ++++ vertex id: 123
     ++++ vertex id: 146
@@ -24038,13 +24038,13 @@ For each cell:
     ++++ wedge id: 1075
 ^^^^^^^^Cell id: 139
     ----Faces:
-    ++++ face id: 286
     ++++ face id: 300
     ++++ face id: 301
+    ++++ face id: 286
     ----Edges:
-    ++++ edge id: 286
     ++++ edge id: 300
     ++++ edge id: 301
+    ++++ edge id: 286
     ----Vertices:
     ++++ vertex id: 149
     ++++ vertex id: 154
@@ -24063,12 +24063,12 @@ For each cell:
 ^^^^^^^^Cell id: 140
     ----Faces:
     ++++ face id: 277
-    ++++ face id: 278
     ++++ face id: 284
+    ++++ face id: 278
     ----Edges:
     ++++ edge id: 277
-    ++++ edge id: 278
     ++++ edge id: 284
+    ++++ edge id: 278
     ----Vertices:
     ++++ vertex id: 123
     ++++ vertex id: 147
@@ -24086,13 +24086,13 @@ For each cell:
     ++++ wedge id: 1087
 ^^^^^^^^Cell id: 141
     ----Faces:
-    ++++ face id: 274
     ++++ face id: 279
     ++++ face id: 300
+    ++++ face id: 273
     ----Edges:
-    ++++ edge id: 274
     ++++ edge id: 279
     ++++ edge id: 300
+    ++++ edge id: 273
     ----Vertices:
     ++++ vertex id: 126
     ++++ vertex id: 154
@@ -24111,12 +24111,12 @@ For each cell:
 ^^^^^^^^Cell id: 142
     ----Faces:
     ++++ face id: 248
-    ++++ face id: 280
     ++++ face id: 278
+    ++++ face id: 280
     ----Edges:
     ++++ edge id: 248
-    ++++ edge id: 280
     ++++ edge id: 278
+    ++++ edge id: 280
     ----Vertices:
     ++++ vertex id: 124
     ++++ vertex id: 123
@@ -24134,13 +24134,13 @@ For each cell:
     ++++ wedge id: 1099
 ^^^^^^^^Cell id: 143
     ----Faces:
-    ++++ face id: 272
     ++++ face id: 280
     ++++ face id: 283
+    ++++ face id: 271
     ----Edges:
-    ++++ edge id: 272
     ++++ edge id: 280
     ++++ edge id: 283
+    ++++ edge id: 271
     ----Vertices:
     ++++ vertex id: 124
     ++++ vertex id: 158
@@ -24158,13 +24158,13 @@ For each cell:
     ++++ wedge id: 1105
 ^^^^^^^^Cell id: 144
     ----Faces:
-    ++++ face id: 271
-    ++++ face id: 281
+    ++++ face id: 272
     ++++ face id: 303
+    ++++ face id: 281
     ----Edges:
-    ++++ edge id: 271
-    ++++ edge id: 281
+    ++++ edge id: 272
     ++++ edge id: 303
+    ++++ edge id: 281
     ----Vertices:
     ++++ vertex id: 125
     ++++ vertex id: 148
@@ -24182,13 +24182,13 @@ For each cell:
     ++++ wedge id: 1111
 ^^^^^^^^Cell id: 145
     ----Faces:
-    ++++ face id: 301
     ++++ face id: 304
     ++++ face id: 305
+    ++++ face id: 301
     ----Edges:
-    ++++ edge id: 301
     ++++ edge id: 304
     ++++ edge id: 305
+    ++++ edge id: 301
     ----Vertices:
     ++++ vertex id: 154
     ++++ vertex id: 157
@@ -24206,13 +24206,13 @@ For each cell:
     ++++ wedge id: 1117
 ^^^^^^^^Cell id: 146
     ----Faces:
-    ++++ face id: 298
     ++++ face id: 307
     ++++ face id: 299
+    ++++ face id: 297
     ----Edges:
-    ++++ edge id: 298
     ++++ edge id: 307
     ++++ edge id: 299
+    ++++ edge id: 297
     ----Vertices:
     ++++ vertex id: 151
     ++++ vertex id: 153
@@ -24230,13 +24230,13 @@ For each cell:
     ++++ wedge id: 1123
 ^^^^^^^^Cell id: 147
     ----Faces:
-    ++++ face id: 306
     ++++ face id: 308
     ++++ face id: 305
+    ++++ face id: 306
     ----Edges:
-    ++++ edge id: 306
     ++++ edge id: 308
     ++++ edge id: 305
+    ++++ edge id: 306
     ----Vertices:
     ++++ vertex id: 156
     ++++ vertex id: 155
@@ -24255,12 +24255,12 @@ For each cell:
 ^^^^^^^^Cell id: 148
     ----Faces:
     ++++ face id: 307
-    ++++ face id: 309
     ++++ face id: 288
+    ++++ face id: 309
     ----Edges:
     ++++ edge id: 307
-    ++++ edge id: 309
     ++++ edge id: 288
+    ++++ edge id: 309
     ----Vertices:
     ++++ vertex id: 153
     ++++ vertex id: 151
@@ -24279,12 +24279,12 @@ For each cell:
 ^^^^^^^^Cell id: 149
     ----Faces:
     ++++ face id: 302
-    ++++ face id: 310
     ++++ face id: 309
+    ++++ face id: 310
     ----Edges:
     ++++ edge id: 302
-    ++++ edge id: 310
     ++++ edge id: 309
+    ++++ edge id: 310
     ----Vertices:
     ++++ vertex id: 156
     ++++ vertex id: 153
@@ -24302,13 +24302,13 @@ For each cell:
     ++++ wedge id: 1141
 ^^^^^^^^Cell id: 150
     ----Faces:
-    ++++ face id: 285
-    ++++ face id: 297
+    ++++ face id: 298
     ++++ face id: 303
+    ++++ face id: 285
     ----Edges:
-    ++++ edge id: 285
-    ++++ edge id: 297
+    ++++ edge id: 298
     ++++ edge id: 303
+    ++++ edge id: 285
     ----Vertices:
     ++++ vertex id: 150
     ++++ vertex id: 152
@@ -24326,13 +24326,13 @@ For each cell:
     ++++ wedge id: 1147
 ^^^^^^^^Cell id: 151
     ----Faces:
-    ++++ face id: 287
     ++++ face id: 308
     ++++ face id: 310
+    ++++ face id: 287
     ----Edges:
-    ++++ edge id: 287
     ++++ edge id: 308
     ++++ edge id: 310
+    ++++ edge id: 287
     ----Vertices:
     ++++ vertex id: 155
     ++++ vertex id: 156
@@ -24350,13 +24350,13 @@ For each cell:
     ++++ wedge id: 1153
 ^^^^^^^^Cell id: 152
     ----Faces:
-    ++++ face id: 282
     ++++ face id: 327
     ++++ face id: 328
+    ++++ face id: 282
     ----Edges:
-    ++++ edge id: 282
     ++++ edge id: 327
     ++++ edge id: 328
+    ++++ edge id: 282
     ----Vertices:
     ++++ vertex id: 146
     ++++ vertex id: 169
@@ -24374,13 +24374,13 @@ For each cell:
     ++++ wedge id: 1159
 ^^^^^^^^Cell id: 153
     ----Faces:
-    ++++ face id: 273
     ++++ face id: 330
     ++++ face id: 311
+    ++++ face id: 274
     ----Edges:
-    ++++ edge id: 273
     ++++ edge id: 330
     ++++ edge id: 311
+    ++++ edge id: 274
     ----Vertices:
     ++++ vertex id: 149
     ++++ vertex id: 172
@@ -24399,12 +24399,12 @@ For each cell:
 ^^^^^^^^Cell id: 154
     ----Faces:
     ++++ face id: 312
-    ++++ face id: 313
     ++++ face id: 331
+    ++++ face id: 313
     ----Edges:
     ++++ edge id: 312
-    ++++ edge id: 313
     ++++ edge id: 331
+    ++++ edge id: 313
     ----Vertices:
     ++++ vertex id: 130
     ++++ vertex id: 172
@@ -24447,12 +24447,12 @@ For each cell:
 ^^^^^^^^Cell id: 156
     ----Faces:
     ++++ face id: 328
-    ++++ face id: 332
     ++++ face id: 334
+    ++++ face id: 333
     ----Edges:
     ++++ edge id: 328
-    ++++ edge id: 332
     ++++ edge id: 334
+    ++++ edge id: 333
     ----Vertices:
     ++++ vertex id: 147
     ++++ vertex id: 169
@@ -24470,13 +24470,13 @@ For each cell:
     ++++ wedge id: 1183
 ^^^^^^^^Cell id: 157
     ----Faces:
-    ++++ face id: 311
-    ++++ face id: 313
+    ++++ face id: 312
     ++++ face id: 254
+    ++++ face id: 311
     ----Edges:
-    ++++ edge id: 311
-    ++++ edge id: 313
+    ++++ edge id: 312
     ++++ edge id: 254
+    ++++ edge id: 311
     ----Vertices:
     ++++ vertex id: 172
     ++++ vertex id: 130
@@ -24494,13 +24494,13 @@ For each cell:
     ++++ wedge id: 1189
 ^^^^^^^^Cell id: 158
     ----Faces:
-    ++++ face id: 314
     ++++ face id: 315
-    ++++ face id: 312
+    ++++ face id: 313
+    ++++ face id: 314
     ----Edges:
-    ++++ edge id: 314
     ++++ edge id: 315
-    ++++ edge id: 312
+    ++++ edge id: 313
+    ++++ edge id: 314
     ----Vertices:
     ++++ vertex id: 160
     ++++ vertex id: 130
@@ -24518,12 +24518,12 @@ For each cell:
     ++++ wedge id: 1195
 ^^^^^^^^Cell id: 159
     ----Faces:
-    ++++ face id: 335
     ++++ face id: 283
+    ++++ face id: 335
     ++++ face id: 336
     ----Edges:
-    ++++ edge id: 335
     ++++ edge id: 283
+    ++++ edge id: 335
     ++++ edge id: 336
     ----Vertices:
     ++++ vertex id: 148
@@ -24542,13 +24542,13 @@ For each cell:
     ++++ wedge id: 1201
 ^^^^^^^^Cell id: 160
     ----Faces:
-    ++++ face id: 333
-    ++++ face id: 336
+    ++++ face id: 335
     ++++ face id: 284
+    ++++ face id: 332
     ----Edges:
-    ++++ edge id: 333
-    ++++ edge id: 336
+    ++++ edge id: 335
     ++++ edge id: 284
+    ++++ edge id: 332
     ----Vertices:
     ++++ vertex id: 170
     ++++ vertex id: 158
@@ -24566,13 +24566,13 @@ For each cell:
     ++++ wedge id: 1207
 ^^^^^^^^Cell id: 161
     ----Faces:
-    ++++ face id: 335
     ++++ face id: 340
     ++++ face id: 285
+    ++++ face id: 336
     ----Edges:
-    ++++ edge id: 335
     ++++ edge id: 340
     ++++ edge id: 285
+    ++++ edge id: 336
     ----Vertices:
     ++++ vertex id: 170
     ++++ vertex id: 150
@@ -24591,12 +24591,12 @@ For each cell:
 ^^^^^^^^Cell id: 162
     ----Faces:
     ++++ face id: 338
-    ++++ face id: 341
     ++++ face id: 330
+    ++++ face id: 341
     ----Edges:
     ++++ edge id: 338
-    ++++ edge id: 341
     ++++ edge id: 330
+    ++++ edge id: 341
     ----Vertices:
     ++++ vertex id: 176
     ++++ vertex id: 172
@@ -24614,13 +24614,13 @@ For each cell:
     ++++ wedge id: 1219
 ^^^^^^^^Cell id: 163
     ----Faces:
-    ++++ face id: 286
     ++++ face id: 342
     ++++ face id: 341
+    ++++ face id: 286
     ----Edges:
-    ++++ edge id: 286
     ++++ edge id: 342
     ++++ edge id: 341
+    ++++ edge id: 286
     ----Vertices:
     ++++ vertex id: 155
     ++++ vertex id: 176
@@ -24639,12 +24639,12 @@ For each cell:
 ^^^^^^^^Cell id: 164
     ----Faces:
     ++++ face id: 343
-    ++++ face id: 344
     ++++ face id: 342
+    ++++ face id: 344
     ----Edges:
     ++++ edge id: 343
-    ++++ edge id: 344
     ++++ edge id: 342
+    ++++ edge id: 344
     ----Vertices:
     ++++ vertex id: 177
     ++++ vertex id: 176
@@ -24686,13 +24686,13 @@ For each cell:
     ++++ wedge id: 1237
 ^^^^^^^^Cell id: 166
     ----Faces:
-    ++++ face id: 287
     ++++ face id: 348
-    ++++ face id: 343
+    ++++ face id: 344
+    ++++ face id: 287
     ----Edges:
-    ++++ edge id: 287
     ++++ edge id: 348
-    ++++ edge id: 343
+    ++++ edge id: 344
+    ++++ edge id: 287
     ----Vertices:
     ++++ vertex id: 159
     ++++ vertex id: 177
@@ -24711,12 +24711,12 @@ For each cell:
 ^^^^^^^^Cell id: 167
     ----Faces:
     ++++ face id: 340
-    ++++ face id: 349
     ++++ face id: 339
+    ++++ face id: 349
     ----Edges:
     ++++ edge id: 340
-    ++++ edge id: 349
     ++++ edge id: 339
+    ++++ edge id: 349
     ----Vertices:
     ++++ vertex id: 150
     ++++ vertex id: 170
@@ -24735,12 +24735,12 @@ For each cell:
 ^^^^^^^^Cell id: 168
     ----Faces:
     ++++ face id: 349
-    ++++ face id: 350
     ++++ face id: 337
+    ++++ face id: 350
     ----Edges:
     ++++ edge id: 349
-    ++++ edge id: 350
     ++++ edge id: 337
+    ++++ edge id: 350
     ----Vertices:
     ++++ vertex id: 150
     ++++ vertex id: 175
@@ -24782,13 +24782,13 @@ For each cell:
     ++++ wedge id: 1261
 ^^^^^^^^Cell id: 170
     ----Faces:
-    ++++ face id: 352
     ++++ face id: 288
-    ++++ face id: 345
+    ++++ face id: 347
+    ++++ face id: 351
     ----Edges:
-    ++++ edge id: 352
     ++++ edge id: 288
-    ++++ edge id: 345
+    ++++ edge id: 347
+    ++++ edge id: 351
     ----Vertices:
     ++++ vertex id: 159
     ++++ vertex id: 151
@@ -24806,13 +24806,13 @@ For each cell:
     ++++ wedge id: 1267
 ^^^^^^^^Cell id: 171
     ----Faces:
-    ++++ face id: 346
     ++++ face id: 289
     ++++ face id: 350
+    ++++ face id: 345
     ----Edges:
-    ++++ edge id: 346
     ++++ edge id: 289
     ++++ edge id: 350
+    ++++ edge id: 345
     ----Vertices:
     ++++ vertex id: 151
     ++++ vertex id: 150
@@ -24830,15 +24830,15 @@ For each cell:
     ++++ wedge id: 1273
 ^^^^^^^^Cell id: 172
     ----Faces:
-    ++++ face id: 255
     ++++ face id: 315
     ++++ face id: 316
     ++++ face id: 317
+    ++++ face id: 255
     ----Edges:
-    ++++ edge id: 255
     ++++ edge id: 315
     ++++ edge id: 316
     ++++ edge id: 317
+    ++++ edge id: 255
     ----Vertices:
     ++++ vertex id: 130
     ++++ vertex id: 160
@@ -24860,15 +24860,15 @@ For each cell:
     ++++ wedge id: 1281
 ^^^^^^^^Cell id: 173
     ----Faces:
-    ++++ face id: 318
     ++++ face id: 319
-    ++++ face id: 257
+    ++++ face id: 260
     ++++ face id: 320
+    ++++ face id: 318
     ----Edges:
-    ++++ edge id: 318
     ++++ edge id: 319
-    ++++ edge id: 257
+    ++++ edge id: 260
     ++++ edge id: 320
+    ++++ edge id: 318
     ----Vertices:
     ++++ vertex id: 162
     ++++ vertex id: 132
@@ -24890,15 +24890,15 @@ For each cell:
     ++++ wedge id: 1289
 ^^^^^^^^Cell id: 174
     ----Faces:
-    ++++ face id: 262
     ++++ face id: 317
     ++++ face id: 321
     ++++ face id: 322
+    ++++ face id: 262
     ----Edges:
-    ++++ edge id: 262
     ++++ edge id: 317
     ++++ edge id: 321
     ++++ edge id: 322
+    ++++ edge id: 262
     ----Vertices:
     ++++ vertex id: 131
     ++++ vertex id: 161
@@ -24921,14 +24921,14 @@ For each cell:
 ^^^^^^^^Cell id: 175
     ----Faces:
     ++++ face id: 320
-    ++++ face id: 323
-    ++++ face id: 264
+    ++++ face id: 266
     ++++ face id: 324
+    ++++ face id: 323
     ----Edges:
     ++++ edge id: 320
-    ++++ edge id: 323
-    ++++ edge id: 264
+    ++++ edge id: 266
     ++++ edge id: 324
+    ++++ edge id: 323
     ----Vertices:
     ++++ vertex id: 163
     ++++ vertex id: 133
@@ -24950,15 +24950,15 @@ For each cell:
     ++++ wedge id: 1305
 ^^^^^^^^Cell id: 176
     ----Faces:
-    ++++ face id: 268
     ++++ face id: 322
     ++++ face id: 325
     ++++ face id: 353
+    ++++ face id: 268
     ----Edges:
-    ++++ edge id: 268
     ++++ edge id: 322
     ++++ edge id: 325
     ++++ edge id: 353
+    ++++ edge id: 268
     ----Vertices:
     ++++ vertex id: 137
     ++++ vertex id: 164
@@ -24981,14 +24981,14 @@ For each cell:
 ^^^^^^^^Cell id: 177
     ----Faces:
     ++++ face id: 324
-    ++++ face id: 326
-    ++++ face id: 269
+    ++++ face id: 270
     ++++ face id: 354
+    ++++ face id: 326
     ----Edges:
     ++++ edge id: 324
-    ++++ edge id: 326
-    ++++ edge id: 269
+    ++++ edge id: 270
     ++++ edge id: 354
+    ++++ edge id: 326
     ----Vertices:
     ++++ vertex id: 165
     ++++ vertex id: 138
@@ -25011,14 +25011,14 @@ For each cell:
 ^^^^^^^^Cell id: 178
     ----Faces:
     ++++ face id: 353
-    ++++ face id: 290
     ++++ face id: 355
     ++++ face id: 357
+    ++++ face id: 290
     ----Edges:
     ++++ edge id: 353
-    ++++ edge id: 290
     ++++ edge id: 355
     ++++ edge id: 357
+    ++++ edge id: 290
     ----Vertices:
     ++++ vertex id: 141
     ++++ vertex id: 166
@@ -25041,14 +25041,14 @@ For each cell:
 ^^^^^^^^Cell id: 179
     ----Faces:
     ++++ face id: 354
-    ++++ face id: 356
     ++++ face id: 291
     ++++ face id: 357
+    ++++ face id: 356
     ----Edges:
     ++++ edge id: 354
-    ++++ edge id: 356
     ++++ edge id: 291
     ++++ edge id: 357
+    ++++ edge id: 356
     ----Vertices:
     ++++ vertex id: 167
     ++++ vertex id: 142
