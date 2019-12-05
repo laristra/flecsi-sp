@@ -246,6 +246,7 @@ target_link_libraries( FleCSI-SP ${FLECSI_SP_LIBRARIES} )
 set(FLECSI_SP_BURTON_SPECIALIZATION_INIT
   ${FLECSI_SP_SHARE_DIR}/burton_specialization_init.cc)
 
+add_subdirectory(apps)
 
 #------------------------------------------------------------------------------#
 # Extract all project options so they can be exported to the ProjectConfig.cmake
