@@ -140,7 +140,7 @@ option(
   ON
 )
 include_directories(${Boost_INCLUDE_DIRS})
-list(APPEND FLECSI_SP_LIBRARIES ${Boost_LIBRARIES})
+list(APPEND FLECSI_SP_LIBRARIES ${Boost_LIBRARIES} Boost::program_options Boost::boost)
 
 #------------------------------------------------------------------------------#
 # Load the cinch extras
