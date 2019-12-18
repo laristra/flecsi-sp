@@ -8,6 +8,8 @@
 #include <sstream>
 #include <vector>
 
+#include "decomp.h"
+
 namespace po = boost::program_options;
 
 using integer_t = int;
@@ -250,23 +252,18 @@ int main( int argc, char* argv[] )
     }
   }
   else {
-
-    auto is_even = (comm_size % 2 == 0);
-
-    if (is_even) {
-      unsigned_integer_t avg_block_size = std::pow<real_t>( comm_size, 1./num_dims );
-      unsigned_integer_t tot_parts = 1;
-      for ( int i=0; i<num_dims-1; ++i ) {
-        block_sizes[i] = avg_block_size;
-        tot_parts *= avg_block_size;
-      }
-      block_sizes[num_dims-1] = comm_size / tot_parts;
-    }
-
-    else {
+    if (num_dims == 2) {
+      auto decomp = cartmesh::decomp<2>({global_dims[0], global_dims[1]}, comm_size);
+      for (unsigned_integer_t i = 0; i < 2; i++)
+        block_sizes[i] = decomp[i];
+    } else if (num_dims == 3) {
+      auto decomp = cartmesh::decomp<3>({global_dims[0], global_dims[1]}, comm_size);
+      for (unsigned_integer_t i = 0; i < 3; i++)
+        block_sizes[i] = decomp[i];
+    } else {
       block_sizes[0] = comm_size;
     }
-      
+
     if (comm_rank==0) {
       std::cout << "Automatically partitioned block sizes: ";
       for ( auto i : block_sizes ) std::cout << i << " ";
