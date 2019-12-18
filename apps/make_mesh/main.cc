@@ -257,7 +257,7 @@ int main( int argc, char* argv[] )
       for (unsigned_integer_t i = 0; i < 2; i++)
         block_sizes[i] = decomp[i];
     } else if (num_dims == 3) {
-      auto decomp = cartmesh::decomp<3>({global_dims[0], global_dims[1]}, comm_size);
+      auto decomp = cartmesh::decomp<3>({global_dims[0], global_dims[1], global_dims[2]}, comm_size);
       for (unsigned_integer_t i = 0; i < 3; i++)
         block_sizes[i] = decomp[i];
     } else {
