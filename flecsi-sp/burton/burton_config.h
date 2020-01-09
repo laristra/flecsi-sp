@@ -68,7 +68,7 @@ struct burton_config_t {
   };
 
   // the tags type
-  using tag_t = uint16_t;
+  using tag_t = unsigned int;
   using tag_list_t = ristra::utils::fixed_vector< tag_t, N*N >;
 
   //! \brief the shape type
