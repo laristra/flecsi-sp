@@ -21,7 +21,7 @@ class FlecsiSp(CMakePackage):
 
     depends_on('cmake@3.12:',  type='build')
     # Requires cinch > 1.0 due to cinchlog installation issue
-    #depends_on('cinch@1.01:', type='build')
+    depends_on('cinch@1.01:', type='build')
     #depends_on('mpi', when='backend=mpi')
     #depends_on('mpi', when='backend=legion')
     #depends_on('mpi', when='backend=hpx')
@@ -37,7 +37,7 @@ class FlecsiSp(CMakePackage):
     def cmake_args(self):
         spec = self.spec
         options = []
-        #options.append('-DCINCH_SOURCE_DIR=' + spec['cinch'].prefix)
+        options.append('-DCINCH_SOURCE_DIR=' + spec['cinch'].prefix)
 
         if self.run_tests:
             options.append('-DENABLE_UNIT_TESTS=ON')
