@@ -18,10 +18,12 @@ class FlecsiSp(CMakePackage):
             description='The build type to build', multi=False)
     variant('backend', default='mpi', values=('serial', 'mpi', 'legion', 'charm++', 'hpx'),
             description='Backend to use for distributed memory', multi=False)
+    variant('cinch', default=False,
+            description='Enable External Cinch')
 
     depends_on('cmake@3.12:',  type='build')
     # Requires cinch > 1.0 due to cinchlog installation issue
-    depends_on('cinch@1.01:', type='build')
+    depends_on('cinch@1.01:', type='build', when='+cinch')
     #depends_on('mpi', when='backend=mpi')
     #depends_on('mpi', when='backend=legion')
     #depends_on('mpi', when='backend=hpx')
@@ -29,15 +31,17 @@ class FlecsiSp(CMakePackage):
     #depends_on('boost@1.70.0: cxxstd=14 +program_options')
     #depends_on('metis@5.1.0:')
     #depends_on('parmetis@4.0.3:')
-    depends_on('libristra')
-    depends_on('flecsi backend=mpi', when='backend=mpi')
-    depends_on('flecsi +hdf5 backend=legion', when='backend=legion')
+    depends_on('libristra +cinch')
+    depends_on('flecsi +cinch backend=mpi', when='backend=mpi')
+    depends_on('flecsi +cinch +hdf5 backend=legion', when='backend=legion')
     depends_on('exodusii +mpi')
 
     def cmake_args(self):
         spec = self.spec
         options = []
-        options.append('-DCINCH_SOURCE_DIR=' + spec['cinch'].prefix)
+
+        if '+cinch' in spec:
+            options.append('-DCINCH_SOURCE_DIR=' + spec['cinch'].prefix)
 
         if self.run_tests:
             options.append('-DENABLE_UNIT_TESTS=ON')
