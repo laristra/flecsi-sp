@@ -11,6 +11,7 @@
 #include <cinchtest.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi-sp/burton/burton_mesh.h>
+#include <flecsi-sp/burton/mesh_interface.h>
 #include <flecsi-sp/burton/portage_mesh_wrapper.h>
 #include <flecsi-sp/burton/portage_state_wrapper.h>
 #include <flecsi-sp/utils/types.h>
