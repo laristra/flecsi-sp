@@ -7,7 +7,7 @@
 from spack import *
 
 
-class FlecsiSP(CMakePackage):
+class FlecsiSp(CMakePackage):
     '''Flecsi-SP contains various specializations for use with the FleCSI core programming system.
     '''
     git      = 'https://https://github.com/laristra/flecsi-sp.git'
