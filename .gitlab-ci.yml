@@ -38,7 +38,7 @@ variables:
   FLECSISP_PYTHON_VERSION: "3.5.1"
   FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
-  FLECSISP_SPACK_SPEC: "flecsi-sp%gcc@${FLECSISP_GCC_VERSION} backend=${RUNTIME} ^hdf5~mpi"
+  FLECSISP_SPACK_SPEC: "flecsi-sp%gcc@${FLECSISP_GCC_VERSION} backend=${RUNTIME}"
 before_script:
   - echo ${CI_JOB_NAME_NOSTAGE%.*}-${CI_COMMIT_REF_SLUG}
   - '[ "$(git rev-parse origin/$CI_COMMIT_REF_NAME)" != "$CI_COMMIT_SHA" ] && curl --header "PRIVATE-TOKEN: $MY_CI_API_TOKEN" -X POST https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/cancel'
@@ -153,19 +153,21 @@ before_script:
   <<: *cache_def
 
 .update_spackage: &update_spackage |-
-    echo 'Updating spackages...'
+  echo 'Updating spackages...'
     cd ${CI_PROJECT_DIR}
+    git clone git@gitlab.lanl.gov:laristra/ristra_spackages.git
+    echo $(diff -r ${CI_PROJECT_DIR}/spack-repo/packages/ ${CI_PROJECT_DIR}/ristra_spackages/spack-repo/packages/ | grep "${CI_PROJECT_DIR}/spack-repo" | tee thediff)
     export last_commit=$(git log -n 1 --pretty=format:%H -- spack-repo/packages)
     git diff ${last_commit}^ HEAD spack-repo/packages | tee spackage.patch
-    if [[ -s spackage.patch ]];
+    if [[ -s spackage.patch && -s thediff ]];
     then
-      git clone git@gitlab.lanl.gov:laristra/ristra_spackages.git;
       cd ristra_spackages;
       git apply ${CI_PROJECT_DIR}/spackage.patch;
       git add -u;
-      git commit -m "Gitlab CI Automatic Spackage Update";
+      git commit -m "Gitlab CI Automatic Spackage Update - FleCSI-SP";
       git push;
     fi;
+
 
 #############
 # Env Stage #
