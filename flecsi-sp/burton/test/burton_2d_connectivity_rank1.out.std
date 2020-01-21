@@ -35923,13 +35923,11 @@ For each cell:
 ^^^^^^^^Cell id: 480
     ----Faces:
     ++++ face id: 1007
-    ++++ face id: 1090
     ++++ face id: 1008
     ++++ face id: 1009
     ++++ face id: 1090
     ----Edges:
     ++++ edge id: 1007
-    ++++ edge id: 1090
     ++++ edge id: 1008
     ++++ edge id: 1009
     ++++ edge id: 1090
