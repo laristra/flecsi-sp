@@ -32,7 +32,7 @@ class FlecsiSp(CMakePackage):
     depends_on('boost@1.70.0: cxxstd=14 +program_options')
     depends_on('metis@5.1.0:')
     depends_on('parmetis@4.0.3:')
-    depends_on('hdf5+hl')
+    depends_on('hdf5+hl+mpi')
     depends_on('exodusii')
     #depends_on('libristra +cinch')
     #depends_on('flecsi +cinch backend=mpi', when='backend=mpi')
