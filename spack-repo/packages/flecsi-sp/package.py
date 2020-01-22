@@ -27,7 +27,7 @@ class FlecsiSp(CMakePackage):
     depends_on('mpi', when='backend=mpi')
     depends_on('mpi', when='backend=legion')
     depends_on('mpi', when='backend=hpx')
-    depends_on('legion@ctrl-rep +shared +mpi +hdf5', when='backend=legion')
+    depends_on('legion@ctrl-rep-3 +shared +mpi +hdf5', when='backend=legion')
     depends_on('hpx@1.3.0 cxxstd=14 build_type=Release', when='backend=hpx')
     depends_on('boost@1.70.0: cxxstd=14 +program_options')
     depends_on('metis@5.1.0:')
