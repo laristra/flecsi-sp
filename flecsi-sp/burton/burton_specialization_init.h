@@ -3667,9 +3667,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     auto basename = ristra::utils::basename( filename_string );
     auto output_prefix = ristra::utils::remove_extension( basename );
     auto output_extension = ristra::utils::file_extension(basename); 
+    auto digits = ristra::utils::num_digits(comm_size);
     auto output_filename = output_prefix + "-partitioned." + output_extension + "." +
-    ristra::utils::zero_padded(comm_size) + "." +
-    ristra::utils::zero_padded(rank);
+    ristra::utils::zero_padded(comm_size, digits) + "." +
+    ristra::utils::zero_padded(rank, digits);
     auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
     if (rank == 0 && comm_size > 1)
       std::cout << "Writing partitioned mesh to " << output_filename << std::endl;

@@ -1054,7 +1054,6 @@ public:
     elem_list.reserve(num_sides);
     side_list.reserve(num_sides);
 
-
     for ( auto & side_pair : element_sides ) {
       auto global_id = side_pair.first;
       auto local_id = element_global_to_local.at( global_id );
@@ -2080,7 +2079,7 @@ public:
     size_t num_remove = 0;
 
     auto delete_it = local_ids.begin();
-    
+
     for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_cells; ++old_local_id )
     {
       
@@ -2210,13 +2209,14 @@ public:
         old2new( num_sides, std::numeric_limits<size_t>::max() );
       
       auto delete_it = delete_sides.begin();
-      for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_vertices; ++old_local_id )
+      for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_sides; ++old_local_id )
       {
 
         // skip deleted items
         if ( delete_it != delete_sides.end() ) {
           if ( *delete_it == old_local_id ) {
-            deleted_sides++;
+            ++deleted_sides;
+            ++delete_it;
             continue;
           }
         }
@@ -2238,7 +2238,6 @@ public:
           s = old2new[s];
 
     }
-   
     
     
   }
@@ -3899,13 +3898,14 @@ public:
         old2new( num_sides, std::numeric_limits<size_t>::max() );
       
       auto delete_it = delete_sides.begin();
-      for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_vertices; ++old_local_id )
+      for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_sides; ++old_local_id )
       {
 
         // skip deleted items
         if ( delete_it != delete_sides.end() ) {
           if ( *delete_it == old_local_id ) {
-            deleted_sides++;
+            ++deleted_sides;
+            ++delete_it;
             continue;
           }
         }
