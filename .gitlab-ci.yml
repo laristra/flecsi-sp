@@ -194,12 +194,9 @@ before_script:
       source ${SPACK_ROOT}/share/spack/setup-env.sh;
       spack repo rm ${FLECSISP_SPACK_SCOPE} || /bin/true ;
       spack repo add ${CI_PROJECT_DIR}/spack-repo;
-      spack repo rm lanl_ristra || /bin/true ;
-      spack repo add ${CI_PROJECT_DIR}/ristra_spackages/spack-repo;
       spack repo list;
       spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi%gcc@${FLECSISP_GCC_VERSION};
       spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich%gcc@${FLECSISP_GCC_VERSION};
-      spack repo rm lanl_ristra;
       spack repo rm ${FLECSISP_SPACK_SCOPE};
       ) 200>${DEPS_LOCK}
 
