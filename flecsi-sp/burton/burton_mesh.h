@@ -244,7 +244,7 @@ public:
     bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >** = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
+  FLECSI_INLINE_TARGET decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // degenerate case:  EIN and EOUT are the same, return trivial set
     using etype = flecsi::topology::domain_entity_u<M, EIN>;
@@ -498,7 +498,7 @@ public:
   //! \brief Return all faces in the burton mesh.
   //! \return Return all faces in the burton mesh as a sequence for use, e.g.,
   //!   in range based for loops.
-  decltype(auto) faces() // FIXME const
+  FLECSI_INLINE_TARGET decltype(auto) faces() // FIXME const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>();
   }
@@ -511,7 +511,7 @@ public:
   //!
   //! \return Return faces associated with entity instance \e e as a sequence.
   template <class E>
-  decltype(auto) faces(E * e) const
+  FLECSI_INLINE_TARGET decltype(auto) faces(E * e) const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>(e);
   }
