@@ -6,4 +6,4 @@
 add_executable( make_mesh
   main.cc
 )
-target_link_libraries( make_mesh ${EXODUSII_LIBRARIES} ${Boost_LIBRARIES} ${MPI_C_LIBRARIES} )
+target_link_libraries( make_mesh ${EXODUSII_LIBRARIES} ${Boost_LIBRARIES} Boost::boost Boost::program_options  ${MPI_C_LIBRARIES} )
