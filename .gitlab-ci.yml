@@ -231,6 +231,7 @@ before_script:
     cd build
     cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/libristra-dev/build/install \
         -DCMAKE_BUILD_TYPE=Release \
+        -DENABLE_LUA=ON \
         -DENABLE_UNIT_TESTS=ON \
         ..
     make -k -j2 -l40 || make VERBOSE=1
