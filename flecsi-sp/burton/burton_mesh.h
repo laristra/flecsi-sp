@@ -228,7 +228,7 @@ public:
     bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >* = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
+  FLECSI_INLINE_TARGET decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // normal case:  EIN and EOUT are different, query topology
     return
@@ -244,7 +244,7 @@ public:
     bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >** = nullptr
   >
-  decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
+  FLECSI_INLINE_TARGET decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // degenerate case:  EIN and EOUT are the same, return trivial set
     using etype = flecsi::topology::domain_entity_u<M, EIN>;
@@ -476,19 +476,19 @@ public:
   //!
   //! \return Return all faces in the burton mesh as a sequence for use, e.g.,
   //!   in range based for loops.
-  decltype(auto) faces() const
+  FLECSI_INLINE_TARGET decltype(auto) faces() const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>();
   }
 
-  decltype(auto) faces(partition_t subset) const
+  FLECSI_INLINE_TARGET decltype(auto) faces(partition_t subset) const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>(
       subset
     );
   }
   
-  decltype(auto) faces( subset_t ) const 
+  FLECSI_INLINE_TARGET decltype(auto) faces( subset_t ) const 
   { 
     // only returns overlapping right now
     return base_t::template subentities<index_subspaces_t::overlapping_faces>();
@@ -498,7 +498,7 @@ public:
   //! \brief Return all faces in the burton mesh.
   //! \return Return all faces in the burton mesh as a sequence for use, e.g.,
   //!   in range based for loops.
-  decltype(auto) faces() // FIXME const
+  FLECSI_INLINE_TARGET decltype(auto) faces() // FIXME const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>();
   }
@@ -511,7 +511,7 @@ public:
   //!
   //! \return Return faces associated with entity instance \e e as a sequence.
   template <class E>
-  decltype(auto) faces(E * e) const
+  FLECSI_INLINE_TARGET decltype(auto) faces(E * e) const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>(e);
   }
@@ -525,7 +525,7 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
+  FLECSI_INLINE_TARGET decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, face_t>(e);
   }
@@ -557,12 +557,12 @@ public:
 
   //! \brief Return the number of cells in the burton mesh.
   //! \return The number of cells in the burton mesh.
-  size_t num_cells() const
+  FLECSI_INLINE_TARGET size_t num_cells() const
   {
     return base_t::template num_entities<cell_t::dimension, cell_t::domain>();
   }
 
-  size_t num_cells(partition_t subset) const
+  FLECSI_INLINE_TARGET size_t num_cells(partition_t subset) const
   {
     return base_t::template num_entities<cell_t::dimension, cell_t::domain>(
       subset
@@ -573,12 +573,12 @@ public:
   //!
   //! \return Return all cells in the burton mesh as a sequence for use, e.g.,
   //!   in range based for loops.
-  decltype(auto) cells() const
+  FLECSI_INLINE_TARGET decltype(auto) cells() const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>();
   }
 
-  decltype(auto) cells(partition_t subset) const
+  FLECSI_INLINE_TARGET decltype(auto) cells(partition_t subset) const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>(
       subset
@@ -588,7 +588,7 @@ public:
   //! \brief Return all cells in the burton mesh.
   //! \return Return all cells in the burton mesh as a sequence for use, e.g.,
   //!   in range based for loops.
-  decltype(auto) cells() // FIXME const
+  FLECSI_INLINE_TARGET decltype(auto) cells() // FIXME const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>();
   }
@@ -601,7 +601,7 @@ public:
   //!
   //! \return Return cells associated with entity instance \e e as a sequence.
   template <class E>
-  decltype(auto) cells(E * e) const
+  FLECSI_INLINE_TARGET decltype(auto) cells(E * e) const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>(e);
   }
@@ -615,7 +615,7 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
-  decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
+  FLECSI_INLINE_TARGET decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, cell_t>(e);
   }

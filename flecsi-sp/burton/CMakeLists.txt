@@ -3,6 +3,7 @@
 # All rights reserved
 #~----------------------------------------------------------------------------~#
 
+set_property(SOURCE burton_specialization_init.cc APPEND PROPERTY COMPILE_FLAGS "-xcuda --cuda-gpu-arch=sm_70" )
 # burton requires parmetis
 if (NOT FLECSI_SP_ENABLE_PARMETIS)
   return()

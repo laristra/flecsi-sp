@@ -2004,7 +2004,7 @@ void make_corners(
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   // get the number of dimensions
-  constexpr auto num_dims = mesh_def.dimension();
+  constexpr auto num_dims = 2;//mesh_def.dimension();
 
   // get the connectvitiy from the cells to the vertices.  there is a
   // corner per cell, per vertex
@@ -2702,7 +2702,7 @@ void make_corners(
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   // get the number of dimensions
-  constexpr auto num_dims = mesh_def.dimension();
+  constexpr auto num_dims = 3;//mesh_def.dimension();
 
   // get the connectvitiy from the cells to the vertices.  there is a
   // corner per cell, per vertex
