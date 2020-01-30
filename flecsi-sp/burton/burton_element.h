@@ -474,12 +474,12 @@ struct burton_element_t<2,1> :
   template<typename T>
   bool is_flipped(const T & c)
   {
-    return owner_id_ != c->template global_id().global();
+    return owner_id_ != c->global_id().global();
   }
   
   template<typename T>
   void set_owner(const T & c) {
-    owner_id_ = c->template global_id().global();
+    owner_id_ = c->global_id().global();
   }
 
   //! \brief update the mesh geometry
@@ -1415,12 +1415,12 @@ struct burton_element_t<3,2>
   template<typename T>
   bool is_flipped(const T & c)
   {
-    return owner_id_ != c->template global_id().global();
+    return owner_id_ != c->global_id().global();
   }
   
   template<typename T>
   void set_owner(const T & c) {
-    owner_id_ = c->template global_id().global();
+    owner_id_ = c->global_id().global();
   }
 
   //============================================================================

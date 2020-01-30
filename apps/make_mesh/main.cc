@@ -322,7 +322,7 @@ int main( int argc, char* argv[] )
     for ( unsigned_integer_t i=0; i<comm_size; ++i )
     {
       if ( comm_rank == i ) {
-        std::cout << "Rank " << comm_rank << " has block dimensions: ";
+        std::cout << "Rank " << comm_rank << " has block index: ";
         for ( unsigned_integer_t j=0; j<num_dims; ++j ) std::cout << block_ijk[j] << " ";
         std::cout << std::endl;
       }

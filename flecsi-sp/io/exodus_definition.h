@@ -2405,11 +2405,11 @@ public:
       return it->second;
   }
 
-  virtual const flecsi::coloring::crs_t & side_vertices() const {
+  virtual const flecsi::coloring::crs_t & side_vertices() const override {
     return side_to_vertices_;
   }
   
-  virtual const std::vector<size_t> & side_ids() const {
+  virtual const std::vector<size_t> & side_ids() const override {
     return side_id_;
   }
 
@@ -3988,11 +3988,11 @@ public:
       return it->second;
   }
 
-  virtual const flecsi::coloring::crs_t & side_vertices() const {
+  virtual const flecsi::coloring::crs_t & side_vertices() const override {
     return side_to_vertices_;
   }
   
-  virtual const std::vector<size_t> & side_ids() const {
+  virtual const std::vector<size_t> & side_ids() const override {
     return side_id_;
   }
 
