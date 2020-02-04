@@ -266,7 +266,6 @@ before_script:
         -DENABLE_UNIT_TESTS=ON \
         ..
     make -k -j2 -l40 || make VERBOSE=1
-    ctest --output-on-failure
     make install DESTDIR=${CI_PROJECT_DIR}/build/install
     make install
     ccache -s
@@ -284,7 +283,7 @@ before_script:
   script: &test_script |-
     echo 'Start testing'
     cd ${CI_PROJECT_DIR}/build/
-    ctest --output-on-failure
+    ctest --verbose --output-on-failure
     #gcovr .
 
 ############
