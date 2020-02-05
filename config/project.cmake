@@ -166,6 +166,7 @@ find_package(MPI)
 if (MPI_FOUND) 
   set(MPI_LANGUAGE C CACHE STRING "" FORCE)
   include_directories(${MPI_C_INCLUDE_PATH})
+  add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
 endif()
 
 #------------------------------------------------------------------------------#
