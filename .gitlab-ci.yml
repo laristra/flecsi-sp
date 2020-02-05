@@ -283,7 +283,7 @@ before_script:
   script: &test_script |-
     echo 'Start testing'
     cd ${CI_PROJECT_DIR}/build/
-    ctest --verbose --output-on-failure
+    make CTEST_OUTPUT_ON_FAILURE=1 test
     #gcovr .
 
 ############
