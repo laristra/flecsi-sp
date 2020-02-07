@@ -261,13 +261,12 @@ void create_cells(
     }
   }
 
-  for ( auto v : vertices ) {
-    auto vid = v->id();
-    auto & tags = vertex_tags[vid];
+  for ( auto & [ vid, tags ] : vertex_tags ) {
     std::sort( tags.begin(), tags.end() );
     auto last = std::unique( tags.begin(), tags.end() );
+    auto vtx = vertices[vid];
     for ( auto it=tags.begin(); it != last; ++it ) {
-      v->tag( *it );
+      vtx->tag( *it );
     }
   }
 
@@ -642,13 +641,12 @@ void create_cells(
     }
   }
 
-  for ( auto v : vertices ) {
-    auto vid = v->id();
-    auto & tags = vertex_tags[vid];
+  for ( auto & [ vid, tags ] : vertex_tags ) {
     std::sort( tags.begin(), tags.end() );
     auto last = std::unique( tags.begin(), tags.end() );
+    auto vtx = vertices[vid];
     for ( auto it=tags.begin(); it != last; ++it ) {
-      v->tag( *it );
+      vtx->tag( *it );
     }
   }
 
