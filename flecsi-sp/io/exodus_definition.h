@@ -2355,11 +2355,9 @@ public:
         side_id_.emplace_back( side_id );
         size_t nv;
         flecsi::topology::uncast( buffer, 1, &nv );
-        auto st = side_to_vertices_.offsets.back();
-        auto en = st + nv;
-        side_to_vertices_.offsets.emplace_back( en );
-        side_to_vertices_.indices.resize( en );
-        flecsi::topology::uncast( buffer, nv, &side_to_vertices_.indices[st] );
+        std::vector<size_t> vs(nv);
+        flecsi::topology::uncast( buffer, nv, vs.data() );
+        side_to_vertices_.push_back( vs );
       }
     } // has sides
 
@@ -3613,11 +3611,9 @@ public:
           side_id_.emplace_back( side_id );
           size_t nv;
           flecsi::topology::uncast( buffer, 1, &nv );
-          auto st = side_to_vertices_.offsets.back();
-          auto en = st + nv;
-          side_to_vertices_.offsets.emplace_back( en );
-          side_to_vertices_.indices.resize( en );
-          flecsi::topology::uncast( buffer, nv, &side_to_vertices_.indices[st] );
+          std::vector<size_t> vs(nv);
+          flecsi::topology::uncast( buffer, nv, vs.data() );
+          side_to_vertices_.push_back( vs );
         }
       } // has sides
     } // sides
