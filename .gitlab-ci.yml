@@ -128,7 +128,8 @@ before_script:
   only:
     - merge_requests
     - master
-    - refactor
+    - "1.4"
+    - "1"
 
 .cache_template: &cache_def
   cache:
