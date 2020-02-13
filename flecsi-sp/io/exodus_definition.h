@@ -818,6 +818,7 @@ public:
       else if (
           strcasecmp("quad", elem_type) == 0 ||
           strcasecmp("quad4", elem_type) == 0 ||
+          strcasecmp("shell", elem_type) == 0 ||
           strcasecmp("shell4", elem_type) == 0)
         return block_t::quad;
       else if (
