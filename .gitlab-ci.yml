@@ -127,7 +127,6 @@ before_script:
   retry: 1
   only:
     - merge_requests
-    - master
     - "1.4"
     - "1"
 
@@ -311,7 +310,7 @@ env_update:
   extends: env_mpi
   only:
     refs:
-      - master
+      - "1"
   script:
     - *update_spackage
   allow_failure: true
