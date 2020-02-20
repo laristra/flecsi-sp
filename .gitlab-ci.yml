@@ -243,6 +243,7 @@ before_script:
     git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
     mv flecsi flecsi-dev
     cd flecsi-dev
+    git checkout 1
     cp -R ../cinch .
     mkdir -p build
     mkdir -p build/install
