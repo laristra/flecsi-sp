@@ -353,7 +353,7 @@ build:centOS_mpi_clang_release:
   allow_failure: true
 
 .build:centOS_mpi_intel_release:
-  extends: build:centOS_mpi_intel
+  extends: .build:centOS_mpi_intel
   variables:
     <<: *buildtype_release
 
@@ -391,7 +391,7 @@ build:centOS_mpich_mpi_clang_release:
   allow_failure: true
 
 .build:centOS_mpich_mpi_intel_release:
-  extends: build:centOS_mpich_mpi_intel
+  extends: .build:centOS_mpich_mpi_intel
   variables:
     <<: *buildtype_release
 
@@ -429,7 +429,7 @@ build:centOS_legion_clang_release:
   allow_failure: true
 
 .build:centOS_legion_intel_release:
-  extends: build:centOS_legion_intel
+  extends: .build:centOS_legion_intel
   variables:
     <<: *buildtype_release
 
@@ -467,7 +467,7 @@ build:centOS_mpich_legion_clang_release:
   allow_failure: true
 
 .build:centOS_mpich_legion_intel_release:
-  extends: build:centOS_mpich_legion_intel
+  extends: .build:centOS_mpich_legion_intel
   variables:
     <<: *buildtype_release
 
