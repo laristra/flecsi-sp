@@ -1845,7 +1845,6 @@ struct burton_element_t<3,3>
       
       // get the cell entities
       auto cell_verts = primal_conn.get_entity_vec( cell, /* dim */ 0 );
-      auto cell_edges = primal_conn.get_entity_vec( cell, /* dim */ 1 ).vec();
       auto cell_faces = primal_conn.get_entity_vec( cell, /* dim */ 2 ).vec();
 
       // get connectivity specific to sides
