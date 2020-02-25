@@ -244,6 +244,7 @@ before_script:
     git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
     mv flecsi flecsi-dev
     cd flecsi-dev
+    git checkout 1.4
     cp -R ../cinch .
     mkdir -p build
     mkdir -p build/install
@@ -347,14 +348,14 @@ build:centOS_mpi_clang_release:
   variables:
     <<: *buildtype_release
 
-build:centOS_mpi_intel:
+.build:centOS_mpi_intel:
   extends: build:centOS_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpi_intel_release:
-  extends: build:centOS_mpi_intel
+.build:centOS_mpi_intel_release:
+  extends: .build:centOS_mpi_intel
   variables:
     <<: *buildtype_release
 
@@ -385,14 +386,14 @@ build:centOS_mpich_mpi_clang_release:
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_mpi_intel:
+.build:centOS_mpich_mpi_intel:
   extends: build:centOS_mpich_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpich_mpi_intel_release:
-  extends: build:centOS_mpich_mpi_intel
+.build:centOS_mpich_mpi_intel_release:
+  extends: .build:centOS_mpich_mpi_intel
   variables:
     <<: *buildtype_release
 
@@ -423,14 +424,14 @@ build:centOS_legion_clang_release:
   variables:
     <<: *buildtype_release
 
-build:centOS_legion_intel:
+.build:centOS_legion_intel:
   extends: build:centOS_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_legion_intel_release:
-  extends: build:centOS_legion_intel
+.build:centOS_legion_intel_release:
+  extends: .build:centOS_legion_intel
   variables:
     <<: *buildtype_release
 
@@ -461,14 +462,14 @@ build:centOS_mpich_legion_clang_release:
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_legion_intel:
+.build:centOS_mpich_legion_intel:
   extends: build:centOS_mpich_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpich_legion_intel_release:
-  extends: build:centOS_mpich_legion_intel
+.build:centOS_mpich_legion_intel_release:
+  extends: .build:centOS_mpich_legion_intel
   variables:
     <<: *buildtype_release
 
