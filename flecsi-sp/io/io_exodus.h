@@ -423,6 +423,92 @@ public:
     
   }
 
+  static
+      void write_fields( int exoid, mesh_t & m, std::vector<const real_t *> &var_vec, std::vector<std::string> &name) 
+  { 
+
+    int status;
+
+    // mesh statistics
+    constexpr auto num_dims  = mesh_t::num_dimensions;
+    auto num_nodes = m.num_vertices();
+    auto num_elem = m.num_cells();
+    auto num_elem_blk = m.num_regions();
+
+    //--------------------------------------------------------------------------
+    // initial setup
+
+    // get the iteration number
+    // - first step starts at 1
+    auto time_step = 1;
+
+
+    // a lambda function for validating strings
+    auto validate_string = []( auto && str ) {
+      return std::forward<decltype(str)>(str);
+    };
+
+    //--------------------------------------------------------------------------
+    // hard coded data
+    //--------------------------------------------------------------------------
+    
+    int num_var = name.size();
+    //int var_id = 1;
+    int elem_blk_id = 1;
+
+    // put the number of element fields
+    status = ex_put_var_param(exoid, "e", num_var);
+    if (status)
+      THROW_RUNTIME_ERROR(
+        "Problem writing variable number, " <<
+        " ex_put_var_param() returned " << status 
+      );
+
+    // fill element variable names array
+//    auto label = validate_string( f.label() );
+
+    for(int i=0;i<name.size();++i)
+    {
+        int var_id(i+1);
+        
+        status = ex_put_var_name(exoid, "e", var_id, name[i].c_str());
+
+        if (status)
+            THROW_RUNTIME_ERROR(
+                "Problem writing variable name, " << name[i].c_str()<<
+                " ex_put_var_name() returned " << status 
+                );
+    }
+    
+
+    for(int i=0;i<var_vec.size();++i)
+    {
+        
+        size_t cid = 0;
+        std::vector<ex_real_t> tmp(m.num_cells()); 
+
+        auto f = var_vec[i];
+        
+        for(auto c: m.cells())
+        {
+            tmp[cid++] = f[c.id()];
+        }
+
+        int var_id(i+1);
+        
+        status = ex_put_elem_var(
+            exoid, time_step, var_id, elem_blk_id, tmp.size(), tmp.data()
+            );
+
+        if (status)
+            THROW_RUNTIME_ERROR(
+                "Problem writing variable data, " <<
+                " ex_put_elem_var() returned " << status 
+                );
+    }
+    
+  }
+
 #endif
 
 

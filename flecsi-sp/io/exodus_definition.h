@@ -823,6 +823,7 @@ public:
         return block_t::quad;
       else if (
           strcasecmp("tet", elem_type) == 0 ||
+          strcasecmp("tetra", elem_type) == 0 ||
           strcasecmp("tet4", elem_type) == 0)
         return block_t::tet;
       else if (
