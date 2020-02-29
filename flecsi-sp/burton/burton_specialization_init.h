@@ -3753,7 +3753,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
       const auto & conn = mesh_def->entities_crs(from_dim, to_dim);
       for ( size_t i=0; i<conn.size(); ++i ) {
         auto global_id = local2global[i];
-        my_counts.emplace(global_id, conn.at(i).size());
+        auto res = my_counts.emplace(global_id, conn.at(i).size());
+        if (!res.second) 
+          THROW_RUNTIME_ERROR("multiple local ids map to one global");
       }
 
       // get the ghost connectivity and count it

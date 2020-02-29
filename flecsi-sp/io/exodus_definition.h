@@ -2914,6 +2914,10 @@ public:
       for ( auto & v : face2vertices_.indices ) 
         v = vertex_global2local_.at(v);
 
+      // sorted face verts are all in terms of global ids right now, since you
+      // cant change the key of a map, rebuild the list
+      sort_face_vertices();
+
     } // serial
     // parallel
     else {
@@ -3026,6 +3030,7 @@ public:
     //--------------------------------------------------------------------------
     // close the file
     base_t::close(exoid);
+    
   }
   
   //============================================================================
@@ -3718,7 +3723,7 @@ public:
     // Delete faces
     
     if ( has_unused_faces ) {
-    
+      
       // storage for renumberings
       vector<index_t>
         old2new( num_faces, std::numeric_limits<size_t>::max() );
@@ -3728,7 +3733,7 @@ public:
 
       for ( size_t old_local_id=0, new_local_id=0; old_local_id<num_faces; ++old_local_id )
       {
-    
+        
         // skip deleted items
         if ( counts[old_local_id] == 0 ) {
             deleted_faces.emplace_back( old_local_id );
@@ -3780,6 +3785,7 @@ public:
           }
         }
       }
+      
 
     } // has unused faces
     
@@ -3791,6 +3797,7 @@ public:
     std::fill( counts.begin(), counts.end(), 0 );
     
     for ( auto i : cells2verts.indices ) counts[i]++; 
+
     bool has_unused_vertices = false;
     for ( size_t i=0; i<num_vertices; ++i ) {
       if ( counts[i] == 0 ) {
@@ -3850,7 +3857,7 @@ public:
       
       //------------
       // Renumber
-      
+
       // renumber cell connectivity
       for ( auto & i : cells2verts.indices ) {
         i = old2new[i];
@@ -3867,16 +3874,8 @@ public:
     // delete the sorted face vertices.  you cant change the key of a map, so
     // you cant renumber the vertices.  just blow away the whole map and
     // rebuild it.
-    sorted_vertices_to_faces_.clear();
-
-    size_t face_cnt{0};
-    std::vector<size_t> sorted_vs;
-    for ( const auto & vs : faces2verts ) {
-      sorted_vs.assign( vs.begin(), vs.end() );
-      std::sort( sorted_vs.begin(), sorted_vs.end() );
-      sorted_vertices_to_faces_.emplace(sorted_vs, face_cnt);
-      ++face_cnt;
-    }
+    sort_face_vertices();
+    assert( num_faces == sorted_vertices_to_faces_.size() );
     
     //--------------------------------------------------------------------------
     // Delete sides
@@ -3926,7 +3925,6 @@ public:
 
     }
    
-    
   }
 
   void build_connectivity() override {
@@ -3938,6 +3936,9 @@ public:
     const auto & faces2vertices = local_connectivity_.at(2).at(0);
     auto & faces2edges = local_connectivity_[2][1];
     auto & edges2vertices = local_connectivity_[1][0];
+
+
+    assert( faces2vertices.size() == sorted_vertices_to_faces_.size() );
 
     // build the connecitivity array
     std::map<std::vector<index_t>, index_t> sorted_vertices_to_edges;
@@ -3968,6 +3969,23 @@ public:
     auto & face_global2local = global_to_local_[2];
     flecsi::coloring::match_ids( *this, 2, face_local2global, face_global2local );
     
+  }
+
+  void sort_face_vertices() {
+    auto & faces2verts = local_connectivity_.at(2).at(0);
+    sorted_vertices_to_faces_.clear();
+
+    size_t face_cnt{0};
+    std::vector<size_t> sorted_vs;
+    for ( const auto & vs : faces2verts ) {
+      sorted_vs.assign( vs.begin(), vs.end() );
+      std::sort( sorted_vs.begin(), sorted_vs.end() );
+      sorted_vertices_to_faces_.emplace(sorted_vs, face_cnt);
+      ++face_cnt;
+    }
+    auto num_faces = faces2verts.size();
+    assert( num_faces == face_cnt );
+    assert( num_faces == sorted_vertices_to_faces_.size() );
   }
 
   const std::vector<size_t> & face_owners() const override {
