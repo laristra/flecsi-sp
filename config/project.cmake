@@ -161,11 +161,10 @@ if (Legion_FOUND)
   include_directories(${Legion_INCLUDE_DIRS})
 endif()
 
-find_package(MPI)
+find_package(MPI COMPONENTS C CXX REQUIRED)
 
 if (MPI_FOUND) 
-  set(MPI_LANGUAGE C CACHE STRING "" FORCE)
-  include_directories(${MPI_C_INCLUDE_PATH})
+  list(APPEND FLECSI_SP_LIBRARIES MPI::MPI_CXX MPI::MPI_C)
 endif()
 
 #------------------------------------------------------------------------------#
