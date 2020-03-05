@@ -112,7 +112,7 @@ OPTION (FLECSI_SP_DOUBLE_PRECISION "Use double precision reals"  ON)
 
 if( FLECSI_SP_DOUBLE_PRECISION ) 
   message(STATUS "Note: Double precision build activated.")
-  SET (FLECSI_SP_TEST_TOLERANCE 1.0e-14 CACHE STRING "The testing tolerance")
+  SET (FLECSI_SP_TEST_TOLERANCE 1.0e-13 CACHE STRING "The testing tolerance")
 else()
   message(STATUS "Note: Single precision build activated.")
   SET (FLECSI_SP_TEST_TOLERANCE 1.0e-6 CACHE STRING "The testing tolerance")
