@@ -43,6 +43,7 @@ before_script:
   - echo ${CI_JOB_NAME_NOSTAGE%.*}-${CI_COMMIT_REF_SLUG}
   - '[ "$(git rev-parse origin/$CI_COMMIT_REF_NAME)" != "$CI_COMMIT_SHA" ] && curl --header "PRIVATE-TOKEN: $MY_CI_API_TOKEN" -X POST https://gitlab.com/api/v4/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/cancel'
   #- find . -name "`basename cinch`" | grep "cinch\$" | xargs rm -fr
+  - export HOME=${CI_PROJECT_DIR}
   - mkdir -p ${CI_PROJECT_DIR}/build
   - module load gcc/${FLECSISP_GCC_VERSION}
   - module load python/${FLECSISP_PYTHON_VERSION}
@@ -128,7 +129,6 @@ before_script:
   only:
     - merge_requests
     - master
-    - refactor
 
 .cache_template: &cache_def
   cache:
@@ -144,7 +144,7 @@ before_script:
     paths:
       - ${CI_PROJECT_DIR}/build #/builds/next-generation-codes/laristra/flecsi-sp/build
     when: always
-    expire_in: 6 months
+    expire_in: 2 weeks
   dependencies: []
 
 .shell_template: &shell_def
@@ -306,7 +306,7 @@ env_legion:
     <<: *buildtype_debug
     <<: *compiler_gcc
 
-env_update:
+.env_update:
   extends: env_mpi
   only:
     refs:
