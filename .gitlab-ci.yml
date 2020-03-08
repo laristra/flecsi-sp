@@ -312,7 +312,7 @@ env_update:
   extends: env_mpi
   only:
     refs:
-      - 1.4
+      - "1.4"
   script:
     - *update_spackage
   allow_failure: true
