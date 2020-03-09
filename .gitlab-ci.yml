@@ -196,11 +196,13 @@ before_script:
       spack repo add ${CI_PROJECT_DIR}/ristra_spackages/spack-repo;
       spack repo add ${CI_PROJECT_DIR}/spack-repo;
       spack repo list;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi%gcc@${FLECSISP_GCC_VERSION};
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich%gcc@${FLECSISP_GCC_VERSION};
+      spack clean --all;
+      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
       spack repo rm ${FLECSISP_SPACK_SCOPE};
       spack repo rm lanl_ristra;
       ) 200>${DEPS_LOCK}
+    - $([ "$(grep -c "Errno " spack_tmp.out)" = "0" ] && exit 0 || exit 1)
 
 ###############
 # Build Stage #
