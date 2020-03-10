@@ -359,7 +359,7 @@ build:centOS_mpi_intel:
   allow_failure: true
 
 .build:centOS_mpi_intel_release:
-  extends: .build:centOS_mpi_intel
+  extends: build:centOS_mpi_intel
   variables:
     <<: *buildtype_release
 
