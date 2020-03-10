@@ -32,9 +32,11 @@ variables:
   #lock_fd: 314
   FLECSISP_CI_JOB_NAME_NOSTAGE: ${CI_JOB_NAME#*:}
   FLECSISP_MPI_PACKAGE: ""
+  FLECSISP_MPICH_VERSION: "3.2.1"
+  FLECSISP_OPENMPI_VERSION: "3.1.3"
   FLECSISP_INTEL_VERSION: "19.0.2"
   FLECSISP_CLANG_VERSION: "8.0.1"
-  FLECSISP_GCC_VERSION: "7.3.0"
+  FLECSISP_GCC_VERSION: "8.3.0"
   FLECSISP_PYTHON_VERSION: "3.5.1"
   FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
@@ -48,7 +50,7 @@ before_script:
   - module load gcc/${FLECSISP_GCC_VERSION}
   - module load python/${FLECSISP_PYTHON_VERSION}
   - echo ${FLECSISP_ENV_SOURCE_FILE}
-  - export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PACKAGE}%gcc@${FLECSISP_GCC_VERSION}"
+  - export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PACKAGE}@$([ ${FLECSISP_MPI_PACKAGE} == 'openmpi' ] && echo ${FLECSISP_OPENMPI_VERSION} || echo ${FLECSISP_MPICH_VERSION})%gcc@${FLECSISP_GCC_VERSION}"
   - rm ${FLECSISP_ENV_SOURCE_FILE} || /bin/true
   - cd ${CI_PROJECT_DIR}
   - git clone git@gitlab.lanl.gov:laristra/ristra_spackages.git
@@ -163,7 +165,7 @@ before_script:
 .update_spackage: &update_spackage |-
   echo 'Updating spackages...'
   cd ${CI_PROJECT_DIR}
-  for f in $(find ./spack-repo/packages/ -type f); do diff -urN ${CI_PROJECT_DIR}/ristra_spackages/$f $f; done | tee $f.patch
+  for f in $(find ./spack-repo/packages/ -type f); do diff -urN ${CI_PROJECT_DIR}/ristra_spackages/$f $f | tee $f.patch; done
   for f in $(find ./spack-repo/packages/ -type f -name "*.patch"); do patch -i $f ${CI_PROJECT_DIR}/ristra_spackages/$f; done
   for f in $(find ./spack-repo/packages/ -type f -name "*.patch"); do rm $f; done
   cd ${CI_PROJECT_DIR}/ristra_spackages
@@ -198,8 +200,8 @@ before_script:
       spack repo add ${CI_PROJECT_DIR}/spack-repo;
       spack repo list;
       spack clean --all;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi@${FLECSISP_OPENMPI_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich@${FLECSISP_MPICH_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
       spack repo rm ${FLECSISP_SPACK_SCOPE};
       spack repo rm lanl_ristra;
       ) 200>${DEPS_LOCK}
@@ -225,10 +227,10 @@ before_script:
     cd ${CI_PROJECT_DIR}
     export _tmp_username=${LIBRISTRA_USERNAME//PLUS/+}
     export _tmp_username=${_tmp_username//MINUS/-}
-    git clone https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
+    git clone --recursive https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
     mv libristra libristra-dev
     cd libristra-dev
-    cp -R ../cinch .
+    git submodule update --init --recursive
     mkdir -p build
     mkdir -p build/install
     cd build
@@ -243,11 +245,11 @@ before_script:
     cd ${CI_PROJECT_DIR}
     export _tmp_username=${FLECSI_USERNAME//PLUS/+}
     export _tmp_username=${_tmp_username//MINUS/-}
-    git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
+    git clone --recursive https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
     mv flecsi flecsi-dev
     cd flecsi-dev
     git checkout 1.4
-    cp -R ../cinch .
+    git submodule update --init --recursive
     mkdir -p build
     mkdir -p build/install
     cd build
@@ -264,7 +266,7 @@ before_script:
     make install
     export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/flecsi-dev/build/install:$CMAKE_PREFIX_PATH
     cd ${CI_PROJECT_DIR}/build/
-    CXXFLAGS=-ffloat-store cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
+    cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DFLECSI_RUNTIME_MODEL=$RUNTIME \
         -DENABLE_UNIT_TESTS=ON \
@@ -323,7 +325,7 @@ env_update:
 # Build Jobs #
 ##############
 
-build:centOS_mpi:
+.build:centOS_mpi:
   extends: .build
   <<: *shell_def
   variables:
@@ -336,22 +338,22 @@ build:centOS_mpi:
     - *test_script
 
 build:centOS_mpi_release:
-  extends: build:centOS_mpi
+  extends: .build:centOS_mpi
   variables:
     <<: *buildtype_release
 
 build:centOS_mpi_clang:
-  extends: build:centOS_mpi
+  extends: .build:centOS_mpi
   variables:
     <<: *compiler_clang
 
-build:centOS_mpi_clang_release:
+.build:centOS_mpi_clang_release:
   extends: build:centOS_mpi_clang
   variables:
     <<: *buildtype_release
 
-.build:centOS_mpi_intel:
-  extends: build:centOS_mpi
+build:centOS_mpi_intel:
+  extends: .build:centOS_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
@@ -373,18 +375,18 @@ build:centOS_mpich_mpi:
     - *build_script
     - *test_script
 
-build:centOS_mpich_mpi_release:
+.build:centOS_mpich_mpi_release:
   extends: build:centOS_mpich_mpi
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_mpi_clang:
+.build:centOS_mpich_mpi_clang:
   extends: build:centOS_mpich_mpi
   variables:
     <<: *compiler_clang
 
 build:centOS_mpich_mpi_clang_release:
-  extends: build:centOS_mpich_mpi_clang
+  extends: .build:centOS_mpich_mpi_clang
   variables:
     <<: *buildtype_release
 
@@ -394,12 +396,12 @@ build:centOS_mpich_mpi_clang_release:
     <<: *compiler_intel
   allow_failure: true
 
-.build:centOS_mpich_mpi_intel_release:
+build:centOS_mpich_mpi_intel_release:
   extends: .build:centOS_mpich_mpi_intel
   variables:
     <<: *buildtype_release
 
-build:centOS_legion:
+.build:centOS_legion:
   extends: .build
   <<: *shell_def
   variables:
@@ -412,28 +414,28 @@ build:centOS_legion:
     - *test_script
 
 build:centOS_legion_release:
-  extends: build:centOS_legion
+  extends: .build:centOS_legion
   variables:
     <<: *buildtype_release
 
 build:centOS_legion_clang:
-  extends: build:centOS_legion
+  extends: .build:centOS_legion
   variables:
     <<: *compiler_clang
 
-build:centOS_legion_clang_release:
+.build:centOS_legion_clang_release:
   extends: build:centOS_legion_clang
   variables:
     <<: *buildtype_release
 
-.build:centOS_legion_intel:
-  extends: build:centOS_legion
+build:centOS_legion_intel:
+  extends: .build:centOS_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
 
 .build:centOS_legion_intel_release:
-  extends: .build:centOS_legion_intel
+  extends: build:centOS_legion_intel
   variables:
     <<: *buildtype_release
 
@@ -449,18 +451,18 @@ build:centOS_mpich_legion:
     - *build_script
     - *test_script
 
-build:centOS_mpich_legion_release:
+.build:centOS_mpich_legion_release:
   extends: build:centOS_mpich_legion
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_legion_clang:
+.build:centOS_mpich_legion_clang:
   extends: build:centOS_mpich_legion
   variables:
     <<: *compiler_clang
 
 build:centOS_mpich_legion_clang_release:
-  extends: build:centOS_mpich_legion_clang
+  extends: .build:centOS_mpich_legion_clang
   variables:
     <<: *buildtype_release
 
@@ -470,7 +472,7 @@ build:centOS_mpich_legion_clang_release:
     <<: *compiler_intel
   allow_failure: true
 
-.build:centOS_mpich_legion_intel_release:
+build:centOS_mpich_legion_intel_release:
   extends: .build:centOS_mpich_legion_intel
   variables:
     <<: *buildtype_release
