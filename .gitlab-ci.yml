@@ -165,13 +165,13 @@ before_script:
 .update_spackage: &update_spackage |-
   echo 'Updating spackages...'
   cd ${CI_PROJECT_DIR}
-  for f in $(find ./spack-repo/packages/ -type f); do diff -urN ${CI_PROJECT_DIR}/ristra_spackages/$f $f | tee $f.patch; done
+  for f in $(find ./spack-repo/packages/ -type f); do diff -urN ${CI_PROJECT_DIR}/ristra_spackages/$f $f | tee $f.patch || /bin/true; done
   for f in $(find ./spack-repo/packages/ -type f -name "*.patch"); do patch -i $f ${CI_PROJECT_DIR}/ristra_spackages/${f%.*}; done
   for f in $(find ./spack-repo/packages/ -type f -name "*.patch"); do rm $f; done
   cd ${CI_PROJECT_DIR}/ristra_spackages
   git add spack-repo/packages/*
-  git commit -m "Gitlab CI Automatic Spackage Update - FleCSI-SP"
-  git push
+  git commit -m "Gitlab CI Automatic Spackage Update - FleCSI-SP" || /bin/true
+  git push -u origin master
 
 #############
 # Env Stage #
@@ -352,14 +352,14 @@ build:centOS_mpi_clang:
   variables:
     <<: *buildtype_release
 
-build:centOS_mpi_intel:
+.build:centOS_mpi_intel:
   extends: .build:centOS_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
 
 .build:centOS_mpi_intel_release:
-  extends: build:centOS_mpi_intel
+  extends: .build:centOS_mpi_intel
   variables:
     <<: *buildtype_release
 
@@ -396,7 +396,7 @@ build:centOS_mpich_mpi_clang_release:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpich_mpi_intel_release:
+.build:centOS_mpich_mpi_intel_release:
   extends: .build:centOS_mpich_mpi_intel
   variables:
     <<: *buildtype_release
@@ -428,14 +428,14 @@ build:centOS_legion_clang:
   variables:
     <<: *buildtype_release
 
-build:centOS_legion_intel:
+.build:centOS_legion_intel:
   extends: .build:centOS_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
 
 .build:centOS_legion_intel_release:
-  extends: build:centOS_legion_intel
+  extends: .build:centOS_legion_intel
   variables:
     <<: *buildtype_release
 
@@ -472,7 +472,7 @@ build:centOS_mpich_legion_clang_release:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpich_legion_intel_release:
+.build:centOS_mpich_legion_intel_release:
   extends: .build:centOS_mpich_legion_intel
   variables:
     <<: *buildtype_release
