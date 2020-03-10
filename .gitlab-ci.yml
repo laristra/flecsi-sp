@@ -227,10 +227,10 @@ before_script:
     cd ${CI_PROJECT_DIR}
     export _tmp_username=${LIBRISTRA_USERNAME//PLUS/+}
     export _tmp_username=${_tmp_username//MINUS/-}
-    git clone --recursive https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
+    git clone https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
     mv libristra libristra-dev
     cd libristra-dev
-    git submodule update --init --recursive
+    cp -R ../cinch .
     mkdir -p build
     mkdir -p build/install
     cd build
@@ -245,11 +245,11 @@ before_script:
     cd ${CI_PROJECT_DIR}
     export _tmp_username=${FLECSI_USERNAME//PLUS/+}
     export _tmp_username=${_tmp_username//MINUS/-}
-    git clone --recursive https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
+    git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
     mv flecsi flecsi-dev
     cd flecsi-dev
     git checkout 1.4
-    git submodule update --init --recursive
+    cp -R ../cinch .
     mkdir -p build
     mkdir -p build/install
     cd build
