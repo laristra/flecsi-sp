@@ -14,6 +14,7 @@
 #include <flecsi-sp/burton/portage_mesh_wrapper.h>
 #include <flecsi-sp/burton/portage_mm_state_wrapper.h>
 #include <flecsi-sp/utils/types.h>
+#include <flecsi-sp/burton/mesh_interface.h>
 
 #include <portage/driver/mmdriver.h>
 
