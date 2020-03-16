@@ -325,7 +325,7 @@ env_update:
 # Build Jobs #
 ##############
 
-.build:centOS_mpi:
+build:centOS_mpi:
   extends: .build
   <<: *shell_def
   variables:
@@ -337,13 +337,13 @@ env_update:
     - *build_script
     - *test_script
 
-build:centOS_mpi_release:
-  extends: .build:centOS_mpi
+.build:centOS_mpi_release:
+  extends: build:centOS_mpi
   variables:
     <<: *buildtype_release
 
 build:centOS_mpi_clang:
-  extends: .build:centOS_mpi
+  extends: build:centOS_mpi
   variables:
     <<: *compiler_clang
 
@@ -353,7 +353,7 @@ build:centOS_mpi_clang:
     <<: *buildtype_release
 
 .build:centOS_mpi_intel:
-  extends: .build:centOS_mpi
+  extends: build:centOS_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
@@ -380,13 +380,13 @@ build:centOS_mpich_mpi_release:
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_mpi_clang:
+.build:centOS_mpich_mpi_clang:
   extends: .build:centOS_mpich_mpi
   variables:
     <<: *compiler_clang
 
-.build:centOS_mpich_mpi_clang_release:
-  extends: build:centOS_mpich_mpi_clang
+build:centOS_mpich_mpi_clang_release:
+  extends: .build:centOS_mpich_mpi_clang
   variables:
     <<: *buildtype_release
 
@@ -418,13 +418,13 @@ build:centOS_legion:
   variables:
     <<: *buildtype_release
 
-.build:centOS_legion_clang:
+build:centOS_legion_clang:
   extends: build:centOS_legion
   variables:
     <<: *compiler_clang
 
-build:centOS_legion_clang_release:
-  extends: .build:centOS_legion_clang
+.build:centOS_legion_clang_release:
+  extends: build:centOS_legion_clang
   variables:
     <<: *buildtype_release
 
@@ -439,7 +439,7 @@ build:centOS_legion_clang_release:
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_legion:
+.build:centOS_mpich_legion:
   extends: .build
   <<: *shell_def
   variables:
@@ -451,13 +451,13 @@ build:centOS_mpich_legion:
     - *build_script
     - *test_script
 
-.build:centOS_mpich_legion_release:
-  extends: build:centOS_mpich_legion
+build:centOS_mpich_legion_release:
+  extends: .build:centOS_mpich_legion
   variables:
     <<: *buildtype_release
 
 .build:centOS_mpich_legion_clang:
-  extends: build:centOS_mpich_legion
+  extends: .build:centOS_mpich_legion
   variables:
     <<: *compiler_clang
 
@@ -467,7 +467,7 @@ build:centOS_mpich_legion_clang_release:
     <<: *buildtype_release
 
 .build:centOS_mpich_legion_intel:
-  extends: build:centOS_mpich_legion
+  extends: .build:centOS_mpich_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
