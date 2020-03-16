@@ -32,9 +32,11 @@ variables:
   #lock_fd: 314
   FLECSISP_CI_JOB_NAME_NOSTAGE: ${CI_JOB_NAME#*:}
   FLECSISP_MPI_PACKAGE: ""
+  FLECSISP_MPICH_VERSION: "3.2.1"
+  FLECSISP_OPENMPI_VERSION: "3.1.3"
   FLECSISP_INTEL_VERSION: "19.0.2"
   FLECSISP_CLANG_VERSION: "8.0.1"
-  FLECSISP_GCC_VERSION: "7.3.0"
+  FLECSISP_GCC_VERSION: "8.3.0"
   FLECSISP_PYTHON_VERSION: "3.5.1"
   FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
@@ -48,7 +50,7 @@ before_script:
   - module load gcc/${FLECSISP_GCC_VERSION}
   - module load python/${FLECSISP_PYTHON_VERSION}
   - echo ${FLECSISP_ENV_SOURCE_FILE}
-  - export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PACKAGE}%gcc@${FLECSISP_GCC_VERSION}"
+  - export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PACKAGE}@$([ ${FLECSISP_MPI_PACKAGE} == 'openmpi' ] && echo ${FLECSISP_OPENMPI_VERSION} || echo ${FLECSISP_MPICH_VERSION})%gcc@${FLECSISP_GCC_VERSION}"
   - rm ${FLECSISP_ENV_SOURCE_FILE} || /bin/true
   - cd ${CI_PROJECT_DIR}
   - git clone git@gitlab.lanl.gov:laristra/ristra_spackages.git
@@ -128,7 +130,8 @@ before_script:
   retry: 1
   only:
     - merge_requests
-    - master
+    - "1.4"
+    - "1"
 
 .cache_template: &cache_def
   cache:
@@ -197,8 +200,8 @@ before_script:
       spack repo add ${CI_PROJECT_DIR}/spack-repo;
       spack repo list;
       spack clean --all;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi@${FLECSISP_OPENMPI_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich@${FLECSISP_MPICH_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
       spack repo rm ${FLECSISP_SPACK_SCOPE};
       spack repo rm lanl_ristra;
       ) 200>${DEPS_LOCK}
@@ -245,6 +248,7 @@ before_script:
     git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
     mv flecsi flecsi-dev
     cd flecsi-dev
+    git checkout 1
     cp -R ../cinch .
     mkdir -p build
     mkdir -p build/install
@@ -285,7 +289,7 @@ before_script:
   script: &test_script |-
     echo 'Start testing'
     cd ${CI_PROJECT_DIR}/build/
-    ctest --verbose --output-on-failure
+    make CTEST_OUTPUT_ON_FAILURE=1 test
     #gcovr .
 
 ############
@@ -333,7 +337,7 @@ build:centOS_mpi:
     - *build_script
     - *test_script
 
-build:centOS_mpi_release:
+.build:centOS_mpi_release:
   extends: build:centOS_mpi
   variables:
     <<: *buildtype_release
@@ -343,19 +347,19 @@ build:centOS_mpi_clang:
   variables:
     <<: *compiler_clang
 
-build:centOS_mpi_clang_release:
+.build:centOS_mpi_clang_release:
   extends: build:centOS_mpi_clang
   variables:
     <<: *buildtype_release
 
-build:centOS_mpi_intel:
+.build:centOS_mpi_intel:
   extends: build:centOS_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpi_intel_release:
-  extends: build:centOS_mpi_intel
+.build:centOS_mpi_intel_release:
+  extends: .build:centOS_mpi_intel
   variables:
     <<: *buildtype_release
 
@@ -371,7 +375,7 @@ build:centOS_mpich_mpi:
     - *build_script
     - *test_script
 
-build:centOS_mpich_mpi_release:
+.build:centOS_mpich_mpi_release:
   extends: build:centOS_mpich_mpi
   variables:
     <<: *buildtype_release
@@ -381,23 +385,23 @@ build:centOS_mpich_mpi_clang:
   variables:
     <<: *compiler_clang
 
-build:centOS_mpich_mpi_clang_release:
+.build:centOS_mpich_mpi_clang_release:
   extends: build:centOS_mpich_mpi_clang
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_mpi_intel:
+.build:centOS_mpich_mpi_intel:
   extends: build:centOS_mpich_mpi
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpich_mpi_intel_release:
-  extends: build:centOS_mpich_mpi_intel
+.build:centOS_mpich_mpi_intel_release:
+  extends: .build:centOS_mpich_mpi_intel
   variables:
     <<: *buildtype_release
 
-build:centOS_legion:
+.build:centOS_legion:
   extends: .build
   <<: *shell_def
   variables:
@@ -410,32 +414,32 @@ build:centOS_legion:
     - *test_script
 
 build:centOS_legion_release:
-  extends: build:centOS_legion
+  extends: .build:centOS_legion
   variables:
     <<: *buildtype_release
 
-build:centOS_legion_clang:
-  extends: build:centOS_legion
+.build:centOS_legion_clang:
+  extends: .build:centOS_legion
   variables:
     <<: *compiler_clang
 
 build:centOS_legion_clang_release:
-  extends: build:centOS_legion_clang
+  extends: .build:centOS_legion_clang
   variables:
     <<: *buildtype_release
 
-build:centOS_legion_intel:
-  extends: build:centOS_legion
+.build:centOS_legion_intel:
+  extends: .build:centOS_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_legion_intel_release:
-  extends: build:centOS_legion_intel
+.build:centOS_legion_intel_release:
+  extends: .build:centOS_legion_intel
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_legion:
+.build:centOS_mpich_legion:
   extends: .build
   <<: *shell_def
   variables:
@@ -448,28 +452,28 @@ build:centOS_mpich_legion:
     - *test_script
 
 build:centOS_mpich_legion_release:
-  extends: build:centOS_mpich_legion
+  extends: .build:centOS_mpich_legion
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_legion_clang:
-  extends: build:centOS_mpich_legion
+.build:centOS_mpich_legion_clang:
+  extends: .build:centOS_mpich_legion
   variables:
     <<: *compiler_clang
 
 build:centOS_mpich_legion_clang_release:
-  extends: build:centOS_mpich_legion_clang
+  extends: .build:centOS_mpich_legion_clang
   variables:
     <<: *buildtype_release
 
-build:centOS_mpich_legion_intel:
-  extends: build:centOS_mpich_legion
+.build:centOS_mpich_legion_intel:
+  extends: .build:centOS_mpich_legion
   variables:
     <<: *compiler_intel
   allow_failure: true
 
-build:centOS_mpich_legion_intel_release:
-  extends: build:centOS_mpich_legion_intel
+.build:centOS_mpich_legion_intel_release:
+  extends: .build:centOS_mpich_legion_intel
   variables:
     <<: *buildtype_release
 

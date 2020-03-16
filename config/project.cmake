@@ -112,7 +112,7 @@ OPTION (FLECSI_SP_DOUBLE_PRECISION "Use double precision reals"  ON)
 
 if( FLECSI_SP_DOUBLE_PRECISION ) 
   message(STATUS "Note: Double precision build activated.")
-  SET (FLECSI_SP_TEST_TOLERANCE 1.0e-14 CACHE STRING "The testing tolerance")
+  SET (FLECSI_SP_TEST_TOLERANCE 1.0e-13 CACHE STRING "The testing tolerance")
 else()
   message(STATUS "Note: Single precision build activated.")
   SET (FLECSI_SP_TEST_TOLERANCE 1.0e-6 CACHE STRING "The testing tolerance")
@@ -132,7 +132,8 @@ endif()
 # Boost is needed for program options
 #------------------------------------------------------------------------------#
 
-find_package(Boost 1.59.0 COMPONENTS program_options REQUIRED)
+find_package(Boost 1.59.0 COMPONENTS program_options QUIET)
+
 # this option overrides what will get set in cinch_load_extras()
 option(
   ENABLE_BOOST
@@ -161,12 +162,10 @@ if (Legion_FOUND)
   include_directories(${Legion_INCLUDE_DIRS})
 endif()
 
-find_package(MPI)
+find_package(MPI COMPONENTS C CXX REQUIRED)
 
 if (MPI_FOUND) 
-  set(MPI_LANGUAGE C CACHE STRING "" FORCE)
-  include_directories(${MPI_C_INCLUDE_PATH})
-  add_definitions(-DOMPI_SKIP_MPICXX -DMPICH_SKIP_MPICXX)
+  list(APPEND FLECSI_SP_LIBRARIES MPI::MPI_CXX MPI::MPI_C)
 endif()
 
 #------------------------------------------------------------------------------#
