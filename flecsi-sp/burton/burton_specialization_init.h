@@ -171,6 +171,7 @@ void create_cells(
   const auto & side_vertices = mesh_def.side_vertices();
   const auto & side_ids = mesh_def.side_ids();
   std::vector<size_t> sides;
+  std::map<size_t, std::vector<size_t>> vertex_tags;
 
   // create the edges
   for(auto & em: edge_lid_to_mid) {
@@ -255,9 +256,19 @@ void create_cells(
     auto last = std::unique( sides.begin(), sides.end() );
     for ( auto it=sides.begin(); it != last; ++it ) {
       new_edge->tag(*it);
+      for ( auto v : elem_vs )
+        vertex_tags[v->id()].emplace_back(*it);
     }
   }
 
+  for ( auto & [ vid, tags ] : vertex_tags ) {
+    std::sort( tags.begin(), tags.end() );
+    auto last = std::unique( tags.begin(), tags.end() );
+    auto vtx = vertices[vid];
+    for ( auto it=tags.begin(); it != last; ++it ) {
+      vtx->tag( *it );
+    }
+  }
 
   //----------------------------------------------------------------------------
   // create the cells
@@ -538,6 +549,7 @@ void create_cells(
   const auto & side_vertices = mesh_def.side_vertices();
   const auto & side_ids = mesh_def.side_ids();
   std::vector<size_t> sides;
+  std::map<size_t, std::vector<size_t>> vertex_tags;
 
   auto num_sides = side_vertices.size();
   std::vector< std::vector<size_t> > sorted_side_vertices( num_sides );
@@ -624,9 +636,19 @@ void create_cells(
     auto last = std::unique( sides.begin(), sides.end() );
     for ( auto it=sides.begin(); it != last; ++it ) {
       f->tag(*it);
+      for ( auto v : elem_vs )
+        vertex_tags[v->id()].emplace_back(*it);
     }
   }
 
+  for ( auto & [ vid, tags ] : vertex_tags ) {
+    std::sort( tags.begin(), tags.end() );
+    auto last = std::unique( tags.begin(), tags.end() );
+    auto vtx = vertices[vid];
+    for ( auto it=tags.begin(); it != last; ++it ) {
+      vtx->tag( *it );
+    }
+  }
 
   //----------------------------------------------------------------------------
   // create the cells
@@ -3731,7 +3753,9 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
       const auto & conn = mesh_def->entities_crs(from_dim, to_dim);
       for ( size_t i=0; i<conn.size(); ++i ) {
         auto global_id = local2global[i];
-        my_counts.emplace(global_id, conn.at(i).size());
+        auto res = my_counts.emplace(global_id, conn.at(i).size());
+        if (!res.second) 
+          THROW_RUNTIME_ERROR("multiple local ids map to one global");
       }
 
       // get the ghost connectivity and count it

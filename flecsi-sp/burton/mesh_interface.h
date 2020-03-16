@@ -31,10 +31,12 @@ using real_t = mesh_t::real_t;
 //! \param [in] mesh the mesh object
 ////////////////////////////////////////////////////////////////////////////////
 void update_geometry( 
-  flecsi_sp::utils::client_handle_r<mesh_t> mesh
+  flecsi_sp::utils::client_handle_r<mesh_t> mesh,
+  int alpha_,
+  int axis_
 ) {
   
-  mesh.update_geometry();
+  mesh.update_geometry(alpha_, axis_);
 
 }
 
@@ -84,11 +86,24 @@ public:
 
   void setup(size_t time_cnt, real_t soln_time, ristra::initialization::input_t & input)
   {
+   
+    auto mesh_input = input["mesh"];
+    int alpha_= 0;
+    int axis_ = 1;
+    if (!mesh_input.empty()){
+      auto geom = mesh_input["geom"].as<std::string>();
+      auto alpha_axis_vec = initialize_geometry(geom);
+      alpha_ = alpha_axis_vec[0];
+      axis_ = alpha_axis_vec[1];
+    }
+
     auto f = flecsi_execute_task( 
       update_geometry, 
       flecsi_sp::burton,
       index, 
-      handle_
+      handle_,
+      alpha_,
+      axis_
     );
     f.wait();  // DONT GO FORWARD UNTIL DONE!
   
@@ -101,6 +116,60 @@ public:
   }
 
   auto get_handle_ptr() { return &handle_; }
+
+  //==============================================================================
+  //! \brief set the geometry variables
+  //! cartesian -> cartesian geometry, no assumptions of symmetry
+  //! cylindrical_x -> cylindrical geometry, x-axis of symmetry
+  //! cylindrical_y -> cylindrical geometry, y-axis of symmetry
+  //! \param [in] geom  The chosen geometry for the problem (string)
+  //==============================================================================
+  static std::vector<int> initialize_geometry(std::string geom){
+
+    // Create an enumerated list of the geometries
+    //  explicitly assign enumerated values
+    enum geom_enum{cartesian=0,
+                   cylindrical_x = 1,
+                   cylindrical_y = 2};
+    // Create a map of the possible geometry strings
+    //  same values as with the enumeration
+    std::map<std::string, int> geom_choices_ = {
+      {"cartesian", 0},
+      {"cylindrical_x", 1},
+      {"cylindrical_y", 2}};
+
+    // Check if the geometry is available
+    //  assign value for runtime error if geom not available
+    int geom_val_ = -1;
+    if (geom_choices_.find(geom) != geom_choices_.end())
+      geom_val_ = geom_choices_.at(geom);
+    
+    // Create container and fill the geometry values
+    // alpha -> zeroth value, corresponds to switch from cartesian to cylindrical
+    // axis -> first value, choice of symmetry axis, irrelevant for cartesian
+    std::vector<int> alpha_axis_vec;
+    switch(geom_val_)
+      {
+      case cartesian:
+        alpha_axis_vec.push_back(0); //alpha
+        alpha_axis_vec.push_back(0); //axis
+        break;
+      case cylindrical_x:
+        alpha_axis_vec.push_back(1); //alpha
+        alpha_axis_vec.push_back(0); //axis
+        break;
+      case cylindrical_y:
+        alpha_axis_vec.push_back(1); //alpha
+        alpha_axis_vec.push_back(1); //axis
+        break;
+      default:
+        THROW_RUNTIME_ERROR(
+          "Unknown geometry type provided: \""<< geom << "\""
+          );
+        break;
+      }
+    return alpha_axis_vec;
+  }
 
 };
 

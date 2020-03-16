@@ -66,7 +66,6 @@ public:
   static constexpr auto num_dimensions = config_t::num_dimensions;
   //! \brief the number of domains
   static constexpr auto num_domains = config_t::num_domains;
-
   //! a compile string type
   using const_string_t = typename config_t::const_string_t;
   
@@ -111,8 +110,7 @@ public:
 
   //! Side type.
   using side_t = typename types_t::side_t;
-
-
+ 
   //! the index spaces type
   using index_spaces_t = typename types_t::index_spaces_t;
   //! special subspace for 
@@ -130,7 +128,7 @@ public:
 
   //! the ownership ( exclusive, shared, ghost ) types
   using partition_t = flecsi::partition_t;
-
+  
   //! other special subsets that we have defined
   enum class subset_t {
     overlapping
@@ -1143,26 +1141,29 @@ void set_regions(std::vector<int> &region_ids)
 
     // now set the boundary flags.
     for ( auto f : faces() ) {
-	    auto cs = cells(f);
+      auto cs = cells(f);
       f->set_owner(cs[0]);
       f->set_boundary( (cs.size() == 1) );
       // if there is only one cell, it is a boundary
       if ( f->is_boundary() ) {
         if constexpr ( num_dimensions >= 2 ) {
-	        // cell flags
-	        for ( auto c : cs )
-	          c->set_touching_boundary( true );
-          // point flags are only for 2d and 3d
-          auto ps = vertices(f);
-          for ( auto p : ps )
-            p->set_boundary( true );
-        }
+            // cell flags
+            for ( auto c : cs )
+              c->set_touching_boundary( true );
+            // point flags are only for 2d and 3d
+            auto ps = vertices(f);
+            for ( auto p : ps ){
+              p->set_boundary( true );
+              /* std::cout << p.id() << " "; */
+            }
+            /* std::cout << std::endl; */
+          }
         // edge flags are only for 3d
         if constexpr ( num_dimensions == 3 ) {
-          auto es = edges(f);
-          for ( auto e : es ) 
-            e->set_boundary( true );
-        }
+            auto es = edges(f);
+            for ( auto e : es ) 
+              e->set_boundary( true );
+          }
       } // is_boundary
     } // for
     
@@ -1372,7 +1373,7 @@ void set_regions(std::vector<int> &region_ids)
   //!---------------------------------------------------------------------------
   //! \brief Compute the goemetry.
   //!---------------------------------------------------------------------------
-  void update_geometry()
+  void update_geometry(int alpha=0, int axis=1)
   {
     // get the mesh info
     auto cs = cells();
@@ -1381,7 +1382,8 @@ void set_regions(std::vector<int> &region_ids)
     auto num_cells = cs.size();
     auto num_faces = fs.size();
     auto num_edges = es.size();
-
+    
+    // default 
     #pragma omp parallel
     {
 
@@ -1414,11 +1416,11 @@ void set_regions(std::vector<int> &region_ids)
       //--------------------------------------------------------------------------
       // compute cell parameters (in 2D and 3D, this must follow
       // edges and faces)
-
-      if ( num_dimensions > 1 ) {
+      if ( num_dimensions > 1  ) {
         #pragma omp for
-        for ( counter_t i=0; i<num_cells; i++ )
-          cs[i]->update( this );
+        for ( counter_t i=0; i<num_cells; i++ ){
+          cs[i]->update( this, alpha,axis );
+        }
       }
 
       //--------------------------------------------------------------------------
@@ -1462,8 +1464,7 @@ void set_regions(std::vector<int> &region_ids)
     } // end omp parallel
 
   }
-
-
+    
   //============================================================================
   //! \brief Install a boundary and tag the relatex entities.
   //============================================================================
