@@ -386,7 +386,7 @@ build:centOS_mpich_mpi_clang:
     <<: *compiler_clang
 
 .build:centOS_mpich_mpi_clang_release:
-  extends: .build:centOS_mpich_mpi_clang
+  extends: build:centOS_mpich_mpi_clang
   variables:
     <<: *buildtype_release
 
