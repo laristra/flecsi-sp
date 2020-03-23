@@ -1852,7 +1852,7 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
   // add them to the index space
   auto & vert_subspace =
-     mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+     mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
      vert_subspace.push_back( v->template global_id<0>() );
 }
@@ -1917,12 +1917,12 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
   // add them to the index space
   auto & vert_subspace =
-    mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+    mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
     vert_subspace.push_back( v->global_id() );
 
   auto & edge_subspace =
-    mesh.template get_index_subspace< index_subspaces::overlapping_edges >();
+    mesh.template sub_ids< index_subspaces::overlapping_edges >();
   for ( auto e : my_edges )
     edge_subspace.push_back( e->global_id() );
 }
@@ -1992,17 +1992,17 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
 
   // add them to the index space
   auto & vert_subspace =
-    mesh.template get_index_subspace< index_subspaces::overlapping_vertices >();
+    mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
     vert_subspace.push_back( v->global_id() );
 
   auto & edge_subspace =
-    mesh.template get_index_subspace< index_subspaces::overlapping_edges >();
+    mesh.template sub_ids< index_subspaces::overlapping_edges >();
   for ( auto e : my_edges )
     edge_subspace.push_back( e->global_id() );
 
   auto & face_subspace =
-    mesh.template get_index_subspace< index_subspaces::overlapping_faces >();
+    mesh.template sub_ids< index_subspaces::overlapping_faces >();
   for ( auto f : my_faces )
     face_subspace.push_back( f->global_id() );
 }
@@ -2838,7 +2838,7 @@ void make_corners(
     for ( auto face_id : cell_faces ) {
 
       // copy the vertices/faces of this face
-      auto face_verts = faces_to_vertices.at(face_id).vec();
+      auto face_verts = to_vector(faces_to_vertices.at(face_id));
       const auto & face_edges = faces_to_edges.at(face_id);
 
       // check if this cell owns this face, if it doesnt, rotate the

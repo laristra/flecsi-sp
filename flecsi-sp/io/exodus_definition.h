@@ -1045,7 +1045,7 @@ public:
     
     std::vector< std::vector<index_t> > sorted_face_vs;
     for ( size_t f=0; f<face_vertices.size(); ++f ) {
-      auto vs = face_vertices.at(f).vec();
+      auto vs = to_vector(face_vertices.at(f));
       std::sort( vs.begin(), vs.end() );
       sorted_face_vs.emplace_back( vs );
     }
@@ -1062,7 +1062,7 @@ public:
       for ( auto s : side_pair.second ) {
         if (side_ids[s]+1==ss_id) {
           // vertices
-          auto vs = side_vertices.at(s).vec();
+          auto vs = to_vector(side_vertices.at(s));
           for ( auto & v : vs ) v = vertex_global_to_local.at(v);
           std::sort( vs.begin(), vs.end() );
           // faces
