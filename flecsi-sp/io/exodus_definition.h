@@ -208,9 +208,11 @@ public:
       if (exo_id < 0)
         clog_fatal(
             "Problem opening exodus file, ex_open() returned " << exo_id);
+      
       //This sets the file to read IDs as 64 bit.  If the file does not have 
       //64 bit IDs, it should have no effect. 
       ex_set_int64_status(exo_id, EX_ALL_INT64_API);
+
       return exo_id;
 
     } else if ((mode & std::ios_base::out) == std::ios_base::out) {
