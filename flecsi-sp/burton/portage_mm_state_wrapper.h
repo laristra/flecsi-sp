@@ -122,6 +122,16 @@ public:
   // Public Members
   //============================================================================
 
+  std::vector<std::string> names() const {
+    std::vector<std::string> var_names;
+    var_names.reserve(var_map_.size());
+
+    for (const auto & pair : var_map_)
+      var_names.emplace_back(pair.first);
+
+    return var_names;
+  }
+
   //! \brief Add a variable of entity type (cell) 
   //! field that needs to be remapped to the variable map
   template< typename T >

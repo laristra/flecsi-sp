@@ -16,7 +16,7 @@
 #include <flecsi-sp/burton/portage_state_wrapper.h>
 #include <flecsi-sp/utils/types.h>
 
-#include <portage/driver/mmdriver.h>
+#include <flecsi-sp/burton/portage_helpers.h>
 
 // system includes
 #include <array>
@@ -163,71 +163,6 @@ void output(
 
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief make a remapper object
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename mesh_wrapper_a_t,
-  typename state_wrapper_a_t,
-  typename mesh_wrapper_b_t,
-  typename state_wrapper_b_t,
-  typename var_name_t
-  >
-auto make_remapper(
-         mesh_wrapper_a_t & mesh_wrapper_a,
-         state_wrapper_a_t & state_wrapper_a,
-         mesh_wrapper_b_t & mesh_wrapper_b,
-         state_wrapper_b_t & state_wrapper_b,
-         var_name_t & var_names
-         ) {
-
-  std::cout << " Inside make_remapper" << std::endl;
-  for ( auto v: var_names) {
-    state_wrapper_a.check_map(v);
-    state_wrapper_b.check_map(v);
-  }
-  std::cout << " Inside make_remapper" << std::endl;
-
-  constexpr int dim = mesh_wrapper_a_t::mesh_t::num_dimensions;
-
-  if constexpr( dim == 2) {
-
-    Portage::MMDriver<
-      Portage::SearchKDTree,
-      Portage::IntersectR2D,
-      Portage::Interpolate_2ndOrder,
-      mesh_t::num_dimensions,
-      portage_mesh_wrapper_t<mesh_t>,
-      portage_state_wrapper_t<mesh_t>,
-      portage_mesh_wrapper_t<mesh_t>,
-      portage_state_wrapper_t<mesh_t> > remapper(
-                mesh_wrapper_a,
-                state_wrapper_a,
-                mesh_wrapper_b,
-                state_wrapper_b );
-      return std::move(remapper);
-
-  } else if (dim == 3) {
-
-    Portage::MMDriver<
-      Portage::SearchKDTree,
-      Portage::IntersectR3D,
-      Portage::Interpolate_2ndOrder,
-      mesh_t::num_dimensions,
-      portage_mesh_wrapper_t<mesh_t>,
-      portage_state_wrapper_t<mesh_t>,
-      portage_mesh_wrapper_t<mesh_t>,
-      portage_state_wrapper_t<mesh_t> > remapper(
-                mesh_wrapper_a,
-                state_wrapper_a,
-                mesh_wrapper_b,
-                state_wrapper_b );
-      return std::move(remapper);
-
-  } else {
-    static_assert(dim!=3 || dim!=2, "Make_remapper dimensions are out of range");
-  }
-}
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Test the remap capabilities of portage
@@ -335,33 +270,40 @@ void remap_test(
     state_wrapper_a.check_map(v);
     state_wrapper_b.check_map(v);
   }
-  std::cout << " Before make_remapper" << std::endl;
-
-  auto remapper = make_remapper(
-             mesh_wrapper_a,
-             state_wrapper_a,
-             mesh_wrapper_b,
-             state_wrapper_b,
-             var_names);
+  std::cout << " Before distribute_mesh" << std::endl;
   
+	auto distributed = distrubute_mesh(
+      mesh_wrapper_a,
+      state_wrapper_a,
+      mesh_wrapper_b,
+      state_wrapper_b,
+			var_names);
 
-  // Assign the remap varaible names for the portage driver
-  remapper.set_remap_var_names(var_names);
-  //remapper.set_limiter( Portage::Limiter_type::BARTH_JESPERSEN );
-  remapper.set_limiter( Portage::Limiter_type::NOLIMITER );
+  std::cout << " Before make_remapper" << std::endl;
+  
+  auto remapper = make_remapper<num_dims>(
+             *distributed.first,
+             *distributed.second,
+             mesh_wrapper_b,
+             state_wrapper_b);
 
-  std::cout << " After make_remapper" << std::endl;
-  for ( auto v: var_names) {
-    state_wrapper_a.check_map(v);
-    state_wrapper_b.check_map(v);
-  }
-  std::cout << " After make_remapper" << std::endl;
+  std::cout << " Before weights" << std::endl;
 
   // Do the remap 
-  // Argument is boolean: distributed (true or false)
-  auto mpi_comm = MPI_COMM_WORLD;
-  Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
-  remapper.run(&mpiexecutor);
+	compute_weights<num_dims>(remapper);
+
+  std::cout << "Before interpolate" << std::endl;
+	
+  constexpr auto RealMin = std::numeric_limits<double>::min();
+  constexpr auto RealMax = std::numeric_limits<double>::max();
+
+  for (const auto & var : var_names) {  
+    remapper.template interpolate<
+      real_t, Portage::Entity_kind::CELL, Portage::Interpolate_2ndOrder
+    >( var, var, RealMin, RealMax, Portage::Limiter_type::NOLIMITER,
+        Portage::Boundary_Limiter_type::BND_NOLIMITER);
+  }
+
 
   //---------------------------------------------------------------------------
   // Swap old for new data
@@ -435,6 +377,7 @@ void remap_test(
   }
 
   // output L1, L2 errors for debug
+  auto mpi_comm = MPI_COMM_WORLD;
   real_t total_vol_sum{0}, L1_sum{0}, L2_sum{0};
   int ret;
   ret = MPI_Allreduce( &total_vol, &total_vol_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
