@@ -132,7 +132,8 @@ endif()
 # Boost is needed for program options
 #------------------------------------------------------------------------------#
 
-find_package(Boost 1.59.0 COMPONENTS program_options REQUIRED)
+find_package(Boost 1.59.0 COMPONENTS program_options QUIET)
+
 # this option overrides what will get set in cinch_load_extras()
 option(
   ENABLE_BOOST

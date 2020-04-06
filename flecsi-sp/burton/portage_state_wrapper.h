@@ -84,6 +84,16 @@ public:
   //============================================================================
   // Public Members
   //============================================================================
+  std::vector<std::string> names() const {
+    std::vector<std::string> var_names;
+    var_names.reserve(var_map.size());
+
+    for (const auto & pair : var_map)
+      var_names.emplace_back(pair.first);
+
+    return var_names;
+  }
+
 
   //! \brief Add a field that needs to be remapped to the variable map
   void add_cell_field( std::string var_name, double* data) {

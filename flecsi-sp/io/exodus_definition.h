@@ -208,6 +208,10 @@ public:
       if (exo_id < 0)
         clog_fatal(
             "Problem opening exodus file, ex_open() returned " << exo_id);
+      
+      //This sets the file to read IDs as 64 bit.  If the file does not have 
+      //64 bit IDs, it should have no effect. 
+      ex_set_int64_status(exo_id, EX_ALL_INT64_API);
 
       return exo_id;
 
@@ -1045,7 +1049,7 @@ public:
     
     std::vector< std::vector<index_t> > sorted_face_vs;
     for ( size_t f=0; f<face_vertices.size(); ++f ) {
-      auto vs = face_vertices.at(f).vec();
+      auto vs = to_vector(face_vertices.at(f));
       std::sort( vs.begin(), vs.end() );
       sorted_face_vs.emplace_back( vs );
     }
@@ -1062,7 +1066,7 @@ public:
       for ( auto s : side_pair.second ) {
         if (side_ids[s]+1==ss_id) {
           // vertices
-          auto vs = side_vertices.at(s).vec();
+          auto vs = to_vector(side_vertices.at(s));
           for ( auto & v : vs ) v = vertex_global_to_local.at(v);
           std::sort( vs.begin(), vs.end() );
           // faces
