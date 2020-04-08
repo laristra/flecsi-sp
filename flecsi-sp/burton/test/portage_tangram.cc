@@ -259,7 +259,7 @@ void remap_tangram_test(
   // Apply the new coordinates to the mesh and update its geometry.
   // Here we save some info we need.
   std::vector< real_t > target_cell_volume(mesh.num_cells());
-  std::vector< vector_t > target_cell_centroid(mesh.num_cells());
+  //!  std::vector< vector_t > target_cell_centroid(mesh.num_cells());
   // update coordinates
   for ( auto v : mesh.vertices() )
     std::swap(v->coordinates(), new_vertex_coords(v));
@@ -267,7 +267,7 @@ void remap_tangram_test(
   for ( auto c: mesh.cells() ) {
     c->update(&mesh);
     target_cell_volume[c] = c->volume();
-    target_cell_centroid[c] = c->centroid();
+    //! Find the class here   target_cell_centroid[c] = c->centroid();
   }
 
   // Store the cell volumes for the source mesh 
@@ -290,8 +290,8 @@ void remap_tangram_test(
 
   target_mesh_wrapper.set_new_coordinates(
     &new_vertex_coords(0),
-    target_cell_volume.data(),
-    target_cell_centroid.data() );
+    target_cell_volume.data());
+    //    target_cell_centroid.data() );
 
   // Create the state wrapper objects
   portage_mm_state_wrapper_t<mesh_t> source_state_wrapper(mesh);
@@ -329,10 +329,10 @@ void remap_tangram_test(
       std::string{"mat_volfracs"}, entity_kind_t::CELL,
       field_type_t::MULTIMATERIAL_FIELD);
 
-  using tangram_point_t = Tangram::Point<num_dims>;
-  auto matcentroids = source_state_wrapper.template add_cell_field<tangram_point_t>(
-      std::string{"mat_centroids"}, entity_kind_t::CELL,
-      field_type_t::MULTIMATERIAL_FIELD);
+    //! using tangram_point_t = Tangram::Point<num_dims>;
+  // auto matcentroids = source_state_wrapper.template add_cell_field<tangram_point_t>(
+  //     std::string{"mat_centroids"}, entity_kind_t::CELL,
+  //     field_type_t::MULTIMATERIAL_FIELD);
 
   // now set fields to be reconstructed
   auto density_name = "density";
@@ -349,29 +349,29 @@ void remap_tangram_test(
     }
   }
 
-  // Get the material centroid values via Tangram
+  // // Get the material centroid values via Tangram
   auto mpi_comm = MPI_COMM_WORLD;
-  Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
-  bool all_convex = false;
-  std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
-  auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
-  								     tols,
-  								     all_convex);  
-  // Create the mat centroid list
-  auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
-                                                            source_interface_reconstructor,
-                                                            &mpiexecutor);
-  // Hand-off mat centroid list to matcentroid pointer object
-  offset = 0;
-  for (int m=0; m<max_mats; ++m){
-    auto mat_index = 0;
-    for (auto c: velocity_handle.indices(m) ){
-      matcentroids[offset] = centroid_list[m][mat_index]; 
-      density[offset] = prescribed_function( centroid_list[m][mat_index] );
-      offset++;
-      mat_index++;
-    }
-  }
+  // Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
+  // bool all_convex = false;
+  // std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
+  // auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
+  // 								     tols,
+  // 								     all_convex);  
+  // // Create the mat centroid list
+  // auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
+  //                                                           source_interface_reconstructor,
+  //                                                           &mpiexecutor);
+  // // Hand-off mat centroid list to matcentroid pointer object
+  // offset = 0;
+  // for (int m=0; m<max_mats; ++m){
+  //   auto mat_index = 0;
+  //   for (auto c: velocity_handle.indices(m) ){
+  //     matcentroids[offset] = centroid_list[m][mat_index]; 
+  //     density[offset] = prescribed_function( centroid_list[m][mat_index] );
+  //     offset++;
+  //     mat_index++;
+  //   }
+  // }
 
   // Build remapper
 	auto distributed = distrubute_mesh(

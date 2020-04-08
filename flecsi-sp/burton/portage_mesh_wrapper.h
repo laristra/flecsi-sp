@@ -172,12 +172,10 @@ public:
 
   void set_new_coordinates(
     const vector_t * node_coordinates,
-    const real_t * cell_volumes,
-    const vector_t * cell_centroids )
+    const real_t * cell_volumes )
   {
     node_coordinates_ = node_coordinates;
     cell_volumes_ = cell_volumes;
-    cell_centroids_ = cell_centroids;
   }
 
   //============================================================================
