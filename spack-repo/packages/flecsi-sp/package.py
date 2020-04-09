@@ -16,17 +16,18 @@ class FlecsiSp(CMakePackage):
 
     variant('build_type', default='Release', values=('Debug', 'Release'),
             description='The build type to build', multi=False)
-    variant('backend', default='mpi', values=('serial', 'mpi', 'legion', 'charm++', 'hpx'),
+    variant('backend', default='mpi', values=('serial', 'mpi', 'legion', 'charmpp', 'hpx'),
             description='Backend to use for distributed memory', multi=False)
-    variant('cinch', default=False,
+    variant('cinch', default=True,
             description='Enable External Cinch')
 
-    depends_on('cmake@3.12:',  type='build')
+    depends_on('cmake@3.12:')
     # Requires cinch > 1.0 due to cinchlog installation issue
     depends_on('cinch@1.01:', type='build', when='+cinch')
     depends_on('mpi', when='backend=mpi')
     depends_on('mpi', when='backend=legion')
     depends_on('mpi', when='backend=hpx')
+    depends_on('mpi', when='backend=charmpp')
     depends_on('legion@ctrl-rep-5 +shared +mpi +hdf5', when='backend=legion')
     depends_on('hpx@1.3.0 cxxstd=14 build_type=Release', when='backend=hpx')
     depends_on('boost@1.70.0: cxxstd=14 +program_options')
@@ -50,5 +51,21 @@ class FlecsiSp(CMakePackage):
             options.append('-DENABLE_UNIT_TESTS=ON')
         else:
             options.append('-DENABLE_UNIT_TESTS=OFF')
+
+        if spec.variants['backend'].value == 'legion':
+            options.append('-DFLECSI_RUNTIME_MODEL=legion')
+            options.append('-DENABLE_MPI=ON')
+        elif spec.variants['backend'].value == 'mpi':
+            options.append('-DFLECSI_RUNTIME_MODEL=mpi')
+            options.append('-DENABLE_MPI=ON')
+        elif spec.variants['backend'].value == 'hpx':
+            options.append('-DFLECSI_RUNTIME_MODEL=hpx')
+            options.append('-DENABLE_MPI=ON')
+        elif spec.variants['backend'].value == 'charmpp':
+            options.append('-DFLECSI_RUNTIME_MODEL=charmpp')
+            options.append('-DENABLE_MPI=ON')
+        else:
+            options.append('-DFLECSI_RUNTIME_MODEL=serial')
+            options.append('-DENABLE_MPI=OFF')
 
         return options

@@ -54,17 +54,16 @@ before_script:
   - rm ${FLECSISP_ENV_SOURCE_FILE} || /bin/true
   - cd ${CI_PROJECT_DIR}
   - git clone git@gitlab.lanl.gov:laristra/ristra_spackages.git
+  - . ${SPACK_ROOT}/share/spack/setup-env.sh
   - |
     ( flock -e 200
-    source ${SPACK_ROOT}/share/spack/setup-env.sh;
-    # spack load -r flecsi-sp-deps%gcc@${FLECSISP_GCC_COMPILER#*/} ~graphviz ^${FLECSISP_MPI_PACKAGE} || /bin/true;
     spack repo rm ${FLECSISP_SPACK_SCOPE} || /bin/true ;
     spack repo rm lanl_ristra || /bin/true ;
     spack repo add ${CI_PROJECT_DIR}/ristra_spackages/spack-repo;
     spack repo add ${CI_PROJECT_DIR}/spack-repo;
     spack repo list;
     echo ${FLECSISP_SPACK_FULL_SPEC};
-    spack build-env --dump ${FLECSISP_ENV_SOURCE_FILE} "${FLECSISP_SPACK_FULL_SPEC}" || /bin/true;
+    spack module tcl loads --dependencies ${FLECSISP_SPACK_FULL_SPEC} | tee ${FLECSISP_ENV_SOURCE_FILE} || /bin/true;
     spack repo rm ${FLECSISP_SPACK_SCOPE};
     spack repo rm lanl_ristra;
     ) 200>${DEPS_LOCK}
@@ -72,7 +71,6 @@ before_script:
   - |
     if [[ ${CI_JOB_NAME} =~ "clang" ]];
     then
-      module unload clang;
       module load clang/${FLECSISP_CLANG_VERSION};
     elif [[ ${CI_JOB_NAME} =~ "intel" ]];
     then
@@ -200,8 +198,8 @@ before_script:
       spack repo add ${CI_PROJECT_DIR}/spack-repo;
       spack repo list;
       spack clean --all;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^openmpi@${FLECSISP_OPENMPI_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
-      spack install --show-log-on-error --only dependencies ${FLECSISP_SPACK_SPEC} ^mpich@${FLECSISP_MPICH_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error ${FLECSISP_SPACK_SPEC} ^openmpi@${FLECSISP_OPENMPI_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
+      spack install --show-log-on-error ${FLECSISP_SPACK_SPEC} ^mpich@${FLECSISP_MPICH_VERSION}%gcc@${FLECSISP_GCC_VERSION} | tee -a spack_tmp.out;
       spack repo rm ${FLECSISP_SPACK_SCOPE};
       spack repo rm lanl_ristra;
       ) 200>${DEPS_LOCK}
@@ -227,10 +225,12 @@ before_script:
     cd ${CI_PROJECT_DIR}
     export _tmp_username=${LIBRISTRA_USERNAME//PLUS/+}
     export _tmp_username=${_tmp_username//MINUS/-}
-    git clone https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
+    #git clone https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
+    git clone --recursive https://github.com/laristra/libristra.git
     mv libristra libristra-dev
     cd libristra-dev
-    cp -R ../cinch .
+    #cp -R ../cinch .
+    git submodule update --init --recursive
     mkdir -p build
     mkdir -p build/install
     cd build
@@ -245,11 +245,13 @@ before_script:
     cd ${CI_PROJECT_DIR}
     export _tmp_username=${FLECSI_USERNAME//PLUS/+}
     export _tmp_username=${_tmp_username//MINUS/-}
-    git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
+    #git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
+    git clone --recursive https://github.com/laristra/flecsi.git
     mv flecsi flecsi-dev
     cd flecsi-dev
     git checkout 1.4
-    cp -R ../cinch .
+    #cp -R ../cinch .
+    git submodule update --init --recursive
     mkdir -p build
     mkdir -p build/install
     cd build
