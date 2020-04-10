@@ -22,7 +22,7 @@ class FlecsiSp(CMakePackage):
             description='Enable External Cinch')
     variant('shared', default=True,
             description='Build shared libraries')
-    variant('hdf5', default=False,
+    variant('hdf5', default=True,
             description='Enable HDF5 Support')
     variant('caliper', default=False,
             description='Enable Caliper Support')
