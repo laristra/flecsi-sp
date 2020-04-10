@@ -223,50 +223,50 @@ before_script:
     mkdir -p ${CI_PROJECT_DIR}/build
     mkdir -p ${CI_PROJECT_DIR}/build/install
     cd ${CI_PROJECT_DIR}
-    export _tmp_username=${LIBRISTRA_USERNAME//PLUS/+}
-    export _tmp_username=${_tmp_username//MINUS/-}
+    #export _tmp_username=${LIBRISTRA_USERNAME//PLUS/+}
+    #export _tmp_username=${_tmp_username//MINUS/-}
     #git clone https://${_tmp_username}:${LIBRISTRA_PASSWORD}@gitlab.lanl.gov/laristra/libristra.git
-    git clone --recursive https://github.com/laristra/libristra.git
-    mv libristra libristra-dev
-    cd libristra-dev
+    #git clone --recursive https://github.com/laristra/libristra.git
+    #mv libristra libristra-dev
+    #cd libristra-dev
     #cp -R ../cinch .
-    git submodule update --init --recursive
-    mkdir -p build
-    mkdir -p build/install
-    cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/libristra-dev/build/install \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DENABLE_LUA=ON \
-        -DENABLE_UNIT_TESTS=ON \
-        ..
-    make -k -j2 -l40 || make VERBOSE=1
-    make install
-    export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/libristra-dev/build/install:$CMAKE_PREFIX_PATH
-    cd ${CI_PROJECT_DIR}
-    export _tmp_username=${FLECSI_USERNAME//PLUS/+}
-    export _tmp_username=${_tmp_username//MINUS/-}
+    #git submodule update --init --recursive
+    #mkdir -p build
+    #mkdir -p build/install
+    #cd build
+    #cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/libristra-dev/build/install \
+    #    -DCMAKE_BUILD_TYPE=Release \
+    #    -DENABLE_LUA=ON \
+    #    -DENABLE_UNIT_TESTS=ON \
+    #    ..
+    #make -k -j2 -l40 || make VERBOSE=1
+    #make install
+    #export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/libristra-dev/build/install:$CMAKE_PREFIX_PATH
+    #cd ${CI_PROJECT_DIR}
+    #export _tmp_username=${FLECSI_USERNAME//PLUS/+}
+    #export _tmp_username=${_tmp_username//MINUS/-}
     #git clone https://${_tmp_username}:${FLECSI_PASSWORD}@gitlab.lanl.gov/laristra/flecsi.git
-    git clone --recursive https://github.com/laristra/flecsi.git
-    mv flecsi flecsi-dev
-    cd flecsi-dev
-    git checkout 1.4
+    #git clone --recursive https://github.com/laristra/flecsi.git
+    #mv flecsi flecsi-dev
+    #cd flecsi-dev
+    #git checkout 1.4
     #cp -R ../cinch .
-    git submodule update --init --recursive
-    mkdir -p build
-    mkdir -p build/install
-    cd build
-    cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/flecsi-dev/build/install \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DFLECSI_RUNTIME_MODEL=$RUNTIME \
-        -DFLECSI_ENABLE_TUTORIAL=OFF \
-        -DENABLE_UNIT_TESTS=ON \
-        -DENABLE_DOXYGEN=OFF \
-        -DENABLE_DOCUMENTATION=OFF \
-        -DENABLE_COVERAGE_BUILD=OFF \
-        ..
-    make -k VERBOSE=1 -j2 -l40
-    make install
-    export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/flecsi-dev/build/install:$CMAKE_PREFIX_PATH
+    #git submodule update --init --recursive
+    #mkdir -p build
+    #mkdir -p build/install
+    #cd build
+    #cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/flecsi-dev/build/install \
+    #    -DCMAKE_BUILD_TYPE=Release \
+    #    -DFLECSI_RUNTIME_MODEL=$RUNTIME \
+    #    -DFLECSI_ENABLE_TUTORIAL=OFF \
+    #    -DENABLE_UNIT_TESTS=ON \
+    #    -DENABLE_DOXYGEN=OFF \
+    #    -DENABLE_DOCUMENTATION=OFF \
+    #    -DENABLE_COVERAGE_BUILD=OFF \
+    #    ..
+    #make -k VERBOSE=1 -j2 -l40
+    #make install
+    #export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/flecsi-dev/build/install:$CMAKE_PREFIX_PATH
     cd ${CI_PROJECT_DIR}/build/
     cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
