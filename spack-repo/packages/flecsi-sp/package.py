@@ -12,7 +12,7 @@ class FlecsiSp(CMakePackage):
     '''
     git      = 'https://https://github.com/laristra/flecsi-sp.git'
 
-    version('master', branch='master', submodules=False, preferred=True)
+    version('1.4', branch='1.4', submodules=False, preferred=True)
 
     variant('build_type', default='Release', values=('Debug', 'Release'),
             description='The build type to build', multi=False)
