@@ -37,7 +37,7 @@ variables:
   FLECSISP_OPENMPI_VERSION: "3.1.4"
   FLECSISP_INTEL_VERSION: "19.0.2"
   FLECSISP_CLANG_VERSION: "8.0.1"
-  FLECSISP_GCC_VERSION: "7.4.0"
+  FLECSISP_GCC_VERSION: "8.3.0"
   FLECSISP_PYTHON_VERSION: "3.5.1"
   FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
@@ -222,51 +222,30 @@ before_script:
     # git submodule init
     # git config submodule.cinch.url https://github.com/laristra/cinch.git
     # git submodule update --init --recursive
-
     mkdir -p ${CI_PROJECT_DIR}/build
     mkdir -p ${CI_PROJECT_DIR}/build/install
     cd ${CI_PROJECT_DIR}
-
     echo "BUILDING TANGRAM"
-    #build tangram
     git clone --recurse-submodules ssh://git@xcp-stash.lanl.gov:7999/laristra/tangram.git
-    cd tangram
-    mkdir build
-    cd build
+    mkdir tangram/build
+    cd tangram/build
     cmake \
     -D CMAKE_C_COMPILER=`which mpicc` \
     -D CMAKE_CXX_COMPILER=`which mpiCC` \
     -D CMAKE_BUILD_TYPE=Release \
     -D ENABLE_UNIT_TESTS=True \
     -D ENABLE_MPI=True \
-    -D CMAKE_INSTALL_PREFIX=$HOME/tangram/build/install \
+    -D CMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/tangram/build/install \
     ..
     make -j2
-    make test
-    echo " ********I am in " 
-    pwd
-    ls
-    cat Makefile
-    echo "*************cmake_install.cmake*************"
-    cat cmake_install.cmake
-    echo "*************cmake_install.cmake*************"
     make install/local
     echo "DONE BUILDING TANGRAM"
-
-    #build portage
     echo "BUILDING PORTAGE"
-    cd $HOME
+    cd ${CI_PROJECT_DIR}
     git clone --recurse-submodules ssh://git@xcp-stash.lanl.gov:7999/laristra/portage.git
-    cd portage    
-    #portage requires LAPACKE
-    spack install netlib-lapack lapacke=true
-    ls /home/gitlab-runner/ci-spack/spack-sp/opt/spack/linux-centos7-skylake_avx512/gcc-9.1.0
-    #where is tangram?
-    echo "PWD TANGRAM"
-    ls $HOME/tangram
-    ls $HOME/tangram/tangram
-    echo "printing home/tangram/build"
-    ls $HOME/tangram/build
+    mkdir portage/build
+    cd portage/build    
+    
     TANGRAM_INSTALL_PREFIX=$HOME/tangram/build/install
     LAPACKE_DIR=/home/gitlab-runner/ci-spack/spack-sp/opt/spack/linux-centos7-skylake_avx512/gcc-9.1.0/netlib-lapack-3.8.0-mfux7fgjy3qwbiogw4ojziinnek4kjbn
 
@@ -288,7 +267,6 @@ before_script:
     make -j4
     make install
     echo "DONE BUILDING PORTAGE"
-
     cd ${CI_PROJECT_DIR}/build/
     cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
