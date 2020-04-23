@@ -60,6 +60,9 @@ class FlecsiSp(CMakePackage):
     #depends_on('parmetis@4.0.3:')
     #depends_on('hdf5+hl+mpi')
     #depends_on('lua@5.3.5')
+    
+    #portage requires LAPACKE
+    depends_on('netlib-lapack lapacke=true')
 
     def cmake_args(self):
         spec = self.spec

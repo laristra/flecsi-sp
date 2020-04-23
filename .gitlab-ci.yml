@@ -8,7 +8,6 @@ stages:
   - Deploy
 
 variables:
-#amh: portage/wonton/tangram version
   #CI_DEBUG_TRACE: "true"
   GET_SOURCES_ATTEMPTS: 10
   ARTIFACT_DOWNLOAD_ATTEMPTS: 10
@@ -28,6 +27,7 @@ variables:
   CC: "gcc"
   CXX: "g++"
   CXXFLAGS: ""
+  GASNET_BACKTRACE: 1
   SPACK_ROOT: /home/gitlab-runner/ci-spack/spack-sp
   DEPS_LOCK: /home/gitlab-runner/ci-spack/deps-sp.pid
   #lock_fd: 314
@@ -37,8 +37,10 @@ variables:
   FLECSISP_OPENMPI_VERSION: "3.1.4"
   FLECSISP_INTEL_VERSION: "19.0.2"
   FLECSISP_CLANG_VERSION: "8.0.1"
-  FLECSISP_GCC_VERSION: "7.4.0"
+  FLECSISP_GCC_VERSION: "8.3.0"
   FLECSISP_PYTHON_VERSION: "3.5.1"
+  FLECSISP_TANGRAM_INSTALL_PREFIX: "${CI_PROJECT_DIR}/tangram/build/install"
+  FLECSISP_PORTAGE_INSTALL_PREFIX: "${CI_PROJECT_DIR}/portage/build/install"
   FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
   FLECSISP_SPACK_SPEC: "flecsi-sp%gcc@${FLECSISP_GCC_VERSION} backend=${RUNTIME}"
@@ -222,83 +224,52 @@ before_script:
     # git submodule init
     # git config submodule.cinch.url https://github.com/laristra/cinch.git
     # git submodule update --init --recursive
-
     mkdir -p ${CI_PROJECT_DIR}/build
     mkdir -p ${CI_PROJECT_DIR}/build/install
     cd ${CI_PROJECT_DIR}
-
     echo "BUILDING TANGRAM"
-    #build tangram
     git clone --recurse-submodules ssh://git@xcp-stash.lanl.gov:7999/laristra/tangram.git
-    cd tangram
-    mkdir build
-    cd build
+    mkdir tangram/build
+    cd tangram/build
     cmake \
     -D CMAKE_C_COMPILER=`which mpicc` \
     -D CMAKE_CXX_COMPILER=`which mpiCC` \
     -D CMAKE_BUILD_TYPE=Release \
     -D ENABLE_UNIT_TESTS=True \
     -D ENABLE_MPI=True \
-    -D CMAKE_INSTALL_PREFIX=$HOME/tangram/build/install \
+    -D CMAKE_INSTALL_PREFIX=${FLECSISP_TANGRAM_INSTALL_PREFIX} \
     ..
     make -j2
-    make test
-    echo " ********I am in " 
-    pwd
-    ls
-    cat Makefile
-    echo "*************cmake_install.cmake*************"
-    cat cmake_install.cmake
-    echo "*************cmake_install.cmake*************"
     make install/local
+    export CMAKE_PREFIX_PATH=${FLECSISP_TANGRAM_INSTALL_PREFIX}:${CMAKE_PREFIX_PATH}
     echo "DONE BUILDING TANGRAM"
-
-    #build portage
     echo "BUILDING PORTAGE"
-    cd $HOME
+    cd ${CI_PROJECT_DIR}
     git clone --recurse-submodules ssh://git@xcp-stash.lanl.gov:7999/laristra/portage.git
-    cd portage    
-    #portage requires LAPACKE
-    spack install netlib-lapack lapacke=true
-    ls /home/gitlab-runner/ci-spack/spack-sp/opt/spack/linux-centos7-skylake_avx512/gcc-9.1.0
-    #where is tangram?
-    echo "PWD TANGRAM"
-    ls $HOME/tangram
-    ls $HOME/tangram/tangram
-    echo "printing home/tangram/build"
-    ls $HOME/tangram/build
-    TANGRAM_INSTALL_PREFIX=$HOME/tangram/build/install
-    LAPACKE_DIR=/home/gitlab-runner/ci-spack/spack-sp/opt/spack/linux-centos7-skylake_avx512/gcc-9.1.0/netlib-lapack-3.8.0-mfux7fgjy3qwbiogw4ojziinnek4kjbn
-
-    mkdir build
-    cd build
-    echo "PWD" ${pwd};ls
-    echo "PWD.."; pwd ..; ls ..;
-    echo ls ../cinch
+    mkdir portage/build
+    cd portage/build
     cmake \
         -D CMAKE_BUILD_TYPE=Release \
         -D ENABLE_UNIT_TESTS=True \
         -D ENABLE_APP_TESTS=True \
         -D ENABLE_MPI=True \
-        -D TANGRAM_DIR:FILEPATH=$TANGRAM_INSTALL_PREFIX \
-        -D XMOF2D_DIR:FILEPATH=$XMOF2D_INSTALL_PREFIX/share/cmake \
-        -D LAPACKE_DIR=$LAPACKE_DIR \
-        -D CMAKE_INSTALL_PREFIX=install \
+        -D TANGRAM_DIR:FILEPATH=${FLECSISP_TANGRAM_INSTALL_PREFIX} \
+        -D XMOF2D_DIR:FILEPATH=${XMOF2D_INSTALL_PREFIX}/share/cmake \
+        -D CMAKE_INSTALL_PREFIX=${FLECSISP_PORTAGE_INSTALL_PREFIX} \
     ..
     make -j4
     make install
+    export CMAKE_PREFIX_PATH=${FLECSISP_PORTAGE_INSTALL_PREFIX}:${CMAKE_PREFIX_PATH}
     echo "DONE BUILDING PORTAGE"
-
     cd ${CI_PROJECT_DIR}/build/
     cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
         -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
         -DFLECSI_RUNTIME_MODEL=$RUNTIME \
         -DENABLE_UNIT_TESTS=ON \
-        -DPORTAGE_LIBRARY=$HOME/portage/build/install/lib64/libportage.so \
-        -DWONTON_LIBRARY=$HOME/portage/build/install/lib64/libwonton.so \
-        -DPORTAGE_INCLUDE_DIR=$HOME/portage/build/install/include \
-        -DTANGRAM_INCLUDE_DIR=$TANGRAM_INSTALL_PREFIX/include\
-        -DCMAKE_PREFIX_PATH=$TANGRAM_INSTALL_PREFIX:${TANGRAM_INSTALL_PREFIX}/share/cmake:${CMAKE_PREFIX_PATH} \
+        -DPORTAGE_LIBRARY=${FLECSISP_PORTAGE_INSTALL_PREFIX}/lib64/libportage.so \
+        -DWONTON_LIBRARY=${FLECSISP_PORTAGE_INSTALL_PREFIX}/lib64/libwonton.so \
+        -DPORTAGE_INCLUDE_DIR=${FLECSISP_PORTAGE_INSTALL_PREFIX}/include \
+        -DTANGRAM_INCLUDE_DIR=${FLECSISP_TANGRAM_INSTALL_PREFIX}/include\
         ..
     make -k -j2 -l40 || make VERBOSE=1
     make install DESTDIR=${CI_PROJECT_DIR}/build/install
