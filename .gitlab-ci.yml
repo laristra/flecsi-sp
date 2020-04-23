@@ -27,6 +27,7 @@ variables:
   CC: "gcc"
   CXX: "g++"
   CXXFLAGS: ""
+  GASNET_BACKTRACE: 1
   SPACK_ROOT: /home/gitlab-runner/ci-spack/spack-sp
   DEPS_LOCK: /home/gitlab-runner/ci-spack/deps-sp.pid
   #lock_fd: 314
