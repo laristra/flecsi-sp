@@ -30,6 +30,8 @@ class FlecsiSp(CMakePackage):
             description='Enable GraphViz Support')
     variant('tutorial', default=False,
             description='Build FleCSI Tutorials')
+    variant('portage', default=False,
+            description='Enable Portage Support')
 
     for b in ['serial', 'mpi', 'legion', 'charm++', 'hpx', 'trilinos']:
         depends_on("flecsi@1.4 backend=%s" % b,
@@ -62,7 +64,7 @@ class FlecsiSp(CMakePackage):
     #depends_on('lua@5.3.5')
     
     #portage requires LAPACKE
-    depends_on('netlib-lapack lapacke=true')
+    depends_on('netlib-lapack lapacke=true', when='+portage')
 
     def cmake_args(self):
         spec = self.spec
