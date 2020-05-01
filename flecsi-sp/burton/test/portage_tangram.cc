@@ -601,16 +601,16 @@ void restore(
 
 flecsi_register_mpi_task(remap_tangram_test, flecsi_sp::burton::test);
 flecsi_register_task(output, flecsi_sp::burton::test, loc,
-  single|flecsi::leaf);
+  index|flecsi::leaf);
 
 // Different Initialization Tasks
 flecsi_register_task(initialize, flecsi_sp::burton::test, loc,
-  single|flecsi::leaf);
+  index|flecsi::leaf);
 
 flecsi_register_task(restore, flecsi_sp::burton::test, loc,
-         single|flecsi::leaf);
+         index|flecsi::leaf);
 flecsi_register_task(modify, flecsi_sp::burton::test, loc,
-         single|flecsi::leaf);
+         index|flecsi::leaf);
 
 } // namespace
 } // namespace
@@ -644,7 +644,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
           initialize,
           flecsi_sp::burton::test,
-          single,
+          index,
           mesh_handle,
           density_mutator,
           volfrac_mutator,
@@ -654,13 +654,13 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
             output,
             flecsi_sp::burton::test,
-            single,
+            index,
             mesh_handle, time_cnt, density_handle, volfrac_handle);
 
   flecsi_execute_task(
           modify,
           flecsi_sp::burton::test,
-          single,
+          index,
           mesh_handle,
           xn);
 
@@ -680,7 +680,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
           restore,
           flecsi_sp::burton::test,
-          single,
+          index,
           mesh_handle,
           xn);
 #endif
@@ -689,7 +689,7 @@ void driver(int argc, char ** argv)
   flecsi_execute_task(
             output,
             flecsi_sp::burton::test,
-            single,
+            index,
             mesh_handle, time_cnt, density_handle, volfrac_handle);
 
 } // driver
