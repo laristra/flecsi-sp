@@ -351,27 +351,27 @@ void remap_tangram_test(
 
   // // Get the material centroid values via Tangram
   auto mpi_comm = MPI_COMM_WORLD;
-  // Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
-  // bool all_convex = false;
-  // std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
-  // auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
-  // 								     tols,
-  // 								     all_convex);  
-  // // Create the mat centroid list
-  // auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
-  //                                                           source_interface_reconstructor,
-  //                                                           &mpiexecutor);
-  // // Hand-off mat centroid list to matcentroid pointer object
-  // offset = 0;
-  // for (int m=0; m<max_mats; ++m){
-  //   auto mat_index = 0;
-  //   for (auto c: velocity_handle.indices(m) ){
-  //     matcentroids[offset] = centroid_list[m][mat_index]; 
-  //     density[offset] = prescribed_function( centroid_list[m][mat_index] );
-  //     offset++;
-  //     mat_index++;
-  //   }
-  // }
+  Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
+   bool all_convex = false;
+   std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
+   auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
+   								     tols,
+   								     all_convex);  
+  // Create the mat centroid list
+  auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
+                                                            source_interface_reconstructor,
+                                                            &mpiexecutor);
+  // Hand-off mat centroid list to matcentroid pointer object
+  offset = 0;
+  for (int m=0; m<max_mats; ++m){
+    auto mat_index = 0;
+    for (auto c: velocity_handle.indices(m) ){
+      //      matcentroids[offset] = centroid_list[m][mat_index]; 
+      density[offset] = prescribed_function( centroid_list[m][mat_index] );
+      offset++;
+      mat_index++;
+    }
+  }
 
   // Build remapper
 	auto distributed = distrubute_mesh(
