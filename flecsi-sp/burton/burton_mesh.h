@@ -1457,8 +1457,29 @@ void set_regions(std::vector<int> &region_ids)
             (*wit)->update( this, true );
           }
         }
-      }  // else num_dimensions
-
+         
+        if( alpha == 1 )
+        {
+          std::vector<double> x(4);
+          std::vector<double> y(4);
+          for(counter_t i=0;i<num_cells;++i)
+          {
+            auto cell = cs[i];
+            int cntr(0);
+            for(auto vt: vertices(cell))
+            {
+              x[cntr]=vt->coordinates()[0];
+              y[cntr]=vt->coordinates()[1];
+            }//vt
+            cntr=0;
+            for(auto cn:corners(cell))
+            {
+              //cn->update_volume(cntr,x,y);
+              cn->update_volume(this,alpha);
+            }//cn
+          }//i(cell)
+        }
+        }
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
     } // end omp parallel

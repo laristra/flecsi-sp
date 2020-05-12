@@ -123,6 +123,9 @@ public:
   burton_extras_t( burton_extras_t && ) = delete;
   burton_extras_t & operator=( burton_extras_t && ) = delete;
 
+  template< typename MESH_TOPOLOGY >
+  void update_volume( const MESH_TOPOLOGY * mesh, int alpha );
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -599,7 +602,22 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
 
   // NOTE internal facet values are not defined....
 }
-
-
+////////////////////////////////////////////////////////////////////////////////
+// 2d corner volume.
+////////////////////////////////////////////////////////////////////////////////
+template<>
+template< typename MESH_TOPOLOGY >
+void burton_extras_t<2,0>::update_volume(const  MESH_TOPOLOGY* mesh, int alpha)
+{
+  
+   // nothing to do if xy geometry.
+    if(alpha==0)
+      return;
+   auto we = mesh->template entities<burton_wedge_t<2>::dimension, domain, burton_wedge_t<2>::domain>(this);
+   for()
+   {
+     
+   }
+}
 } // namespace burton
 } // namespace flecsi_sp
