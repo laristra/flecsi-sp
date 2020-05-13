@@ -20,7 +20,8 @@ script:
   - cd ../../
   - mv -v ${TRAVIS_REPO_SLUG} $HOME/docker
   - docker build --build-arg BUILD_TYPE=${BUILD_TYPE}
-                 --build-arg MPI_PACKAGE=${MPI_PACKAGE} 
+                 --build-arg MPI_PACKAGE=${MPI_PACKAGE}
+                 --build-arg RUNTIME=${RUNTIME}
                  --build-arg CC=${CC} --build-arg CXX=${CXX}
                  --build-arg CI=${CI} --build-arg TRAVIS=${TRAVIS} --build-arg TRAVIS_OS_NAME=${DISTRO}
                  --build-arg TRAVIS_BRANCH=${TRAVIS_BRANCH} --build-arg TRAVIS_JOB_NUMBER=${TRAVIS_JOB_NUMBER}
