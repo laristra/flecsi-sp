@@ -32,6 +32,8 @@ USER laristra
 
 WORKDIR $HOME
 RUN export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
+    git clone https://github.com/laristra/ristra_spackages.git && \
+    spack repo add --scope site $HOME/ristra_spackages/spack-repo && \
     spack repo add --scope site $HOME/flecsi-sp/spack-repo && \
     spack find && \
     echo "spack install --show-log-on-error $SPACK_SPEC" && \
