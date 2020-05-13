@@ -53,6 +53,8 @@ RUN source $HOME/load_deps.sh && \
     cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DFLECSI_RUNTIME_MODEL=$RUNTIME \
           -DENABLE_UNIT_TESTS=ON \
+          -DENABLE_FLECSIT=OFF \
+          -DENABLE_FLECSI_TUTORIAL=OFF \
           .. && \
     make -j2 || make VERBOSE=1 && \
     ctest --output-on-failure && \
