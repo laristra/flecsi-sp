@@ -31,7 +31,7 @@ RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
 WORKDIR $HOME
-RUN export SPACK_SPEC="flecsi-sp%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
+RUN export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
     spack repo add --scope site $HOME/flecsi-sp/spack-repo && \
     spack find && \
     echo "spack install --show-log-on-error $SPACK_SPEC" && \
