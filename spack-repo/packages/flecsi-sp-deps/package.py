@@ -18,10 +18,14 @@ class FlecsiSpDeps(BundlePackage):
             description='The build type to build', multi=False)
     variant('backend', default='mpi', values=('serial', 'mpi', 'legion', 'charmpp', 'hpx'),
             description='Backend to use for distributed memory', multi=False)
-    variant('cinch', default=True,
+    variant('debug_backend', default=False,
+            description='Build Backend with Debug Mode')
+    variant('cinch', default=False,
             description='Enable External Cinch')
     variant('shared', default=True,
             description='Build shared libraries')
+    variant('doxygen', default=False,
+            description='Enable doxygen')
     variant('hdf5', default=True,
             description='Enable HDF5 Support')
     variant('caliper', default=False,
@@ -33,12 +37,12 @@ class FlecsiSpDeps(BundlePackage):
     variant('portage', default=False,
             description='Enable Portage Support')
 
-    for b in ['serial', 'mpi', 'legion', 'charm++', 'hpx', 'trilinos']:
-        depends_on("flecsi-deps@1.4 backend=%s" % b,
+    for b in ['mpi', 'legion', 'hpx']:
+        depends_on("flecsi-deps backend=%s" % b,
             when="backend=%s" % b)
-    for v in ['shared', 'hdf5', 'caliper', 'graphviz', 'tutorial']:
-        depends_on("flecsi-deps@1.4 +%s" % v, when="+%s" % v)
-        depends_on("flecsi-deps@1.4 ~%s" % v, when="~%s" % v)
+    for v in ['debug_backend', 'doxygen', 'hdf5', 'caliper', 'graphviz', 'tutorial', 'cinch']:
+        depends_on("flecsi-deps +%s" % v, when="+%s" % v)
+        depends_on("flecsi-deps ~%s" % v, when="~%s" % v)
 
     for b in ['Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel']:
         depends_on("libristra build_type=%s" % b,
