@@ -451,6 +451,10 @@ struct burton_element_t<2,1> :
   auto area() const
   { return length_; }
 
+  //! true area of 2d element,differs from "area" when running rz.
+  auto true_area() const
+  {return true_area_;}
+
   //! the edge normal
   const auto & normal() const
   { return normal_; }
@@ -490,7 +494,7 @@ struct burton_element_t<2,1> :
 
   //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update( const MESH_TOPOLOGY * mesh, int alpha=0 , int axis=1)
   {
     using ristra::math::sqr;
     using ristra::math::normal;
@@ -502,6 +506,11 @@ struct burton_element_t<2,1> :
     length_ = std::sqrt( sqr(a[0]-b[0]) + sqr(a[1]-b[1]) );
     normal_ = normal( b, a );
     normal_ /= length_;
+
+    if( alpha==0)
+      true_area_ = length_;
+    else
+      true_area_ = 2*M_PI*length_*midpoint_[axis];
   }
 
   //============================================================================
@@ -521,6 +530,7 @@ private:
   point_t midpoint_ = 0;
   vector_t normal_ = 0;
 
+  real_t true_area_ =0;
   //! owner
   size_t owner_id_ = std::numeric_limits<size_t>::max();
 };
@@ -621,7 +631,7 @@ struct burton_element_t<3,1> :
 
   //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update( const MESH_TOPOLOGY * mesh, int alpha=0 , int axis=1)
   {
     using ristra::math::sqr;
     auto vs = mesh->template entities<0, domain>(this);
@@ -1245,6 +1255,9 @@ struct burton_element_t<3,2>
   auto area() const
   { return area_; }
 
+  auto true_area() const
+  {return area_;}
+
   //! the minimum length in the element
   auto min_length() const
   { return min_length_; }
@@ -1324,7 +1337,7 @@ struct burton_element_t<3,2>
   //! \brief update the mesh geometry
   //----------------------------------------------------------------------------
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update(  const MESH_TOPOLOGY * mesh, int alpha=0 , int axis=1)
   {
     using ristra::math::abs;
   

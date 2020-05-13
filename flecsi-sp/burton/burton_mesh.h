@@ -1402,7 +1402,7 @@ void set_regions(std::vector<int> &region_ids)
 
       #pragma omp for nowait
       for ( counter_t i=0; i<num_edges; i++ )
-        es[i]->update( this );
+        es[i]->update( this, alpha, axis );
 
       //--------------------------------------------------------------------------
       // compute face parameters
@@ -1410,7 +1410,7 @@ void set_regions(std::vector<int> &region_ids)
       if ( num_dimensions == 3 ) {
         #pragma omp for nowait
         for ( counter_t i=0; i<num_faces; i++ )
-          fs[i]->update( this );
+          fs[i]->update( this, alpha, axis );
       }
 
       //--------------------------------------------------------------------------
