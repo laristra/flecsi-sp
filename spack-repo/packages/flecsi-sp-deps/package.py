@@ -36,9 +36,6 @@ class FlecsiSpDeps(BundlePackage):
     for b in ['serial', 'mpi', 'legion', 'charm++', 'hpx', 'trilinos']:
         depends_on("flecsi-deps@1.4 backend=%s" % b,
             when="backend=%s" % b)
-    for b in ['Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel']:
-        depends_on("flecsi-deps@1.4 build_type=%s" % b,
-            when="build_type=%s" % b)
     for v in ['shared', 'hdf5', 'caliper', 'graphviz', 'tutorial']:
         depends_on("flecsi-deps@1.4 +%s" % v, when="+%s" % v)
         depends_on("flecsi-deps@1.4 ~%s" % v, when="~%s" % v)
