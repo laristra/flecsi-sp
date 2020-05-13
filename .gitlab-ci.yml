@@ -42,7 +42,7 @@ variables:
   FLECSISP_TANGRAM_INSTALL_PREFIX: "${CI_PROJECT_DIR}/tangram/build/install"
   FLECSISP_TANGRAM_HASH: "a43fcb1d0354e04f9bc0ed5a2c83e198c211a29e"
   FLECSISP_PORTAGE_INSTALL_PREFIX: "${CI_PROJECT_DIR}/portage/build/install"
-  FLECSISP_PORTAGE_HASH: ""
+  FLECSISP_PORTAGE_HASH: "e7ebc43dde36b49e3102e8b5bd0e565ed21d5309"
   FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
   FLECSISP_SPACK_SPEC: "flecsi-sp-deps%gcc@${FLECSISP_GCC_VERSION} backend=${RUNTIME} +portage"
@@ -233,6 +233,7 @@ before_script:
     git clone --recurse-submodules ssh://git@xcp-stash.lanl.gov:7999/laristra/tangram.git
     cd tangram
     git checkout ${FLECSISP_TANGRAM_HASH}
+    git submodule update --init --recursive
     mkdir build
     cd build
     cmake \
@@ -250,8 +251,11 @@ before_script:
     echo "BUILDING PORTAGE"
     cd ${CI_PROJECT_DIR}
     git clone --recurse-submodules ssh://git@xcp-stash.lanl.gov:7999/laristra/portage.git
-    mkdir portage/build
-    cd portage/build
+    cd portage
+    git checkout ${FLECSISP_PORTAGE_HASH}
+    git submodule update --init --recursive
+    mkdir build
+    cd build
     cmake \
         -D CMAKE_BUILD_TYPE=Release \
         -D ENABLE_UNIT_TESTS=True \
