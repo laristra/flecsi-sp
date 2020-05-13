@@ -108,6 +108,13 @@ public:
   using mesh_topology_base_t = 
     flecsi::topology::mesh_topology_base_u< mesh_storage_t >;
 
+  //! the base wedge type
+  using wedge_t = burton_wedge_t<num_dimensions>;
+
+
+  //! Type of floating point.
+  using real_t = typename config_t::real_t;
+
   //============================================================================
   // Constructors
   //============================================================================
@@ -123,12 +130,21 @@ public:
   burton_extras_t( burton_extras_t && ) = delete;
   burton_extras_t & operator=( burton_extras_t && ) = delete;
 
+  // access corner volume
+  auto volume() const
+  {
+     return corner_volume_;
+  }
+
+  // update corner volume
   template< typename MESH_TOPOLOGY >
-  void update_volume( const MESH_TOPOLOGY * mesh, int alpha );
+  void update_volume(const  MESH_TOPOLOGY* mesh, const int alpha, const int loc,
+                     const std::vector<double> &x, const std::vector<double> &y);
 
+private:
+  real_t corner_volume_ =0;
 };
-
-////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
 //! \brief An interface for managing geometry and state associated with
 //!   one-dimensional mesh corners/wedges.
 //!   Since corners in 1D also serve as wedges, we give this class some
@@ -356,6 +372,24 @@ public:
   auto internal_facet_area() const
   { return internal_facet_area_; }
 
+  //! \breif modify facet area
+  void set_corner_area(real_t a) 
+  { corner_area_ = a;}
+
+  //! \breif modify internalfacet area
+  void set_internal_corner_area(real_t a)
+  { internal_corner_area_ = a;}
+
+ //! \brief the corner area
+  auto corner_area() const
+  { return corner_area_; }
+
+  //! \brief the facet area
+  auto internal_corner_area() const
+  { return internal_corner_area_; }
+
+
+
   //! \brief Get the cell facet centroid
   const auto & facet_centroid() const
   { return facet_centroid_; }
@@ -421,6 +455,10 @@ public:
   real_t internal_facet_area_ = 0;
   //! centroid of the internal facet
   point_t internal_facet_centroid_ = 0;
+
+  //! 
+  real_t corner_area_=0;
+  real_t internal_corner_area_=0;
 
   //! this is midpoint between cell mid-point and vertex.
   point_t corner_midpoint_=0;
@@ -602,22 +640,171 @@ void burton_extras_t<3,1>::update(const  MESH_TOPOLOGY* mesh, bool is_right)
 
   // NOTE internal facet values are not defined....
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // 2d corner volume.
 ////////////////////////////////////////////////////////////////////////////////
 template<>
 template< typename MESH_TOPOLOGY >
-void burton_extras_t<2,0>::update_volume(const  MESH_TOPOLOGY* mesh, int alpha)
+void burton_extras_t<2,0>::update_volume(const  MESH_TOPOLOGY* mesh, const int alpha, const int loc,
+                                         const std::vector<double> &x, const std::vector<double> &y)
 {
-  
-   // nothing to do if xy geometry.
+  //std::cout <<"in update_volume(() " << alpha << " "<< loc<<std::endl;
+    //list of wedges associated with this corner. 
+    auto wes = mesh->template entities<wedge_t::dimension, domain, wedge_t::domain>(this);
+    // nothing to do if xy geometry.
     if(alpha==0)
-      return;
-   auto we = mesh->template entities<burton_wedge_t<2>::dimension, domain, burton_wedge_t<2>::domain>(this);
-   for()
-   {
+    {
+      //for cartesian, corner volume = sum of wedge volume.
+      real_t sum(0);
+      for(auto we:wes)
+      {
+        sum += we->volume();
+        we->set_corner_area(we->facet_area());
+        we->set_internal_corner_area(we->internal_facet_area());
+      }//we
+      corner_volume_ = sum;
+    }//if(alpha)
+    else
+    {
+      double R12 = 1./12.;
+      double R72 = 1./72.;
+      double R36 = 1./36.;
+      double R24 = 1./24.;
      
-   }
+      //mass matrix(corner_volume)
+      switch( loc )
+      {
+        case(0):
+          corner_volume_ = (x[0] * (x[0] * (y[1] - y[3]) * R12 +
+              x[1] * (y[2] * R72 - y[0] * R12 + y[1] * R24 + y[3] * R36) +
+              x[2] * (y[3] - y[1]) * R72 +
+              x[3] * (y[0] * R12 - y[3] * R24 - y[2] * R72 - y[1] * R36)) +
+              x[1] * (x[1] * (y[2] * R36 - y[0] * R24 + y[3] * R72) +
+              x[2] * ((y[3] + y[2]) * R72 - y[1] * R36) + x[3] * (y[3] - y[1]) * R72) +
+              x[2] * (x[2] * (y[3] - y[1]) * R72 + x[3] * (y[3] * R36 - (y[2] + y[1]) * R72)) +
+              x[3] * x[3] * (y[0] * R24 - y[2] * R36 - y[1] * R72))*2.0;
+          break;
+        case(1):
+          corner_volume_= (x[1] * (x[1] * (y[2] - y[0]) * R12 +
+              x[2] * (y[3] * R72 - y[1] * R12 + y[2] * R24 + y[0] * R36) +
+              x[3] * (y[0] - y[2]) * R72 +
+              x[0] * (y[1] * R12 - y[0] * R24 - y[3] * R72 - y[2] * R36)) +
+              x[2] * (x[2] * (y[3] * R36 - y[1] * R24 + y[0] * R72) +
+              x[3] * ((y[0] + y[3]) * R72 - y[2] * R36) + x[0] * (y[0] - y[2]) * R72) +
+              x[3] * (x[3] * (y[0] - y[2]) * R72 + x[0] * (y[0] * R36 - (y[3] + y[2]) * R72)) +
+              x[0] * x[0] * (y[1] * R24 - y[3] * R36 - y[2] * R72))*2.0;
+          break;
+        case(2):
+          corner_volume_ = (x[2] * (x[2] * (y[3] - y[1]) * R12 +
+              x[3] * (y[0] * R72 - y[2] * R12 + y[3] * R24 + y[1] * R36) +
+              x[0] * (y[1] - y[3]) * R72 +
+              x[1] * (y[2] * R12 - y[1] * R24 - y[0] * R72 - y[3] * R36)) +
+              x[3] * (x[3] * (y[0] * R36 - y[2] * R24 + y[1] * R72) +
+              x[0] * ((y[1] + y[0]) * R72 - y[3] * R36) + x[1] * (y[1] - y[3]) * R72) +
+              x[0] * (x[0] * (y[1] - y[3]) * R72 + x[1] * (y[1] * R36 - (y[0] + y[3]) * R72)) +
+              x[1] * x[1] * (y[2] * R24 - y[0] * R36 - y[3] * R72))*2.0;
+          break;
+        case(3):
+          corner_volume_ = (x[3] * (x[3] * (y[0] - y[2]) * R12 +
+              x[0] * (y[1] * R72 - y[3] * R12 + y[0] * R24 + y[2] * R36) +
+              x[1] * (y[2] - y[0]) * R72 +
+              x[2] * (y[3] * R12 - y[2] * R24 - y[1] * R72 - y[0] * R36)) +
+              x[0] * (x[0] * (y[1] * R36 - y[3] * R24 + y[2] * R72) +
+              x[1] * ((y[2] + y[1]) * R72 - y[0] * R36) + x[2] * (y[2] - y[0]) * R72) +
+              x[1] * (x[1] * (y[2] - y[0]) * R72 + x[2] * (y[2] * R36 - (y[1] + y[0]) * R72)) +
+              x[2] * x[2] * (y[3] * R24 - y[1] * R36 - y[0] * R72))*2.0;
+          break;
+        default:
+          THROW_RUNTIME_ERROR(" only quad4 element supported.. for rz (in update_volume())");
+       }
+       //std::cout <<loc <<" corner_volume: " << corner_volume_ <<std::endl;
+       //std::cin.get();
+//now update facet area.
+       //coefficient similar to facet area.    
+       //std::vector< std::vector<double>> FRZ(4);
+       std::vector<real_t> FRZ(2);
+       {
+       int i(loc);
+ 
+       int il = i-1;
+       int ir = i+1;
+       if( i == 0)
+         il = 3;
+       if( i == 3 )
+         ir = 0;
+
+       double distl = sqrt((x[il]-x[i])*(x[il]-x[i])+(y[il]-y[i])*(y[il]-y[i]));
+       double distr = sqrt((x[ir]-x[i])*(x[ir]-x[i])+(y[ir]-y[i])*(y[ir]-y[i]));
+       FRZ[0]= (2.*x[i]+x[il])/3.*distl;
+       FRZ[1]= (2.*x[i]+x[ir])/3.*distr;
+       }
+      
+        // coefficient similar to internal_facet_area;
+        std::vector< std::vector<double>> FIRZ(4);
+        FIRZ.resize(4);
+        std::vector<std::pair<int,int> > v_pair(4);
+        v_pair[0] = std::make_pair(0,2);
+        v_pair[1] = std::make_pair(1,3);
+        v_pair[2] = std::make_pair(2,0);
+        v_pair[3] = std::make_pair(3,1);
+        //center.
+        std::vector<double> xc;
+        std::vector<double> yc;
+        for(int ii=0;ii<4;++ii)
+        {
+           int j=ii+1;
+           if( ii==3 )
+             j=0;
+
+           xc.push_back((x[ii]+x[j])*0.5);
+           yc.push_back((y[ii]+y[j])*0.5);
+           FIRZ[ii].resize(2);
+        }
+        for(int ii=0;ii<4;++ii)
+        {
+          int ir = v_pair[ii].second;
+
+          double distr = sqrt((xc[ir]-xc[ii])*(xc[ir]-xc[ii])+(yc[ir]-yc[ii])*(yc[ir]-yc[ii]));
+          FIRZ[ii][1] = (2.*xc[ii]+xc[ir])/3.*distr;
+          if( ii < 3 )
+           FIRZ[ii+1][0] = FIRZ[ii][1];
+        }//i
+        FIRZ[0][0] = FIRZ[3][1];
+
+        
+        int we_cntr(0);
+        for(auto we: wes)
+        {
+          we->set_corner_area(FRZ[we_cntr]);
+          we->set_internal_corner_area(FIRZ[loc][we_cntr]);
+          we_cntr++;
+        }//we
+
+ 
+    }//if(alpha)
 }
+// for 3D
+template<>
+template< typename MESH_TOPOLOGY >
+void burton_extras_t<3,0>::update_volume(const  MESH_TOPOLOGY* mesh, const int alpha, const int loc,
+                                         const std::vector<double> &x, const std::vector<double> &y)
+{
+    //list of wedges associated with this corner. 
+    auto wes = mesh->template entities<wedge_t::dimension, domain, wedge_t::domain>(this);
+    // nothing to do if xy geometry.
+    //for cartesian, corner volume = sum of wedge volume.
+    real_t sum(0);
+    for(auto we:wes)
+    {
+      sum += we->volume();
+      we->set_corner_area(we->facet_area());
+      we->set_internal_corner_area(we->internal_facet_area());
+    }//we
+    corner_volume_ = sum;
+ 
+}
+
 } // namespace burton
 } // namespace flecsi_sp
