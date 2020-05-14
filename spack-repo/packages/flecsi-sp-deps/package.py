@@ -7,7 +7,7 @@
 from spack import *
 
 
-class FlecsiSp(CMakePackage):
+class FlecsiSpDeps(BundlePackage):
     '''Flecsi-SP contains various specializations for use with the FleCSI core programming system.
     '''
     git = 'https://github.com/laristra/flecsi-sp.git'
@@ -18,10 +18,14 @@ class FlecsiSp(CMakePackage):
             description='The build type to build', multi=False)
     variant('backend', default='mpi', values=('serial', 'mpi', 'legion', 'charmpp', 'hpx'),
             description='Backend to use for distributed memory', multi=False)
-    variant('cinch', default=True,
+    variant('debug_backend', default=False,
+            description='Build Backend with Debug Mode')
+    variant('cinch', default=False,
             description='Enable External Cinch')
     variant('shared', default=True,
             description='Build shared libraries')
+    variant('doxygen', default=False,
+            description='Enable doxygen')
     variant('hdf5', default=True,
             description='Enable HDF5 Support')
     variant('caliper', default=False,
@@ -33,15 +37,12 @@ class FlecsiSp(CMakePackage):
     variant('portage', default=False,
             description='Enable Portage Support')
 
-    for b in ['serial', 'mpi', 'legion', 'charm++', 'hpx', 'trilinos']:
-        depends_on("flecsi@1.4 backend=%s" % b,
+    for b in ['mpi', 'legion', 'hpx']:
+        depends_on("flecsi-deps backend=%s" % b,
             when="backend=%s" % b)
-    for b in ['Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel']:
-        depends_on("flecsi@1.4 build_type=%s" % b,
-            when="build_type=%s" % b)
-    for v in ['shared', 'hdf5', 'caliper', 'graphviz', 'tutorial']:
-        depends_on("flecsi@1.4 +%s" % v, when="+%s" % v)
-        depends_on("flecsi@1.4 ~%s" % v, when="~%s" % v)
+    for v in ['debug_backend', 'doxygen', 'hdf5', 'caliper', 'graphviz', 'tutorial', 'cinch']:
+        depends_on("flecsi-deps +%s" % v, when="+%s" % v)
+        depends_on("flecsi-deps ~%s" % v, when="~%s" % v)
 
     for b in ['Debug', 'Release', 'RelWithDebInfo', 'MinSizeRel']:
         depends_on("libristra build_type=%s" % b,
@@ -65,38 +66,4 @@ class FlecsiSp(CMakePackage):
     
     #portage requires LAPACKE
     depends_on('netlib-lapack lapacke=true', when='+portage')
-
-    def cmake_args(self):
-        spec = self.spec
-        options = []
-
-        if '+cinch' in spec:
-            options.append('-DCINCH_SOURCE_DIR=' + spec['cinch'].prefix)
-
-        if self.run_tests:
-            options.append('-DENABLE_UNIT_TESTS=ON')
-        else:
-            options.append('-DENABLE_UNIT_TESTS=OFF')
-
-        if spec.variants['backend'].value == 'legion':
-            options.append('-DFLECSI_RUNTIME_MODEL=legion')
-            options.append('-DENABLE_MPI=ON')
-        elif spec.variants['backend'].value == 'mpi':
-            options.append('-DFLECSI_RUNTIME_MODEL=mpi')
-            options.append('-DENABLE_MPI=ON')
-        elif spec.variants['backend'].value == 'hpx':
-            options.append('-DFLECSI_RUNTIME_MODEL=hpx')
-            options.append('-DENABLE_MPI=ON')
-        elif spec.variants['backend'].value == 'charmpp':
-            options.append('-DFLECSI_RUNTIME_MODEL=charmpp')
-            options.append('-DENABLE_MPI=ON')
-        else:
-            options.append('-DFLECSI_RUNTIME_MODEL=serial')
-            options.append('-DENABLE_MPI=OFF')
-
-        return options
-
-#    def setup_run_environment(self, env):
-#        env.set('EXODUSII_ROOT', self.spec['exodusii'].prefix)
-#        env.prepend_path('CMAKE_PREFIX_PATH',self.spec['flecsi'].prefix.cmake.flecsi)
-#        env.prepend_path('CMAKE_PREFIX_PATH',self.spec['libristra'].prefix.cmake.libristra)
+    
