@@ -31,8 +31,7 @@ RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
 WORKDIR $HOME
-RUN module list && \
-    echo $CMAKE_PREFIX_PATH && \
+RUN module purge && \
     git clone https://github.com/laristra/ristra_spackages.git
 
 RUN export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
