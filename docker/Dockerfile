@@ -2,8 +2,8 @@ FROM laristra/libristra:fedora30
 
 SHELL ["/bin/bash", "-c"]	
 		
-ENV DEBIAN_FRONTEND=noninteractive \	
-    HOME=/home/laristra \	
+ENV DEBIAN_FRONTEND=noninteractive \
+    HOME=/home/laristra
 
 ARG CC
 ARG CXX
