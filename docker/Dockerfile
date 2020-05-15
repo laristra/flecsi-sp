@@ -31,7 +31,9 @@ RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
 WORKDIR $HOME
-RUN bash git clone https://github.com/laristra/ristra_spackages.git
+RUN module list && \
+    echo $CMAKE_PREFIX_PATH && \
+    git clone https://github.com/laristra/ristra_spackages.git
 
 RUN export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
     spack repo add --scope site $HOME/ristra_spackages/spack-repo && \
