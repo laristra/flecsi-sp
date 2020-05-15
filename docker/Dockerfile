@@ -4,7 +4,6 @@ SHELL ["/bin/bash", "-c"]
 		
 ENV DEBIAN_FRONTEND=noninteractive \	
     HOME=/home/laristra \	
-    BASH_ENV=~/.bashrc
 
 ARG CC
 ARG CXX
@@ -31,8 +30,10 @@ RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
 WORKDIR $HOME
+RUN git clone https://github.com/laristra/ristra_spackages.git
+ENV BASH_ENV=~/.bashrc
+
 RUN export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
-    git clone https://github.com/laristra/ristra_spackages.git && \
     spack repo add --scope site $HOME/ristra_spackages/spack-repo && \
     spack repo add --scope site $HOME/flecsi-sp/spack-repo && \
     spack find && \
