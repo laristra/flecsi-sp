@@ -2,8 +2,8 @@ FROM laristra/libristra:fedora30
 
 SHELL ["/bin/bash", "-c"]	
 		
-ENV DEBIAN_FRONTEND=noninteractive \	
-    HOME=/home/laristra \	
+ENV DEBIAN_FRONTEND=noninteractive \
+    HOME=/home/laristra \
     BASH_ENV=~/.bashrc
 
 ARG CC
@@ -31,8 +31,9 @@ RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
 WORKDIR $HOME
-RUN export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
+RUN module purge && \
     git clone https://github.com/laristra/ristra_spackages.git && \
+    export SPACK_SPEC="flecsi-sp-deps%gcc backend=$RUNTIME ^$MPI_PACKAGE" && \
     spack repo add --scope site $HOME/ristra_spackages/spack-repo && \
     spack repo add --scope site $HOME/flecsi-sp/spack-repo && \
     spack find && \
