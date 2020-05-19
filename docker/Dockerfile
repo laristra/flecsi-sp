@@ -30,8 +30,6 @@ USER root
 RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
-ENV PATH=/usr/local:${PATH}
-
 WORKDIR $HOME
 RUN module purge && \
     git clone https://github.com/laristra/ristra_spackages.git && \
@@ -55,7 +53,8 @@ RUN mkdir build
 WORKDIR build
 
 RUN source $HOME/load_deps.sh && \
-    cmake -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
+    cmake -DMPIEXEC_PREFLAGS=$([ "$MPI_PACKAGE" = "openmpi" ] && echo '--oversubscribe') \
+          -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
           -DFLECSI_RUNTIME_MODEL=$RUNTIME \
           -DENABLE_UNIT_TESTS=ON \
           -DENABLE_FLECSIT=OFF \
