@@ -30,6 +30,8 @@ USER root
 RUN chown -R laristra:laristra $HOME/flecsi-sp
 USER laristra
 
+ENV PATH=/usr/local:${PATH}
+
 WORKDIR $HOME
 RUN module purge && \
     git clone https://github.com/laristra/ristra_spackages.git && \
