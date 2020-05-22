@@ -534,7 +534,6 @@ flecsale-mm:
   only:
     - merge_requests
     - master
-  allow_failure: true
   variables:
     UPSTREAM_REPO: "specializations"
     UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
