@@ -524,7 +524,7 @@ flecsale-mm:
   stage: Trigger
   only:
     - merge_requests
-    - master
+    - "1.4"
   variables:
     UPSTREAM_REPO: "specializations"
     UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
