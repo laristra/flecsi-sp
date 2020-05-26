@@ -13,11 +13,8 @@ variables:
   CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   CCACHE_UMASK: 000
   DISTRO: "centOS"
-  RUNTIME: ""
-  BUILD_TYPE: ""
-  CC: "gcc"
-  CXX: "g++"
-  CXXFLAGS: ""
+  FLECSISP_RUNTIME: "mpi"
+  FLECSISP_BUILD_TYPE: "Debug"
   GASNET_BACKTRACE: 1
   FLECSISP_SPACK_ROOT: /home/gitlab-runner/ngc/laristra/spack
   FLECSISP_DEPS_LOCK: /home/gitlab-runner/ngc/laristra/deps.pid
@@ -34,13 +31,12 @@ variables:
   FLECSISP_TANGRAM_HASH: "2f3b8e7902c923525dac848f26ed39a43132d58b"
   FLECSISP_PORTAGE_INSTALL_PREFIX: "${CI_PROJECT_DIR}/portage/build/install"
   FLECSISP_PORTAGE_HASH: "e7ebc43dde36b49e3102e8b5bd0e565ed21d5309"
-  FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
+  FLECSISP_ENV_SOURCE_FILE: "${CI_PROJECT_DIR}/build/flecsi-sp-deps-${FLECSISP_RUNTIME}-${FLECSISP_MPI_PACKAGE}-${CI_COMMIT_REF_SLUG}-${CI_CONCURRENT_ID}.sh"
   FLECSISP_SPACK_SCOPE: "lanl_ristra_flecsi-sp"
-  FLECSISP_SPACK_SPEC: "flecsi-sp-deps%gcc@${FLECSISP_GCC_VERSION} backend=${RUNTIME} +portage"
+  FLECSISP_SPACK_SPEC: "flecsi-sp-deps%gcc@${FLECSISP_GCC_VERSION} backend=${FLECSISP_RUNTIME} +portage"
 before_script:
   - echo ${CI_JOB_NAME_NOSTAGE%.*}-${CI_COMMIT_REF_SLUG}
   - '[ "$(git rev-parse origin/$CI_COMMIT_REF_NAME)" != "$CI_COMMIT_SHA" ] && curl --header "PRIVATE-TOKEN: $MY_CI_API_TOKEN" -X POST https://gitlab.lanl.gov/api/v4/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID/cancel'
-  #- find . -name "`basename cinch`" | grep "cinch\$" | xargs rm -fr
   - export HOME=${CI_PROJECT_DIR}
   - export TMPDIR=${CI_PROJECT_DIR}
   - mkdir -p ${CI_PROJECT_DIR}/build
@@ -82,13 +78,13 @@ before_script:
 ##########################
 
 .runtime_mpi: &runtime_mpi
-  RUNTIME: "mpi"
+  FLECSISP_RUNTIME: "mpi"
 
 .runtime_legion: &runtime_legion
-  RUNTIME: "legion"
+  FLECSISP_RUNTIME: "legion"
 
 .runtime_hpx: &runtime_hpx
-  RUNTIME: "hpx"
+  FLECSISP_RUNTIME: "hpx"
 
 .compiler_gcc: &compiler_gcc
   CC: "gcc"
@@ -103,10 +99,10 @@ before_script:
   CXX: "icpc"
 
 .buildtype_debug: &buildtype_debug
-  BUILD_TYPE: "Debug"
+  FLECSISP_BUILD_TYPE: "Debug"
 
 .buildtype_release: &buildtype_release
-  BUILD_TYPE: "Release"
+  FLECSISP_BUILD_TYPE: "Release"
 
 .openmpi: &openmpi
   FLECSISP_MPI_PACKAGE: "openmpi"
@@ -132,7 +128,7 @@ before_script:
   cache:
     #key: ${CI_JOB_NAME_NOSTAGE%.*}-${CI_COMMIT_REF_SLUG}
     #key: ${CI_COMMIT_REF_SLUG}
-    key: ${DISTRO}-${RUNTIME}-${CC}
+    key: ${DISTRO}-${FLECSISP_RUNTIME}-${CC}
     paths:
       - ccache/
 
@@ -288,7 +284,7 @@ before_script:
     - |
       cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/flecsi-dev/build/install \
             -DCMAKE_BUILD_TYPE=Release \
-            -DFLECSI_RUNTIME_MODEL=$RUNTIME \
+            -DFLECSI_RUNTIME_MODEL=$FLECSISP_RUNTIME \
             -DENABLE_FLECSIT=OFF \
             -DENABLE_FLECSI_TUTORIAL=OFF \
             -DENABLE_UNIT_TESTS=ON \
@@ -302,8 +298,8 @@ before_script:
     - cd ${CI_PROJECT_DIR}/build/
     - |
       cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
-            -DCMAKE_BUILD_TYPE=$BUILD_TYPE \
-            -DFLECSI_RUNTIME_MODEL=$RUNTIME \
+            -DCMAKE_BUILD_TYPE=$FLECSISP_BUILD_TYPE \
+            -DFLECSI_RUNTIME_MODEL=$FLECSISP_RUNTIME \
             -DENABLE_UNIT_TESTS=ON \
             -DPORTAGE_LIBRARY=${FLECSISP_PORTAGE_INSTALL_PREFIX}/lib64/libportage.so \
             -DWONTON_LIBRARY=${FLECSISP_PORTAGE_INSTALL_PREFIX}/lib64/libwonton.so \
