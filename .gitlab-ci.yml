@@ -13,8 +13,8 @@ variables:
   CCACHE_DIR: "${CI_PROJECT_DIR}/ccache"
   CCACHE_UMASK: 000
   DISTRO: "centOS"
-  RUNTIME: "legion"
-  BUILD_TYPE: "Debug"
+  RUNTIME: ""
+  BUILD_TYPE: ""
   CC: "gcc"
   CXX: "g++"
   CXXFLAGS: ""
