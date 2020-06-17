@@ -736,21 +736,21 @@ int main( int argc, char* argv[] )
     if (comm_rank==0) std::cout << "Wrote " << num_cells << " cells" << std::endl;
   }
 
-  //if (is_int64) 
-  //  status = write_mapping<long long>(exo_id, global_cell_id, global_vertex_id);
-  //else
-  //  status = write_mapping<int>(exo_id, global_cell_id, global_vertex_id);
-  //if (status) {
-  //  if (comm_rank==0)
-  //    std::cerr
-  //        << "Problem putting mapping to exodus file, "
-  //        << " ex_put_num_map() returned " << status << std::endl;
-  //  MPI_Finalize();
-  //  return status;
-  //}
-  //else {
-  //  if (comm_rank==0) std::cout << "Wrote mapping." << std::endl;
-  //}
+  if (is_int64) 
+    status = write_mapping<long long>(exo_id, global_cell_id, global_vertex_id);
+  else
+    status = write_mapping<int>(exo_id, global_cell_id, global_vertex_id);
+  if (status) {
+    if (comm_rank==0)
+      std::cerr
+          << "Problem putting mapping to exodus file, "
+          << " ex_put_num_map() returned " << status << std::endl;
+    MPI_Finalize();
+    return status;
+  }
+  else {
+    if (comm_rank==0) std::cout << "Wrote mapping." << std::endl;
+  }
   
   for (const auto & ss : side_sets) {
     const auto & elem_list = ss.second.elem_list;
