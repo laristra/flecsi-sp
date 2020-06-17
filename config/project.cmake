@@ -9,12 +9,6 @@
 
 cinch_minimum_required(VERSION v1.0)
 
-#------------------------------------------------------------------------------#
-# Set the project name
-#------------------------------------------------------------------------------#
-
-project(FleCSI-SP)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 # cmake module path
