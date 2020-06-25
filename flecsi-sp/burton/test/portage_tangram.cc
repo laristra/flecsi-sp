@@ -329,11 +329,6 @@ void remap_tangram_test(
       std::string{"mat_volfracs"}, entity_kind_t::CELL,
       field_type_t::MULTIMATERIAL_FIELD);
 
-  using tangram_point_t = Tangram::Point<num_dims>;
-  auto matcentroids = source_state_wrapper.template add_cell_field<tangram_point_t>(
-      std::string{"mat_centroids"}, entity_kind_t::CELL,
-      field_type_t::MULTIMATERIAL_FIELD);
-
   // now set fields to be reconstructed
   auto density_name = "density";
   auto density = source_state_wrapper.template add_cell_field<real_t>(
@@ -367,7 +362,6 @@ void remap_tangram_test(
   for (int m=0; m<max_mats; ++m){
     auto mat_index = 0;
     for (auto c: velocity_handle.indices(m) ){
-      matcentroids[offset] = centroid_list[m][mat_index]; 
       density[offset] = prescribed_function( centroid_list[m][mat_index] );
       offset++;
       mat_index++;

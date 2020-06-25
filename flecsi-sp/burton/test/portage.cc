@@ -191,7 +191,6 @@ void remap_test(
   // Apply the new coordinates to the mesh and update its geometry.
   // Here we save some info we need.
   std::vector< real_t > target_cell_volume(mesh.num_cells());
-  std::vector< vector_t > target_cell_centroid(mesh.num_cells());
   // update coordinates
   for ( auto v : mesh.vertices() )
     std::swap(v->coordinates(), new_vertex_coords(v));
@@ -199,7 +198,6 @@ void remap_test(
   for ( auto c: mesh.cells() ) {
     c->update(&mesh);
     target_cell_volume[c] = c->volume();
-    target_cell_centroid[c] = c->centroid();
   }
 
   // Store the cell volumes for the source mesh 
@@ -223,8 +221,7 @@ void remap_test(
 
   mesh_wrapper_b.set_new_coordinates(
     &new_vertex_coords(0),
-    target_cell_volume.data(),
-    target_cell_centroid.data() );
+    target_cell_volume.data());
 
   // Create temporary vectors for the data to be remapped
   std::vector< double > remap_density(mesh.num_cells(), 0);
