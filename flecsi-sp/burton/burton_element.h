@@ -737,21 +737,26 @@ struct burton_element_t<2,2>
   // Accessors / Modifiers
   //============================================================================
   //! the centroid
+  FLECSI_INLINE_TARGET
   const auto & centroid() const 
   { return centroid_; };
 
   //! the edge midpoint
+  FLECSI_INLINE_TARGET
   const auto & midpoint() const
   { return midpoint_; };
 
   //! the area of the element
+  FLECSI_INLINE_TARGET
   auto area() const
   { return area_; };
 
   //! the area of the element
+  FLECSI_INLINE_TARGET
   auto volume() const
   { return volume_; };
   
+  FLECSI_INLINE_TARGET
   auto min_length() const
   { return min_length_; }
 
