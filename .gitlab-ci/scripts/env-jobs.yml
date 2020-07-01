@@ -9,7 +9,7 @@
   stage: Env
   only:
     refs:
-      - master
+      - "1.4"
       - merge_requests
       - schedules
   except:
@@ -87,7 +87,7 @@ update:
     - .update_spackage
   only:
     refs:
-      - master
+      - "1.4"
     changes:
       - spack-repo/*
   artifacts:
