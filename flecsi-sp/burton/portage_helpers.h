@@ -1,3 +1,6 @@
+#ifndef FLECSI_SP_BURTON_PORTAGE_HELPERS
+#define FLECSI_SP_BURTON_PORTAGE_HELPERS
+
 #include <flecsi-sp/burton/portage_mesh_wrapper.h>
 #include <flecsi-sp/burton/portage_state_wrapper.h>
 #include <flecsi-sp/burton/portage_mm_state_wrapper.h>
@@ -116,3 +119,6 @@ void compute_weights(T & remapper)
 
 } // namespace
 } // namespace
+
+
+#endif // FLECSI_SP_BURTON_PORTAGE_HELPERS
