@@ -1002,6 +1002,8 @@ public:
       clog_fatal(
           "Problem reading side set, ex_get_side_set_node_list_len() returned " << status);
 
+    if (!num_side_in_set) return;
+
     // get the actual connectivity
     side_set_node_cnt_list.resize(num_side_in_set + 1);
     side_set_node_list.resize( side_set_node_list_len);
@@ -1734,15 +1736,12 @@ public:
       auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
 
       for (int i = 0; i < num_side_sets; i++){
-        
-        // if no label, use the id
-        if ( ss_names[i].empty() )
-          ss_names[i] = std::to_string( ss_ids[i] ); 
-        
+
         if (int64) {
           std::vector<long long> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
           base_t::template read_side_set<long long>(
             exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+          if (side_set_node_cnt_list.empty()) continue; 
         
           detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
             side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
@@ -1752,12 +1751,17 @@ public:
           std::vector<int> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
           base_t::template read_side_set<int>(
             exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+          if (side_set_node_cnt_list.empty()) continue; 
         
           detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
             side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
             side_to_vertices_, side_sets_ );
         }
-
+        
+        // if no label, use the id
+        if ( ss_names[i].empty() )
+          ss_names[i] = std::to_string( ss_ids[i] ); 
+        
         // if this side set is used on this rank
         auto sit = side_sets_.find(ss_ids[i]);
         if ( sit != side_sets_.end() ) {
