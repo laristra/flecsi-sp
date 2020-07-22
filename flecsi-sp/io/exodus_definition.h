@@ -80,7 +80,7 @@ public:
   static constexpr size_t num_dims = D;
 
   //! An enumeration to keep track of element types
-  enum class block_t { tri, quad, polygon, tet, hex, polyhedron, unknown };
+  enum class block_t { tri, quad, polygon, tet, hex, polyhedron, unknown, empty };
 
 
   struct side_set_info_t {
@@ -739,6 +739,8 @@ public:
     if (status)
       clog_fatal("Problem reading block, ex_get_block() returned " << status);
 
+    if (!num_elem_this_blk) return block_t::empty;
+
     //------------------------------------------------------------------------
     // polygon data
     if (strcasecmp("nsided", elem_type) == 0) {
@@ -809,10 +811,11 @@ public:
       // read element definitions
       indices.resize(num_elem_this_blk * num_nodes_per_elem);
       status = ex_get_elem_conn(exoid, blk_id, indices.data());
-      if (status)
+      if (status) {
         clog_fatal(
             "Problem getting element connectivity, ex_get_elem_conn() "
             << "returned " << status);
+      }
 
       // return element type
       if (
@@ -1578,7 +1581,8 @@ public:
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
 
-      typename base_t::block_t block_type;
+      using block_t = typename base_t::block_t;
+      block_t block_type;
       auto cell_start = cell2vertices_.size();
 
       vector<int> counts;
@@ -1586,6 +1590,8 @@ public:
         vector<long long> indices;
         block_type = base_t::template read_element_block<long long>(
             exoid, elem_blk_ids[iblk], counts, indices );
+        if (block_type == block_t::empty) continue;
+
         detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
             cell2vertices_.offsets, cell2vertices_.indices );
       }
@@ -1593,6 +1599,8 @@ public:
         vector<int> indices;
         block_type = base_t::template read_element_block<int>(
             exoid, elem_blk_ids[iblk], counts, indices );
+        if (block_type == block_t::empty) continue;
+
         detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
             cell2vertices_.offsets, cell2vertices_.indices );
       }
@@ -2674,7 +2682,8 @@ public:
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
 
-      typename base_t::block_t block_type;
+      using block_t = typename base_t::block_t;
+      block_t block_type;
       crs_t new_entities;
       auto counter_start = cell_counter;
 
@@ -2683,6 +2692,7 @@ public:
         vector<long long> temp_indices;
         block_type = base_t::template read_element_block<long long>(
             exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
+        if (block_type == block_t::empty) continue;
         detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
             cell_counter, new_entities.offsets, new_entities.indices );
         if (block_type == base_t::block_t::polyhedron)
@@ -2693,6 +2703,7 @@ public:
         vector<int> temp_counts, temp_indices;
         block_type = base_t::template read_element_block<int>(
             exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
+        if (block_type == block_t::empty) continue;
         detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
             cell_counter, new_entities.offsets, new_entities.indices );
         if (block_type == base_t::block_t::polyhedron)
@@ -2985,14 +2996,12 @@ public:
       auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
 
       for (int i = 0; i < num_side_sets; i++){
-        // if no label, use the id
-        if ( ss_names[i].empty() )
-          ss_names[i] = std::to_string( ss_ids[i] ); 
         
         if (int64) {
           std::vector<long long> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
           base_t::template read_side_set<long long>(
             exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+          if (side_set_node_cnt_list.empty()) continue; 
         
           detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
             side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
@@ -3002,11 +3011,16 @@ public:
           std::vector<int> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
           base_t::template read_side_set<int>(
             exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+          if (side_set_node_cnt_list.empty()) continue; 
         
           detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
             side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
             side_to_vertices_, side_sets_ );
         }
+        
+        // if no label, use the id
+        if ( ss_names[i].empty() )
+          ss_names[i] = std::to_string( ss_ids[i] ); 
 
         // if this side set is used on this rank
         auto sit = side_sets_.find(ss_ids[i]);
