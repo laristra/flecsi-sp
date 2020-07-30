@@ -81,7 +81,7 @@ mpich_legion:
   variables:
     FLECSISP_RUNTIME: "legion"
 
-update:
+.update:
   extends:
     - openmpi_mpi
     - .update_spackage
