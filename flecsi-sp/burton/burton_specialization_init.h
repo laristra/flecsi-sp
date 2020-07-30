@@ -3629,7 +3629,6 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   // create a vector of colorings and color info for each dimensional entity
   auto & entities = context.coloring_map();
   auto & gathered_color_info = context.coloring_info_map();
-
   std::map< size_t,  flecsi::coloring::coloring_info_t > entity_color_info;
 
   //----------------------------------------------------------------------------
@@ -3806,8 +3805,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
            entity_color_info.count(index_space_id) == 0 )
         continue;
       // gather and set to context directly
-      gathered_color_info[index_space_id] = 
-        communicator->gather_coloring_info(entity_color_info[index_space_id]);
+      gathered_color_info[index_space_id][rank] = entity_color_info[index_space_id];
       // add index space to list
       registered_index_spaces.push_back( index_space_id );
     }
