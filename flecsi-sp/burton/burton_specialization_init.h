@@ -3806,8 +3806,12 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
            entity_color_info.count(index_space_id) == 0 )
         continue;
       // gather and set to context directly
+#if FLECSI_RUNTIME_MODEL == FLECSI_RUNTIME_MODEL_mpi
+      gathered_color_info[index_space_id][rank] = entity_color_info[index_space_id];
+#else
       gathered_color_info[index_space_id] = 
         communicator->gather_coloring_info(entity_color_info[index_space_id]);
+#endif
       // add index space to list
       registered_index_spaces.push_back( index_space_id );
     }
