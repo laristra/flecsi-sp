@@ -44,7 +44,7 @@ include:
     - echo "BUILDING TANGRAM"
     - git clone ssh://git@xcp-stash.lanl.gov:7999/laristra/tangram.git
     - cd tangram
-    - git checkout ${FLECSISP_TANGRAM_HASH}
+    - git checkout ${FLECSISP_TANGRAM_REF}
     - git submodule update --init --recursive
     - mkdir build
     - cd build
@@ -65,7 +65,7 @@ include:
     - cd ${CI_PROJECT_DIR}
     - git clone ssh://git@xcp-stash.lanl.gov:7999/laristra/portage.git
     - cd portage
-    - git checkout ${FLECSISP_PORTAGE_HASH}
+    - git checkout ${FLECSISP_PORTAGE_REF}
     - git submodule update --init --recursive
     - mkdir build
     - cd build
