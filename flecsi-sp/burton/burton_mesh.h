@@ -226,6 +226,7 @@ public:
     bool Enabled = ( !ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >* = nullptr
   >
+  FLECSI_INLINE_TARGET
   decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // normal case:  EIN and EOUT are different, query topology
@@ -242,6 +243,7 @@ public:
     bool Enabled = ( ristra::compatibility::is_same_v<EIN, EOUT> ),
     typename std::enable_if_t< Enabled >** = nullptr
   >
+  FLECSI_INLINE_TARGET
   decltype(auto) query_entities(const flecsi::topology::domain_entity_u<M, EIN> & e) const
   {
     // degenerate case:  EIN and EOUT are the same, return trivial set
@@ -509,6 +511,7 @@ public:
   //!
   //! \return Return faces associated with entity instance \e e as a sequence.
   template <class E>
+  FLECSI_INLINE_TARGET
   decltype(auto) faces(E * e) const
   {
     return base_t::template entities<face_t::dimension, face_t::domain>(e);
@@ -523,6 +526,7 @@ public:
   //!
   //! \return Faces for entity \e e in domain \e M.
   template <size_t M, class E>
+  FLECSI_INLINE_TARGET
   decltype(auto) faces(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, face_t>(e);
@@ -544,6 +548,7 @@ public:
   //! \return Return face ids associated with entity instance \e e as a 
   //!         sequence.
   template <class E>
+  FLECSI_INLINE_TARGET
   decltype(auto) face_ids(E * e) const
   {
     return base_t::template entity_ids<face_t::dimension, face_t::domain>(e);
@@ -599,6 +604,7 @@ public:
   //!
   //! \return Return cells associated with entity instance \e e as a sequence.
   template <class E>
+  FLECSI_INLINE_TARGET
   decltype(auto) cells(E * e) const
   {
     return base_t::template entities<cell_t::dimension, cell_t::domain>(e);
@@ -613,6 +619,7 @@ public:
   //!
   //! \return Cells for entity \e e in domain \e M.
   template <size_t M, class E>
+  FLECSI_INLINE_TARGET
   decltype(auto) cells(const flecsi::topology::domain_entity_u<M, E> & e) const
   {
     return query_entities<M, E, cell_t>(e);
@@ -1402,7 +1409,7 @@ void set_regions(std::vector<int> &region_ids)
 
       #pragma omp for nowait
       for ( counter_t i=0; i<num_edges; i++ )
-        es[i]->update( this );
+        es[i]->update( this, alpha, axis );
 
       //--------------------------------------------------------------------------
       // compute face parameters
@@ -1410,7 +1417,7 @@ void set_regions(std::vector<int> &region_ids)
       if ( num_dimensions == 3 ) {
         #pragma omp for nowait
         for ( counter_t i=0; i<num_faces; i++ )
-          fs[i]->update( this );
+          fs[i]->update( this, alpha, axis );
       }
 
       //--------------------------------------------------------------------------
@@ -1457,8 +1464,34 @@ void set_regions(std::vector<int> &region_ids)
             (*wit)->update( this, true );
           }
         }
-      }  // else num_dimensions
+        // used mostly on rz geometry.
 
+        {
+          
+          //std::vector<double> x(4);
+          //std::vector<double> y(4);
+          #pragma omp for
+          for(counter_t i=0;i<num_cells;++i)
+          {
+            auto cell = cs[i];
+            int cntr(0);
+            std::vector<double> x;
+            std::vector<double> y;
+            for(auto vt: vertices(cell))
+            {
+              x.push_back(vt->coordinates()[0]);
+              y.push_back(vt->coordinates()[1]);
+              cntr++;
+            }//vt
+            cntr=0;
+            for(auto cn:corners(cell))
+            {
+              cn->update_volume(this,alpha,cntr,x,y);
+              cntr++;
+            }//cn
+          }//i(cell)
+        }
+      }
 #endif // FLECSI_SP_BURTON_MESH_EXTRAS
 
     } // end omp parallel

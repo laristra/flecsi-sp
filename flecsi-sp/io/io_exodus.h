@@ -650,6 +650,8 @@ public:
 
 
 
+
+
   //============================================================================
   //!  \brief Implementation of exodus mesh write for burton specialization.
   //!
@@ -799,6 +801,234 @@ public:
 
   } // io_exodus_t::write
 
+
+  //============================================================================
+  //!  \brief Implementation of exodus mesh write for burton specialization.
+  //!
+  //!  \param[in] name Write burton mesh \e m to \e name.
+  //!  \param[in] m Burton mesh to write to \e name.
+  //!
+  //!  \return Exodus error code. 0 on success.
+  //============================================================================
+
+  static auto write_begin(
+    const std::string &name,
+    mesh_t &m
+  ) {
+
+#ifdef FLECSI_SP_ENABLE_EXODUS
+
+    // alias some types
+    using std::vector;
+    using std::array;
+
+
+    //--------------------------------------------------------------------------
+    // initial setup
+    //--------------------------------------------------------------------------
+
+    auto exoid = base_t::open( name, std::ios_base::out );
+    assert(exoid >= 0);
+
+    // get the general statistics
+    constexpr auto num_dims = mesh_t::num_dimensions;
+    auto num_nodes = m.num_vertices();
+    auto num_faces = num_dims==3 ? m.num_faces() : 0;
+    auto num_elems = m.num_cells();
+    auto num_elem_blk = 1;
+    auto num_node_sets = 0;
+    auto num_side_sets = 0;
+
+    auto exo_params = base_t::make_params();
+    exo_params.num_nodes = num_nodes;
+    exo_params.num_face = num_faces;
+    exo_params.num_face_blk = num_dims==3 ? 1 : 0;;
+    exo_params.num_elem = num_elems;
+    exo_params.num_elem_blk = 1;
+    exo_params.num_node_sets = 0;
+
+    base_t::write_params(exoid, exo_params);
+
+    // check the integer type used in the exodus file
+    auto int64 = base_t::is_int64(exoid);
+
+    //--------------------------------------------------------------------------
+    // Point Coordinates
+    //--------------------------------------------------------------------------
+    
+    std::vector<real_t> vertex_coord( num_nodes * num_dims );
+    
+    for (auto v : m.vertices()) {
+      auto & coords = v->coordinates();
+      for ( int i=0; i<num_dims; i++ )
+        vertex_coord[ i*num_nodes + v.id() ] = coords[i];
+    } // for
+
+    base_t::write_point_coords( exoid, vertex_coord );
+  
+    //--------------------------------------------------------------------------
+    // Face connectivity
+    //--------------------------------------------------------------------------
+
+    if ( num_dims == 2 ) {
+
+      // get the master entity lists
+      const auto & cs = m.cells();
+
+      // create the element blocks
+      base_t::template write_element_block<ex_index_t>( 
+        exoid, 1, "cells", "nsided", num_elems,
+        [&]( auto c, auto & face_list ) {
+          for ( auto v : m.vertices(cs[c]) ) 
+            face_list.emplace_back( v.id() );
+        }
+      );
+
+    }
+
+    else if ( num_dims == 3 ) {
+      
+      // get the master entity lists
+      const auto & fs = m.faces();
+      const auto & cs = m.cells();
+
+      // create the face blocks
+      base_t::template write_face_block<ex_index_t>( 
+        exoid, 1, "faces", num_faces,
+        [&]( auto f, auto & face_conn ) 
+        {
+          for ( auto v : m.vertices(fs[f]) )
+            face_conn.emplace_back( v.id() );
+        }
+      );
+
+
+      // create the element blocks
+      base_t::template write_element_block<ex_index_t>( 
+        exoid, 1, "cells", "nfaced", num_elems,
+        [&]( auto c, auto & face_list ) {
+          for ( auto f : m.faces(cs[c]) ) 
+            face_list.emplace_back( f.id() );
+        }
+      );
+
+    }
+
+    return exoid;
+
+#else
+
+    std::cerr << "FLECSI not build with exodus support." << std::endl;
+
+#endif
+
+  } // io_exodus_t::write_begin
+
+
+  //============================================================================
+  //!  \brief Implementation of exodus mesh write for burton specialization.
+  //!
+  //!  \param[in] name Write burton mesh \e m to \e name.
+  //!  \param[in] m Burton mesh to write to \e name.
+  //!
+  //!  \return Exodus error code. 0 on success.
+  //============================================================================
+
+  static void write_end(int exoid, double time)
+  {
+
+#ifdef FLECSI_SP_ENABLE_EXODUS
+
+    // -------------
+    // set the time
+    int time_step(1);
+    auto status = ex_put_time(exoid, time_step, &time );
+    assert(status == 0);
+
+    //--------------------------------------------------------------------------
+    // final step
+    //--------------------------------------------------------------------------
+    base_t::close( exoid );
+
+
+#else
+
+    std::cerr << "FLECSI not build with exodus support." << std::endl;
+
+#endif
+
+  } // io_exodus_t::write_end
+
+  //============================================================================
+  //! \brief write field data to the file
+  //! \param [in] m  The mesh to extract field data from.
+  //! \return the status of the file
+  //============================================================================
+  static void write_fields_varnames( int exoid, std::vector<std::string> &name) 
+  { 
+
+    int status;
+
+    //--------------------------------------------------------------------------
+    // hard coded data
+    //--------------------------------------------------------------------------
+    
+    int num_var = name.size();
+    //int var_id = 1;
+    int elem_blk_id = 1;
+
+    // put the number of element fields
+    status = ex_put_var_param(exoid, "e", num_var);
+    if (status)
+      THROW_RUNTIME_ERROR(
+        "Problem writing variable number, " <<
+        " ex_put_var_param() returned " << status 
+      );
+
+    // fill element variable names array
+//    auto label = validate_string( f.label() );
+
+    for(int i=0;i<name.size();++i)
+    {
+        int var_id(i+1);
+        
+        status = ex_put_var_name(exoid, "e", var_id, name[i].c_str());
+
+        if (status)
+            THROW_RUNTIME_ERROR(
+                "Problem writing variable name, " << name[i].c_str()<<
+                " ex_put_var_name() returned " << status 
+                );
+    }
+  } // io_exodus_t::write_fields_varnames
+
+  //============================================================================
+  //! \brief write field data to the file
+  //! \param [in] m  The mesh to extract field data from.
+  //! \return the status of the file
+  //============================================================================
+  static void write_ith_field( int exoid, int var_id, const std::vector<ex_real_t> & vec ) 
+  { 
+
+    int status;
+    //--------------------------------------------------------------------------
+    // hard coded data
+    //--------------------------------------------------------------------------
+    auto time_step = 1;
+    int elem_blk_id = 1;
+    
+    status = ex_put_elem_var(
+        exoid, time_step, var_id, elem_blk_id, vec.size(), vec.data()
+        );
+
+    if (status)
+        THROW_RUNTIME_ERROR(
+            "Problem writing variable data, " <<
+            " ex_put_elem_var() returned " << status 
+            );
+    
+    
+  } // io_exodus_t::write_ith_field
   
 }; // struct io_exodus_t
 

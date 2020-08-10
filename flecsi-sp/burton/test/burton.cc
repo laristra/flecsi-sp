@@ -479,7 +479,7 @@ flecsi_register_task(normals_test, flecsi_sp::burton::test, loc,
 void subset_test( utils::client_handle_r<mesh_t> mesh ) {
   
   std::set< mesh_t::vertex_t* > overlapping_verts;
-  auto & vs = mesh.vertices( mesh_t::subset_t::overlapping );
+  const auto vs = mesh.vertices( mesh_t::subset_t::overlapping );
 
   for(auto c : mesh.cells(flecsi::owned))
   {

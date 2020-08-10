@@ -9,12 +9,6 @@
 
 cinch_minimum_required(VERSION v1.0)
 
-#------------------------------------------------------------------------------#
-# Set the project name
-#------------------------------------------------------------------------------#
-
-project(FleCSI-SP)
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 # cmake module path
@@ -224,6 +218,12 @@ if(FLECSI_SP_ENABLE_PORTAGE)
   include_directories(${PORTAGE_INCLUDE_DIRS})
   list( APPEND FLECSI_SP_LIBRARIES ${PORTAGE_LIBRARIES} )
 endif()
+
+#------------------------------------------------------------------------------#
+# HDF5
+#------------------------------------------------------------------------------#
+find_package(HDF5 REQUIRED)
+list( APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES} )
 
 #------------------------------------------------------------------------------#
 # configure header

@@ -82,6 +82,26 @@ auto write_mapping(
   return status;
 }
 
+template <typename T, typename Container>
+auto write_side_set(
+    int ex_id,
+    int side_id,
+    const Container & elem_list,
+    const Container & side_list)
+{
+  auto status = ex_put_side_set_param(ex_id, side_id, side_list.size(), 0);
+  if (status) return status;
+
+  if ( std::is_same<typename Container::value_type, T>::value ) {
+    return ex_put_side_set(ex_id, side_id, elem_list.data(), side_list.data());
+  }
+  else {
+    std::vector<T> elem(elem_list.begin(), elem_list.end());
+    std::vector<T> side(side_list.begin(), side_list.end());
+    return ex_put_side_set(ex_id, side_id, elem.data(), side.data());
+  }
+}
+
 void subdivide(
     unsigned_integer_t nelem,
     unsigned_integer_t npart,
@@ -103,6 +123,11 @@ void subdivide(
     dist.push_back(dist[r] + indices);
   } // for
 };
+  
+struct side_t {
+  std::vector<unsigned_integer_t> elem_list;
+  std::vector<unsigned_integer_t> side_list;
+};
 
 int main( int argc, char* argv[] )
 {
@@ -119,14 +144,14 @@ int main( int argc, char* argv[] )
   // Declare the supported options.
   po::options_description desc("Allowed options");
   desc.add_options()
-      ("help,h", "produce help message")
-      ("dimensions,d", po::value<std::vector<integer_t>>()->multitoken(), "Box dimensions.")
-      ("partitions,p", po::value<std::vector<integer_t>>()->multitoken(), "Number partitions in each direction.")
-      ("lower,l", po::value<std::vector<real_t>>()->multitoken(), "Box lower coordinates.")
-      ("upper,u", po::value<std::vector<real_t>>()->multitoken(), "Box upper coordinates.")
-      ("output-file,o", po::value<std::string>(), "output file")
-      ("verbose,v", "Print extra debug info.")
-      ("large-integer,i", "Use large integer support.")
+      ("help", "produce help message")
+      ("dimensions", po::value<std::vector<integer_t>>()->multitoken(), "Box dimensions.")
+      ("partitions", po::value<std::vector<integer_t>>()->multitoken(), "Number partitions in each direction.")
+      ("lower", po::value<std::vector<real_t>>()->multitoken(), "Box lower coordinates.")
+      ("upper", po::value<std::vector<real_t>>()->multitoken(), "Box upper coordinates.")
+      ("output-file", po::value<std::string>(), "output file")
+      ("verbose", "Print extra debug info.")
+      ("large-integer", "Use large integer support.")
   ;
   
   po::positional_options_description p;
@@ -386,6 +411,8 @@ int main( int argc, char* argv[] )
   std::vector<unsigned_integer_t> global_cell_id(num_cells);
   std::vector<unsigned_integer_t> global_vertex_id(num_verts);
 
+  std::map<int,side_t> side_sets;
+
   if ( num_dims == 2 ) {
 
     auto vertex_local_id = [&](auto i, auto j) {
@@ -425,6 +452,16 @@ int main( int argc, char* argv[] )
       return iglobal + global_dims[0]*jglobal;
     };
 
+    auto cell_is_bottom_boundary = [&](auto i, auto j)
+    { return block_displ[1][block_ijk[1]] + j == 0; };
+    auto cell_is_top_boundary = [&](auto i, auto j)
+    { return block_displ[1][block_ijk[1]] + j == global_dims[1]-1; };
+
+    auto cell_is_left_boundary = [&](auto i, auto j)
+    { return block_displ[0][block_ijk[0]] + i == 0; };
+    auto cell_is_right_boundary = [&](auto i, auto j)
+    { return block_displ[0][block_ijk[0]] + i == global_dims[0]-1; };
+
     for ( unsigned_integer_t j=0, id=0; j<local_dims[1]; ++j ) {
       for ( unsigned_integer_t i=0; i<local_dims[0]; ++i ) {
         auto local_id = cell_local_id(i, j);
@@ -433,6 +470,22 @@ int main( int argc, char* argv[] )
         cell_vertices[id++] = vertex_local_id(i+1,   j) + 1;
         cell_vertices[id++] = vertex_local_id(i+1, j+1) + 1;
         cell_vertices[id++] = vertex_local_id(i  , j+1) + 1;
+        if (cell_is_bottom_boundary(i, j)) {
+          side_sets[3].elem_list.emplace_back(local_id+1);
+          side_sets[3].side_list.emplace_back(1);
+        }
+        if (cell_is_right_boundary(i, j)) {
+          side_sets[2].elem_list.emplace_back(local_id+1);
+          side_sets[2].side_list.emplace_back(2);
+        }
+        if (cell_is_top_boundary(i, j)) {
+          side_sets[4].elem_list.emplace_back(local_id+1);
+          side_sets[4].side_list.emplace_back(3);
+        }
+        if (cell_is_left_boundary(i, j)) {
+          side_sets[1].elem_list.emplace_back(local_id+1);
+          side_sets[1].side_list.emplace_back(4);
+        }
       }
     }
 
@@ -475,6 +528,21 @@ int main( int argc, char* argv[] )
       auto kglobal = kstart + k;
       return iglobal + global_dims[0]*(jglobal + global_dims[1]*kglobal);
     };
+    
+    auto cell_is_left_boundary = [&](auto i, auto j, auto k)
+    { return block_displ[0][block_ijk[0]] + i == 0; };
+    auto cell_is_right_boundary = [&](auto i, auto j, auto k)
+    { return block_displ[0][block_ijk[0]] + i == global_dims[0]-1; };
+    
+    auto cell_is_bottom_boundary = [&](auto i, auto j, auto k)
+    { return block_displ[1][block_ijk[1]] + j == 0; };
+    auto cell_is_top_boundary = [&](auto i, auto j, auto k)
+    { return block_displ[1][block_ijk[1]] + j == global_dims[1]-1; };
+
+    auto cell_is_front_boundary = [&](auto i, auto j, auto k)
+    { return block_displ[2][block_ijk[2]] + j == 0; };
+    auto cell_is_back_boundary = [&](auto i, auto j, auto k)
+    { return block_displ[2][block_ijk[2]] + j == global_dims[2]-1; };
 
     for ( unsigned_integer_t k=0; k<local_dims[2]+1; ++k ) {
       for ( unsigned_integer_t j=0; j<local_dims[1]+1; ++j ) {
@@ -502,6 +570,31 @@ int main( int argc, char* argv[] )
           cell_vertices[id++] = vertex_local_id(i+1,   j, k+1) + 1;
           cell_vertices[id++] = vertex_local_id(i+1, j+1, k+1) + 1;
           cell_vertices[id++] = vertex_local_id(i  , j+1, k+1) + 1;
+          
+          if (cell_is_bottom_boundary(i, j, k)) {
+            side_sets[1].elem_list.emplace_back(local_id+1);
+            side_sets[1].side_list.emplace_back(1);
+          }
+          if (cell_is_right_boundary(i, j, k)) {
+            side_sets[2].elem_list.emplace_back(local_id+1);
+            side_sets[2].side_list.emplace_back(2);
+          }
+          if (cell_is_top_boundary(i, j, k)) {
+            side_sets[3].elem_list.emplace_back(local_id+1);
+            side_sets[3].side_list.emplace_back(3);
+          }
+          if (cell_is_left_boundary(i, j, k)) {
+            side_sets[4].elem_list.emplace_back(local_id+1);
+            side_sets[4].side_list.emplace_back(4);
+          }
+          if (cell_is_front_boundary(i, j, k)) {
+            side_sets[5].elem_list.emplace_back(local_id+1);
+            side_sets[5].side_list.emplace_back(5);
+          }
+          if (cell_is_front_boundary(i, j, k)) {
+            side_sets[6].elem_list.emplace_back(local_id+1);
+            side_sets[6].side_list.emplace_back(6);
+          }
         }
       }
     }
@@ -581,7 +674,7 @@ int main( int argc, char* argv[] )
   exopar.num_node_sets = 0;
   exopar.num_edge_sets = 0;
   exopar.num_face_sets = 0;
-  exopar.num_side_sets = 0;
+  exopar.num_side_sets = side_sets.size();
   exopar.num_elem_sets = 0;
   exopar.num_node_maps = 0;
   exopar.num_edge_maps = 0;
@@ -657,6 +750,25 @@ int main( int argc, char* argv[] )
   }
   else {
     if (comm_rank==0) std::cout << "Wrote mapping." << std::endl;
+  }
+  
+  for (const auto & ss : side_sets) {
+    const auto & elem_list = ss.second.elem_list;
+    const auto & side_list = ss.second.side_list;
+    auto sid = ss.first;
+    if (is_int64)
+      status = write_side_set<long long> (exo_id, sid, elem_list, side_list);
+    else
+      status = write_side_set<int> (exo_id, sid, elem_list, side_list);
+    if (status) {
+      if (comm_rank==0)
+        std::cerr
+            << "Problem putting side sets to exodus file, "
+            << " ex_put_side_set() returned " << status << std::endl;
+      MPI_Finalize();
+      return status;
+    }
+    sid++;
   }
     
   status = ex_close(exo_id);
