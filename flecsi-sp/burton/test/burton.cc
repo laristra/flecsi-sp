@@ -605,6 +605,31 @@ flecsi_register_task(state_fill_test, flecsi_sp::burton::test, loc,
 flecsi_register_task(state_check_test, flecsi_sp::burton::test, loc,
     index|flecsi::leaf);
 
+void point_in_cell_test(
+  utils::client_handle_r<mesh_t> mesh
+) {
+  
+  const auto & context = flecsi::execution::context_t::instance();
+  
+  // cells
+  for(auto c: mesh.cells(flecsi::owned)) {
+    ASSERT_TRUE( c->is_inside(&mesh, c->centroid().data()) ) << "CENTROID NOT INSIDE";
+    for (auto f : mesh.faces(c)) {
+      for ( auto c2 : mesh.cells(f) )  {
+        if (c2 != c) {
+          ASSERT_FALSE( c2->is_inside(&mesh, c->centroid().data()) )
+            << "NEIGHBOR CENTROID IS INSIDE";
+        }
+      }
+    }
+  }
+
+
+} // TEST_F
+
+flecsi_register_task(point_in_cell_test, flecsi_sp::burton::test, loc,
+    index|flecsi::leaf);
+
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
 
 
@@ -732,6 +757,12 @@ void driver(int argc, char ** argv)
   
   // launch the connectivity test task
   flecsi_execute_task(subset_test, flecsi_sp::burton::test, index, mesh_handle);
+  
+  flecsi_execute_task(
+      point_in_cell_test,
+      flecsi_sp::burton::test,
+      index,
+      mesh_handle);
 
   // launch the state test task
   auto cell_data_handle = flecsi_get_handle(mesh_handle, hydro, cell_data, real_t, dense, 0);
@@ -758,7 +789,6 @@ void driver(int argc, char ** argv)
       face_data_handle,
       edge_data_handle,
       vert_data_handle );
-
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
   
