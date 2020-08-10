@@ -266,7 +266,7 @@ struct burton_element_t<1,1>
   ) {
     assert( dim == 1 );
 
-    auto v = conn.get_entity_vec( cell, /* dimension */ 0 );
+    const auto v = conn.get_entities( cell, /* dimension */ 0 );
     auto num_cell_verts = v.size();
     assert( num_cell_verts == 2 );
 
@@ -307,7 +307,7 @@ struct burton_element_t<1,1>
   ) {
 
     // general connecitivity that is needed in all cases
-    auto cell_verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
+    const auto cell_verts = primal_conn.get_entities( cell, /* dimension */ 0 );
     auto num_vertices = cell_verts.size();
     assert( num_vertices == 2 );
 
@@ -451,6 +451,10 @@ struct burton_element_t<2,1> :
   auto area() const
   { return length_; }
 
+  //! true area of 2d element,differs from "area" when running rz.
+  auto true_area() const
+  {return true_area_;}
+
   //! the edge normal
   const auto & normal() const
   { return normal_; }
@@ -490,7 +494,7 @@ struct burton_element_t<2,1> :
 
   //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update( const MESH_TOPOLOGY * mesh, int alpha=0 , int axis=1)
   {
     using ristra::math::sqr;
     using ristra::math::normal;
@@ -502,6 +506,11 @@ struct burton_element_t<2,1> :
     length_ = std::sqrt( sqr(a[0]-b[0]) + sqr(a[1]-b[1]) );
     normal_ = normal( b, a );
     normal_ /= length_;
+
+    if( alpha==0)
+      true_area_ = length_;
+    else
+      true_area_ = 2*M_PI*length_*midpoint_[axis];
   }
 
   //============================================================================
@@ -521,6 +530,7 @@ private:
   point_t midpoint_ = 0;
   vector_t normal_ = 0;
 
+  real_t true_area_ =0;
   //! owner
   size_t owner_id_ = std::numeric_limits<size_t>::max();
 };
@@ -621,7 +631,7 @@ struct burton_element_t<3,1> :
 
   //! \brief update the mesh geometry
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update( const MESH_TOPOLOGY * mesh, int alpha=0 , int axis=1)
   {
     using ristra::math::sqr;
     auto vs = mesh->template entities<0, domain>(this);
@@ -727,21 +737,26 @@ struct burton_element_t<2,2>
   // Accessors / Modifiers
   //============================================================================
   //! the centroid
+  FLECSI_INLINE_TARGET
   const auto & centroid() const 
   { return centroid_; };
 
   //! the edge midpoint
+  FLECSI_INLINE_TARGET
   const auto & midpoint() const
   { return midpoint_; };
 
   //! the area of the element
+  FLECSI_INLINE_TARGET
   auto area() const
   { return area_; };
 
   //! the area of the element
+  FLECSI_INLINE_TARGET
   auto volume() const
   { return volume_; };
   
+  FLECSI_INLINE_TARGET
   auto min_length() const
   { return min_length_; }
 
@@ -796,7 +811,7 @@ struct burton_element_t<2,2>
   ) {
     assert( dim == 1 );
 
-    auto v = conn.get_entity_vec( cell, /* dimension */ 0 );
+    const auto v = conn.get_entities( cell, /* dimension */ 0 );
     auto num_cell_verts = v.size();
 
     size_t ind=0;
@@ -843,8 +858,8 @@ struct burton_element_t<2,2>
   ) {
 
     // general connecitivity that is needed in all cases
-    auto cell_verts = primal_conn.get_entity_vec( cell, /* dimension */ 0 );
-    auto cell_edges = primal_conn.get_entity_vec( cell, /* dimension */ 1 );
+    const auto cell_verts = primal_conn.get_entities( cell, /* dimension */ 0 );
+    const auto cell_edges = primal_conn.get_entities( cell, /* dimension */ 1 );
     auto num_vertices = cell_verts.size();
     auto num_edges = cell_edges.size();
     
@@ -859,7 +874,7 @@ struct burton_element_t<2,2>
         cell_edges.begin(), cell_edges.end(), 
         [&]( const auto & e ) 
         { 
-          auto verts = primal_conn.get_entity_vec( e, /* dim */ 0 );
+          const auto verts = primal_conn.get_entities( e, /* dim */ 0 );
           assert( verts.size() == 2 && "should be two vertices per edge" );
           return ( (verts[0] == pa && verts[1] == pb) || 
                    (verts[0] == pb && verts[1] == pa) );
@@ -908,7 +923,7 @@ struct burton_element_t<2,2>
     case 1: {
 
       // get connectivity specific to wedges
-      auto cell_corners = domain_conn.get_entity_vec( cell, /* dimension */ 0 ).vec();
+      auto cell_corners = domain_conn.get_entities_vec( cell, /* dimension */ 0 );
       
       // sort cell corners for later intersection
       std::sort( cell_corners.begin(),  cell_corners.end() );
@@ -927,7 +942,7 @@ struct burton_element_t<2,2>
         auto edge1 = _find_edge( *p1, *p2 );
         // get the corner of this point, but also associated with this cell
         auto point_corners =
-          domain_conn.get_entity_vec(  *p1, /* dim */ 0 ).vec();
+          domain_conn.get_entities_vec(  *p1, /* dim */ 0 );
         // sort the lists for intersectinos
         std::sort( point_corners.begin(), point_corners.end() );
         // get the intersections of the sets
@@ -965,7 +980,7 @@ struct burton_element_t<2,2>
 
       // get connectivity specific to sides
       // list of wedges associated to this cell.
-      auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
+      auto cell_wedges = domain_conn.get_entities_vec( cell, /* dimension */ 1 );
       
       // sort cell wedges for later intersection
       std::sort( cell_wedges.begin(),  cell_wedges.end() );
@@ -977,7 +992,7 @@ struct burton_element_t<2,2>
       // loop over each edge (pair of vertices)
       for(auto e1 = cell_edges.begin(); e1 != cell_edges.end();++e1)
       {
-          auto edge_wedges = domain_conn.get_entity_vec(*e1,/*dimension*/1).vec();
+          auto edge_wedges = domain_conn.get_entities_vec(*e1,/*dimension*/1);
           
           // sort cell wedges for later intersection
           std::sort( edge_wedges.begin(),  edge_wedges.end() );
@@ -989,7 +1004,7 @@ struct burton_element_t<2,2>
 
           // it should have two wedges per edges..
           assert(wedges.size()==2);
-          auto edge_verts = primal_conn.get_entity_vec( *e1, /* dimension */ 0 );
+          const auto edge_verts = primal_conn.get_entities( *e1, /* dimension */ 0 );
 
           for( auto v:edge_verts) 
               entities[i++]=v;
@@ -1245,6 +1260,9 @@ struct burton_element_t<3,2>
   auto area() const
   { return area_; }
 
+  auto true_area() const
+  {return area_;}
+
   //! the minimum length in the element
   auto min_length() const
   { return min_length_; }
@@ -1275,7 +1293,7 @@ struct burton_element_t<3,2>
   )  {
     assert( dim == 1 );
 
-    auto v = conn.get_entity_vec( cell, /* dimension */ 0 );
+    const auto v = conn.get_entities( cell, /* dimension */ 0 );
     auto num_cell_verts = v.size();
 
     size_t ind=0;
@@ -1324,7 +1342,7 @@ struct burton_element_t<3,2>
   //! \brief update the mesh geometry
   //----------------------------------------------------------------------------
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update(  const MESH_TOPOLOGY * mesh, int alpha=0 , int axis=1)
   {
     using ristra::math::abs;
   
@@ -1618,7 +1636,7 @@ struct burton_element_t<3,3>
     assert( dim == 1 ); 
   
     // get the cell entities
-    auto cell_faces = conn.get_entity_vec( cell, /* dimension */ 2 );
+    const auto cell_faces = conn.get_entities( cell, /* dimension */ 2 );
     // make sure the faces exist
     assert( cell_faces.size() > 0 && "no cell faces yet" );
     
@@ -1628,7 +1646,7 @@ struct burton_element_t<3,3>
     // get the edges of each face
     for ( const auto & face : cell_faces ) { 
       // get all vertices in this face
-      auto face_verts = conn.get_entity_vec( face, /* dimension */ 0 );
+      const auto face_verts = conn.get_entities( face, /* dimension */ 0 );
       assert( face_verts.size() > 2 && "not enough vertices for a valid face" );
       // reserve space 
       cell_edges.reserve( cell_edges.size() + face_verts.size() );
@@ -1718,9 +1736,9 @@ struct burton_element_t<3,3>
       std::vector<size_t> entity_count;
   
       // get the cell entities
-      auto cell_verts = primal_conn.get_entity_vec( cell, /* dim */ 0 );
-      auto cell_edges = primal_conn.get_entity_vec( cell, /* dim */ 1 ).vec();
-      auto cell_faces = primal_conn.get_entity_vec( cell, /* dim */ 2 ).vec();
+      const auto cell_verts = primal_conn.get_entities( cell, /* dim */ 0 );
+      auto cell_edges = primal_conn.get_entities_vec( cell, /* dim */ 1 );
+      auto cell_faces = primal_conn.get_entities_vec( cell, /* dim */ 2 );
   
       // sort the edges and faces for intersections later      
       std::sort( cell_edges.begin(), cell_edges.end() );
@@ -1734,8 +1752,8 @@ struct burton_element_t<3,3>
         edges.clear();
         faces.clear();
         // get all entities attached to this vertex
-        auto vert_edges = primal_conn.get_entity_vec( vert, /* dim */ 1 ).vec(); 
-        auto vert_faces = primal_conn.get_entity_vec( vert, /* dim */ 2 ).vec(); 
+        auto vert_edges = primal_conn.get_entities_vec( vert, /* dim */ 1 );
+        auto vert_faces = primal_conn.get_entities_vec( vert, /* dim */ 2 );
         // sort the lists for intersectinos
         std::sort( vert_edges.begin(), vert_edges.end() );
         std::sort( vert_faces.begin(), vert_faces.end() );
@@ -1766,8 +1784,8 @@ struct burton_element_t<3,3>
     case 1: {
   
       // get the higher dimensional entities
-      auto cell_faces   = primal_conn.get_entity_vec( cell, /* dim */ 2 );
-      auto cell_corners = domain_conn.get_entity_vec( cell, /* dim */ 0 ).vec();
+      const auto cell_faces   = primal_conn.get_entities( cell, /* dim */ 2 );
+      auto cell_corners = domain_conn.get_entities_vec( cell, /* dim */ 0 );
 
       // sort cell corners for later intersections
       std::sort( cell_corners.begin(),  cell_corners.end() );
@@ -1779,15 +1797,15 @@ struct burton_element_t<3,3>
       for ( const auto & face : cell_faces ) { 
   
         // get the vertices of the face
-        auto face_verts = primal_conn.get_entity_vec( face, /* dim */ 0 );
+        const auto face_verts = primal_conn.get_entities( face, /* dim */ 0 );
         auto ccw_face_verts =
           std::vector<id_t>( face_verts.begin(), face_verts.end() );
         
         // get the edges of the face
-        auto face_edges = primal_conn.get_entity_vec( face, /* dim */ 1 );
+        const auto face_edges = primal_conn.get_entities( face, /* dim */ 1 );
   
         // get the cells of this face
-        auto face_cells = primal_conn.get_entity_vec( face, /* dim */ 3 );
+        const auto face_cells = primal_conn.get_entities( face, /* dim */ 3 );
         // reverse the list of vertices if this is backwards
         if ( face_cells[0] != cell ) 
           std::reverse( ccw_face_verts.begin(), ccw_face_verts.end() );
@@ -1800,7 +1818,7 @@ struct burton_element_t<3,3>
             face_edges.begin(), face_edges.end(), 
             [&]( const auto & e ) 
             { 
-              auto verts = primal_conn.get_entity_vec( e, /* dim */ 0 );
+              const auto verts = primal_conn.get_entities( e, /* dim */ 0 );
               assert( verts.size() == 2 && "should be two vertices per edge" );
               return ( (verts[0] == pa && verts[1] == pb) || 
                        (verts[0] == pb && verts[1] == pa) );
@@ -1822,7 +1840,7 @@ struct burton_element_t<3,3>
           auto edge1 = _find_edge( *p1, *p2 );
           // get the corner of this point, but also associated with this cell
           auto point_corners =
-            domain_conn.get_entity_vec(  *p1, /* dim */ 0 ).vec();
+            domain_conn.get_entities_vec(  *p1, /* dim */ 0 );
           // sort the lists for intersectinos
           std::sort( point_corners.begin(), point_corners.end() );
           // get the intersections of the sets
@@ -1863,13 +1881,12 @@ struct burton_element_t<3,3>
       auto num_sides(0);
       
       // get the cell entities
-      auto cell_verts = primal_conn.get_entity_vec( cell, /* dim */ 0 );
-      auto cell_edges = primal_conn.get_entity_vec( cell, /* dim */ 1 ).vec();
-      auto cell_faces = primal_conn.get_entity_vec( cell, /* dim */ 2 ).vec();
+      const auto cell_verts = primal_conn.get_entities( cell, /* dim */ 0 );
+      const auto cell_faces = primal_conn.get_entities( cell, /* dim */ 2 );
 
       // get connectivity specific to sides
       // list of wedges associated to this cell.
-      auto cell_wedges = domain_conn.get_entity_vec( cell, /* dimension */ 1 ).vec();
+      auto cell_wedges = domain_conn.get_entities_vec( cell, /* dimension */ 1 );
       
       // sort cell wedges for later intersection
       // somehow, sort is important.
@@ -1886,10 +1903,10 @@ struct burton_element_t<3,3>
       // loop over each face.
       for( auto f = cell_faces.begin(); f != cell_faces.end();++f)
       {
-        auto face_edges = primal_conn.get_entity_vec( *f, /* dim */ 1 ).vec();
+        auto face_edges = primal_conn.get_entities( *f, /* dim */ 1 );
 
         // list of wedges that attached to this face.
-        auto face_wedges = domain_conn.get_entity_vec(*f, 1).vec();
+        auto face_wedges = domain_conn.get_entities_vec(*f, 1);
         std::sort(face_wedges.begin(), face_wedges.end());
         
         std::vector<id_t> cell_face_wedges;
@@ -1907,7 +1924,7 @@ struct burton_element_t<3,3>
         for(auto e = face_edges.begin(); e != face_edges.end();++e)
         {
           // wedges attached to edge, e.
-          auto edge_wedges = domain_conn.get_entity_vec(*e,/*dimension*/1).vec();
+          auto edge_wedges = domain_conn.get_entities_vec(*e,/*dimension*/1);
           std::sort(edge_wedges.begin(),edge_wedges.end());
           
           
@@ -1927,7 +1944,7 @@ struct burton_element_t<3,3>
           // 1 face,
           // 2 wedges,
           // 
-          auto edge_verts  = primal_conn.get_entity_vec( *e, /* dimension */ 0 ).vec();
+          const auto edge_verts  = primal_conn.get_entities( *e, /* dimension */ 0 );
 
           // 2 vertex entries 
           for( auto v=edge_verts.begin(); v != edge_verts.end();++v) 

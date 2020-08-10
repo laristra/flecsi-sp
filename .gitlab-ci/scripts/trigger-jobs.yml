@@ -1,0 +1,15 @@
+flecsale-mm:
+  stage: Trigger
+  only:
+    - merge_requests
+    - "1.4"
+    - "1"
+  variables:
+    UPSTREAM_REPO: "specializations"
+    UPSTREAM_BRANCH: $CI_COMMIT_REF_NAME
+    UPSTREAM_URL: "git@gitlab.lanl.gov:${CI_PROJECT_URL#https://gitlab.lanl.gov/*}"
+  trigger:
+    project: laristra/flecsale-mm
+    branch: master
+    strategy: depend
+

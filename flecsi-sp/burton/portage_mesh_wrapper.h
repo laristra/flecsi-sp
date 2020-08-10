@@ -173,7 +173,7 @@ public:
   void set_new_coordinates(
     const vector_t * node_coordinates,
     const real_t * cell_volumes,
-    const vector_t * cell_centroids )
+    const vector_t * cell_centroids = nullptr )
   {
     node_coordinates_ = node_coordinates;
     cell_volumes_ = cell_volumes;
@@ -529,6 +529,10 @@ public:
     auto this_cell = cells_[cell_id];
     if ( cell_centroids_ )
       *centroid = make_point(cell_centroids_[this_cell]);
+    else if (node_coordinates_) 
+      THROW_RUNTIME_ERROR(
+          "Your mesh wrapper has overriden coordinates, but no "
+          " volumes have been provided!" );
     else
       *centroid = make_point(this_cell->centroid());
   }
