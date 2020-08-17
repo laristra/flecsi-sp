@@ -9,7 +9,7 @@
 #pragma once
 
 // user incldues
-#include <cinch/logging/cinchlog.h>
+#include <cinchlog.h>
 #include <ristra/utils/algorithm.h>
 #include <ristra/utils/string_utils.h>
 #include <flecsi/coloring/dcrs_utils.h>
