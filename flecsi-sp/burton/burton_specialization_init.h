@@ -9,7 +9,7 @@
 #pragma once
 
 // user incldues
-#include <cinch/logging/cinchlog.h>
+#include <cinchlog.h>
 #include <ristra/utils/algorithm.h>
 #include <ristra/utils/string_utils.h>
 #include <flecsi/coloring/dcrs_utils.h>
@@ -34,7 +34,7 @@ namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
 
-//! \brief holds some extra mesh info.  
+//! \brief holds some extra mesh info.
 //! This is used to pass information between tlt and spmd initializations.
 //! The alternative would be to duplicate some computation.
 struct extra_mesh_info_t {
