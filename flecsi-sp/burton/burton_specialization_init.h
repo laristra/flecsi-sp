@@ -34,7 +34,7 @@ namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
 
-//! \brief holds some extra mesh info.  
+//! \brief holds some extra mesh info.
 //! This is used to pass information between tlt and spmd initializations.
 //! The alternative would be to duplicate some computation.
 struct extra_mesh_info_t {
