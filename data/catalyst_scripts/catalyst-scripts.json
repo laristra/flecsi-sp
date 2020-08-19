@@ -1,0 +1,7 @@
+{
+	"catalyst-scripts-comment": "scripts for testing; the paths are relative to the catalyst-scripts.json file",
+	"catalyst-scripts": [
+		"write_vtm.py",
+		"view_test.py"
+	]
+}
