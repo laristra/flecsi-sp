@@ -14,8 +14,21 @@
 #include <flecsi-sp/burton/mesh_interface.h>
 #include <flecsi-sp/utils/types.h>
 
+#include <ristra/initialization/arguments.h>
+#include <ristra/initialization/input.h>
+
+// flecsi insitu
+#ifdef FLECSI_SP_ENABLE_CATALYST_ON
+#include "ristra/io/catalyst/adaptor.h"
+#include "ristra/io/catalyst/flecsale_unstructuredGrid.h"
+#include "ristra/io/catalyst/utils/catalystUtils.hpp"
+#endif
+
 // system includes
 #include <array>
+#include <string>
+
+
 
 // using statements
 using std::cout;
@@ -53,6 +66,68 @@ auto prefix()
   ss << FLECSI_SP_BURTON_MESH_DIMENSION << "d";
   return ss.str();
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+//! \brief Insitu Catalyst
+////////////////////////////////////////////////////////////////////////////////
+
+#ifdef FLECSI_SP_ENABLE_CATALYST_ON
+vtkCPProcessor* catalyst_init(std::vector<std::string> scripts)
+{
+  clog(info) << "Init Catalyst" << std::endl;
+  //std::cout << "Init Catalyst" << std::endl;
+  auto p = ristra::io::catalyst::initAdaptor(scripts);
+
+  return p;
+}
+
+flecsi_register_task(catalyst_init, flecsi_sp::burton::test, loc, index|flecsi::leaf);
+
+
+
+vtkSmartPointer<vtkUnstructuredGrid> catalyst_create_vtk( 
+  flecsi_sp::utils::client_handle_r<mesh_t> mesh
+) 
+{
+  clog(info) << "OUTPUT MESH TASK" << std::endl;
+
+  // get the context
+  const auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
+
+  std::vector<real_t> var_scalar;
+  for ( auto c : mesh.cells( flecsi::owned ) )
+  {
+      var_scalar.push_back(rank);
+  }
+
+  auto vtk_grid = ristra::io::catalyst::createMesh( mesh );
+  ristra::io::catalyst::addScalar( &var_scalar[0], "cell_density",  vtk_grid, (size_t)mesh.num_cells(), 1 );
+
+  return vtk_grid;
+}
+
+flecsi_register_task(catalyst_create_vtk, flecsi_sp::burton::test, loc, index|flecsi::leaf);
+
+
+void catalyst_coprocess( 
+  vtkCPProcessor* processor_,
+  vtkSmartPointer<vtkUnstructuredGrid> theGrid, 
+  real_t time,
+  int timestep,
+  bool last_timestep
+) 
+{
+  clog(info) << "OUTPUT MESH TASK" << std::endl;
+
+  ristra::io::catalyst::processCatalyst(processor_, theGrid, time, timestep, last_timestep);
+
+}
+
+flecsi_register_task(catalyst_coprocess,  flecsi_sp::burton::test, loc, index|flecsi::leaf);
+
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Update the goemetry
@@ -708,12 +783,24 @@ namespace execution {
 ////////////////////////////////////////////////////////////////////////////////
 void driver(int argc, char ** argv)
 {
+  #ifdef FLECSI_SP_ENABLE_CATALYST_ON
+  auto & cmdl = ristra::initialization::command_line_arguments_t::instance();
+  auto args = cmdl.process_arguments(argc, argv);
+  const auto & variables = args.variables;
+  auto inputFilename = variables.as<std::string>("catalyst-file");
+  std::cout << "inputFilename: " << inputFilename << std::endl;
+
+  std::vector<std::string> scripts = getCatalystScripts(inputFilename);
+  auto tempInsitu = flecsi_execute_task(catalyst_init, flecsi_sp::burton::test, index, scripts);
+  auto insitu = tempInsitu.get();
+  #endif
 
   // get the mesh handle
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
   auto f = 
     flecsi_execute_task(update_geometry, flecsi_sp::burton::test, index, mesh_handle);
   f.wait(); // dont go forward until this is done!
+
 
   // launch the validity test task
   flecsi_execute_task(validity_test, flecsi_sp::burton::test, index, mesh_handle);
@@ -758,6 +845,15 @@ void driver(int argc, char ** argv)
       face_data_handle,
       edge_data_handle,
       vert_data_handle );
+
+ 
+ 
+ #ifdef FLECSI_SP_ENABLE_CATALYST_ON
+  auto grid = flecsi_execute_task(catalyst_create_vtk, flecsi_sp::burton::test, index,   mesh_handle);
+  grid.wait();
+  auto vtkData = grid.get();
+  flecsi_execute_task(catalyst_coprocess, flecsi_sp::burton::test, index,   insitu, vtkData, 0, 0, 1);
+ #endif
 
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
