@@ -737,21 +737,26 @@ struct burton_element_t<2,2>
   // Accessors / Modifiers
   //============================================================================
   //! the centroid
+  FLECSI_INLINE_TARGET
   const auto & centroid() const 
   { return centroid_; };
 
   //! the edge midpoint
+  FLECSI_INLINE_TARGET
   const auto & midpoint() const
   { return midpoint_; };
 
   //! the area of the element
+  FLECSI_INLINE_TARGET
   auto area() const
   { return area_; };
 
   //! the area of the element
+  FLECSI_INLINE_TARGET
   auto volume() const
   { return volume_; };
   
+  FLECSI_INLINE_TARGET
   auto min_length() const
   { return min_length_; }
 
@@ -1106,6 +1111,30 @@ struct burton_element_t<2,2>
     if (alpha == 0){
       volume_ = area_;
     }
+  }
+  
+  //----------------------------------------------------------------------------
+  // is  a point in a  cell
+  //----------------------------------------------------------------------------
+  template< typename MESH_TOPOLOGY >
+  bool is_inside(const MESH_TOPOLOGY * mesh, const real_t * x)
+  {
+
+    auto coords = detail::coordinates(mesh, this);
+    auto NumPoints  = coords.size();
+    coords.emplace_back( coords.front() );
+
+    for (unsigned i=0; i<NumPoints; ++i) {
+      const auto & p0 = coords[i];
+      const auto & p1 = coords[i+1];
+      auto dx = p1[0] - p0[0];
+      auto dy = p1[1] - p0[1];
+
+      auto f = dx * ( x[1] - p0[1] ) - dy * ( x[0] - p0[0] );
+      if (f<0) return false;
+    }
+
+    return true;
   }
 
 private:
@@ -2025,8 +2054,7 @@ struct burton_element_t<3,3>
       case shape_t::polyhedron: {
         ristra::geometry::shapes::polyhedron<point_t> poly;     
         for ( auto f : fs ) {
-          auto cs = mesh->template entities<3, domain>(f);
-          auto reverse = !f->is_flipped(cs[0]);
+          auto reverse = !f->is_flipped(this);
           auto coords = f->coordinates( mesh, reverse );
           poly.insert( coords );
         }
@@ -2043,6 +2071,41 @@ struct burton_element_t<3,3>
   
     } // switch
     
+  }
+
+  //----------------------------------------------------------------------------
+  // is  a point in a  cell
+  //----------------------------------------------------------------------------
+  template< typename MESH_TOPOLOGY >
+  bool is_inside(const MESH_TOPOLOGY * mesh, const real_t * x)
+  {
+    auto vs = mesh->template entities<0, domain>(this);
+    auto fs = mesh->template entities<2, domain>(this);
+
+    for ( auto f : fs ) {
+      auto cs = mesh->template entities<3, domain>(f);
+      auto reverse = !f->is_flipped(this);
+      auto coords = f->coordinates( mesh, reverse );
+    
+      auto NumPoints = coords.size();
+      coords.emplace_back(coords.front());
+
+      const auto & fx = f->midpoint();
+    
+      for (unsigned i=0; i<NumPoints; ++i) {
+        const auto & p0 = coords[i];
+        const auto & p1 = coords[i+1];
+        auto n = ristra::geometry::shapes::triangle<num_dimensions>::normal( p0, p1, fx );
+        auto f = 
+          n[0] * ( x[0] - p0[0] ) +
+          n[1] * ( x[1] - p0[1] ) +
+          n[2] * ( x[2] - p0[2] );
+        if (f<0) return false;
+      }
+    
+    }
+
+    return true;
   }
 
   //============================================================================

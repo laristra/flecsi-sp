@@ -18,6 +18,11 @@ set(burton_HEADERS
   burton_specialization_arguments.h
   burton_types.h
   burton_vertex.h
+  mesh_interface.h
+  portage_helpers.h
+  portage_mesh_wrapper.h
+  portage_mm_state_wrapper.h
+  portage_state_wrapper.h
 
   PARENT_SCOPE # THIS NEEDS TO BE HERE
 )

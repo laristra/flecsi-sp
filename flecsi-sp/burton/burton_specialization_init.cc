@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // hydro includes
-#include <cinch/logging/cinchlog.h>
+#include <cinchlog.h>
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <ristra/initialization/arguments.h>
 
