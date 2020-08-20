@@ -876,9 +876,6 @@ void driver(int argc, char ** argv)
       face_data_handle,
       edge_data_handle,
       vert_data_handle );
-
-<<<<<<< HEAD
- 
  
  #ifdef FLECSI_SP_ENABLE_CATALYST_ON
   auto grid = flecsi_execute_task(catalyst_create_vtk, flecsi_sp::burton::test, index,   mesh_handle);
@@ -888,8 +885,6 @@ void driver(int argc, char ** argv)
  #endif
 
 
-=======
->>>>>>> 1.4
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
   
   // launch the extras test task
