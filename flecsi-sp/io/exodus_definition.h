@@ -31,6 +31,15 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+  
+extern "C" int ex_get_coord_range(
+    int exoid,
+    int64_t start,
+    int64_t end,
+    void *x_coor,
+    void *y_coor,
+    void *z_coor);
+
 
 namespace flecsi_sp {
 namespace io {
@@ -454,6 +463,44 @@ public:
 
     return vertex_coord;
   }
+  
+  //============================================================================
+  //! \brief read the coordinates of the mesh from a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the vertex coordinates
+  //============================================================================
+  static void read_point_coords(
+      int exo_id,
+      size_t start,
+      size_t end,
+      std::vector<real_t> & vertex_coord) 
+  {
+
+    // get the number of nodes
+    auto num_nodes = end - start;
+    if (num_nodes <= 0)
+      clog_fatal(
+          "Exodus file has zero nodes, or parmeters haven't been read yet.");
+
+    // read nodes
+    vertex_coord.resize(num_dims * num_nodes);
+
+    // exodus is kind enough to fetch the data in the real type we ask for
+    auto status = ex_get_coord_range(
+        exo_id,
+        start,
+        end,
+        vertex_coord.data(),
+        vertex_coord.data() + num_nodes,
+        vertex_coord.data() + 2 * num_nodes);
+
+    if (status)
+      clog_fatal(
+          "Problem getting vertex coordinates from exodus file, "
+          << " ex_get_coord() returned " << status);
+
+  }
+
 
   //============================================================================
   //! \brief write the coordinates of the mesh from a file.
@@ -1647,29 +1694,22 @@ public:
       cell_global2local_.emplace( std::make_pair( global_id, i ) );
     }
 
-    //--------------------------------------------------------------------------
-    // read coordinates
 
-    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
-    clog_assert(
-        coordinates.size() == dimension() * exo_params.num_nodes,
-        "Mismatch in read vertices");
-
-    auto num_vertices = coordinates.size() / dimension();
+    //auto num_vertices = coordinates.size() / dimension();
     
     //--------------------------------------------------------------------------
-    // Renumber vertices
-
+    // Read vertices
+    
     // get the vertex maps
     auto & vertex_global2local_ = global_to_local_[0];
     auto & vertex_local2global_ = local_to_global_[0];
 
     if ( serial ) {
-
-      // Throw away vertices that are not mine
+    
+      // create a local numbering of the vertices
       size_t local_vertices{0};
       vertex_global2local_.clear();
-
+      
       for ( size_t i=0; i<num_cells; ++i ) {
         for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
           auto global_id = cell2vertices_.indices[j];
@@ -1679,30 +1719,97 @@ public:
         }
       }
 
+
+      vertices_.clear();
+      vertices_.resize(local_vertices*num_dims);
+
+      //--------------------------------
+      // Read vertices in serial
+      if (comm_size == 1) {
+        auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
+        clog_assert(
+            coordinates.size() == num_dims * exo_params.num_nodes,
+            "Mismatch in read vertices");
+
+        for ( const auto & id_pair : vertex_global2local_ ) {
+          auto global_id = id_pair.first;
+          auto local_id = id_pair.second;
+          for ( int d=0; d<num_dims; ++d ) {
+            vertices_[ local_id*num_dims + d ] = 
+              coordinates[d * local_vertices + global_id];
+          }
+        }
+      }
+      //--------------------------------
+      // Read vertices in chunks
+      else {
+        constexpr unsigned chunk = 128;
+        std::vector<real_t> buf;
+        auto real_size = sizeof(real_t);
+        MPI_Request request;
+        MPI_Status status;
+
+        for (size_t cnt=0, i=0; cnt<exo_params.num_nodes;) {
+          
+          auto start = cnt;
+          cnt = std::min<std::size_t>(cnt + chunk, exo_params.num_nodes);
+          auto buf_size = cnt - start;
+
+          buf.resize(buf_size*num_dims);
+
+          if (comm_rank == 0)
+            base_t::read_point_coords(exoid, start, cnt, buf);
+
+          auto ret = MPI_Ibcast(
+              buf.data(),
+              buf_size*num_dims*real_size,
+              MPI_BYTE,
+              0,
+              MPI_COMM_WORLD,
+              &request);
+          
+          if (comm_rank != 0)
+            MPI_Wait(&request, &status);
+
+          for (auto global_id=start; global_id<cnt; ++global_id) {
+            auto it = vertex_global2local_.find(global_id);
+            if (it != vertex_global2local_.end()) {
+              auto local_id = it->second; 
+              auto pos = global_id-start;
+              for ( int d=0; d<num_dims; ++d )
+                vertices_[ local_id*num_dims + d ] = buf[d*buf_size + pos];
+            }
+          }
+
+          if (comm_rank == 0)
+            MPI_Wait(&request, &status);
+
+          i = (i + 1) & 1;
+
+        } // for
+      }
+
       // invert the global id to local id map
       vertex_local2global_.clear();
       vertex_local2global_.resize(local_vertices);
 
-      for ( const auto & global_local : vertex_global2local_ ) {
+      for ( const auto & global_local : vertex_global2local_ )
         vertex_local2global_[global_local.second] = global_local.first;
-      }
       
-      // convert element conectivity to local ids and extract only coordinates
-      // that are needed
-      vertices_.clear();
-      vertices_.resize(local_vertices*num_dims);
-
-      for ( auto & v : cell2vertices_.indices ) {
-        auto global_id = v;
-        v = vertex_global2local_.at(global_id);
-        for ( int d=0; d<num_dims; ++d ) {
-          vertices_[ v*num_dims + d ] = 
-            coordinates[d * num_vertices + global_id];
-        }
-      }
+      // convert element conectivity to local ids 
+      for ( auto & v : cell2vertices_.indices )
+        v = vertex_global2local_.at(v);
+      
     } // serial
     // parallel
     else {
+      
+      auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
+      clog_assert(
+          coordinates.size() == num_dims * exo_params.num_nodes,
+          "Mismatch in read vertices");
+
+      auto num_vertices = coordinates.size() / num_dims;
     
       if (int64) {
         vertex_local2global_ =
