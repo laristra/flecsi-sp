@@ -2147,6 +2147,9 @@ public:
         std::array<MPI_Request, 2> requests;
         std::array<MPI_Status, 2> statuses;
         std::array<bool, 2> used = {false, false};
+      
+        double elapsed_time = 0;
+        size_t elapsed_counter = 0;
 
         for (size_t cnt=0, i=0; cnt<exo_params.num_nodes;) {
           
@@ -2161,8 +2164,13 @@ public:
           auto & status = statuses[i];
 
           if (comm_rank == 0) {
+            if (used[i]) {
+              auto start = MPI_Wtime();
+              MPI_Wait(&request, &status);
+              elapsed_time += MPI_Wtime() - start;
+              elapsed_counter++;
+            }
             base_t::read_point_coords(exoid, start, cnt, buf);
-            if (used[i]) MPI_Wait(&request, &status);
           }
 
           auto ret = MPI_Ibcast(
@@ -2192,9 +2200,15 @@ public:
         } // for
           
         if (comm_rank == 0) {
-         for (int i=0; i<2; ++i) 
-           if (used[i])
+          for (int i=0; i<2; ++i) 
+            if (used[i]) {
+             auto start = MPI_Wtime();
              MPI_Wait(&requests[i], &statuses[i]);
+             elapsed_time += MPI_Wtime() - start;
+           }
+          elapsed_counter++;
+          std::cout << "Vertices: Spent a total/average of " << elapsed_time 
+            << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
         }
 
       }
@@ -2442,6 +2456,9 @@ public:
       std::vector<std::vector<MPI_Status>> statuses(2, std::vector<MPI_Status>(3));
       std::array<bool, 2> used = {false, false};
 
+      double elapsed_time = 0;
+      size_t elapsed_counter = 0;
+
       int i = 0;
       while (more_work) {
 
@@ -2453,7 +2470,12 @@ public:
         auto & status = statuses[i];
 
         if (comm_rank == 0) {
-          if (used[i]) MPI_Waitall(request.size(), request.data(), status.data());
+          if (used[i]) {
+            auto start = MPI_Wtime();
+            MPI_Waitall(request.size(), request.data(), status.data());
+            elapsed_time += MPI_Wtime() - start;
+            elapsed_counter++;
+          }
           auto res = base_t::template read_block<U>(
               exoid,
               blk_id,
@@ -2518,9 +2540,15 @@ public:
       }
         
       if (comm_rank == 0) {
-       for (int i=0; i<2; ++i) 
-         if (used[i])
-           MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
+        for (int i=0; i<2; ++i) 
+          if (used[i]) {
+            auto start = MPI_Wtime();
+            MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
+            elapsed_time += MPI_Wtime() - start;
+          }
+        elapsed_counter++;
+        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
       }
 
       return block_type;
@@ -2739,6 +2767,9 @@ public:
       std::vector<std::vector<MPI_Status>> statuses(2, std::vector<MPI_Status>(2));
       std::array<bool, 2> used = {false, false};
       
+      double elapsed_time = 0;
+      size_t elapsed_counter = 0;
+      
       int i = 0;
       while (more_work) {
         auto & data = data_buf[i];
@@ -2748,7 +2779,12 @@ public:
         auto & status = statuses[i];
 
         if (comm_rank == 0) {
-          if (used[i]) MPI_Waitall(request.size(), request.data(), status.data());
+          if (used[i]) {
+            auto start = MPI_Wtime();
+            MPI_Waitall(request.size(), request.data(), status.data());
+            elapsed_time += MPI_Wtime() - start;
+            elapsed_counter++;
+          }
           auto res = base_t::template read_side_set<U>(
               exoid,
               ss_id,
@@ -2808,9 +2844,15 @@ public:
       } // while
 
       if (comm_rank == 0) {
-       for (int i=0; i<2; ++i) 
-         if (used[i])
-           MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
+        for (int i=0; i<2; ++i) 
+          if (used[i]) {
+            auto start = MPI_Wtime();
+            MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
+            elapsed_time += MPI_Wtime() - start;
+          }
+        elapsed_counter++;
+        std::cout << "Side set<" << ss_id << ">: Spent a total/average of " << elapsed_time 
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
       }
     }
     
