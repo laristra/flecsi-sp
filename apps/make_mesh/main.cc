@@ -540,9 +540,9 @@ int main( int argc, char* argv[] )
     { return block_displ[1][block_ijk[1]] + j == global_dims[1]-1; };
 
     auto cell_is_front_boundary = [&](auto i, auto j, auto k)
-    { return block_displ[2][block_ijk[2]] + j == 0; };
+    { return block_displ[2][block_ijk[2]] + k == 0; };
     auto cell_is_back_boundary = [&](auto i, auto j, auto k)
-    { return block_displ[2][block_ijk[2]] + j == global_dims[2]-1; };
+    { return block_displ[2][block_ijk[2]] + k == global_dims[2]-1; };
 
     for ( unsigned_integer_t k=0; k<local_dims[2]+1; ++k ) {
       for ( unsigned_integer_t j=0; j<local_dims[1]+1; ++j ) {
@@ -591,7 +591,7 @@ int main( int argc, char* argv[] )
             side_sets[5].elem_list.emplace_back(local_id+1);
             side_sets[5].side_list.emplace_back(5);
           }
-          if (cell_is_front_boundary(i, j, k)) {
+          if (cell_is_back_boundary(i, j, k)) {
             side_sets[6].elem_list.emplace_back(local_id+1);
             side_sets[6].side_list.emplace_back(6);
           }
