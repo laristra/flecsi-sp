@@ -29,6 +29,11 @@ auto register_mesh_args_entries =
     register_argument<int>( "mesh", "max-entries,e",
         "Specify the maximum number of sparse entries" ); 
 
+auto register_part_args =
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument( "mesg", "partition-only,p",
+        "Partition mesh and exit" );
+
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
 ///////////////////////////////////////////////////////////////////////////////
@@ -74,7 +79,7 @@ void specialization_tlt_init(int argc, char** argv)
       std::cout << "Setting max_entries to \"" << max_entries << "\"." << std::endl;
   
   bool partition_only = variables.count("partition-only");
-
+  
   //===========================================================================
   // Partition mesh
   //===========================================================================

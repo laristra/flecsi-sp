@@ -33,7 +33,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define CHUNK_SIZE 128
+#define CHUNK_SIZE 64
   
 extern "C" {
   int ex_get_coord_range(
