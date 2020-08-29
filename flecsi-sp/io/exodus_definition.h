@@ -33,7 +33,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define CHUNK_SIZE 64
+#define CHUNK_SIZE 1024
   
 extern "C" {
   int ex_get_coord_range(
@@ -643,32 +643,27 @@ public:
     // Read vertices in chunks
     else {
       constexpr unsigned chunk = CHUNK_SIZE;
-      std::array< std::vector<real_t>, 2 > bufs;
+      std::vector<real_t> buf;
       auto real_size = sizeof(real_t);
-      std::array<MPI_Request, 2> requests;
-      std::array<MPI_Status, 2> statuses;
-      std::array<bool, 2> used = {false, false};
+      MPI_Request request;
+      MPI_Status status;
     
       double elapsed_time = 0;
       size_t elapsed_counter = 0;
 
-      for (size_t cnt=0, i=0; cnt<exo_params.num_nodes;) {
+      for (size_t cnt=0; cnt<exo_params.num_nodes;) {
         
         auto start = cnt;
         cnt = std::min<std::size_t>(cnt + chunk, exo_params.num_nodes);
         auto buf_size = cnt - start;
   
-        auto & buf = bufs[i];
         buf.resize(buf_size*num_dims);
 
-        auto & request = requests[i];
-        auto & status = statuses[i];
-
         if (comm_rank == 0) {
-          if (used[i]) {
-            auto start = MPI_Wtime();
+          if (start) {
+            auto startt = MPI_Wtime();
             MPI_Wait(&request, &status);
-            elapsed_time += MPI_Wtime() - start;
+            elapsed_time += MPI_Wtime() - startt;
             elapsed_counter++;
           }
           read_point_coords(exoid, start, cnt, buf);
@@ -695,18 +690,12 @@ public:
           }
         }
 
-        used[i] = true;
-        i = (i + 1) & 1;
-
       } // for
         
       if (comm_rank == 0) {
-        for (int i=0; i<2; ++i) 
-          if (used[i]) {
-           auto start = MPI_Wtime();
-           MPI_Wait(&requests[i], &statuses[i]);
-           elapsed_time += MPI_Wtime() - start;
-         }
+        auto startt = MPI_Wtime();
+        MPI_Wait(&request, &status);
+        elapsed_time += MPI_Wtime() - startt;
         elapsed_counter++;
         std::cout << "Vertices: Spent a total/average of " << elapsed_time 
           << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
@@ -1875,29 +1864,22 @@ public:
         size_t size;
       };
       
-      std::array<std::vector<U>, 2> side_buf;
-      std::array<send_data_t, 2> data_buf;
+      std::vector<U> sides;
+      send_data_t data;
       
-      std::vector<std::vector<MPI_Request>> requests(2, std::vector<MPI_Request>(2));
-      std::vector<std::vector<MPI_Status>> statuses(2, std::vector<MPI_Status>(2));
-      std::array<bool, 2> used = {false, false};
+      std::vector<MPI_Request> request(2);
+      std::vector<MPI_Status> status(2);
       
       double elapsed_time = 0;
       size_t elapsed_counter = 0;
       
-      int i = 0;
       while (more_work) {
-        auto & data = data_buf[i];
-        auto & sides = side_buf[i];
-
-        auto & request = requests[i];
-        auto & status = statuses[i];
 
         if (comm_rank == 0) {
-          if (used[i]) {
-            auto start = MPI_Wtime();
+          if (start) {
+            auto startt = MPI_Wtime();
             MPI_Waitall(request.size(), request.data(), status.data());
-            elapsed_time += MPI_Wtime() - start;
+            elapsed_time += MPI_Wtime() - startt;
             elapsed_counter++;
           }
           auto res = read_side_set<U>(
@@ -1954,17 +1936,12 @@ public:
             side_sets );
         
         start += chunk;
-        used[i] = true;
-        i = (i + 1) & 1;
       } // while
 
       if (comm_rank == 0) {
-        for (int i=0; i<2; ++i) 
-          if (used[i]) {
-            auto start = MPI_Wtime();
-            MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
-            elapsed_time += MPI_Wtime() - start;
-          }
+        auto startt = MPI_Wtime();
+        MPI_Waitall(request.size(), request.data(), status.data());
+        elapsed_time += MPI_Wtime() - startt;
         elapsed_counter++;
         std::cout << "Side set<" << ss_id << ">: Spent a total/average of " << elapsed_time 
           << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
@@ -2644,9 +2621,10 @@ public:
     // nothing to do
     size_t num_cells = exo_params.num_elem;
     size_t cell_min{0}, cell_max{num_cells-1};
+    vector<index_t> cell_partitioning = {cell_min, cell_max+1};
 
     if (serial) {
-      vector<index_t> cell_partitioning;
+      cell_partitioning.clear();
       flecsi::coloring::subdivide( num_cells, comm_size, cell_partitioning );
 
       cell_min = cell_partitioning[comm_rank];
@@ -2695,6 +2673,7 @@ public:
             blk_id,
             cell_min,
             cell_max,
+            cell_partitioning,
             do_read,
             do_send,
             cell_counter,
@@ -2705,6 +2684,7 @@ public:
             blk_id,
             cell_min,
             cell_max,
+            cell_partitioning,
             do_read,
             do_send,
             cell_counter,
@@ -2819,6 +2799,7 @@ public:
       ex_entity_id blk_id,
       size_t cell_min,
       size_t cell_max,
+      const std::vector<index_t> & cell_partitioning,
       bool do_read,
       bool do_send,
       size_t & cell_counter,
@@ -2873,48 +2854,162 @@ public:
     // Parallel version
     else {
     
-      block_t block_type;
+      block_t block_type = block_t::empty;
       bool more_work = true;
-      size_t start = 0;
       constexpr auto chunk = CHUNK_SIZE;
       constexpr auto int_size = sizeof(int);
       constexpr auto index_size = sizeof(U);
 
       struct send_data_t {
-        bool more_work;
         block_t block_type;
         size_t num_counts;
         size_t num_indices;
       };
       
-      std::array<std::vector<int>, 2> counts_buf;
-      std::array<std::vector<U>, 2> indices_buf;
-      std::array<send_data_t, 2> data_buf;
+      std::vector<int> counts;
+      std::vector<U> indices;
+      send_data_t data;
         
-      std::vector<std::vector<MPI_Request>> requests(2, std::vector<MPI_Request>(3));
-      std::vector<std::vector<MPI_Status>> statuses(2, std::vector<MPI_Status>(3));
-      std::array<bool, 2> used = {false, false};
+      std::vector<MPI_Request> request(3);
+      std::vector<MPI_Status> status(3);
 
       double elapsed_time = 0;
       size_t elapsed_counter = 0;
 
-      int i = 0;
-      while (more_work) {
+      auto first_read_cell = cell_counter;
+      auto last_read_cell = cell_counter + block_stats.num_elem_this_blk;
 
-        auto & data = data_buf[i];
-        auto & indices = indices_buf[i];
-        auto & counts = counts_buf[i];
+      std::vector<index_t> distribution(comm_size+1);
+      distribution[0] = 0;
 
-        auto & request = requests[i];
-        auto & status = statuses[i];
+      for (int r=0; r<comm_size; ++r) {
+        auto begin = std::max<index_t>(first_read_cell, cell_partitioning[r]);
+        auto end = std::min<index_t>(last_read_cell, cell_partitioning[r+1]);
+        size_t sz = end>begin ? end-begin : 0;
+        distribution[r+1] = distribution[r] + sz;
+        if (comm_rank ==0) std::cout << begin << " to " << end << std::endl;
+      }
 
-        if (comm_rank == 0) {
-          if (used[i]) {
-            auto start = MPI_Wtime();
+      for (int r=1; r<comm_size; ++r) {
+        size_t start = distribution[r];
+        auto rank_cells = distribution[r+1] - distribution[r];
+      
+        while (rank_cells > 0) {
+
+          auto chunk = std::min<size_t>(CHUNK_SIZE, rank_cells);
+
+          //----------------------------
+          // Root
+          if (comm_rank == 0) {
+            
+            auto res = base_t::template read_block<U>(
+                exoid,
+                blk_id,
+                EX_ELEM_BLOCK,
+                block_stats,
+                counts,
+                indices,
+                start,
+                chunk);
+
+            block_type = res.first;
+            data = {block_type, counts.size(), indices.size()};
+            
+            MPI_Isend(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                r,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+            
+            MPI_Isend(
+                counts.data(),
+                int_size*counts.size(),
+                MPI_BYTE,
+                r,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Isend(
+                indices.data(),
+                index_size * indices.size(),
+                MPI_BYTE,
+                r,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+                
+            auto startt = MPI_Wtime();
             MPI_Waitall(request.size(), request.data(), status.data());
-            elapsed_time += MPI_Wtime() - start;
+            elapsed_time += MPI_Wtime() - startt;
             elapsed_counter++;
           }
+          //----------------------------
+          // Target
+          else if (comm_rank == r)  {
+            auto counts_size = counts.size();
+            auto indices_size = indices.size();
+
+            MPI_Irecv(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                0,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+
+            MPI_Wait(&request[0], &status[0]);
+
+            block_type = data.block_type;
+            counts.resize(counts_size + data.num_counts);
+            indices.resize(indices_size + data.num_indices);
+
+            MPI_Irecv(
+                counts.data() + counts_size,
+                int_size * data.num_counts,
+                MPI_BYTE,
+                0,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Irecv(
+                indices.data() + indices_size,
+                index_size * data.num_indices,
+                MPI_BYTE,
+                0,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+              
+            MPI_Waitall(2, request.data()+1, status.data()+1);
+      
+          }
+          // End  root / target
+          //----------------------------
+
+          start += chunk;
+          rank_cells -= chunk;
+        } // while
+          
+      } // ranks
+        
+      if (comm_rank == 0 && elapsed_counter) {
+        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
+      }
+        
+      // root needs to read its data now
+      if (comm_rank ==0 ) {
+        size_t start = distribution[0];
+        auto rank_cells = distribution[1] - distribution[0];
+        indices.clear();
+        counts.clear();
+        if (rank_cells) {
           auto res = base_t::template read_block<U>(
               exoid,
               blk_id,
@@ -2923,47 +3018,15 @@ public:
               counts,
               indices,
               start,
-              chunk);
+              rank_cells);
           block_type = res.first;
-          more_work  = !res.second;
-          data = {more_work, block_type, counts.size(), indices.size()};
         }
+      }
 
-        MPI_Ibcast(
-            &data,
-            sizeof(data),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request[0]);
-
-        if (comm_rank != 0)
-          MPI_Wait(&request[0], &status[0]);
-
-        more_work = data.more_work;
-        block_type = data.block_type;
-        counts.resize(data.num_counts);
-        indices.resize(data.num_indices);
-
-        MPI_Ibcast(
-            counts.data(),
-            int_size*counts.size(),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request[1]);
-        
-        MPI_Ibcast(
-            indices.data(),
-            index_size * indices.size(),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request[2]);
-          
-        if (comm_rank != 0)
-          MPI_Waitall(2, request.data()+1, status.data()+1);
-      
+      // now filter cells
+      auto rank_size = distribution[comm_rank+1] - distribution[comm_rank];
+      if (rank_size) {
+        cell_counter += distribution[comm_rank];
         detail::filter_block(
             counts,
             indices,
@@ -2972,24 +3035,11 @@ public:
             cell_counter,
             cell2vertices.offsets,
             cell2vertices.indices );
-
-        start += chunk;
-        used[i] = true;
-        i = (i + 1) & 1;
-      }
-        
-      if (comm_rank == 0) {
-        for (int i=0; i<2; ++i) 
-          if (used[i]) {
-            auto start = MPI_Wtime();
-            MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
-            elapsed_time += MPI_Wtime() - start;
-          }
-        elapsed_counter++;
-        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
-          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
       }
 
+      // make sure everyone has the last cell counter
+      cell_counter = last_read_cell;
+      
       return block_type;
     }
   }
@@ -3760,9 +3810,10 @@ public:
     // nothing to do
     size_t num_cells = exo_params.num_elem;
     size_t cell_min{0}, cell_max{num_cells-1};
+    vector<index_t> cell_partitioning = {cell_min, cell_max+1};
 
     if (serial) {
-      vector<index_t> cell_partitioning;
+      cell_partitioning.clear();
       flecsi::coloring::subdivide( num_cells, comm_size, cell_partitioning );
 
       cell_min = cell_partitioning[comm_rank];
@@ -3887,6 +3938,7 @@ public:
             blk_id,
             cell_min,
             cell_max,
+            cell_partitioning,
             do_read,
             do_send,
             cell_counter,
@@ -3898,6 +3950,7 @@ public:
             blk_id,
             cell_min,
             cell_max,
+            cell_partitioning,
             do_read,
             do_send,
             cell_counter,
@@ -4171,6 +4224,7 @@ public:
       ex_entity_id blk_id,
       size_t cell_min,
       size_t cell_max,
+      const std::vector<index_t> & cell_partitioning,
       bool do_read,
       bool do_send,
       size_t & cell_counter,
@@ -4230,48 +4284,160 @@ public:
     // Parallel version
     else {
     
-      block_t block_type;
+      block_t block_type = block_t::empty;
       bool more_work = true;
-      size_t start = 0;
-      constexpr auto chunk = CHUNK_SIZE;
       constexpr auto int_size = sizeof(int);
       constexpr auto index_size = sizeof(U);
 
       struct send_data_t {
-        bool more_work;
         block_t block_type;
         size_t num_counts;
         size_t num_indices;
       };
       
-      std::array<std::vector<int>, 2> counts_buf;
-      std::array<std::vector<U>, 2> indices_buf;
-      std::array<send_data_t, 2> data_buf;
+      std::vector<int> counts;
+      std::vector<U> indices;
+      send_data_t data;
         
-      std::vector<std::vector<MPI_Request>> requests(2, std::vector<MPI_Request>(3));
-      std::vector<std::vector<MPI_Status>> statuses(2, std::vector<MPI_Status>(3));
-      std::array<bool, 2> used = {false, false};
+      std::vector<MPI_Request> request(3);
+      std::vector<MPI_Status> status(3);
 
       double elapsed_time = 0;
       size_t elapsed_counter = 0;
 
-      int i = 0;
-      while (more_work) {
+      auto first_read_cell = cell_counter;
+      auto last_read_cell = cell_counter + block_stats.num_elem_this_blk;
 
-        auto & data = data_buf[i];
-        auto & indices = indices_buf[i];
-        auto & counts = counts_buf[i];
+      std::vector<index_t> distribution(comm_size+1);
+      distribution[0] = 0;
 
-        auto & request = requests[i];
-        auto & status = statuses[i];
+      for (int r=0; r<comm_size; ++r) {
+        auto begin = std::max<index_t>(first_read_cell, cell_partitioning[r]);
+        auto end = std::min<index_t>(last_read_cell, cell_partitioning[r+1]);
+        size_t sz = end>begin ? end-begin : 0;
+        distribution[r+1] = distribution[r] + sz;
+      }
 
-        if (comm_rank == 0) {
-          if (used[i]) {
-            auto start = MPI_Wtime();
+      for (int r=1; r<comm_size; ++r) {
+        size_t start = distribution[r];
+        auto rank_cells = distribution[r+1] - distribution[r];
+      
+        while (rank_cells > 0) {
+
+          auto chunk = std::min<size_t>(CHUNK_SIZE, rank_cells);
+
+          //----------------------------
+          // Root
+          if (comm_rank == 0) {
+            
+            auto res = base_t::template read_block<U>(
+                exoid,
+                blk_id,
+                EX_ELEM_BLOCK,
+                block_stats,
+                counts,
+                indices,
+                start,
+                chunk);
+
+            block_type = res.first;
+            data = {block_type, counts.size(), indices.size()};
+            
+            MPI_Isend(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                r,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+            
+            MPI_Isend(
+                counts.data(),
+                int_size*counts.size(),
+                MPI_BYTE,
+                r,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Isend(
+                indices.data(),
+                index_size * indices.size(),
+                MPI_BYTE,
+                r,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+                
+            auto startt = MPI_Wtime();
             MPI_Waitall(request.size(), request.data(), status.data());
-            elapsed_time += MPI_Wtime() - start;
+            elapsed_time += MPI_Wtime() - startt;
             elapsed_counter++;
           }
+          //----------------------------
+          // Target
+          else if (comm_rank == r)  {
+            auto counts_size = counts.size();
+            auto indices_size = indices.size();
+
+            MPI_Irecv(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                0,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+
+            MPI_Wait(&request[0], &status[0]);
+
+            block_type = data.block_type;
+            counts.resize(counts_size + data.num_counts);
+            indices.resize(indices_size + data.num_indices);
+
+            MPI_Irecv(
+                counts.data() + counts_size,
+                int_size * data.num_counts,
+                MPI_BYTE,
+                0,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Irecv(
+                indices.data() + indices_size,
+                index_size * data.num_indices,
+                MPI_BYTE,
+                0,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+              
+            MPI_Waitall(2, request.data()+1, status.data()+1);
+      
+          }
+          // End  root / target
+          //----------------------------
+
+          start += chunk;
+          rank_cells -= chunk;
+        } // while
+          
+      } // ranks
+        
+      if (comm_rank == 0 && elapsed_counter) {
+        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
+      }
+
+      // root needs to read its data now
+      if (comm_rank ==0 ) {
+        size_t start = distribution[0];
+        auto rank_cells = distribution[1] - distribution[0];
+        indices.clear();
+        counts.clear();
+        if (rank_cells) {
           auto res = base_t::template read_block<U>(
               exoid,
               blk_id,
@@ -4280,49 +4446,16 @@ public:
               counts,
               indices,
               start,
-              chunk);
+              rank_cells);
           block_type = res.first;
-          more_work  = !res.second;
-          data = {more_work, block_type, counts.size(), indices.size()};
         }
+      }
 
-        MPI_Ibcast(
-            &data,
-            sizeof(data),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request[0]);
-
-        if (comm_rank != 0)
-          MPI_Wait(&request[0], &status[0]);
-
-        more_work = data.more_work;
-        block_type = data.block_type;
-        counts.resize(data.num_counts);
-        indices.resize(data.num_indices);
-
-        MPI_Ibcast(
-            counts.data(),
-            int_size*counts.size(),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request[1]);
-        
-        MPI_Ibcast(
-            indices.data(),
-            index_size * indices.size(),
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request[2]);
-          
-        if (comm_rank != 0)
-          MPI_Waitall(2, request.data()+1, status.data()+1);
-      
+      // now filter cells
+      auto rank_size = distribution[comm_rank+1] - distribution[comm_rank];
+      if (rank_size) {
+        cell_counter += distribution[comm_rank];
         auto counter_start = cell_counter;
-
         detail::filter_block(
             counts,
             indices,
@@ -4331,27 +4464,14 @@ public:
             cell_counter,
             cell2entities.offsets,
             cell2entities.indices );
-      
+        
         if (block_type == base_t::block_t::polyhedron)
           track_faces( counter_start, counts, indices );
-
-        start += chunk;
-        used[i] = true;
-        i = (i + 1) & 1;
-      }
-        
-      if (comm_rank == 0) {
-        for (int i=0; i<2; ++i) 
-          if (used[i]) {
-            auto start = MPI_Wtime();
-            MPI_Waitall(requests[i].size(), requests[i].data(), statuses[i].data());
-            elapsed_time += MPI_Wtime() - start;
-          }
-        elapsed_counter++;
-        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
-          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
       }
 
+      // make sure everyone has the last cell counter
+      cell_counter = last_read_cell;
+      
       return block_type;
     }
   }
