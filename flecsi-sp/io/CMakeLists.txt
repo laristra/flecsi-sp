@@ -20,14 +20,6 @@ set(io_HEADERS
   PARENT_SCOPE
 )
 
-set(io_SOURCES
-  ex_get_coord.c
-  ex_get_conn.c
-  ex_get_side_set_elem_list.c
-  ex_get_set.c
-  PARENT_SCOPE
-)
-
 #if ( FLECSI_SP_ENABLE_EXODUS AND FLECSI_SP_ENABLE_PARMETIS )
 #  cinch_add_unit(flecsi_sp_exodus_definition
 #    SOURCES test/exodus_definition.cc

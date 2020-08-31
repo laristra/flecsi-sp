@@ -19,7 +19,6 @@
 
 // thirdparty includes
 #include <exodusII.h>
-#include <exodusII_int.h>
 
 // system includes
 #include <algorithm>
@@ -34,49 +33,49 @@
 #include <vector>
 
 #define CHUNK_SIZE 1024
-  
+
 extern "C" {
-  int ex_get_coord_range(
-    int exoid,
-    int64_t start,
-    int64_t end,
-    void *x_coor,
-    void *y_coor,
-    void *z_coor);
+void  ex_iqsort(int v[], int iv[], int count );
+void  ex_iqsort64(int64_t v[], int64_t iv[], int64_t count );
+} // C
 
-  int ex_get_conn_range(
-    int   exoid,
-    ex_entity_type blk_type,
-    ex_entity_id   blk_id,
-    void_int*  nodeconn,
-    void_int*  edgeconn,
-    void_int*  faceconn,
-    size_t begin,
-    size_t end);
-
-  int ex_get_side_set_elem_list_range(int exoid,
-	  ex_entity_id side_set_id,
-    const struct elem_blk_parm * elem_blk_param,
-	  void_int *side_set_elem_list,
-	  void_int *side_set_side_list,
-    void_int *ss_elem_ndx,
-    void_int* ss_elem_node_ndx,
-    void_int* ss_parm_ndx,
-    size_t begin,
-    size_t end);
-
-  int ex_get_block_parm(int exoid,
-    struct elem_blk_parm * elem_blk_param);
-
-} // extern C
-
-
+  
 namespace flecsi_sp {
 namespace io {
 
 template <std::size_t DIM, typename REAL_TYPE >
 using mesh_definition =
   flecsi::topology::parallel_mesh_definition_u<DIM, REAL_TYPE>;
+
+enum ex_element_type {
+  EX_EL_UNK         =  -1,     /**< unknown entity */
+  EX_EL_NULL_ELEMENT=   0,
+  EX_EL_TRIANGLE    =   1,     /**< Triangle entity */
+  EX_EL_QUAD        =   2,     /**< Quad entity */
+  EX_EL_HEX         =   3,     /**< Hex entity */
+  EX_EL_WEDGE       =   4,     /**< Wedge entity */
+  EX_EL_TETRA       =   5,     /**< Tetra entity */
+  EX_EL_TRUSS       =   6,     /**< Truss entity */
+  EX_EL_BEAM        =   7,     /**< Beam entity */
+  EX_EL_SHELL       =   8,     /**< Shell entity */
+  EX_EL_SPHERE      =   9,     /**< Sphere entity */
+  EX_EL_CIRCLE      =  10,     /**< Circle entity */
+  EX_EL_TRISHELL    =  11,     /**< Triangular Shell entity */
+  EX_EL_PYRAMID     =  12      /**< Pyramid entity */
+};
+
+struct elem_blk_parm
+{
+  char elem_type[33];
+  int64_t elem_blk_id;
+  int64_t num_elem_in_blk;
+  int num_nodes_per_elem;
+  int num_sides;
+  int num_nodes_per_side[6];
+  int num_attr;
+  int64_t elem_ctr;
+  ex_element_type elem_type_val;
+};
     
 /* triangle */
 constexpr int tri_sides = 3;
@@ -567,10 +566,10 @@ public:
     vertex_coord.resize(num_dims * num_nodes);
 
     // exodus is kind enough to fetch the data in the real type we ask for
-    auto status = ex_get_coord_range(
+    auto status = ex_get_partial_coord(
         exo_id,
-        start,
-        end,
+        start+1,
+        end-start,
         vertex_coord.data(),
         vertex_coord.data() + num_nodes,
         vertex_coord.data() + 2 * num_nodes);
@@ -873,12 +872,172 @@ public:
   static void
   read_block_params(
       int exoid,
-      std::vector<elem_blk_parm> & elem_blk_param)
+      const std::vector<index_t> & elem_blk_ids,
+      std::vector<elem_blk_parm> & elem_blk_parms)
   {
-      auto status = ex_get_block_parm(exoid, elem_blk_param.data());
+    elem_blk_parms.resize(elem_blk_ids.size());
+    auto ndim = ex_inquire_int(exoid, EX_INQ_DIM);
+
+    ex_block block;
+    size_t elem_ctr = 0;
+    for (unsigned i=0; i<elem_blk_ids.size(); ++i) {
+
+      block.id = elem_blk_ids[i];
+      block.type = EX_ELEM_BLOCK;
+      auto status = ex_get_block_param (exoid, &block);
       if (status)
         clog_fatal(
-            "Problem reading block ids, ex_get_block_parm() returned " << status);
+            "Problem getting block params, ex_get_block_param() returned "
+            << status);
+    
+      elem_blk_parms[i].num_elem_in_blk = block.num_entry;
+      elem_blk_parms[i].num_nodes_per_elem = block.num_nodes_per_entry;
+      elem_blk_parms[i].num_attr = block.num_attribute;
+      elem_blk_parms[i].elem_blk_id = block.id;    /* save id */
+      elem_blk_parms[i].num_sides = 1;
+   
+      int m=0;
+      for (m=0; m < strlen(block.topology); m++)
+        elem_blk_parms[i].elem_type[m] = std::toupper(block.topology[m]);
+      elem_blk_parms[i].elem_type[m] = '\0';
+
+    
+      if (strncmp(elem_blk_parms[i].elem_type,"CIRCLE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_CIRCLE;
+	      /* set side set node stride */
+        elem_blk_parms[i].num_nodes_per_side[0] = 1;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"SPHERE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_SPHERE;
+	      /* set side set node stride */
+        elem_blk_parms[i].num_nodes_per_side[0] = 1;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"QUAD",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_QUAD;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 4)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 5)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"TRIANGLE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_TRIANGLE;
+	      /* set default side set node stride */
+	      if (ndim == 2)  /* 2d TRIs */
+	      {
+	        if (elem_blk_parms[i].num_nodes_per_elem == 3)
+	          elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	        else 
+	          elem_blk_parms[i].num_nodes_per_side[0] = 3;
+	      }
+	      else if (ndim == 3)  /* 3d TRIs */
+	      {
+	        if (elem_blk_parms[i].num_nodes_per_elem == 3)
+	          elem_blk_parms[i].num_nodes_per_side[0] = 3;
+	        else 
+	          elem_blk_parms[i].num_nodes_per_side[0] = 6;
+	      }
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"SHELL",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_SHELL;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 2) /* KLUDGE for 2D Shells*/
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 4)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"HEX",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_HEX;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 8)  /* 8-node bricks */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 9)  /* 9-node bricks */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 12)  /* HEXSHELLS */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 27)  /* 27-node bricks */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 9;
+	      else 
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"TETRA",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_TETRA;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 4)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 8)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 6;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"WEDGE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_WEDGE;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 6)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+            }
+          else if (strncmp(elem_blk_parms[i].elem_type,"PYRAMID",3) == 0)
+            {
+	      elem_blk_parms[i].elem_type_val = EX_EL_PYRAMID;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 5)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"BEAM",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_BEAM;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 2)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else 
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+      }
+      else if ( (strncmp(elem_blk_parms[i].elem_type,"TRUSS",3) == 0) ||
+                (strncmp(elem_blk_parms[i].elem_type,"BAR",3) == 0) ||
+                (strncmp(elem_blk_parms[i].elem_type,"EDGE",3) == 0) )
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_TRUSS;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 2)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else 
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"NULL",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_NULL_ELEMENT;
+	      elem_blk_parms[i].num_nodes_per_side[0] = 0;
+	      elem_blk_parms[i].num_elem_in_blk = 0;
+      }
+      else
+      { /* unsupported element type; no problem if no sides specified for
+	         this element block */
+	      elem_blk_parms[i].elem_type_val = EX_EL_UNK;
+	      elem_blk_parms[i].num_nodes_per_side[0] = 0;
+      }
+
+      elem_blk_parms[i].elem_blk_id = block.id;    /* save id */
+      elem_ctr += elem_blk_parms[i].num_elem_in_blk;
+      elem_blk_parms[i].elem_ctr = elem_ctr;      /* save elem number max */
+
+    } // block
+
   }
 
 
@@ -1298,15 +1457,15 @@ public:
 
       // read element definitions
       indices.resize(num_elem_this_blk * stats.num_nodes_per_elem);
-      auto status = ex_get_conn_range(
+      auto status = ex_get_partial_conn(
           exoid,
           EX_ELEM_BLOCK,
           blk_id,
+          start+1,
+          end-start,
           indices.data(),
           0,
-          0,
-          start,
-          end);
+          0);
       if (status)
         clog_fatal(
             "Problem getting element connectivity, ex_get_elem_conn() "
@@ -1606,21 +1765,101 @@ public:
     auto finished = (end == stats.tot_num_ss_elem);
     
     // get the actual connectivity
-    side_set_data.resize(5*num_ss_elem);
-    auto status = ex_get_side_set_elem_list_range(
+    side_set_data.resize(4*num_ss_elem);
+    auto side_set_elem_list = side_set_data.data();
+    auto side_set_side_list = side_set_data.data() + num_ss_elem;
+    auto status = ex_get_partial_side_set(
         exoid,
         ss_id,
-        elem_blk_parms.data(),
-        side_set_data.data(),
-        side_set_data.data() + num_ss_elem,
-        side_set_data.data() + 2*num_ss_elem,
-        side_set_data.data() + 3*num_ss_elem,
-        side_set_data.data() + 4*num_ss_elem,
-        start,
-        end);
+        start+1,
+        end-start,
+        side_set_elem_list,
+        side_set_side_list);
     if (status)
       clog_fatal(
           "Problem reading side set, ex_get_side_set_node_list() returned " << status);
+
+    std::vector<ex_index_t> sorted_elem(num_ss_elem);
+    std::iota(sorted_elem.begin(), sorted_elem.end(), 0);
+
+    if (sizeof(ex_index_t) == sizeof(int64_t))
+      ex_iqsort64(
+          (int64_t*)side_set_data.data(),
+          (int64_t*)sorted_elem.data(),
+          num_ss_elem);
+    else
+      ex_iqsort(
+          (int*)side_set_data.data(),
+          (int*)sorted_elem.data(),
+          num_ss_elem);
+  
+    auto num_elem_blks = elem_blk_parms.size();
+
+    auto ss_elem_node_ndx = side_set_data.data() + 2*num_ss_elem;
+    auto ss_parm_ndx = side_set_data.data() + 3*num_ss_elem;
+
+    auto ndim = ex_inquire_int(exoid, EX_INQ_DIM);
+    for (size_t i=0, j=0; i<num_ss_elem; ++i) {
+    
+      auto iside = sorted_elem[i];
+      auto elem = side_set_data[iside];
+      auto side = side_set_side_list[iside];
+
+      for (; j<num_elem_blks; j++) {
+        if (elem_blk_parms[j].elem_type_val != EX_EL_NULL_ELEMENT) {
+          auto num_elem_in_blk = elem_blk_parms[j].num_elem_in_blk;
+	        if (elem <= elem_blk_parms[j].elem_ctr)
+            break;
+        }
+      }
+
+      /* Update node_ctr (which points to next node in chain */
+      size_t node_ctr = 0;
+
+      /* WEDGEs with 3 node sides (side 4 or 5) are special cases */
+      if (elem_blk_parms[j].elem_type_val == EX_EL_WEDGE &&
+          (side == 4 || side == 5))
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 6)
+	        node_ctr += 3;  /* 3 node side */
+	      else
+	        node_ctr += 6;  /* 6 node side */
+      }
+      /* PYRAMIDSs with 3 node sides (sides 1,2,3,4) are also special */
+      else if (elem_blk_parms[j].elem_type_val == EX_EL_PYRAMID &&
+               (side < 5))
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 5)
+	        node_ctr += 3;  /* 3 node side */
+	      else
+	        node_ctr += 6;  /* 6 node side */
+      }
+      /* side numbers 3,4,5,6 for SHELLs are also special */
+      else if (elem_blk_parms[j].elem_type_val == EX_EL_SHELL &&
+	       (side > 2 ))
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 4)
+	        node_ctr += 2;  /* 2 node side */
+	      else
+	        node_ctr += 3;  /* 3 node side */
+      }
+      /* side numbers 3,4,5 for 3d TRIs are also special */
+      else if (elem_blk_parms[j].elem_type_val == EX_EL_TRIANGLE &&
+               ndim == 3 &&
+               side > 2 )
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 3)  /* 3-node TRI */
+	        node_ctr += 2;  /* 2 node side */
+	      else   /* 6-node TRI */
+	        node_ctr += 3;  /* 3 node side */
+      }
+      else /* all other element types */
+        node_ctr += elem_blk_parms[j].num_nodes_per_side[0];
+
+      ss_parm_ndx[iside] = j; /* assign parameter block index */
+      ss_elem_node_ndx[iside] = node_ctr;     /* assign node list index */
+
+    }
 
     return finished;
 
@@ -1725,15 +1964,14 @@ public:
 
   
   
-    auto num_ss_elem = side_set_data.size() / 5;
-    if (num_ss_elem * 5 != side_set_data.size())
-      clog_fatal("num_ss_elem * 5 != side_set_data.size()");
+    auto num_ss_elem = side_set_data.size() / 4;
+    if (num_ss_elem * 4 != side_set_data.size())
+      clog_fatal("num_ss_elem * 4 != side_set_data.size()");
 
     auto side_set_elem_list = side_set_data.data();
     auto side_set_side_list = side_set_data.data() + num_ss_elem;
-    auto ss_elem_ndx = side_set_data.data() + 2*num_ss_elem;
-    auto ss_elem_node_ndx = side_set_data.data() + 3*num_ss_elem;
-    auto ss_parm_ndx = side_set_data.data() + 4*num_ss_elem;
+    auto ss_elem_node_ndx = side_set_data.data() + 2*num_ss_elem;
+    auto ss_parm_ndx = side_set_data.data() + 3*num_ss_elem;
 
     // filter sides for elementes i own
     std::vector<size_t> vs;
@@ -1981,7 +2219,7 @@ public:
 
     // read block info
     std::vector<elem_blk_parm> block_params(elem_blk_ids.size());
-    if (do_read) read_block_params(exoid, block_params);
+    if (do_read) read_block_params(exoid, elem_blk_ids, block_params);
     if (do_send) broadcast(block_params);
     
     // get the side set ids
@@ -2887,7 +3125,6 @@ public:
         auto end = std::min<index_t>(last_read_cell, cell_partitioning[r+1]);
         size_t sz = end>begin ? end-begin : 0;
         distribution[r+1] = distribution[r] + sz;
-        if (comm_rank ==0) std::cout << begin << " to " << end << std::endl;
       }
 
       for (int r=1; r<comm_size; ++r) {
