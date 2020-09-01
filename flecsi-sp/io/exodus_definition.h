@@ -32,7 +32,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define CHUNK_SIZE 1024
+#define CHUNK_SIZE 128
 
 extern "C" {
 void  ex_iqsort(int v[], int iv[], int count );
@@ -266,6 +266,28 @@ public:
       }
     } // broadcast
 
+  };
+  
+  //============================================================================
+  // Subdivide an index space
+  //============================================================================
+  template<typename Vector>
+  void
+  static subdivide(size_t nelem, size_t npart, Vector & dist) {
+  
+    size_t quot = nelem / npart;
+    size_t rem = nelem % npart;
+  
+    dist.reserve(npart + 1);
+    dist.push_back(0);
+  
+    // Set the distributions for each rank. This happens on all ranks.
+    // Each rank gets the average number of indices, with higher ranks
+    // getting an additional index for non-zero remainders.
+    for(size_t r(0); r < npart; ++r) {
+      const size_t indices = quot + ((r >= (npart - rem)) ? 1 : 0);
+      dist.push_back(dist[r] + indices);
+    } // for
   };
 
   //============================================================================
@@ -637,12 +659,24 @@ public:
         }
       }
 
+      // invert the global id to local id map
+      vertex_local2global.clear();
+      vertex_local2global.resize(local_vertices);
+        
+      for ( const auto & global_local : vertex_global2local )
+        vertex_local2global[global_local.second] = global_local.first;
+
     }
     //--------------------------------
     // Read vertices in chunks
     else {
+
+      
+      std::vector<index_t> distribution;
+      subdivide(exo_params.num_nodes, comm_size, distribution);
+
       constexpr unsigned chunk = CHUNK_SIZE;
-      std::vector<real_t> buf;
+      std::vector<real_t> coordinates, vert_buf;
       auto real_size = sizeof(real_t);
       MPI_Request request;
       MPI_Status status;
@@ -650,65 +684,206 @@ public:
       double elapsed_time = 0;
       size_t elapsed_counter = 0;
 
-      for (size_t cnt=0; cnt<exo_params.num_nodes;) {
-        
-        auto start = cnt;
-        cnt = std::min<std::size_t>(cnt + chunk, exo_params.num_nodes);
-        auto buf_size = cnt - start;
-  
-        buf.resize(buf_size*num_dims);
+      auto comm_verts = distribution[comm_rank+1] - distribution[comm_rank];
+      if (comm_rank != 0) coordinates.resize(comm_verts*num_dims);
 
-        if (comm_rank == 0) {
-          if (start) {
+      for (int r=1; r<comm_size; ++r) {
+        
+        size_t start = distribution[r];
+        auto rank_verts = distribution[r+1] - distribution[r];
+  
+        while (rank_verts > 0) {
+
+          auto chunk = std::min<size_t>(CHUNK_SIZE, rank_verts);
+          auto coord_size = chunk*real_size*num_dims;
+          
+          //----------------------------
+          // Root
+          if (comm_rank == 0) {
+
+            read_point_coords(exoid, start, start+chunk, coordinates);
+        
+            MPI_Isend(
+                coordinates.data(),
+                coord_size,
+                MPI_BYTE,
+                r,
+                0,
+                MPI_COMM_WORLD,
+                &request);
+            
             auto startt = MPI_Wtime();
             MPI_Wait(&request, &status);
             elapsed_time += MPI_Wtime() - startt;
             elapsed_counter++;
           }
-          read_point_coords(exoid, start, cnt, buf);
-        }
+          
+          //----------------------------
+          // Target
+          else if (comm_rank == r)  {
+            
+            vert_buf.resize(chunk*num_dims);
+            MPI_Irecv(
+                vert_buf.data(),
+                coord_size,
+                MPI_BYTE,
+                0,
+                0,
+                MPI_COMM_WORLD,
+                &request);
+          
+            MPI_Wait(&request, &status);
 
-        auto ret = MPI_Ibcast(
-            buf.data(),
-            buf_size*num_dims*real_size,
-            MPI_BYTE,
-            0,
-            MPI_COMM_WORLD,
-            &request);
-        
-        if (comm_rank != 0)
-          MPI_Wait(&request, &status);
-
-        for (auto global_id=start; global_id<cnt; ++global_id) {
-          auto it = vertex_global2local.find(global_id);
-          if (it != vertex_global2local.end()) {
-            auto local_id = it->second; 
-            auto pos = global_id-start;
-            for ( int d=0; d<num_dims; ++d )
-              vertices[ local_id*num_dims + d ] = buf[d*buf_size + pos];
+            auto offset = start - distribution[r];
+            for (size_t i=0; i<chunk; ++i) {
+              auto pos = offset + i;
+              for (unsigned d=0; d<num_dims; ++d) {
+                coordinates[d*comm_verts + pos] = vert_buf[d*chunk + i];
+              }
+            }
+          
           }
-        }
+          // End  root / target
+          //----------------------------
 
-      } // for
-        
-      if (comm_rank == 0) {
-        auto startt = MPI_Wtime();
-        MPI_Wait(&request, &status);
-        elapsed_time += MPI_Wtime() - startt;
-        elapsed_counter++;
+          start += chunk;
+          rank_verts -= chunk;
+        } // while
+          
+      } // ranks
+      
+      if (comm_rank == 0 && elapsed_counter) {
         std::cout << "Vertices: Spent a total/average of " << elapsed_time 
           << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
       }
 
+      // root needs to read its data
+      if (comm_rank == 0) {
+        size_t start = distribution[0];
+        auto rank_verts = distribution[1] - distribution[0];
+        if (rank_verts) read_point_coords(exoid, start, start+rank_verts, coordinates);
+      }
+
+      // invert the global id to local id map
+      vertex_local2global.clear();
+      vertex_local2global.resize(local_vertices);
+      for ( const auto & global_local : vertex_global2local )
+        vertex_local2global[global_local.second] = global_local.first;
+      
+      // figure out who owns the vertices i need
+      std::vector<int> rank_owner(local_vertices);
+      
+      // determine the rank owners and send counts
+      std::vector<size_t> sendcounts(comm_size, 0);
+
+      int r = 0;
+      for ( const auto & global_local : vertex_global2local ) {
+        auto global_id = global_local.first;
+        auto local_id = global_local.second;
+        while (global_id >= distribution[r+1]) { ++r; }
+        rank_owner[local_id] = r;
+        sendcounts[r]++;
+      }
+  
+      auto size_size = sizeof(size_t);
+      std::vector<size_t> recvcounts(comm_size);
+      auto ret = MPI_Alltoall(
+          sendcounts.data(),
+          size_size,
+          MPI_BYTE,
+          recvcounts.data(),
+          size_size,
+          MPI_BYTE,
+          MPI_COMM_WORLD);
+      if(ret != MPI_SUCCESS)
+        clog_error("Error communicating vertex counts");
+    
+      // finish displacements
+      std::vector<size_t> senddispls(comm_size+1);
+      std::vector<size_t> recvdispls(comm_size+1);
+      senddispls[0] = 0;
+      recvdispls[0] = 0;
+      for(size_t r = 0; r < comm_size; ++r)  {
+        senddispls[r + 1] = senddispls[r] + sendcounts[r];
+        recvdispls[r + 1] = recvdispls[r] + recvcounts[r];
+      }
+
+      std::vector<size_t> index_buf(senddispls[comm_size]);
+      std::fill(sendcounts.begin(), sendcounts.end(), 0);
+
+      for ( const auto & global_local : vertex_global2local ) {
+        auto global_id = global_local.first;
+        auto local_id = global_local.second;
+        auto r = rank_owner[local_id];
+        auto pos = senddispls[r] + sendcounts[r];
+        index_buf[pos] = global_id;
+        sendcounts[r]++;
+      }
+
+      // now send the vertices i need to the owners
+      std::vector<size_t> send_indices(recvdispls[comm_size]);
+      ret = flecsi::coloring::alltoallv(
+          index_buf,
+          sendcounts,
+          senddispls,
+          send_indices,
+          recvcounts,
+          recvdispls,
+          MPI_COMM_WORLD);
+      if(ret != MPI_SUCCESS)
+        clog_error("Error communicating new vertices");
+    
+      // copy ther vertices
+      auto start = distribution[comm_rank];
+      vert_buf.resize(send_indices.size()*num_dims);
+
+      for (size_t i=0; i<send_indices.size(); ++i) {
+        auto pos = send_indices[i] - start;
+        for (unsigned d=0; d<num_dims; ++d)
+          vert_buf[i*num_dims + d] = coordinates[d*comm_verts + pos];
+      }
+
+      // swap send and recv counts
+      std::swap(sendcounts, recvcounts);
+      std::swap(senddispls, recvdispls);
+
+      for (size_t i=0; i<comm_size; ++i) {
+        sendcounts[i] *= num_dims;
+        senddispls[i+1] *= num_dims;
+        recvcounts[i] *= num_dims;
+        recvdispls[i+1] *= num_dims;
+      }
+      
+      coordinates.resize(local_vertices*num_dims);
+      ret = flecsi::coloring::alltoallv(
+          vert_buf,
+          sendcounts,
+          senddispls,
+          coordinates,
+          recvcounts,
+          recvdispls,
+          MPI_COMM_WORLD);
+      if(ret != MPI_SUCCESS)
+        clog_error("Error communicating new vertices");
+      
+      // unpack
+      for (size_t i=0; i<comm_size; ++i) recvdispls[i+1] /= num_dims;
+      
+      std::fill(recvcounts.begin(), recvcounts.end(), 0);
+
+      for ( const auto & global_local : vertex_global2local ) {
+        auto global_id = global_local.first;
+        auto local_id = global_local.second;
+        auto r = rank_owner[local_id];
+        auto pos = recvdispls[r] + recvcounts[r];
+        // here
+        for ( unsigned d=0; d<num_dims; ++d )
+          vertices[ local_id*num_dims + d ] = coordinates[ pos*num_dims + d ];
+        recvcounts[r]++;
+      }
+
     }
       
-    // invert the global id to local id map
-    vertex_local2global.clear();
-    vertex_local2global.resize(local_vertices);
-
-    for ( const auto & global_local : vertex_global2local )
-      vertex_local2global[global_local.second] = global_local.first;
-    
   }
   
   //============================================================================
