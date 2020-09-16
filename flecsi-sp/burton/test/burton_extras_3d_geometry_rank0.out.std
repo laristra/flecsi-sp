@@ -443,10 +443,10 @@ For each face:
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ++++ vertex id: 28 with coordinates ( -0.25 -0.25 0.25 )
 ---- face id: 2 with midpoint ( -0.375 -0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
 ++++ vertex id: 0 with coordinates ( -0.5 -0.5 0.5 )
 ++++ vertex id: 2 with coordinates ( -0.25 -0.5 0.5 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
+++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
 ---- face id: 3 with midpoint ( -0.5 -0.375 0.375 ), area 0.0625 and normal ( -1 0 0 )
 ++++ vertex id: 0 with coordinates ( -0.5 -0.5 0.5 )
 ++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
@@ -463,10 +463,10 @@ For each face:
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 34 with coordinates ( -0.25 0 0.25 )
 ---- face id: 6 with midpoint ( -0.375 -0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
 ++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
+++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
 ---- face id: 7 with midpoint ( -0.5 -0.125 0.375 ), area 0.0625 and normal ( -1 0 0 )
 ++++ vertex id: 1 with coordinates ( -0.5 -0.25 0.5 )
 ++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
@@ -483,10 +483,10 @@ For each face:
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 38 with coordinates ( -0.25 0.25 0.25 )
 ---- face id: 10 with midpoint ( -0.375 0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
 ++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
+++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
 ---- face id: 11 with midpoint ( -0.5 0.125 0.375 ), area 0.0625 and normal ( -1 0 0 )
 ++++ vertex id: 4 with coordinates ( -0.5 0 0.5 )
 ++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
@@ -503,10 +503,10 @@ For each face:
 ++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ++++ vertex id: 42 with coordinates ( -0.25 0.5 0.25 )
 ---- face id: 14 with midpoint ( -0.375 0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 8 with coordinates ( -0.5 0.5 0.5 )
 ++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
+++++ vertex id: 8 with coordinates ( -0.5 0.5 0.5 )
 ---- face id: 15 with midpoint ( -0.5 0.375 0.375 ), area 0.0625 and normal ( -1 0 0 )
 ++++ vertex id: 6 with coordinates ( -0.5 0.25 0.5 )
 ++++ vertex id: 8 with coordinates ( -0.5 0.5 0.5 )
@@ -528,10 +528,10 @@ For each face:
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
 ---- face id: 19 with midpoint ( -0.125 -0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ++++ vertex id: 2 with coordinates ( -0.25 -0.5 0.5 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
+++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ---- face id: 20 with midpoint ( 0 -0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
@@ -543,10 +543,10 @@ For each face:
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ---- face id: 22 with midpoint ( -0.125 -0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 3 with coordinates ( -0.25 -0.25 0.5 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
+++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ---- face id: 23 with midpoint ( 0 -0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 46 with coordinates ( 0 -0.25 0.25 )
@@ -558,10 +558,10 @@ For each face:
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
 ---- face id: 25 with midpoint ( -0.125 0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 5 with coordinates ( -0.25 0 0.5 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
+++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ---- face id: 26 with midpoint ( 0 0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
@@ -573,10 +573,10 @@ For each face:
 ++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
 ++++ vertex id: 53 with coordinates ( 0 0.5 0.25 )
 ---- face id: 28 with midpoint ( -0.125 0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ++++ vertex id: 7 with coordinates ( -0.25 0.25 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
+++++ vertex id: 9 with coordinates ( -0.25 0.5 0.5 )
 ---- face id: 29 with midpoint ( 0.125 -0.5 0.375 ), area 0.0625 and normal ( 0 -1 0 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 45 with coordinates ( 0 -0.5 0.25 )
@@ -588,25 +588,25 @@ For each face:
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 56 with coordinates ( 0.25 -0.25 0.25 )
 ---- face id: 31 with midpoint ( 0.125 -0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 10 with coordinates ( 0 -0.5 0.5 )
 ++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
+++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ---- face id: 32 with midpoint ( 0.125 0 0.375 ), area 0.0625 and normal ( 0 1 0 )
 ++++ vertex id: 49 with coordinates ( 0 0 0.25 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 59 with coordinates ( 0.25 0 0.25 )
 ---- face id: 33 with midpoint ( 0.125 -0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 11 with coordinates ( 0 -0.25 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
+++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ---- face id: 34 with midpoint ( 0.125 0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 12 with coordinates ( 0 0 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
+++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ---- face id: 35 with midpoint ( 0 0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 51 with coordinates ( 0 0.25 0.25 )
@@ -638,10 +638,10 @@ For each face:
 ++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
 ++++ vertex id: 63 with coordinates ( 0.25 0.5 0.25 )
 ---- face id: 41 with midpoint ( 0.125 0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
 ++++ vertex id: 13 with coordinates ( 0 0.25 0.5 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
+++++ vertex id: 14 with coordinates ( 0 0.5 0.5 )
 ---- face id: 42 with midpoint ( 0.25 0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 61 with coordinates ( 0.25 0.25 0.25 )
@@ -658,10 +658,10 @@ For each face:
 ++++ vertex id: 21 with coordinates ( 0.5 -0.25 0.5 )
 ++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
 ---- face id: 45 with midpoint ( 0.375 -0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 15 with coordinates ( 0.25 -0.5 0.5 )
 ++++ vertex id: 20 with coordinates ( 0.5 -0.5 0.5 )
 ++++ vertex id: 21 with coordinates ( 0.5 -0.25 0.5 )
+++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ---- face id: 46 with midpoint ( 0.5 -0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 20 with coordinates ( 0.5 -0.5 0.5 )
 ++++ vertex id: 65 with coordinates ( 0.5 -0.5 0.25 )
@@ -673,10 +673,10 @@ For each face:
 ++++ vertex id: 22 with coordinates ( 0.5 0 0.5 )
 ++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
 ---- face id: 48 with midpoint ( 0.375 -0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 16 with coordinates ( 0.25 -0.25 0.5 )
 ++++ vertex id: 21 with coordinates ( 0.5 -0.25 0.5 )
 ++++ vertex id: 22 with coordinates ( 0.5 0 0.5 )
+++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ---- face id: 49 with midpoint ( 0.5 -0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 21 with coordinates ( 0.5 -0.25 0.5 )
 ++++ vertex id: 66 with coordinates ( 0.5 -0.25 0.25 )
@@ -688,10 +688,10 @@ For each face:
 ++++ vertex id: 23 with coordinates ( 0.5 0.25 0.5 )
 ++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
 ---- face id: 51 with midpoint ( 0.375 0.125 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 17 with coordinates ( 0.25 0 0.5 )
 ++++ vertex id: 22 with coordinates ( 0.5 0 0.5 )
 ++++ vertex id: 23 with coordinates ( 0.5 0.25 0.5 )
+++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ---- face id: 52 with midpoint ( 0.5 0.125 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 22 with coordinates ( 0.5 0 0.5 )
 ++++ vertex id: 69 with coordinates ( 0.5 0 0.25 )
@@ -703,10 +703,10 @@ For each face:
 ++++ vertex id: 24 with coordinates ( 0.5 0.5 0.5 )
 ++++ vertex id: 73 with coordinates ( 0.5 0.5 0.25 )
 ---- face id: 54 with midpoint ( 0.375 0.375 0.5 ), area 0.0625 and normal ( 0 0 1 )
-++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
 ++++ vertex id: 18 with coordinates ( 0.25 0.25 0.5 )
 ++++ vertex id: 23 with coordinates ( 0.5 0.25 0.5 )
 ++++ vertex id: 24 with coordinates ( 0.5 0.5 0.5 )
+++++ vertex id: 19 with coordinates ( 0.25 0.5 0.5 )
 ---- face id: 55 with midpoint ( 0.5 0.375 0.375 ), area 0.0625 and normal ( 1 0 0 )
 ++++ vertex id: 23 with coordinates ( 0.5 0.25 0.5 )
 ++++ vertex id: 71 with coordinates ( 0.5 0.25 0.25 )
@@ -2083,13 +2083,13 @@ For each wedge:
 ---- wedge id: 21 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 22 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 23 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 24 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 24 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 25 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 26 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 27 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 27 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 28 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 29 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 30 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 29 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 30 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 31 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 32 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 33 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -2131,13 +2131,13 @@ For each wedge:
 ---- wedge id: 69 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 70 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 71 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 72 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 72 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 73 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 74 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 75 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 75 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 76 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 77 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 78 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 77 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 78 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 79 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 80 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 81 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -2179,13 +2179,13 @@ For each wedge:
 ---- wedge id: 117 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 118 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 119 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 120 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 120 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 121 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 122 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 123 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 123 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 124 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 125 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 126 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 125 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 126 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 127 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 128 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 129 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -2227,13 +2227,13 @@ For each wedge:
 ---- wedge id: 165 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 166 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 167 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 168 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 168 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 169 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 170 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 171 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 171 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 172 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 173 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 174 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 173 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 174 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 175 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 176 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- wedge id: 177 with facet normal ( -1 0 0 ), facet area 0.0078125
@@ -2275,13 +2275,13 @@ For each wedge:
 ---- wedge id: 213 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 214 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 215 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 216 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 216 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 217 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 218 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 219 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 219 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 220 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 221 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 222 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 221 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 222 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 223 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 224 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 225 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2323,13 +2323,13 @@ For each wedge:
 ---- wedge id: 261 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 262 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 263 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 264 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 264 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 265 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 266 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 267 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 267 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 268 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 269 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 270 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 269 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 270 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 271 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 272 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 273 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2371,13 +2371,13 @@ For each wedge:
 ---- wedge id: 309 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 310 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 311 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 312 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 312 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 313 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 314 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 315 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 315 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 316 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 317 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 318 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 317 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 318 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 319 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 320 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 321 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2419,13 +2419,13 @@ For each wedge:
 ---- wedge id: 357 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 358 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 359 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 360 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 360 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 361 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 362 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 363 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 363 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 364 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 365 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 366 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 365 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 366 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 367 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 368 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 369 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2467,13 +2467,13 @@ For each wedge:
 ---- wedge id: 405 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 406 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 407 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 408 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 408 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 409 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 410 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 411 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 411 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 412 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 413 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 414 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 413 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 414 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 415 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 416 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 417 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2515,13 +2515,13 @@ For each wedge:
 ---- wedge id: 453 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 454 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 455 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 456 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 456 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 457 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 458 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 459 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 459 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 460 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 461 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 462 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 461 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 462 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 463 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 464 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 465 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2563,13 +2563,13 @@ For each wedge:
 ---- wedge id: 501 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 502 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 503 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 504 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 504 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 505 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 506 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 507 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 507 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 508 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 509 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 510 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 509 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 510 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 511 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 512 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 513 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2611,13 +2611,13 @@ For each wedge:
 ---- wedge id: 549 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 550 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 551 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 552 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 552 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 553 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 554 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 555 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 555 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 556 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 557 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 558 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 557 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 558 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 559 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 560 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 561 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2659,13 +2659,13 @@ For each wedge:
 ---- wedge id: 597 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 598 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 599 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 600 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 600 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 601 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 602 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 603 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 603 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 604 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 605 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 606 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 605 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 606 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 607 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 608 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 609 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2707,13 +2707,13 @@ For each wedge:
 ---- wedge id: 645 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 646 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 647 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 648 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 648 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 649 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 650 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 651 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 651 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 652 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 653 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 654 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 653 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 654 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 655 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 656 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 657 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2755,13 +2755,13 @@ For each wedge:
 ---- wedge id: 693 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 694 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 695 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 696 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 696 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 697 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 698 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 699 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 699 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 700 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 701 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 702 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 701 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 702 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 703 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 704 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 705 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -2803,13 +2803,13 @@ For each wedge:
 ---- wedge id: 741 with facet normal ( 0 1 0 ), facet area 0.0078125
 ---- wedge id: 742 with facet normal ( 0 1 -0 ), facet area 0.0078125
 ---- wedge id: 743 with facet normal ( 0 1 0 ), facet area 0.0078125
----- wedge id: 744 with facet normal ( -0 0 1 ), facet area 0.0078125
+---- wedge id: 744 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 745 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 746 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 747 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 747 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ---- wedge id: 748 with facet normal ( 0 0 1 ), facet area 0.0078125
----- wedge id: 749 with facet normal ( 0 -0 1 ), facet area 0.0078125
----- wedge id: 750 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 749 with facet normal ( 0 0 1 ), facet area 0.0078125
+---- wedge id: 750 with facet normal ( -0 0 1 ), facet area 0.0078125
 ---- wedge id: 751 with facet normal ( 0 0 1 ), facet area 0.0078125
 ---- wedge id: 752 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ---- wedge id: 753 with facet normal ( -1 0 -0 ), facet area 0.0078125
@@ -4367,8 +4367,8 @@ For each corner:
 ---- corner id: 0
 ++++ wedge id: 0 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 1 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 26 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 27 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 24 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 25 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 32 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 33 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 1
@@ -4388,15 +4388,15 @@ For each corner:
 ---- corner id: 3
 ++++ wedge id: 18 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 19 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 24 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 25 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 30 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 31 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 34 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 35 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 4
 ++++ wedge id: 6 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 7 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 28 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 29 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 26 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 27 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 40 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 41 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 5
@@ -4416,15 +4416,15 @@ For each corner:
 ---- corner id: 7
 ++++ wedge id: 20 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 21 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 30 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 31 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 28 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 29 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 46 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 47 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 8
 ++++ wedge id: 52 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 53 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 74 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 75 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 72 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 73 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 80 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 81 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 9
@@ -4444,15 +4444,15 @@ For each corner:
 ---- corner id: 11
 ++++ wedge id: 66 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 67 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 72 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 73 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 78 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 79 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 82 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 83 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 12
 ++++ wedge id: 50 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 51 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 76 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 77 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 74 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 75 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 88 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 89 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 13
@@ -4472,15 +4472,15 @@ For each corner:
 ---- corner id: 15
 ++++ wedge id: 68 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 69 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 78 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 79 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 76 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 77 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 94 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 95 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 16
 ++++ wedge id: 100 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 101 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 122 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 123 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 120 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 121 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 128 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 129 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 17
@@ -4500,15 +4500,15 @@ For each corner:
 ---- corner id: 19
 ++++ wedge id: 114 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 115 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 120 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 121 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 126 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 127 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 130 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 131 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 20
 ++++ wedge id: 98 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 99 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 124 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 125 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 122 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 123 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 136 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 137 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 21
@@ -4528,15 +4528,15 @@ For each corner:
 ---- corner id: 23
 ++++ wedge id: 116 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 117 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 126 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 127 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 124 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 125 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 142 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 143 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 24
 ++++ wedge id: 148 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 149 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 170 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 171 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 168 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 169 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 176 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 177 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 25
@@ -4556,15 +4556,15 @@ For each corner:
 ---- corner id: 27
 ++++ wedge id: 162 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 163 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 168 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 169 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 174 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 175 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 178 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 179 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 28
 ++++ wedge id: 146 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 147 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 172 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 173 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 170 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 171 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 184 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 185 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 29
@@ -4584,15 +4584,15 @@ For each corner:
 ---- corner id: 31
 ++++ wedge id: 164 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 165 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 174 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 175 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 172 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 173 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 190 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 191 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 32
 ++++ wedge id: 192 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 193 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 218 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 219 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 216 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 217 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 230 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 231 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 33
@@ -4612,15 +4612,15 @@ For each corner:
 ---- corner id: 35
 ++++ wedge id: 210 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 211 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 216 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 217 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 222 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 223 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 224 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 225 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 36
 ++++ wedge id: 198 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 199 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 220 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 221 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 218 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 219 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 232 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 233 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 37
@@ -4640,15 +4640,15 @@ For each corner:
 ---- corner id: 39
 ++++ wedge id: 212 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 213 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 222 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 223 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 220 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 221 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 238 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 239 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 40
 ++++ wedge id: 244 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 245 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 266 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 267 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 264 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 265 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 278 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 279 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 41
@@ -4668,15 +4668,15 @@ For each corner:
 ---- corner id: 43
 ++++ wedge id: 258 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 259 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 264 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 265 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 270 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 271 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 272 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 273 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 44
 ++++ wedge id: 242 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 243 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 268 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 269 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 266 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 267 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 280 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 281 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 45
@@ -4696,15 +4696,15 @@ For each corner:
 ---- corner id: 47
 ++++ wedge id: 260 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 261 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 270 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 271 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 268 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 269 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 286 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 287 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 48
 ++++ wedge id: 292 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 293 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 314 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 315 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 312 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 313 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 326 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 327 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 49
@@ -4724,15 +4724,15 @@ For each corner:
 ---- corner id: 51
 ++++ wedge id: 306 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 307 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 312 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 313 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 318 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 319 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 320 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 321 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 52
 ++++ wedge id: 290 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 291 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 316 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 317 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 314 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 315 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 328 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 329 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 53
@@ -4752,15 +4752,15 @@ For each corner:
 ---- corner id: 55
 ++++ wedge id: 308 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 309 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 318 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 319 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 316 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 317 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 334 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 335 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 56
 ++++ wedge id: 340 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 341 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 362 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 363 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 360 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 361 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 374 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 375 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 57
@@ -4780,15 +4780,15 @@ For each corner:
 ---- corner id: 59
 ++++ wedge id: 354 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 355 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 360 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 361 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 366 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 367 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 368 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 369 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 60
 ++++ wedge id: 338 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 339 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 364 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 365 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 362 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 363 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 376 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 377 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 61
@@ -4808,15 +4808,15 @@ For each corner:
 ---- corner id: 63
 ++++ wedge id: 356 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 357 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 366 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 367 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 364 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 365 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 382 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 383 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 64
 ++++ wedge id: 384 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 385 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 410 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 411 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 408 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 409 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 422 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 423 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 65
@@ -4836,15 +4836,15 @@ For each corner:
 ---- corner id: 67
 ++++ wedge id: 402 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 403 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 408 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 409 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 414 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 415 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 416 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 417 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 68
 ++++ wedge id: 390 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 391 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 412 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 413 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 410 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 411 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 424 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 425 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 69
@@ -4864,15 +4864,15 @@ For each corner:
 ---- corner id: 71
 ++++ wedge id: 404 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 405 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 414 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 415 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 412 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 413 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 430 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 431 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 72
 ++++ wedge id: 436 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 437 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 458 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 459 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 456 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 457 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 470 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 471 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 73
@@ -4892,15 +4892,15 @@ For each corner:
 ---- corner id: 75
 ++++ wedge id: 450 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 451 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 456 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 457 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 462 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 463 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 464 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 465 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 76
 ++++ wedge id: 434 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 435 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 460 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 461 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 458 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 459 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 472 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 473 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 77
@@ -4920,15 +4920,15 @@ For each corner:
 ---- corner id: 79
 ++++ wedge id: 452 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 453 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 462 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 463 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 460 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 461 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 478 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 479 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 80
 ++++ wedge id: 484 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 485 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 506 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 507 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 504 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 505 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 518 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 519 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 81
@@ -4948,15 +4948,15 @@ For each corner:
 ---- corner id: 83
 ++++ wedge id: 498 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 499 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 504 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 505 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 510 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 511 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 512 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 513 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 84
 ++++ wedge id: 482 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 483 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 508 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 509 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 506 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 507 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 520 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 521 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 85
@@ -4976,15 +4976,15 @@ For each corner:
 ---- corner id: 87
 ++++ wedge id: 500 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 501 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 510 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 511 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 508 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 509 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 526 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 527 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 88
 ++++ wedge id: 532 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 533 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 554 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 555 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 552 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 553 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 566 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 567 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 89
@@ -5004,15 +5004,15 @@ For each corner:
 ---- corner id: 91
 ++++ wedge id: 546 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 547 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 552 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 553 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 558 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 559 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 560 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 561 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 92
 ++++ wedge id: 530 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 531 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 556 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 557 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 554 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 555 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 568 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 569 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 93
@@ -5032,15 +5032,15 @@ For each corner:
 ---- corner id: 95
 ++++ wedge id: 548 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 549 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 558 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 559 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 556 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 557 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 574 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 575 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 96
 ++++ wedge id: 576 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 577 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 602 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 603 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 600 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 601 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 614 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 615 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 97
@@ -5060,15 +5060,15 @@ For each corner:
 ---- corner id: 99
 ++++ wedge id: 594 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 595 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 600 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 601 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 606 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 607 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 608 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 609 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 100
 ++++ wedge id: 582 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 583 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 604 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 605 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 602 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 603 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 616 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 617 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 101
@@ -5088,15 +5088,15 @@ For each corner:
 ---- corner id: 103
 ++++ wedge id: 596 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 597 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 606 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 607 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 604 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 605 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 622 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 623 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 104
 ++++ wedge id: 628 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 629 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 650 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 651 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 648 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 649 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 662 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 663 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 105
@@ -5116,15 +5116,15 @@ For each corner:
 ---- corner id: 107
 ++++ wedge id: 642 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 643 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 648 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 649 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 654 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 655 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 656 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 657 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 108
 ++++ wedge id: 626 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 627 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 652 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 653 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 650 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 651 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 664 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 665 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 109
@@ -5144,15 +5144,15 @@ For each corner:
 ---- corner id: 111
 ++++ wedge id: 644 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 645 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 654 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 655 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 652 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 653 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 670 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 671 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 112
 ++++ wedge id: 676 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 677 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 698 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 699 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 696 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 697 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 710 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 711 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 113
@@ -5172,15 +5172,15 @@ For each corner:
 ---- corner id: 115
 ++++ wedge id: 690 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 691 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 696 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 697 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 702 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 703 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 704 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 705 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 116
 ++++ wedge id: 674 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 675 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 700 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 701 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 698 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 699 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 712 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 713 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 117
@@ -5200,15 +5200,15 @@ For each corner:
 ---- corner id: 119
 ++++ wedge id: 692 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 693 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 702 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 703 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 700 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 701 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 718 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 719 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 120
 ++++ wedge id: 724 with facet normal ( 0 -1 0 ), facet area 0.0078125
 ++++ wedge id: 725 with facet normal ( 0 -1 0 ), facet area 0.0078125
-++++ wedge id: 746 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 747 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 744 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 745 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 758 with facet normal ( -1 0 0 ), facet area 0.0078125
 ++++ wedge id: 759 with facet normal ( -1 0 0 ), facet area 0.0078125
 ---- corner id: 121
@@ -5228,15 +5228,15 @@ For each corner:
 ---- corner id: 123
 ++++ wedge id: 738 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 739 with facet normal ( -0 1 0 ), facet area 0.0078125
-++++ wedge id: 744 with facet normal ( -0 0 1 ), facet area 0.0078125
-++++ wedge id: 745 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 750 with facet normal ( -0 0 1 ), facet area 0.0078125
+++++ wedge id: 751 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 752 with facet normal ( -1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 753 with facet normal ( -1 0 -0 ), facet area 0.0078125
 ---- corner id: 124
 ++++ wedge id: 722 with facet normal ( 0 -1 -0 ), facet area 0.0078125
 ++++ wedge id: 723 with facet normal ( -0 -1 0 ), facet area 0.0078125
-++++ wedge id: 748 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 749 with facet normal ( 0 -0 1 ), facet area 0.0078125
+++++ wedge id: 746 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 747 with facet normal ( 0 -0 1 ), facet area 0.0078125
 ++++ wedge id: 760 with facet normal ( 1 -0 0 ), facet area 0.0078125
 ++++ wedge id: 761 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 125
@@ -5256,8 +5256,8 @@ For each corner:
 ---- corner id: 127
 ++++ wedge id: 740 with facet normal ( 0 1 0 ), facet area 0.0078125
 ++++ wedge id: 741 with facet normal ( 0 1 0 ), facet area 0.0078125
-++++ wedge id: 750 with facet normal ( 0 0 1 ), facet area 0.0078125
-++++ wedge id: 751 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 748 with facet normal ( 0 0 1 ), facet area 0.0078125
+++++ wedge id: 749 with facet normal ( 0 0 1 ), facet area 0.0078125
 ++++ wedge id: 766 with facet normal ( 1 0 0 ), facet area 0.0078125
 ++++ wedge id: 767 with facet normal ( 1 0 0 ), facet area 0.0078125
 ---- corner id: 128

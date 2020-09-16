@@ -32,12 +32,100 @@
 #include <unordered_map>
 #include <vector>
 
+#define CHUNK_SIZE 128
+
+extern "C" {
+void  ex_iqsort(int v[], int iv[], int count );
+void  ex_iqsort64(int64_t v[], int64_t iv[], int64_t count );
+} // C
+
+  
 namespace flecsi_sp {
 namespace io {
 
 template <std::size_t DIM, typename REAL_TYPE >
 using mesh_definition =
   flecsi::topology::parallel_mesh_definition_u<DIM, REAL_TYPE>;
+
+enum ex_element_type {
+  EX_EL_UNK         =  -1,     /**< unknown entity */
+  EX_EL_NULL_ELEMENT=   0,
+  EX_EL_TRIANGLE    =   1,     /**< Triangle entity */
+  EX_EL_QUAD        =   2,     /**< Quad entity */
+  EX_EL_HEX         =   3,     /**< Hex entity */
+  EX_EL_WEDGE       =   4,     /**< Wedge entity */
+  EX_EL_TETRA       =   5,     /**< Tetra entity */
+  EX_EL_TRUSS       =   6,     /**< Truss entity */
+  EX_EL_BEAM        =   7,     /**< Beam entity */
+  EX_EL_SHELL       =   8,     /**< Shell entity */
+  EX_EL_SPHERE      =   9,     /**< Sphere entity */
+  EX_EL_CIRCLE      =  10,     /**< Circle entity */
+  EX_EL_TRISHELL    =  11,     /**< Triangular Shell entity */
+  EX_EL_PYRAMID     =  12      /**< Pyramid entity */
+};
+
+struct elem_blk_parm
+{
+  char elem_type[33];
+  int64_t elem_blk_id;
+  int64_t num_elem_in_blk;
+  int num_nodes_per_elem;
+  int num_sides;
+  int num_nodes_per_side[6];
+  int num_attr;
+  int64_t elem_ctr;
+  ex_element_type elem_type_val;
+};
+    
+/* triangle */
+constexpr int tri_sides = 3;
+constexpr int tri_size = 3;
+static int tri_table[tri_sides][tri_size] = {
+  /*   1        2        3                                             side   */
+  {1,2,4}, {2,3,5}, {3,1,6}                                       /* nodes  */
+};
+
+/* quad */
+constexpr int quad_sides = 4;
+constexpr int quad_size = 3;
+static int quad_table[quad_sides][quad_size] = {
+  /*   1        2        3        4                                    side   */
+  {1,2,5}, {2,3,6}, {3,4,7}, {4,1,8}                              /* nodes  */
+};
+
+/* tetra */
+constexpr int tetra_sides = 4;
+constexpr int tetra_size = 6;
+static int tetra_table[tetra_sides][tetra_size] = {
+  /*      1              2               3               4            side   */
+  {1,2,4,5,9,8}, {2,3,4,6,10,9}, {1,4,3,8,10,7}, {1,3,2,7,6,5}   /* nodes  */
+};
+
+/* hex */
+constexpr int hex_sides = 6;
+constexpr int hex_size = 9;
+static int hex_table[hex_sides][hex_size] = {
+  /*         1                        2                                side   */
+  {1,2,6,5,9,14,17,13,26}, {2,3,7,6,10,15,18,14,25},              /* nodes  */
+  /*         3                        4                                side   */
+  {3,4,8,7,11,16,19,15,27}, {1,5,8,4,13,20,16,12,24},             /* nodes  */
+  /*         5                        6                                side   */
+  {1,4,3,2,12,11,10,9,22},  {5,6,7,8,17,18,19,20,23}              /* nodes  */
+};
+
+
+/* shell */
+constexpr int shell_sides = 6;
+constexpr int shell_size = 8;
+static int shell_table[shell_sides][shell_size] = {
+  /*        1                  2                                       side   */
+  {1,2,3,4,5,6,7,8}, {1,4,3,2,8,7,6,5} ,                          /* nodes  */
+  /*        3                  4                                       side   */
+  {1,2,5,0,0,0,0,0}, {2,3,6,0,0,0,0,0} ,                          /* nodes  */
+  /*        5                  6                                       side   */
+  {3,4,7,0,0,0,0,0}, {4,1,8,0,0,0,0,0}                            /* nodes  */
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief This is the three-dimensional mesh reader and writer based on the
@@ -75,6 +163,7 @@ public:
 
   //! \brief the data type for connectivity
   using connectivity_t = sparse_matrix<index_t>;
+  using crs_t = flecsi::coloring::crs_t;
 
   //! the number of dimensions
   static constexpr size_t num_dims = D;
@@ -177,6 +266,28 @@ public:
       }
     } // broadcast
 
+  };
+  
+  //============================================================================
+  // Subdivide an index space
+  //============================================================================
+  template<typename Vector>
+  void
+  static subdivide(size_t nelem, size_t npart, Vector & dist) {
+  
+    size_t quot = nelem / npart;
+    size_t rem = nelem % npart;
+  
+    dist.reserve(npart + 1);
+    dist.push_back(0);
+  
+    // Set the distributions for each rank. This happens on all ranks.
+    // Each rank gets the average number of indices, with higher ranks
+    // getting an additional index for non-zero remainders.
+    for(size_t r(0); r < npart; ++r) {
+      const size_t indices = quot + ((r >= (npart - rem)) ? 1 : 0);
+      dist.push_back(dist[r] + indices);
+    } // for
   };
 
   //============================================================================
@@ -454,6 +565,372 @@ public:
 
     return vertex_coord;
   }
+  
+  //============================================================================
+  //! \brief read the coordinates of the mesh from a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the vertex coordinates
+  //============================================================================
+  static void read_point_coords(
+      int exo_id,
+      size_t start,
+      size_t end,
+      std::vector<real_t> & vertex_coord) 
+  {
+
+    // get the number of nodes
+    auto num_nodes = end - start;
+    if (num_nodes <= 0)
+      clog_fatal(
+          "Exodus file has zero nodes, or parmeters haven't been read yet.");
+
+    // read nodes
+    vertex_coord.resize(num_dims * num_nodes);
+
+    // exodus is kind enough to fetch the data in the real type we ask for
+    auto status = ex_get_partial_coord(
+        exo_id,
+        start+1,
+        end-start,
+        vertex_coord.data(),
+        vertex_coord.data() + num_nodes,
+        vertex_coord.data() + 2 * num_nodes);
+
+    if (status)
+      clog_fatal(
+          "Problem getting vertex coordinates from exodus file, "
+          << " ex_get_coord() returned " << status);
+
+  }
+
+
+
+  //============================================================================
+  //! \brief read the coordinates of the mesh from a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the vertex coordinates
+  //============================================================================
+  static void read_point_coords_serial(
+      int exoid,
+      const ex_init_params & exo_params,
+      bool do_read,
+      bool do_send,
+      const crs_t & cell2vertices,
+      std::map<index_t, index_t> & vertex_global2local,
+      std::vector<index_t> & vertex_local2global,
+      std::vector<real_t> & vertices)
+  {
+    
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+
+    // create a local numbering of the vertices
+    size_t local_vertices{0};
+    vertex_global2local.clear();
+   
+    auto num_cells = cell2vertices.size();
+    for ( size_t i=0; i<num_cells; ++i ) {
+      for ( auto j=cell2vertices.offsets[i]; j<cell2vertices.offsets[i+1]; ++j ) {
+        auto global_id = cell2vertices.indices[j];
+        auto res = vertex_global2local.emplace(
+            std::make_pair(global_id, local_vertices) );
+        if ( res.second ) local_vertices++;
+      }
+    }
+
+    vertices.clear();
+    vertices.resize(local_vertices*num_dims);
+
+    //--------------------------------
+    // Read vertices in serial
+    if (!do_send) {
+      auto coordinates = read_point_coords(exoid, exo_params.num_nodes);
+      clog_assert(
+          coordinates.size() == num_dims * exo_params.num_nodes,
+          "Mismatch in read vertices");
+
+      for ( const auto & id_pair : vertex_global2local ) {
+        auto global_id = id_pair.first;
+        auto local_id = id_pair.second;
+        for ( int d=0; d<num_dims; ++d ) {
+          vertices[ local_id*num_dims + d ] = 
+            coordinates[d * local_vertices + global_id];
+        }
+      }
+
+      // invert the global id to local id map
+      vertex_local2global.clear();
+      vertex_local2global.resize(local_vertices);
+        
+      for ( const auto & global_local : vertex_global2local )
+        vertex_local2global[global_local.second] = global_local.first;
+
+    }
+    //--------------------------------
+    // Read vertices in chunks
+    else {
+
+      
+      std::vector<index_t> distribution;
+      subdivide(exo_params.num_nodes, comm_size, distribution);
+
+      constexpr unsigned chunk = CHUNK_SIZE;
+      std::vector<real_t> coordinates, vert_buf;
+      auto real_size = sizeof(real_t);
+      MPI_Request request;
+      MPI_Status status;
+    
+      double elapsed_time = 0;
+      size_t elapsed_counter = 0;
+
+      auto comm_verts = distribution[comm_rank+1] - distribution[comm_rank];
+      if (comm_rank != 0) coordinates.resize(comm_verts*num_dims);
+
+      for (int r=1; r<comm_size; ++r) {
+        
+        size_t start = distribution[r];
+        auto rank_verts = distribution[r+1] - distribution[r];
+  
+        while (rank_verts > 0) {
+
+          auto chunk = std::min<size_t>(CHUNK_SIZE, rank_verts);
+          auto coord_size = chunk*real_size*num_dims;
+          
+          //----------------------------
+          // Root
+          if (comm_rank == 0) {
+
+            read_point_coords(exoid, start, start+chunk, coordinates);
+        
+            MPI_Isend(
+                coordinates.data(),
+                coord_size,
+                MPI_BYTE,
+                r,
+                0,
+                MPI_COMM_WORLD,
+                &request);
+            
+            auto startt = MPI_Wtime();
+            MPI_Wait(&request, &status);
+            elapsed_time += MPI_Wtime() - startt;
+            elapsed_counter++;
+          }
+          
+          //----------------------------
+          // Target
+          else if (comm_rank == r)  {
+            
+            vert_buf.resize(chunk*num_dims);
+            MPI_Irecv(
+                vert_buf.data(),
+                coord_size,
+                MPI_BYTE,
+                0,
+                0,
+                MPI_COMM_WORLD,
+                &request);
+          
+            MPI_Wait(&request, &status);
+
+            auto offset = start - distribution[r];
+            for (size_t i=0; i<chunk; ++i) {
+              auto pos = offset + i;
+              for (unsigned d=0; d<num_dims; ++d) {
+                coordinates[d*comm_verts + pos] = vert_buf[d*chunk + i];
+              }
+            }
+          
+          }
+          // End  root / target
+          //----------------------------
+
+          start += chunk;
+          rank_verts -= chunk;
+        } // while
+          
+      } // ranks
+      
+      if (comm_rank == 0 && elapsed_counter) {
+        std::cout << "Vertices: Spent a total/average of " << elapsed_time 
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
+      }
+
+      // root needs to read its data
+      if (comm_rank == 0) {
+        size_t start = distribution[0];
+        auto rank_verts = distribution[1] - distribution[0];
+        if (rank_verts) read_point_coords(exoid, start, start+rank_verts, coordinates);
+      }
+
+      // invert the global id to local id map
+      vertex_local2global.clear();
+      vertex_local2global.resize(local_vertices);
+      for ( const auto & global_local : vertex_global2local )
+        vertex_local2global[global_local.second] = global_local.first;
+      
+      // figure out who owns the vertices i need
+      std::vector<int> rank_owner(local_vertices);
+      
+      // determine the rank owners and send counts
+      std::vector<size_t> sendcounts(comm_size, 0);
+
+      int r = 0;
+      for ( const auto & global_local : vertex_global2local ) {
+        auto global_id = global_local.first;
+        auto local_id = global_local.second;
+        while (global_id >= distribution[r+1]) { ++r; }
+        rank_owner[local_id] = r;
+        sendcounts[r]++;
+      }
+  
+      auto size_size = sizeof(size_t);
+      std::vector<size_t> recvcounts(comm_size);
+      auto ret = MPI_Alltoall(
+          sendcounts.data(),
+          size_size,
+          MPI_BYTE,
+          recvcounts.data(),
+          size_size,
+          MPI_BYTE,
+          MPI_COMM_WORLD);
+      if(ret != MPI_SUCCESS)
+        clog_error("Error communicating vertex counts");
+    
+      // finish displacements
+      std::vector<size_t> senddispls(comm_size+1);
+      std::vector<size_t> recvdispls(comm_size+1);
+      senddispls[0] = 0;
+      recvdispls[0] = 0;
+      for(size_t r = 0; r < comm_size; ++r)  {
+        senddispls[r + 1] = senddispls[r] + sendcounts[r];
+        recvdispls[r + 1] = recvdispls[r] + recvcounts[r];
+      }
+
+      std::vector<size_t> index_buf(senddispls[comm_size]);
+      std::fill(sendcounts.begin(), sendcounts.end(), 0);
+
+      for ( const auto & global_local : vertex_global2local ) {
+        auto global_id = global_local.first;
+        auto local_id = global_local.second;
+        auto r = rank_owner[local_id];
+        auto pos = senddispls[r] + sendcounts[r];
+        index_buf[pos] = global_id;
+        sendcounts[r]++;
+      }
+
+      // now send the vertices i need to the owners
+      std::vector<size_t> send_indices(recvdispls[comm_size]);
+      ret = flecsi::coloring::alltoallv(
+          index_buf,
+          sendcounts,
+          senddispls,
+          send_indices,
+          recvcounts,
+          recvdispls,
+          MPI_COMM_WORLD);
+      if(ret != MPI_SUCCESS)
+        clog_error("Error communicating new vertices");
+    
+      // copy ther vertices
+      auto start = distribution[comm_rank];
+      vert_buf.resize(send_indices.size()*num_dims);
+
+      for (size_t i=0; i<send_indices.size(); ++i) {
+        auto pos = send_indices[i] - start;
+        for (unsigned d=0; d<num_dims; ++d)
+          vert_buf[i*num_dims + d] = coordinates[d*comm_verts + pos];
+      }
+
+      // swap send and recv counts
+      std::swap(sendcounts, recvcounts);
+      std::swap(senddispls, recvdispls);
+
+      for (size_t i=0; i<comm_size; ++i) {
+        sendcounts[i] *= num_dims;
+        senddispls[i+1] *= num_dims;
+        recvcounts[i] *= num_dims;
+        recvdispls[i+1] *= num_dims;
+      }
+      
+      coordinates.resize(local_vertices*num_dims);
+      ret = flecsi::coloring::alltoallv(
+          vert_buf,
+          sendcounts,
+          senddispls,
+          coordinates,
+          recvcounts,
+          recvdispls,
+          MPI_COMM_WORLD);
+      if(ret != MPI_SUCCESS)
+        clog_error("Error communicating new vertices");
+      
+      // unpack
+      for (size_t i=0; i<comm_size; ++i) recvdispls[i+1] /= num_dims;
+      
+      std::fill(recvcounts.begin(), recvcounts.end(), 0);
+
+      for ( const auto & global_local : vertex_global2local ) {
+        auto global_id = global_local.first;
+        auto local_id = global_local.second;
+        auto r = rank_owner[local_id];
+        auto pos = recvdispls[r] + recvcounts[r];
+        // here
+        for ( unsigned d=0; d<num_dims; ++d )
+          vertices[ local_id*num_dims + d ] = coordinates[ pos*num_dims + d ];
+        recvcounts[r]++;
+      }
+
+    }
+      
+  }
+  
+  //============================================================================
+  //! \brief read the coordinates of the mesh from a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the vertex coordinates
+  //============================================================================
+  static void read_point_coords_parallel(
+      int exoid,
+      const ex_init_params & exo_params,
+      bool do_read,
+      bool do_send,
+      bool int64,
+      const crs_t & cell2vertices,
+      std::map<index_t, index_t> & vertex_global2local,
+      std::vector<index_t> & vertex_local2global,
+      std::vector<real_t> & vertices)
+  {
+      
+    auto coordinates = read_point_coords(exoid, exo_params.num_nodes);
+    clog_assert(
+        coordinates.size() == num_dims * exo_params.num_nodes,
+        "Mismatch in read vertices");
+
+    auto num_vertices = coordinates.size() / num_dims;
+    
+    if (int64) {
+      vertex_local2global =
+        read_node_map<long long>(exoid, num_vertices);
+    }
+    else {
+      vertex_local2global =
+        read_node_map<int>(exoid, num_vertices);
+    }
+    
+    vertices.clear();
+    vertices.resize(num_vertices*num_dims);
+
+    for ( size_t i=0; i<num_vertices; ++i ) {
+      auto global_id = vertex_local2global[i];
+      vertex_global2local.emplace( std::make_pair( global_id, i ) );
+      for (int d=0; d<num_dims; ++d)
+        vertices[i*num_dims + d] = coordinates[d*num_vertices + i];
+    }
+
+  } 
+      
 
   //============================================================================
   //! \brief write the coordinates of the mesh from a file.
@@ -561,6 +1038,183 @@ public:
     // now return them
     return ids;
   }
+  
+  //============================================================================
+  //! \brief read the block ids from an exodus file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the status of the file
+  //============================================================================
+  static void
+  read_block_params(
+      int exoid,
+      const std::vector<index_t> & elem_blk_ids,
+      std::vector<elem_blk_parm> & elem_blk_parms)
+  {
+    elem_blk_parms.resize(elem_blk_ids.size());
+    auto ndim = ex_inquire_int(exoid, EX_INQ_DIM);
+
+    ex_block block;
+    size_t elem_ctr = 0;
+    for (unsigned i=0; i<elem_blk_ids.size(); ++i) {
+
+      block.id = elem_blk_ids[i];
+      block.type = EX_ELEM_BLOCK;
+      auto status = ex_get_block_param (exoid, &block);
+      if (status)
+        clog_fatal(
+            "Problem getting block params, ex_get_block_param() returned "
+            << status);
+    
+      elem_blk_parms[i].num_elem_in_blk = block.num_entry;
+      elem_blk_parms[i].num_nodes_per_elem = block.num_nodes_per_entry;
+      elem_blk_parms[i].num_attr = block.num_attribute;
+      elem_blk_parms[i].elem_blk_id = block.id;    /* save id */
+      elem_blk_parms[i].num_sides = 1;
+   
+      int m=0;
+      for (m=0; m < strlen(block.topology); m++)
+        elem_blk_parms[i].elem_type[m] = std::toupper(block.topology[m]);
+      elem_blk_parms[i].elem_type[m] = '\0';
+
+    
+      if (strncmp(elem_blk_parms[i].elem_type,"CIRCLE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_CIRCLE;
+	      /* set side set node stride */
+        elem_blk_parms[i].num_nodes_per_side[0] = 1;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"SPHERE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_SPHERE;
+	      /* set side set node stride */
+        elem_blk_parms[i].num_nodes_per_side[0] = 1;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"QUAD",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_QUAD;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 4)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 5)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"TRIANGLE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_TRIANGLE;
+	      /* set default side set node stride */
+	      if (ndim == 2)  /* 2d TRIs */
+	      {
+	        if (elem_blk_parms[i].num_nodes_per_elem == 3)
+	          elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	        else 
+	          elem_blk_parms[i].num_nodes_per_side[0] = 3;
+	      }
+	      else if (ndim == 3)  /* 3d TRIs */
+	      {
+	        if (elem_blk_parms[i].num_nodes_per_elem == 3)
+	          elem_blk_parms[i].num_nodes_per_side[0] = 3;
+	        else 
+	          elem_blk_parms[i].num_nodes_per_side[0] = 6;
+	      }
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"SHELL",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_SHELL;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 2) /* KLUDGE for 2D Shells*/
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 4)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"HEX",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_HEX;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 8)  /* 8-node bricks */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 9)  /* 9-node bricks */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 12)  /* HEXSHELLS */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 27)  /* 27-node bricks */
+	        elem_blk_parms[i].num_nodes_per_side[0] = 9;
+	      else 
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"TETRA",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_TETRA;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 4)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+	      else if (elem_blk_parms[i].num_nodes_per_elem == 8)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 6;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"WEDGE",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_WEDGE;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 6)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+            }
+          else if (strncmp(elem_blk_parms[i].elem_type,"PYRAMID",3) == 0)
+            {
+	      elem_blk_parms[i].elem_type_val = EX_EL_PYRAMID;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 5)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 4;
+	      else
+	        elem_blk_parms[i].num_nodes_per_side[0] = 8;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"BEAM",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_BEAM;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 2)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else 
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+      }
+      else if ( (strncmp(elem_blk_parms[i].elem_type,"TRUSS",3) == 0) ||
+                (strncmp(elem_blk_parms[i].elem_type,"BAR",3) == 0) ||
+                (strncmp(elem_blk_parms[i].elem_type,"EDGE",3) == 0) )
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_TRUSS;
+	      /* determine side set node stride */
+	      if (elem_blk_parms[i].num_nodes_per_elem == 2)
+	        elem_blk_parms[i].num_nodes_per_side[0] = 2;
+	      else 
+	        elem_blk_parms[i].num_nodes_per_side[0] = 3;
+      }
+      else if (strncmp(elem_blk_parms[i].elem_type,"NULL",3) == 0)
+      {
+	      elem_blk_parms[i].elem_type_val = EX_EL_NULL_ELEMENT;
+	      elem_blk_parms[i].num_nodes_per_side[0] = 0;
+	      elem_blk_parms[i].num_elem_in_blk = 0;
+      }
+      else
+      { /* unsupported element type; no problem if no sides specified for
+	         this element block */
+	      elem_blk_parms[i].elem_type_val = EX_EL_UNK;
+	      elem_blk_parms[i].num_nodes_per_side[0] = 0;
+      }
+
+      elem_blk_parms[i].elem_blk_id = block.id;    /* save id */
+      elem_ctr += elem_blk_parms[i].num_elem_in_blk;
+      elem_blk_parms[i].elem_ctr = elem_ctr;      /* save elem number max */
+
+    } // block
+
+  }
+
 
   //============================================================================
   //! \brief read the element blocks from an exodus file.
@@ -845,6 +1499,182 @@ public:
     } // element type
     //------------------------------------------------------------------------
   }
+    
+  template<typename U>
+  struct block_stats_t {
+    U num_elem_this_blk = 0;
+    U num_faces_per_elem = 0;
+    U num_edges_per_elem = 0;
+    U num_nodes_per_elem = 0;
+    U num_attr = 0;
+    char elem_type[MAX_STR_LENGTH];
+  };
+
+  
+  //============================================================================
+  //! \brief read the element blocks from an exodus file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the status of the file
+  //============================================================================
+  template<typename U>
+  static void read_block_stats(
+      int exoid,
+      ex_entity_id blk_id,
+      ex_entity_type entity_type,
+      block_stats_t<U> & block_stats)
+  {
+    auto status = ex_get_block(
+        exoid,
+        entity_type,
+        blk_id,
+        block_stats.elem_type,
+        &block_stats.num_elem_this_blk,
+        &block_stats.num_nodes_per_elem,
+        &block_stats.num_edges_per_elem,
+        &block_stats.num_faces_per_elem,
+        &block_stats.num_attr);
+    if (status)
+      clog_fatal("Problem reading block, ex_get_block() returned " << status);
+
+  }
+  
+  //============================================================================
+  //! \brief read the element blocks from an exodus file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the status of the file
+  //============================================================================
+  template<typename U>
+  static std::pair<block_t, bool> read_block(
+      int exoid,
+      ex_entity_id blk_id,
+      ex_entity_type entity_type,
+      const block_stats_t<U> & stats,
+      vector<int> & counts,
+      vector<U> & indices,
+      U start = 0,
+      U count = std::numeric_limits<U>::max())
+  {
+
+    // some type aliases
+    using ex_index_t = U;
+
+
+    //------------------------------------------------------------------------
+    // polygon data
+    if (strcasecmp("nsided", stats.elem_type) == 0) {
+
+      // the number of nodes per element is really the number of nodes
+      // in the whole block
+      auto num_nodes_this_blk = stats.num_nodes_per_elem;
+
+      // get the number of nodes per element
+      counts.resize(stats.num_elem_this_blk);
+      auto status = ex_get_entity_count_per_polyhedra(
+          exoid, entity_type, blk_id, counts.data());
+      if (status)
+        clog_fatal(
+            "Problem getting element node numbers, "
+            << "ex_get_entity_count_per_polyhedra() returned " << status);
+
+      // read element definitions
+      indices.resize(num_nodes_this_blk);
+      status = ex_get_conn(
+          exoid, entity_type, blk_id, indices.data(), nullptr, nullptr);
+      if (status)
+        clog_fatal(
+            "Problem getting element connectivity, ex_get_elem_conn() "
+            << "returned " << status);
+      
+      return {block_t::polygon, false};
+
+    }
+    //------------------------------------------------------------------------
+    // polygon data
+    else if (strcasecmp("nfaced", stats.elem_type) == 0) {
+
+      // the number of faces per element is really the number of
+      // faces in the whole block ( includes duplicate / overlapping
+      // nodes )
+      auto num_face_this_blk = stats.num_faces_per_elem;
+
+      // get the number of nodes per element
+      counts.resize(stats.num_elem_this_blk);
+      auto status = ex_get_entity_count_per_polyhedra(
+          exoid, entity_type, blk_id, counts.data());
+      if (status)
+        clog_fatal(
+            "Problem reading element node info, "
+            << "ex_get_entity_count_per_polyhedra() returned " << status);
+
+      // read element definitions
+      indices.resize(num_face_this_blk);
+      status = ex_get_conn(
+          exoid, entity_type, blk_id, nullptr, nullptr, indices.data());
+      if (status)
+        clog_fatal(
+            "Problem getting element connectivity, ex_get_conn() "
+            << "returned " << status);
+
+      return {block_t::polyhedron, false};
+
+    }
+    //------------------------------------------------------------------------
+    // fixed element size
+    else {
+
+      auto end = std::min(start+count, stats.num_elem_this_blk);
+      auto num_elem_this_blk = end - start;
+      auto finished = (end == stats.num_elem_this_blk);
+
+      // set the counts
+      counts.resize(num_elem_this_blk);
+      std::fill( counts.begin(), counts.end(), stats.num_nodes_per_elem );
+
+      // read element definitions
+      indices.resize(num_elem_this_blk * stats.num_nodes_per_elem);
+      auto status = ex_get_partial_conn(
+          exoid,
+          EX_ELEM_BLOCK,
+          blk_id,
+          start+1,
+          end-start,
+          indices.data(),
+          0,
+          0);
+      if (status)
+        clog_fatal(
+            "Problem getting element connectivity, ex_get_elem_conn() "
+            << "returned " << status);
+
+      // return element type
+      if (
+          strcasecmp("tri", stats.elem_type) == 0 ||
+          strcasecmp("tri3", stats.elem_type) == 0)
+        return {block_t::tri, finished};
+      else if (
+          strcasecmp("quad", stats.elem_type) == 0 ||
+          strcasecmp("quad4", stats.elem_type) == 0 ||
+          strcasecmp("shell", stats.elem_type) == 0 ||
+          strcasecmp("shell4", stats.elem_type) == 0)
+        return {block_t::quad, finished};
+      else if (
+          strcasecmp("tet", stats.elem_type) == 0 ||
+          strcasecmp("tetra", stats.elem_type) == 0 ||
+          strcasecmp("tet4", stats.elem_type) == 0)
+        return {block_t::tet, finished};
+      else if (
+          strcasecmp("hex", stats.elem_type) == 0 ||
+          strcasecmp("hex8", stats.elem_type) == 0)
+        return {block_t::hex, finished};
+      else {
+        clog_fatal("Unknown block type, " << stats.elem_type);
+        return {block_t::unknown, finished};
+      }
+
+    } // element type
+    //------------------------------------------------------------------------
+  }
+
 
   //============================================================================
   //! \brief read the element blocks from an exodus file.
@@ -913,6 +1743,9 @@ public:
         std::forward<CONN_TYPE>(element_conn));
   }
   
+  //============================================================================
+  //! Read side set ids
+  //============================================================================
   template<typename U>
   static auto
   read_side_set_ids(int exoid, size_t num_side_sets) {
@@ -942,6 +1775,9 @@ public:
   }
 
 
+  //============================================================================
+  //! Read side set names
+  //============================================================================
   static auto
   read_side_set_names(int exoid, size_t num_side_sets) {
 
@@ -976,7 +1812,57 @@ public:
     // now return them
     return names;
   }
+  
+  //============================================================================
+  //! side set stats
+  //============================================================================
+  template<typename U>
+  struct side_set_stats_t {
+    U num_side_in_set;
+    U num_dist_fact_in_set;
+    U side_set_node_list_len;
+    U tot_num_ss_elem;
+  };
+  
+  //============================================================================
+  //! Read side set stats
+  //============================================================================
+  template<typename U>
+  static auto read_side_set_stats(
+      int exoid,
+      ex_entity_id ss_id,
+      side_set_stats_t<U> & side_set_stats
+  ) {
 
+    // get side set params
+    auto status = ex_get_side_set_param(
+        exoid,
+        ss_id,
+        &side_set_stats.num_side_in_set,
+        &side_set_stats.num_dist_fact_in_set);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set_param() returned " << status);
+
+    // get side set connectivitiy lenght
+    status = ex_get_side_set_node_list_len(
+        exoid,
+        ss_id,
+        &side_set_stats.side_set_node_list_len);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set_node_list_len() returned " << status);
+
+
+    status = ex_get_set_param(exoid, EX_SIDE_SET, ss_id, &side_set_stats.tot_num_ss_elem, 0);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_set_param() returned " << status);
+  }
+
+  //============================================================================
+  //! Read side sets
+  //============================================================================
   template<typename U>
   static auto read_side_set(
       int exoid,
@@ -1030,7 +1916,134 @@ public:
 
 
   }
+  
+  //============================================================================
+  //! Read side sets
+  //============================================================================
+  template<typename U>
+  static bool read_side_set(
+      int exoid,
+      ex_entity_id ss_id,
+      const side_set_stats_t<U> & stats,
+      const std::vector<elem_blk_parm> & elem_blk_parms,
+      vector<U> & side_set_data,
+      U start = 0,
+      U count = std::numeric_limits<U>::max()
+  ) {
+
+    // some type aliases
+    using ex_index_t = U;
+
+
+    auto end = std::min(start+count, stats.tot_num_ss_elem);
+    auto num_ss_elem = end - start;
+    auto finished = (end == stats.tot_num_ss_elem);
+    
+    // get the actual connectivity
+    side_set_data.resize(4*num_ss_elem);
+    auto side_set_elem_list = side_set_data.data();
+    auto side_set_side_list = side_set_data.data() + num_ss_elem;
+    auto status = ex_get_partial_side_set(
+        exoid,
+        ss_id,
+        start+1,
+        end-start,
+        side_set_elem_list,
+        side_set_side_list);
+    if (status)
+      clog_fatal(
+          "Problem reading side set, ex_get_side_set_node_list() returned " << status);
+
+    std::vector<ex_index_t> sorted_elem(num_ss_elem);
+    std::iota(sorted_elem.begin(), sorted_elem.end(), 0);
+
+    if (sizeof(ex_index_t) == sizeof(int64_t))
+      ex_iqsort64(
+          (int64_t*)side_set_data.data(),
+          (int64_t*)sorted_elem.data(),
+          num_ss_elem);
+    else
+      ex_iqsort(
+          (int*)side_set_data.data(),
+          (int*)sorted_elem.data(),
+          num_ss_elem);
+  
+    auto num_elem_blks = elem_blk_parms.size();
+
+    auto ss_elem_node_ndx = side_set_data.data() + 2*num_ss_elem;
+    auto ss_parm_ndx = side_set_data.data() + 3*num_ss_elem;
+
+    auto ndim = ex_inquire_int(exoid, EX_INQ_DIM);
+    for (size_t i=0, j=0; i<num_ss_elem; ++i) {
+    
+      auto iside = sorted_elem[i];
+      auto elem = side_set_data[iside];
+      auto side = side_set_side_list[iside];
+
+      for (; j<num_elem_blks; j++) {
+        if (elem_blk_parms[j].elem_type_val != EX_EL_NULL_ELEMENT) {
+          auto num_elem_in_blk = elem_blk_parms[j].num_elem_in_blk;
+	        if (elem <= elem_blk_parms[j].elem_ctr)
+            break;
+        }
+      }
+
+      /* Update node_ctr (which points to next node in chain */
+      size_t node_ctr = 0;
+
+      /* WEDGEs with 3 node sides (side 4 or 5) are special cases */
+      if (elem_blk_parms[j].elem_type_val == EX_EL_WEDGE &&
+          (side == 4 || side == 5))
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 6)
+	        node_ctr += 3;  /* 3 node side */
+	      else
+	        node_ctr += 6;  /* 6 node side */
+      }
+      /* PYRAMIDSs with 3 node sides (sides 1,2,3,4) are also special */
+      else if (elem_blk_parms[j].elem_type_val == EX_EL_PYRAMID &&
+               (side < 5))
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 5)
+	        node_ctr += 3;  /* 3 node side */
+	      else
+	        node_ctr += 6;  /* 6 node side */
+      }
+      /* side numbers 3,4,5,6 for SHELLs are also special */
+      else if (elem_blk_parms[j].elem_type_val == EX_EL_SHELL &&
+	       (side > 2 ))
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 4)
+	        node_ctr += 2;  /* 2 node side */
+	      else
+	        node_ctr += 3;  /* 3 node side */
+      }
+      /* side numbers 3,4,5 for 3d TRIs are also special */
+      else if (elem_blk_parms[j].elem_type_val == EX_EL_TRIANGLE &&
+               ndim == 3 &&
+               side > 2 )
+      {
+	      if (elem_blk_parms[j].num_nodes_per_elem == 3)  /* 3-node TRI */
+	        node_ctr += 2;  /* 2 node side */
+	      else   /* 6-node TRI */
+	        node_ctr += 3;  /* 3 node side */
+      }
+      else /* all other element types */
+        node_ctr += elem_blk_parms[j].num_nodes_per_side[0];
+
+      ss_parm_ndx[iside] = j; /* assign parameter block index */
+      ss_elem_node_ndx[iside] = node_ctr;     /* assign node list index */
+
+    }
+
+    return finished;
+
+  }
  
+ 
+  //============================================================================
+  //! Write side sets
+  //============================================================================
   template<typename U, typename V, typename W, typename X, typename Y>
   static void
   write_side_set(int exoid, size_t ss_id, const V & side_ids,
@@ -1102,6 +2115,473 @@ public:
           "Problem writing side set, ex_put_side_set() returned " << status);
 
   }
+
+
+  //============================================================================
+  // Filter out sides
+  //============================================================================
+  template< typename U >
+  static void filter_sides(
+      size_t ss_id,
+      const std::vector<U> & side_set_data,
+      size_t cell_min,
+      size_t cell_max,
+      const std::vector<block_t> & cell_type,
+      const std::map<index_t, index_t> & element_global2local,
+      const std::vector<index_t> & vertex_local2global,
+      const crs_t & cell2vertices,
+      const std::vector<elem_blk_parm> & elem_blk_parms,
+      std::vector<size_t> & side_ids,
+      std::map<size_t, std::vector<size_t>> & element_to_sides,
+      crs_t & side_to_vertices,
+      std::map<size_t, side_set_info_t> & side_sets )
+  {
+
+  
+  
+    auto num_ss_elem = side_set_data.size() / 4;
+    if (num_ss_elem * 4 != side_set_data.size())
+      clog_fatal("num_ss_elem * 4 != side_set_data.size()");
+
+    auto side_set_elem_list = side_set_data.data();
+    auto side_set_side_list = side_set_data.data() + num_ss_elem;
+    auto ss_elem_node_ndx = side_set_data.data() + 2*num_ss_elem;
+    auto ss_parm_ndx = side_set_data.data() + 3*num_ss_elem;
+
+    // filter sides for elementes i own
+    std::vector<size_t> vs;
+    for ( size_t j=0; j<num_ss_elem; ++j ) {
+      auto elem_gid = side_set_elem_list[j] - 1;
+      if (elem_gid >= cell_min && elem_gid <= cell_max )
+      {
+        auto & this_ss = side_sets[ss_id];
+        // get side info
+        auto num_vert = ss_elem_node_ndx[j];
+        auto side_num = side_set_side_list[j] - 1;
+        auto blk_id = ss_parm_ndx[j];
+        auto elem_lid = element_global2local.at(elem_gid);
+        auto elem_type = elem_blk_parms[blk_id].elem_type_val;
+        // get the vertices
+        vs.clear();
+        vs.reserve(num_vert);
+        const auto & elem_verts = cell2vertices.at(elem_lid);
+        // figure out the block type
+        int table_len;
+        int * side_vert_map = nullptr;
+        switch (elem_type) {
+        case (EX_EL_TRIANGLE):
+          table_len = tri_size;
+          side_vert_map = &tri_table[0][0];
+          break;
+        case (EX_EL_QUAD):
+          table_len = quad_size;
+          side_vert_map = &quad_table[0][0];
+          break;
+        case (EX_EL_SHELL):
+          table_len = shell_size;
+          side_vert_map = &shell_table[0][0];
+          break;
+        case (EX_EL_TETRA):
+          table_len = tetra_size;
+          side_vert_map = &tetra_table[0][0];
+          break;
+        case (EX_EL_HEX):
+          table_len  = hex_size;
+          side_vert_map = &hex_table[0][0];
+          break;
+        default:
+          clog_fatal("Side set deduction not implemented for this block type");
+        };
+        // extract the vertices
+        for (size_t i=0; i<num_vert; ++i) {
+          auto id = side_vert_map[side_num*table_len + i] - 1;
+          auto vert_lid = elem_verts[id];
+          auto vert_gid = vertex_local2global.at(vert_lid);
+          vs.emplace_back( vert_gid );
+        }
+        // add side info
+        auto side_id = side_to_vertices.size();
+        side_ids.emplace_back( ss_id-1 );
+        element_to_sides[elem_gid].push_back(side_id);
+        side_to_vertices.push_back(vs);
+      }
+    }
+  
+  }
+
+  
+  //============================================================================
+  //! \brief read a block
+  //============================================================================
+  template <typename U>
+  static void read_side_set(
+      int exoid,
+      ex_entity_id ss_id,
+      size_t cell_min,
+      size_t cell_max,
+      bool do_read,
+      bool do_send,
+      const std::vector<block_t> & cell_type,
+      const std::map<index_t, index_t> & element_global2local,
+      const std::vector<index_t> & vertex_local2global,
+      const crs_t & cell2vertices,
+      const std::vector<elem_blk_parm> elem_blk_parms,
+      std::vector<size_t> & side_id,
+      std::map<size_t, std::vector<size_t>> & element_to_sides,
+      crs_t & side_to_vertices,
+      std::map<size_t, side_set_info_t> & side_sets)
+  {
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+
+    // get the info about this block
+    using stats_t = side_set_stats_t<U>;
+    stats_t side_set_stats;
+    if  (do_read) {
+      read_side_set_stats(
+        exoid,
+        ss_id,
+        side_set_stats);
+    }
+    if (do_send) broadcast(side_set_stats);
+      
+    if (!side_set_stats.num_side_in_set) return;
+      
+    //----------------------------------
+    // Serial version
+    if (do_read && !do_send) {
+    
+      std::vector<U> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
+
+      read_side_set<U>(
+        exoid, ss_id, side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
+      
+      detail::filter_sides( ss_id, side_set_node_cnt_list, side_set_node_list,
+        side_set_elem_list, cell_min, cell_max, side_id, element_to_sides,
+        side_to_vertices, side_sets );
+
+    }
+    //----------------------------------
+    // Parallel version
+    else {
+
+      // now read side sets
+      bool more_work = true;
+      size_t start = 0;
+      constexpr auto chunk = CHUNK_SIZE;
+      constexpr auto index_size = sizeof(U);
+      
+      struct send_data_t {
+        bool more_work;
+        size_t size;
+      };
+      
+      std::vector<U> sides;
+      send_data_t data;
+      
+      std::vector<MPI_Request> request(2);
+      std::vector<MPI_Status> status(2);
+      
+      double elapsed_time = 0;
+      size_t elapsed_counter = 0;
+      
+      while (more_work) {
+
+        if (comm_rank == 0) {
+          if (start) {
+            auto startt = MPI_Wtime();
+            MPI_Waitall(request.size(), request.data(), status.data());
+            elapsed_time += MPI_Wtime() - startt;
+            elapsed_counter++;
+          }
+          auto res = read_side_set<U>(
+              exoid,
+              ss_id,
+              side_set_stats,
+              elem_blk_parms,
+              sides,
+              start,
+              chunk);
+          more_work = !res;
+          data = {more_work, sides.size()};
+        }
+        
+        MPI_Ibcast(
+            &data,
+            sizeof(data),
+            MPI_BYTE,
+            0,
+            MPI_COMM_WORLD,
+            &request[0]);
+
+        if (comm_rank != 0)
+          MPI_Wait(&request[0], &status[0]);
+
+        more_work = data.more_work;
+        sides.resize(data.size);
+
+        MPI_Ibcast(
+            sides.data(),
+            index_size*sides.size(),
+            MPI_BYTE,
+            0,
+            MPI_COMM_WORLD,
+            &request[1]);
+ 
+        if (comm_rank != 0)
+          MPI_Wait(&request[1], &status[1]);
+        
+        // filter sides here
+        filter_sides<U>(
+            ss_id,
+            sides,
+            cell_min,
+            cell_max,
+            cell_type,
+            element_global2local,
+            vertex_local2global,
+            cell2vertices,
+            elem_blk_parms,
+            side_id,
+            element_to_sides,
+            side_to_vertices,
+            side_sets );
+        
+        start += chunk;
+      } // while
+
+      if (comm_rank == 0) {
+        auto startt = MPI_Wtime();
+        MPI_Waitall(request.size(), request.data(), status.data());
+        elapsed_time += MPI_Wtime() - startt;
+        elapsed_counter++;
+        std::cout << "Side set<" << ss_id << ">: Spent a total/average of " << elapsed_time 
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
+      }
+    }
+    
+  }
+
+  
+  //============================================================================
+  //! \brief read the coordinates of the mesh from a file.
+  //! \param [in] exo_id  The exodus file id.
+  //! \return the vertex coordinates
+  //============================================================================
+  static void read_side_sets(
+      int exoid,
+      const ex_init_params & exo_params,
+      bool serial,
+      bool do_read,
+      bool do_send,
+      bool int64,
+      size_t cell_min,
+      size_t cell_max,
+      const std::vector<index_t> & elem_blk_ids,
+      const std::vector<block_t> & cell_type,
+      const std::map<index_t, index_t> & cell_global2local,
+      const std::vector<index_t> & cell_local2global,
+      const std::vector<index_t> & vertex_local2global,
+      const crs_t & cell2vertices,
+      std::map<size_t, side_set_info_t> & side_sets,
+      std::map<size_t, std::vector<size_t>> & element_to_sides,
+      crs_t & side_to_vertices,
+      std::vector<size_t> & side_id)
+  {
+    auto num_side_sets = exo_params.num_side_sets;
+    if (!num_side_sets) return;
+
+    // read block info
+    std::vector<elem_blk_parm> block_params(elem_blk_ids.size());
+    if (do_read) read_block_params(exoid, elem_blk_ids, block_params);
+    if (do_send) broadcast(block_params);
+    
+    // get the side set ids
+    vector<index_t> ss_ids;
+
+    if (do_read) {
+      if (int64)
+        ss_ids = read_side_set_ids<long long>(
+          exoid, num_side_sets);
+      else
+        ss_ids = read_side_set_ids<int>(
+          exoid, num_side_sets);
+    }
+    if (do_send) broadcast(ss_ids);
+
+    // get the side set names
+    std::vector<std::string> ss_names;
+    if (do_read) 
+      ss_names = read_side_set_names(exoid, num_side_sets);
+    else
+      ss_names.resize(num_side_sets);
+
+    for (int i = 0; i < num_side_sets; i++){
+      
+      // if no label, use the id
+      if ( do_read && ss_names[i].empty() )
+        ss_names[i] = std::to_string( ss_ids[i] ); 
+
+      if (do_send) broadcast(ss_names[i]);
+    
+      
+      if (int64) {
+        read_side_set<long long>(
+            exoid,
+            ss_ids[i],
+            cell_min,
+            cell_max,
+            do_read,
+            do_send,
+            cell_type,
+            cell_global2local,
+            vertex_local2global,
+            cell2vertices,
+            block_params,
+            side_id,
+            element_to_sides,
+            side_to_vertices,
+            side_sets);
+      }
+      else {
+        read_side_set<int>(
+            exoid,
+            ss_ids[i],
+            cell_min,
+            cell_max,
+            do_read,
+            do_send,
+            cell_type,
+            cell_global2local,
+            vertex_local2global,
+            cell2vertices,
+            block_params,
+            side_id,
+            element_to_sides,
+            side_to_vertices,
+            side_sets);
+      }
+      
+      // if no label, use the id
+      if ( ss_names[i].empty() )
+        ss_names[i] = std::to_string( ss_ids[i] ); 
+      
+      // if this side set is used on this rank
+      auto sit = side_sets.find(ss_ids[i]);
+      if ( sit != side_sets.end() ) {
+        sit->second.label = ss_names[i];
+      }
+
+    } // for side set 
+
+    // side connectivity is tracked via global ids for simplicity
+    if (!serial && (do_read && !do_send)) {
+
+      for ( auto & v : side_to_vertices.indices )
+        v = vertex_local2global[v];
+
+      std::map<size_t, std::vector<size_t>> new_element_to_sides;
+      for ( auto && pair : element_to_sides ) {
+        auto global_id = cell_local2global[pair.first];
+        new_element_to_sides.emplace( global_id, std::move(pair.second) );
+      }
+      std::swap( new_element_to_sides, element_to_sides );
+
+    } // parallel
+  }
+
+  //============================================================================
+  //! \brief read cell ids
+  //============================================================================
+  static void read_cell_ids(
+      int exoid,
+      bool serial,
+      bool int64,
+      size_t cell_min,
+      size_t num_cells,
+      std::vector<index_t> & cell_local2global,
+      std::map<index_t, index_t> & cell_global2local)
+  {
+    
+    // for serial files, make up the indices
+    if ( serial ) {
+      cell_local2global.clear();
+      cell_local2global.resize(num_cells);
+      for ( size_t i=0; i<num_cells; ++i ) {
+        cell_local2global[i] = cell_min + i;
+      }
+    }
+    // read them for parallel files
+    else if (int64) {
+      cell_local2global =
+        read_element_map<long long>(exoid, num_cells);
+    }
+    else {
+      cell_local2global =
+        read_element_map<int>(exoid, num_cells);
+    }
+    
+    // invert the global id to local id map
+    for ( size_t i=0; i<num_cells; ++i ) {
+      auto global_id = cell_local2global[i];
+      cell_global2local.emplace( std::make_pair( global_id, i ) );
+    }
+
+  }
+  
+  //============================================================================
+  // broadcast
+  //============================================================================
+  template<typename U>
+  static void broadcast( std::vector<U> & vec ) {
+    auto data_size = sizeof(U);
+    auto sz = vec.size();
+    MPI_Bcast(
+        &sz,
+        sizeof(size_t),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
+    vec.resize(sz);
+    MPI_Bcast(
+        vec.data(),
+        data_size*vec.size(),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
+  }
+  
+  template<typename U>
+  static void broadcast( U & data ) {
+    auto data_size = sizeof(U);
+    MPI_Bcast(
+        &data,
+        data_size,
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
+  }
+  
+  static void broadcast( std::string & data ) {
+    auto data_size = sizeof(char);
+    auto sz = data.size();
+    MPI_Bcast(
+        &sz,
+        sizeof(size_t),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
+    data.resize(sz);
+    MPI_Bcast(
+        data.data(),
+        data_size*data.size(),
+        MPI_BYTE,
+        0,
+        MPI_COMM_WORLD);
+  }
+
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1483,7 +2963,7 @@ public:
 
   //! the connectivity type
   using connectivity_t = typename base_t::connectivity_t;
-  using crs_t = flecsi::coloring::crs_t;
+  using crs_t = typename base_t::crs_t;
 
   //============================================================================
   // Constructors
@@ -1518,36 +2998,46 @@ public:
   void read(const std::string & name, bool serial) {
 
     clog(info) << "Reading mesh from: " << name << std::endl;
-
-    //--------------------------------------------------------------------------
-    // Open file
-
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::in);
-    if (exoid < 0)
-      clog_fatal("Problem reading exodus file");
-
-    // get the initialization parameters
-    auto exo_params = base_t::read_params(exoid);
-
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
-
-    //--------------------------------------------------------------------------
-    // Figure out partitioning 
     
     int comm_size, comm_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
 
+    //--------------------------------------------------------------------------
+    // Open file
+    bool do_read = (serial && comm_rank==0) ||  (!serial);
+    bool do_send = serial && (comm_size>1);
+
+    // open the exodus file
+    int exoid = -1;
+    if (do_read) {
+      exoid = base_t::open(name, std::ios_base::in);
+      if (exoid < 0)
+        clog_fatal("Problem reading exodus file");
+    }
+
+    // get the initialization parameters
+    ex_init_params exo_params;
+    if (do_read) exo_params = base_t::read_params(exoid);
+    if (do_send) base_t::broadcast(exo_params);
+
+    // check the integer type used in the exodus file
+    bool int64;
+    if (do_read) int64 = base_t::is_int64(exoid);
+    if (do_send) base_t::broadcast(int64);
+
+    //--------------------------------------------------------------------------
+    // Figure out partitioning 
+    
     // figure out the number of cells for this rank.
     // if this is reading a bunch of exodus files, there is
     // nothing to do
     size_t num_cells = exo_params.num_elem;
     size_t cell_min{0}, cell_max{num_cells-1};
+    vector<index_t> cell_partitioning = {cell_min, cell_max+1};
 
     if (serial) {
-      vector<index_t> cell_partitioning;
+      cell_partitioning.clear();
       flecsi::coloring::subdivide( num_cells, comm_size, cell_partitioning );
 
       cell_min = cell_partitioning[comm_rank];
@@ -1571,12 +3061,15 @@ public:
     vector<index_t> elem_blk_ids;
 
     // get the element block ids
-    if (int64)
-      elem_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
-    else
-      elem_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
+    if (do_read) {
+      if (int64)
+        elem_blk_ids = base_t::template read_block_ids<long long>(
+            exoid, EX_ELEM_BLOCK, num_elem_blk);
+      else
+        elem_blk_ids = base_t::template read_block_ids<int>(
+            exoid, EX_ELEM_BLOCK, num_elem_blk);
+    }
+    if (do_send) base_t::broadcast(elem_blk_ids);
 
     // read each block
     for (int iblk = 0; iblk < num_elem_blk; iblk++) {
@@ -1584,31 +3077,38 @@ public:
       using block_t = typename base_t::block_t;
       block_t block_type;
       auto cell_start = cell2vertices_.size();
+      auto blk_id = elem_blk_ids[iblk];
 
-      vector<int> counts;
-      if (int64) {
-        vector<long long> indices;
-        block_type = base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], counts, indices );
-        if (block_type == block_t::empty) continue;
-
-        detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
-            cell2vertices_.offsets, cell2vertices_.indices );
-      }
-      else {
-        vector<int> indices;
-        block_type = base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], counts, indices );
-        if (block_type == block_t::empty) continue;
-
-        detail::filter_block( counts, indices, cell_min, cell_max, cell_counter,
-            cell2vertices_.offsets, cell2vertices_.indices );
-      }
+      // 64  bit version
+      if (int64) 
+        block_type = read_block<long long>(
+            exoid,
+            blk_id,
+            cell_min,
+            cell_max,
+            cell_partitioning,
+            do_read,
+            do_send,
+            cell_counter,
+            cell2vertices_);
+      else 
+        block_type = read_block<int>(
+            exoid,
+            blk_id,
+            cell_min,
+            cell_max,
+            cell_partitioning,
+            do_read,
+            do_send,
+            cell_counter,
+            cell2vertices_);
+      
+      if (block_type == block_t::empty) continue;
       
       // add the block type
       auto num_added = cell2vertices_.size() - cell_start;
       for (size_t i=0; i<num_added; ++i) {
-        cell_block_id_.emplace_back(elem_blk_ids[iblk]);
+        cell_block_id_.emplace_back(blk_id);
         cell_type_.emplace_back(block_type);
       }
 
@@ -1621,189 +3121,341 @@ public:
     
     // create the local to global cell mapping
     auto & cell_local2global_ = local_to_global_[num_dims];
-    
-    // for serial files, make up the indices
-    if ( serial ) {
-      cell_local2global_.clear();
-      cell_local2global_.resize(num_cells);
-      for ( size_t i=0; i<num_cells; ++i ) {
-        cell_local2global_[i] = cell_min + i;
-      }
-    }
-    // read them for parallel files
-    else if (int64) {
-      cell_local2global_ =
-        base_t::template read_element_map<long long>(exoid, num_cells);
-    }
-    else {
-      cell_local2global_ =
-        base_t::template read_element_map<int>(exoid, num_cells);
-    }
-    
-    // invert the global id to local id map
     auto & cell_global2local_ = global_to_local_[num_dims];
-    for ( size_t i=0; i<num_cells; ++i ) {
-      auto global_id = cell_local2global_[i];
-      cell_global2local_.emplace( std::make_pair( global_id, i ) );
-    }
-
-    //--------------------------------------------------------------------------
-    // read coordinates
-
-    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
-    clog_assert(
-        coordinates.size() == dimension() * exo_params.num_nodes,
-        "Mismatch in read vertices");
-
-    auto num_vertices = coordinates.size() / dimension();
+    
+    base_t::read_cell_ids(
+        exoid,
+        serial,
+        int64,
+        cell_min,
+        num_cells,
+        cell_local2global_,
+        cell_global2local_);
     
     //--------------------------------------------------------------------------
-    // Renumber vertices
-
+    // Read vertices
+    
     // get the vertex maps
     auto & vertex_global2local_ = global_to_local_[0];
     auto & vertex_local2global_ = local_to_global_[0];
 
     if ( serial ) {
 
-      // Throw away vertices that are not mine
-      size_t local_vertices{0};
-      vertex_global2local_.clear();
+      base_t::read_point_coords_serial(
+          exoid,
+          exo_params,
+          do_read,
+          do_send,
+          cell2vertices_,
+          vertex_global2local_,
+          vertex_local2global_,
+          vertices_);
 
-      for ( size_t i=0; i<num_cells; ++i ) {
-        for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
-          auto global_id = cell2vertices_.indices[j];
-          auto res = vertex_global2local_.emplace(
-              std::make_pair(global_id, local_vertices) );
-          if ( res.second ) local_vertices++;
-        }
-      }
+      // convert element conectivity to local ids 
+      for ( auto & v : cell2vertices_.indices )
+        v = vertex_global2local_.at(v);
 
-      // invert the global id to local id map
-      vertex_local2global_.clear();
-      vertex_local2global_.resize(local_vertices);
-
-      for ( const auto & global_local : vertex_global2local_ ) {
-        vertex_local2global_[global_local.second] = global_local.first;
-      }
-      
-      // convert element conectivity to local ids and extract only coordinates
-      // that are needed
-      vertices_.clear();
-      vertices_.resize(local_vertices*num_dims);
-
-      for ( auto & v : cell2vertices_.indices ) {
-        auto global_id = v;
-        v = vertex_global2local_.at(global_id);
-        for ( int d=0; d<num_dims; ++d ) {
-          vertices_[ v*num_dims + d ] = 
-            coordinates[d * num_vertices + global_id];
-        }
-      }
     } // serial
     // parallel
     else {
-    
-      if (int64) {
-        vertex_local2global_ =
-          base_t::template read_node_map<long long>(exoid, num_vertices);
-      }
-      else {
-        vertex_local2global_ =
-          base_t::template read_node_map<int>(exoid, num_vertices);
-      }
-    
-      vertices_.clear();
-      vertices_.resize(num_vertices*num_dims);
 
-      for ( size_t i=0; i<num_vertices; ++i ) {
-        auto global_id = vertex_local2global_[i];
-        vertex_global2local_.emplace( std::make_pair( global_id, i ) );
-        for (int d=0; d<num_dims; ++d)
-          vertices_[i*num_dims + d] = coordinates[d*num_vertices + i];
-      }
+        base_t::read_point_coords_parallel(
+            exoid,
+            exo_params,
+            do_read,
+            do_send,
+            int64,
+            cell2vertices_,
+            vertex_global2local_,
+            vertex_local2global_,
+            vertices_);
 
     } // parallel
     
     //--------------------------------------------------------------------------
     // read side sets
-    auto num_side_sets = exo_params.num_side_sets;
-
-    if(num_side_sets > 0){
-
-      // get the side set ids
-      vector<index_t> ss_ids;
-      if (int64)
-        ss_ids = base_t::template read_side_set_ids<long long>(
-          exoid, num_side_sets);
-      else
-        ss_ids = base_t::template read_side_set_ids<int>(
-          exoid, num_side_sets);
-
-      // get the side set names
-      auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
-
-      for (int i = 0; i < num_side_sets; i++){
-
-        if (int64) {
-          std::vector<long long> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
-          base_t::template read_side_set<long long>(
-            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
-          if (side_set_node_cnt_list.empty()) continue; 
-        
-          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
-            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
-            side_to_vertices_, side_sets_ );
-        }
-        else {
-          std::vector<int> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
-          base_t::template read_side_set<int>(
-            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
-          if (side_set_node_cnt_list.empty()) continue; 
-        
-          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
-            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
-            side_to_vertices_, side_sets_ );
-        }
-        
-        // if no label, use the id
-        if ( ss_names[i].empty() )
-          ss_names[i] = std::to_string( ss_ids[i] ); 
-        
-        // if this side set is used on this rank
-        auto sit = side_sets_.find(ss_ids[i]);
-        if ( sit != side_sets_.end() ) {
-          sit->second.label = ss_names[i];
-        }
-
-      } // for side set 
-
-
-      // side connectivity is tracked via global ids for simplicity
-      if ( !serial ) {
-
-        for ( auto & v : side_to_vertices_.indices )
-          v = vertex_local2global_[v];
-
-        decltype(element_to_sides_) new_element_to_sides;
-        for ( auto && pair : element_to_sides_ ) {
-          auto global_id = cell_local2global_[pair.first];
-          new_element_to_sides.emplace( global_id, std::move(pair.second) );
-        }
-        std::swap( new_element_to_sides, element_to_sides_ );
-
-      } // parallel
-
-    } // ss > 0
+    base_t::read_side_sets(
+        exoid,
+        exo_params,
+        serial,
+        do_read,
+        do_send,
+        int64,
+        cell_min,
+        cell_max,
+        elem_blk_ids,
+        cell_type_,
+        cell_global2local_,
+        cell_local2global_,
+        vertex_local2global_,
+        cell2vertices_,
+        side_sets_,
+        element_to_sides_,
+        side_to_vertices_,
+        side_id_);
 
     base_t::side_set_info_t::broadcast( side_sets_ );
 
     //--------------------------------------------------------------------------
     // close the file
-    base_t::close(exoid);
+    if (do_read)
+      base_t::close(exoid);
 
   }
+  
+  //============================================================================
+  //! \brief read a block
+  //============================================================================
+  template <typename U>
+  typename base_t::block_t read_block(
+      int exoid,
+      ex_entity_id blk_id,
+      size_t cell_min,
+      size_t cell_max,
+      const std::vector<index_t> & cell_partitioning,
+      bool do_read,
+      bool do_send,
+      size_t & cell_counter,
+      crs_t & cell2vertices)
+  {
+    using block_t = typename base_t::block_t;
 
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+      
+    // get the info about this block
+    using stats_t = typename base_t::template block_stats_t<U>;
+    stats_t block_stats;
+    if  (do_read) {
+      base_t::read_block_stats(
+        exoid,
+        blk_id,
+        EX_ELEM_BLOCK,
+        block_stats);
+    }
+    if (do_send) base_t::broadcast(block_stats);
+    
+    if (!block_stats.num_elem_this_blk) return block_t::empty;
+    
+    //----------------------------------
+    // Serial version
+    if (do_read && !do_send) {
+    
+      vector<int> counts;
+      vector<U> indices;
+    
+      auto res = base_t::template read_block<U>(
+          exoid,
+          blk_id,
+          EX_ELEM_BLOCK,
+          block_stats,
+          counts,
+          indices);
+      detail::filter_block(
+          counts,
+          indices,
+          cell_min,
+          cell_max,
+          cell_counter,
+          cell2vertices.offsets,
+          cell2vertices.indices );
+      return res.first;
+    }
+
+    //----------------------------------
+    // Parallel version
+    else {
+    
+      block_t block_type = block_t::empty;
+      bool more_work = true;
+      constexpr auto chunk = CHUNK_SIZE;
+      constexpr auto int_size = sizeof(int);
+      constexpr auto index_size = sizeof(U);
+
+      struct send_data_t {
+        block_t block_type;
+        size_t num_counts;
+        size_t num_indices;
+      };
+      
+      std::vector<int> counts;
+      std::vector<U> indices;
+      send_data_t data;
+        
+      std::vector<MPI_Request> request(3);
+      std::vector<MPI_Status> status(3);
+
+      double elapsed_time = 0;
+      size_t elapsed_counter = 0;
+
+      auto first_read_cell = cell_counter;
+      auto last_read_cell = cell_counter + block_stats.num_elem_this_blk;
+
+      std::vector<index_t> distribution(comm_size+1);
+      distribution[0] = 0;
+
+      for (int r=0; r<comm_size; ++r) {
+        auto begin = std::max<index_t>(first_read_cell, cell_partitioning[r]);
+        auto end = std::min<index_t>(last_read_cell, cell_partitioning[r+1]);
+        size_t sz = end>begin ? end-begin : 0;
+        distribution[r+1] = distribution[r] + sz;
+      }
+
+      for (int r=1; r<comm_size; ++r) {
+        size_t start = distribution[r];
+        auto rank_cells = distribution[r+1] - distribution[r];
+      
+        while (rank_cells > 0) {
+
+          auto chunk = std::min<size_t>(CHUNK_SIZE, rank_cells);
+
+          //----------------------------
+          // Root
+          if (comm_rank == 0) {
+            
+            auto res = base_t::template read_block<U>(
+                exoid,
+                blk_id,
+                EX_ELEM_BLOCK,
+                block_stats,
+                counts,
+                indices,
+                start,
+                chunk);
+
+            block_type = res.first;
+            data = {block_type, counts.size(), indices.size()};
+            
+            MPI_Isend(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                r,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+            
+            MPI_Isend(
+                counts.data(),
+                int_size*counts.size(),
+                MPI_BYTE,
+                r,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Isend(
+                indices.data(),
+                index_size * indices.size(),
+                MPI_BYTE,
+                r,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+                
+            auto startt = MPI_Wtime();
+            MPI_Waitall(request.size(), request.data(), status.data());
+            elapsed_time += MPI_Wtime() - startt;
+            elapsed_counter++;
+          }
+          //----------------------------
+          // Target
+          else if (comm_rank == r)  {
+            auto counts_size = counts.size();
+            auto indices_size = indices.size();
+
+            MPI_Irecv(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                0,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+
+            MPI_Wait(&request[0], &status[0]);
+
+            block_type = data.block_type;
+            counts.resize(counts_size + data.num_counts);
+            indices.resize(indices_size + data.num_indices);
+
+            MPI_Irecv(
+                counts.data() + counts_size,
+                int_size * data.num_counts,
+                MPI_BYTE,
+                0,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Irecv(
+                indices.data() + indices_size,
+                index_size * data.num_indices,
+                MPI_BYTE,
+                0,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+              
+            MPI_Waitall(2, request.data()+1, status.data()+1);
+      
+          }
+          // End  root / target
+          //----------------------------
+
+          start += chunk;
+          rank_cells -= chunk;
+        } // while
+          
+      } // ranks
+        
+      if (comm_rank == 0 && elapsed_counter) {
+        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
+      }
+        
+      // root needs to read its data now
+      if (comm_rank ==0 ) {
+        size_t start = distribution[0];
+        auto rank_cells = distribution[1] - distribution[0];
+        indices.clear();
+        counts.clear();
+        if (rank_cells) {
+          auto res = base_t::template read_block<U>(
+              exoid,
+              blk_id,
+              EX_ELEM_BLOCK,
+              block_stats,
+              counts,
+              indices,
+              start,
+              rank_cells);
+          block_type = res.first;
+        }
+      }
+
+      // now filter cells
+      auto rank_size = distribution[comm_rank+1] - distribution[comm_rank];
+      if (rank_size) {
+        cell_counter += distribution[comm_rank];
+        detail::filter_block(
+            counts,
+            indices,
+            cell_min,
+            cell_max,
+            cell_counter,
+            cell2vertices.offsets,
+            cell2vertices.indices );
+      }
+
+      // make sure everyone has the last cell counter
+      cell_counter = last_read_cell;
+      
+      return block_type;
+    }
+  }
+  
   //============================================================================
   //! \brief Implementation of exodus mesh write for burton specialization.
   //!
@@ -2534,36 +4186,46 @@ public:
   void read(const std::string & name, bool serial) {
 
     clog(info) << "Reading mesh from: " << name << std::endl;
-
-    //--------------------------------------------------------------------------
-    // Open file
-
-    // open the exodus file
-    auto exoid = base_t::open(name, std::ios_base::in);
-    if (exoid < 0)
-      clog_fatal("Problem reading exodus file");
-
-    // get the initialization parameters
-    auto exo_params = base_t::read_params(exoid);
-
-    // check the integer type used in the exodus file
-    auto int64 = base_t::is_int64(exoid);
-
-    //--------------------------------------------------------------------------
-    // Figure out partitioning 
     
     int comm_size, comm_rank;
     MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
     MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+
+    //--------------------------------------------------------------------------
+    // Open file
+    bool do_read = (serial && comm_rank==0) ||  (!serial);
+    bool do_send = serial && (comm_size>1);
+
+    // open the exodus file
+    int exoid = -1;
+    if (do_read) {
+      exoid = base_t::open(name, std::ios_base::in);
+      if (exoid < 0)
+        clog_fatal("Problem reading exodus file");
+    }
+
+    // get the initialization parameters
+    ex_init_params exo_params;
+    if (do_read) exo_params = base_t::read_params(exoid);
+    if (do_send) base_t::broadcast(exo_params);
+
+    // check the integer type used in the exodus file
+    bool int64;
+    if (do_read) int64 = base_t::is_int64(exoid);
+    if (do_send) base_t::broadcast(int64);
+
+    //--------------------------------------------------------------------------
+    // Figure out partitioning 
 
     // figure out the number of cells for this rank.
     // if this is reading a bunch of exodus files, there is
     // nothing to do
     size_t num_cells = exo_params.num_elem;
     size_t cell_min{0}, cell_max{num_cells-1};
+    vector<index_t> cell_partitioning = {cell_min, cell_max+1};
 
     if (serial) {
-      vector<index_t> cell_partitioning;
+      cell_partitioning.clear();
       flecsi::coloring::subdivide( num_cells, comm_size, cell_partitioning );
 
       cell_min = cell_partitioning[comm_rank];
@@ -2582,12 +4244,15 @@ public:
     crs_t temp_face2vertices;
 
     // get the face block ids
-    if (int64)
-      face_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
-    else
-      face_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_FACE_BLOCK, num_face_blk);
+    if (do_read) {
+      if (int64)
+        face_blk_ids = base_t::template read_block_ids<long long>(
+            exoid, EX_FACE_BLOCK, num_face_blk);
+      else
+        face_blk_ids = base_t::template read_block_ids<int>(
+            exoid, EX_FACE_BLOCK, num_face_blk);
+    }
+    if (do_send) base_t::broadcast(face_blk_ids);
 
     // read each block (add all faces right now.  we will
     // filter out the unused ones later
@@ -2627,17 +4292,6 @@ public:
     }
     
     //--------------------------------------------------------------------------
-    // read coordinates
-
-    auto coordinates = base_t::read_point_coords(exoid, exo_params.num_nodes);
-    clog_assert(
-        coordinates.size() == dimension() * exo_params.num_nodes,
-        "Mismatch in read vertices");
-
-    auto num_vertices = coordinates.size() / dimension();
-    
-    
-    //--------------------------------------------------------------------------
     // element blocks
     
     // offsets always have initial zero
@@ -2658,23 +4312,25 @@ public:
     vector<index_t> elem_blk_ids;
 
     // get the element block ids
-    if (int64)
-      elem_blk_ids = base_t::template read_block_ids<long long>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
-    else
-      elem_blk_ids = base_t::template read_block_ids<int>(
-          exoid, EX_ELEM_BLOCK, num_elem_blk);
+    if (do_read) {
+      if (int64)
+        elem_blk_ids = base_t::template read_block_ids<long long>(
+            exoid, EX_ELEM_BLOCK, num_elem_blk);
+      else
+        elem_blk_ids = base_t::template read_block_ids<int>(
+            exoid, EX_ELEM_BLOCK, num_elem_blk);
+    }
+    if (do_send) base_t::broadcast(elem_blk_ids);
 
     // a lambda to add face info
-    auto track_faces = [](auto counter_start, const auto & counts,
-        auto & indices, auto & cell2faces, auto & cellids )
+    auto track_faces = [&](auto counter_start, const auto & counts, auto & indices )
     {
       for ( auto & i : indices ) i--;
       for (size_t i=0, j=0; i<counts.size(); ++i)
       {
         auto n = counts[i];
-        cell2faces.append( &indices[j], &indices[j+n] );
-        cellids.emplace_back(counter_start + i);
+        temp_cell2faces.append( &indices[j], &indices[j+n] );
+        temp_cellids.emplace_back(counter_start + i);
         j += n;
       }
     };
@@ -2685,31 +4341,33 @@ public:
       using block_t = typename base_t::block_t;
       block_t block_type;
       crs_t new_entities;
-      auto counter_start = cell_counter;
-
-      if (int64) {
-        vector<int> temp_counts;
-        vector<long long> temp_indices;
-        block_type = base_t::template read_element_block<long long>(
-            exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
-        if (block_type == block_t::empty) continue;
-        detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
-            cell_counter, new_entities.offsets, new_entities.indices );
-        if (block_type == base_t::block_t::polyhedron)
-          track_faces( counter_start, temp_counts, temp_indices,
-              temp_cell2faces, temp_cellids );
-      }
-      else {
-        vector<int> temp_counts, temp_indices;
-        block_type = base_t::template read_element_block<int>(
-            exoid, elem_blk_ids[iblk], temp_counts, temp_indices );
-        if (block_type == block_t::empty) continue;
-        detail::filter_block( temp_counts, temp_indices, cell_min, cell_max,
-            cell_counter, new_entities.offsets, new_entities.indices );
-        if (block_type == base_t::block_t::polyhedron)
-          track_faces( counter_start, temp_counts, temp_indices,
-              temp_cell2faces, temp_cellids );
-      }
+      auto blk_id = elem_blk_ids[iblk];
+      
+      // 64  bit version
+      if (int64) 
+        block_type = read_block<long long>(
+            exoid,
+            blk_id,
+            cell_min,
+            cell_max,
+            cell_partitioning,
+            do_read,
+            do_send,
+            cell_counter,
+            new_entities,
+            track_faces);
+      else
+        block_type = read_block<int>(
+            exoid,
+            blk_id,
+            cell_min,
+            cell_max,
+            cell_partitioning,
+            do_read,
+            do_send,
+            cell_counter,
+            new_entities,
+            track_faces);
       
       //--------------------------------
       // make sure the block type isnt unknown
@@ -2740,29 +4398,38 @@ public:
         // insert the faces into the cell face list
         for ( auto vs : new_entities )
           cell2vertices_.append(vs.begin(), vs.end());
+              
+        int * side_indices = nullptr;
+        int num_sides = 0;
+        int num_side_points = 0;
+        int side_size = 0;
+        if (block_type == base_t::block_t::hex) {
+          side_indices = &hex_table[0][0];
+          num_sides = hex_sides;
+          side_size = hex_size;
+          num_side_points = 4;
+        }
+        else if (block_type == base_t::block_t::tet) {
+          side_indices = &tetra_table[0][0];
+          num_sides = tetra_sides;
+          side_size = tetra_size;
+          num_side_points = 3;
+        }
+        std::vector<index_t> temp_vs(num_side_points);
 
         // build the connecitivity array
         detail::new_build_connectivity(
             new_entities, // i.e. cell_vertices for each block
             cell2faces_, temp_face2vertices,
             sorted_vertices_to_faces_,
-            [=](const auto & vs, auto & face_vs) {
-              // hardcoded for hex
-              if (block_type == base_t::block_t::hex) {
-                face_vs.push_back({vs[0], vs[1], vs[5], vs[4]});
-                face_vs.push_back({vs[1], vs[2], vs[6], vs[5]});
-                face_vs.push_back({vs[2], vs[3], vs[7], vs[6]});
-                face_vs.push_back({vs[3], vs[0], vs[4], vs[7]});
-                face_vs.push_back({vs[0], vs[3], vs[2], vs[1]});
-                face_vs.push_back({vs[4], vs[5], vs[6], vs[7]});
+            [&](const auto & vs, auto & face_vs) {
+              for (int i=0; i<num_sides; ++i) {
+                for (int j=0; j<num_side_points; ++j) {
+                  auto id = side_indices[i*side_size + j] - 1;
+                  temp_vs[j] = vs[id];
+                }
+                face_vs.push_back(temp_vs);
               }
-              // this is for a tet
-              else if (block_type == base_t::block_t::tet) {
-                face_vs.push_back({vs[0], vs[1], vs[3]});
-                face_vs.push_back({vs[1], vs[2], vs[3]});
-                face_vs.push_back({vs[2], vs[0], vs[3]});
-                face_vs.push_back({vs[0], vs[2], vs[1]});
-              } // block type
             });
 
       } // block type
@@ -2854,83 +4521,41 @@ public:
     
     // create the local to global cell mapping
     auto & cell_local2global_ = local_to_global_[num_dims];
-    
-    // for serial files, make up the indices
-    if ( serial ) {
-      cell_local2global_.clear();
-      cell_local2global_.resize(num_cells);
-      for ( size_t i=0; i<num_cells; ++i ) {
-        cell_local2global_[i] = cell_min + i;
-      }
-    }
-    // read them for parallel files
-    else {
-      
-      if (int64) {
-        cell_local2global_ =
-          base_t::template read_element_map<long long>(exoid, num_cells);
-      }
-      else {
-        cell_local2global_ =
-          base_t::template read_element_map<int>(exoid, num_cells);
-      }
-
-    }
-    
-    // invert the global id to local id map
     auto & cell_global2local_ = global_to_local_[num_dims];
-    for ( size_t i=0; i<num_cells; ++i ) {
-      auto global_id = cell_local2global_[i];
-      cell_global2local_.emplace( std::make_pair( global_id, i ) );
-    }
+    
+    base_t::read_cell_ids(
+        exoid,
+        serial,
+        int64,
+        cell_min,
+        num_cells,
+        cell_local2global_,
+        cell_global2local_);
 
     //--------------------------------------------------------------------------
-    // Renumber vertices
-
+    // Read vertices
+    
     // get the vertex maps
     auto & vertex_global2local_ = global_to_local_[0];
     auto & vertex_local2global_ = local_to_global_[0];
 
     if ( serial ) {
 
-      // Throw away vertices that are not mine
-      size_t local_vertices{0};
-      vertex_global2local_.clear();
+      base_t::read_point_coords_serial(
+          exoid,
+          exo_params,
+          do_read,
+          do_send,
+          cell2vertices_,
+          vertex_global2local_,
+          vertex_local2global_,
+          vertices_);
 
-      for ( size_t i=0; i<num_cells; ++i ) {
-        for ( auto j=cell2vertices_.offsets[i]; j<cell2vertices_.offsets[i+1]; ++j ) {
-          auto global_id = cell2vertices_.indices[j];
-          auto res = vertex_global2local_.emplace(
-              std::make_pair(global_id, local_vertices) );
-          if ( res.second ) local_vertices++;
-        }
-      }
+      // convert element conectivity to local ids 
+      for ( auto & v : cell2vertices_.indices )
+        v = vertex_global2local_.at(v);
 
-      // invert the global id to local id map
-      auto & vertex_local2global_ = local_to_global_[0];
-      vertex_local2global_.clear();
-      vertex_local2global_.resize(local_vertices);
-
-      for ( const auto & global_local : vertex_global2local_ ) {
-        vertex_local2global_[global_local.second] = global_local.first;
-      }
-
-      
-      // convert element conectivity to local ids and extract only coordinates
-      // that are needed
-      vertices_.clear();
-      vertices_.resize(local_vertices*num_dims);
-
-      for ( auto & v : cell2vertices_.indices ) {
-        auto global_id = v;
-        v = vertex_global2local_.at(global_id);
-        for ( int d=0; d<num_dims; ++d ) {
-          vertices_[ v*num_dims + d ] = 
-            coordinates[d * num_vertices + global_id];
-        }
-      }
-    
-      for ( auto & v : face2vertices_.indices ) 
+      for ( auto & v : face2vertices_.indices )
         v = vertex_global2local_.at(v);
 
       // sorted face verts are all in terms of global ids right now, since you
@@ -2941,26 +4566,19 @@ public:
     // parallel
     else {
 
-      if (int64) {
-        vertex_local2global_ =
-          base_t::template read_node_map<long long>(exoid, num_vertices);
-      }
-      else {
-        vertex_local2global_ =
-          base_t::template read_node_map<int>(exoid, num_vertices);
-      }
-    
-      vertices_.clear();
-      vertices_.resize(num_vertices*num_dims);
-
-      for ( size_t i=0; i<num_vertices; ++i ) {
-        auto global_id = vertex_local2global_[i];
-        vertex_global2local_.emplace( std::make_pair( global_id, i ) );
-        for (int d=0; d<num_dims; ++d)
-          vertices_[i*num_dims + d] = coordinates[d*num_vertices + i];
-      }
+        base_t::read_point_coords_parallel(
+            exoid,
+            exo_params,
+            do_read,
+            do_send,
+            int64,
+            cell2vertices_,
+            vertex_global2local_,
+            vertex_local2global_,
+            vertices_);
 
     } // parallel
+    
 
     // determine face owners
     // The convention is the first cell to use the face is the owner.
@@ -2979,81 +4597,297 @@ public:
 
     //--------------------------------------------------------------------------
     // read side sets
-    auto num_side_sets = exo_params.num_side_sets;
-
-    if(num_side_sets > 0){
-
-      // get the side set ids
-      vector<index_t> ss_ids;
-      if (int64)
-        ss_ids = base_t::template read_side_set_ids<long long>(
-          exoid, num_side_sets);
-      else
-        ss_ids = base_t::template read_side_set_ids<int>(
-          exoid, num_side_sets);
-
-      // get the side set names
-      auto ss_names = base_t::read_side_set_names(exoid, num_side_sets);
-
-      for (int i = 0; i < num_side_sets; i++){
-        
-        if (int64) {
-          std::vector<long long> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
-          base_t::template read_side_set<long long>(
-            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
-          if (side_set_node_cnt_list.empty()) continue; 
-        
-          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
-            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
-            side_to_vertices_, side_sets_ );
-        }
-        else {
-          std::vector<int> side_set_node_cnt_list, side_set_node_list, side_set_elem_list; 
-          base_t::template read_side_set<int>(
-            exoid, ss_ids[i], side_set_node_cnt_list, side_set_node_list, side_set_elem_list );
-          if (side_set_node_cnt_list.empty()) continue; 
-        
-          detail::filter_sides( ss_ids[i], side_set_node_cnt_list, side_set_node_list,
-            side_set_elem_list, cell_min, cell_max, side_id_, element_to_sides_,
-            side_to_vertices_, side_sets_ );
-        }
-        
-        // if no label, use the id
-        if ( ss_names[i].empty() )
-          ss_names[i] = std::to_string( ss_ids[i] ); 
-
-        // if this side set is used on this rank
-        auto sit = side_sets_.find(ss_ids[i]);
-        if ( sit != side_sets_.end() ) {
-          sit->second.label = ss_names[i];
-        }
-
-      } // for side set 
-      
-      // side connectivity is tracked via global ids for simplicity
-      if ( !serial ) {
-
-        for ( auto & v : side_to_vertices_.indices )
-          v = vertex_local2global_[v];
-
-        decltype(element_to_sides_) new_element_to_sides;
-        for ( auto && pair : element_to_sides_ ) {
-          auto global_id = cell_local2global_[pair.first];
-          new_element_to_sides.emplace( global_id, std::move(pair.second) );
-        }
-        std::swap( new_element_to_sides, element_to_sides_ );
-
-      } // parallel
-
-
-    } // ss > 0
+    
+    base_t::read_side_sets(
+        exoid,
+        exo_params,
+        serial,
+        do_read,
+        do_send,
+        int64,
+        cell_min,
+        cell_max,
+        elem_blk_ids,
+        cell_type_,
+        cell_global2local_,
+        cell_local2global_,
+        vertex_local2global_,
+        cell2vertices_,
+        side_sets_,
+        element_to_sides_,
+        side_to_vertices_,
+        side_id_);
 
     base_t::side_set_info_t::broadcast( side_sets_ );
+
     //--------------------------------------------------------------------------
     // close the file
-    base_t::close(exoid);
+    if (do_read)
+      base_t::close(exoid);
     
   }
+  
+  //============================================================================
+  //! \brief read a block
+  //============================================================================
+  template <typename U, typename P>
+  typename base_t::block_t read_block(
+      int exoid,
+      ex_entity_id blk_id,
+      size_t cell_min,
+      size_t cell_max,
+      const std::vector<index_t> & cell_partitioning,
+      bool do_read,
+      bool do_send,
+      size_t & cell_counter,
+      crs_t & cell2entities,
+      P && track_faces)
+  {
+    using block_t = typename base_t::block_t;
+
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+      
+    // get the info about this block
+    using stats_t = typename base_t::template block_stats_t<U>;
+    stats_t block_stats;
+    if  (do_read) {
+      base_t::read_block_stats(
+        exoid,
+        blk_id,
+        EX_ELEM_BLOCK,
+        block_stats);
+    }
+    if (do_send) base_t::broadcast(block_stats);
+    
+    if (!block_stats.num_elem_this_blk) return block_t::empty;
+      
+    //----------------------------------
+    // Serial version
+    if (do_read && !do_send) {
+    
+      vector<int> counts;
+      vector<U> indices;
+      auto counter_start = cell_counter;
+    
+      auto res = base_t::template read_block<U>(
+          exoid,
+          blk_id,
+          EX_ELEM_BLOCK,
+          block_stats,
+          counts,
+          indices);
+      detail::filter_block(
+          counts,
+          indices,
+          cell_min,
+          cell_max,
+          cell_counter,
+          cell2entities.offsets,
+          cell2entities.indices );
+      auto block_type = res.first;
+      if (block_type == base_t::block_t::polyhedron)
+        track_faces( counter_start, counts, indices );
+      return block_type;
+    }
+
+    //----------------------------------
+    // Parallel version
+    else {
+    
+      block_t block_type = block_t::empty;
+      bool more_work = true;
+      constexpr auto int_size = sizeof(int);
+      constexpr auto index_size = sizeof(U);
+
+      struct send_data_t {
+        block_t block_type;
+        size_t num_counts;
+        size_t num_indices;
+      };
+      
+      std::vector<int> counts;
+      std::vector<U> indices;
+      send_data_t data;
+        
+      std::vector<MPI_Request> request(3);
+      std::vector<MPI_Status> status(3);
+
+      double elapsed_time = 0;
+      size_t elapsed_counter = 0;
+
+      auto first_read_cell = cell_counter;
+      auto last_read_cell = cell_counter + block_stats.num_elem_this_blk;
+
+      std::vector<index_t> distribution(comm_size+1);
+      distribution[0] = 0;
+
+      for (int r=0; r<comm_size; ++r) {
+        auto begin = std::max<index_t>(first_read_cell, cell_partitioning[r]);
+        auto end = std::min<index_t>(last_read_cell, cell_partitioning[r+1]);
+        size_t sz = end>begin ? end-begin : 0;
+        distribution[r+1] = distribution[r] + sz;
+      }
+
+      for (int r=1; r<comm_size; ++r) {
+        size_t start = distribution[r];
+        auto rank_cells = distribution[r+1] - distribution[r];
+      
+        while (rank_cells > 0) {
+
+          auto chunk = std::min<size_t>(CHUNK_SIZE, rank_cells);
+
+          //----------------------------
+          // Root
+          if (comm_rank == 0) {
+            
+            auto res = base_t::template read_block<U>(
+                exoid,
+                blk_id,
+                EX_ELEM_BLOCK,
+                block_stats,
+                counts,
+                indices,
+                start,
+                chunk);
+
+            block_type = res.first;
+            data = {block_type, counts.size(), indices.size()};
+            
+            MPI_Isend(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                r,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+            
+            MPI_Isend(
+                counts.data(),
+                int_size*counts.size(),
+                MPI_BYTE,
+                r,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Isend(
+                indices.data(),
+                index_size * indices.size(),
+                MPI_BYTE,
+                r,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+                
+            auto startt = MPI_Wtime();
+            MPI_Waitall(request.size(), request.data(), status.data());
+            elapsed_time += MPI_Wtime() - startt;
+            elapsed_counter++;
+          }
+          //----------------------------
+          // Target
+          else if (comm_rank == r)  {
+            auto counts_size = counts.size();
+            auto indices_size = indices.size();
+
+            MPI_Irecv(
+                &data,
+                sizeof(data),
+                MPI_BYTE,
+                0,
+                0,
+                MPI_COMM_WORLD,
+                &request[0]);
+
+            MPI_Wait(&request[0], &status[0]);
+
+            block_type = data.block_type;
+            counts.resize(counts_size + data.num_counts);
+            indices.resize(indices_size + data.num_indices);
+
+            MPI_Irecv(
+                counts.data() + counts_size,
+                int_size * data.num_counts,
+                MPI_BYTE,
+                0,
+                1,
+                MPI_COMM_WORLD,
+                &request[1]);
+            
+            MPI_Irecv(
+                indices.data() + indices_size,
+                index_size * data.num_indices,
+                MPI_BYTE,
+                0,
+                2,
+                MPI_COMM_WORLD,
+                &request[2]);
+              
+            MPI_Waitall(2, request.data()+1, status.data()+1);
+      
+          }
+          // End  root / target
+          //----------------------------
+
+          start += chunk;
+          rank_cells -= chunk;
+        } // while
+          
+      } // ranks
+        
+      if (comm_rank == 0 && elapsed_counter) {
+        std::cout << "Block<" << blk_id << ">: Spent a total/average of " << elapsed_time
+          << " / " << elapsed_time / elapsed_counter << " secs waiting." << std::endl;
+      }
+
+      // root needs to read its data now
+      if (comm_rank ==0 ) {
+        size_t start = distribution[0];
+        auto rank_cells = distribution[1] - distribution[0];
+        indices.clear();
+        counts.clear();
+        if (rank_cells) {
+          auto res = base_t::template read_block<U>(
+              exoid,
+              blk_id,
+              EX_ELEM_BLOCK,
+              block_stats,
+              counts,
+              indices,
+              start,
+              rank_cells);
+          block_type = res.first;
+        }
+      }
+
+      // now filter cells
+      auto rank_size = distribution[comm_rank+1] - distribution[comm_rank];
+      if (rank_size) {
+        cell_counter += distribution[comm_rank];
+        auto counter_start = cell_counter;
+        detail::filter_block(
+            counts,
+            indices,
+            cell_min,
+            cell_max,
+            cell_counter,
+            cell2entities.offsets,
+            cell2entities.indices );
+        
+        if (block_type == base_t::block_t::polyhedron)
+          track_faces( counter_start, counts, indices );
+      }
+
+      // make sure everyone has the last cell counter
+      cell_counter = last_read_cell;
+      
+      return block_type;
+    }
+  }
+  
   
   //============================================================================
   //! \brief Implementation of exodus mesh write for burton specialization.
