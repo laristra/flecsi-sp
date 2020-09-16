@@ -10,19 +10,61 @@
 namespace flecsi_sp {
 namespace utils {
 
+/////////////////////////
 // the dense handle type
+
+// write only for own/shared.
 template<typename T>
 using dense_handle_w =
+  flecsi::dense_accessor<T, flecsi::wo, flecsi::wo, flecsi::ro>;
+
+template<typename T>
+using dense_handle_w_na =
   flecsi::dense_accessor<T, flecsi::wo, flecsi::wo, flecsi::na>;
 
+template<typename T>
+using dense_handle_w_w =
+  flecsi::dense_accessor<T, flecsi::wo, flecsi::wo, flecsi::wo>;
+
+template<typename T>
+using dense_handle_w_rw =
+  flecsi::dense_accessor<T, flecsi::wo, flecsi::wo, flecsi::rw>;
+
+// read/write for own/shared.
 template<typename T>
 using dense_handle_rw =
   flecsi::dense_accessor<T, flecsi::rw, flecsi::rw, flecsi::ro>;
 
 template<typename T>
+using dense_handle_rw_na =
+  flecsi::dense_accessor<T, flecsi::rw, flecsi::rw, flecsi::na>;
+
+template<typename T>
+using dense_handle_rw_w =
+  flecsi::dense_accessor<T, flecsi::rw, flecsi::rw, flecsi::wo>;
+
+template<typename T>
+using dense_handle_rw_rw =
+  flecsi::dense_accessor<T, flecsi::rw, flecsi::rw, flecsi::rw>;
+
+// read only for own/shared
+template<typename T>
 using dense_handle_r =
   flecsi::dense_accessor<T, flecsi::ro, flecsi::ro, flecsi::ro>;
 
+template<typename T>
+using dense_handle_r_na =
+  flecsi::dense_accessor<T, flecsi::ro, flecsi::ro, flecsi::na>;
+
+template<typename T>
+using dense_handle_r_w =
+  flecsi::dense_accessor<T, flecsi::ro, flecsi::ro, flecsi::wo>;
+
+template<typename T>
+using dense_handle_r_rw =
+  flecsi::dense_accessor<T, flecsi::ro, flecsi::ro, flecsi::rw>;
+
+/////////////////////////
 // the sparse handle type
 template<typename T>
 using sparse_mutator =
