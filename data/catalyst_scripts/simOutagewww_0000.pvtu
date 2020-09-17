@@ -1,0 +1,20 @@
+<VTKFile type="PUnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt64" compressor="vtkZLibDataCompressor">
+  <PUnstructuredGrid GhostLevel="1">
+    <FieldData>
+      <Array type="String" Name="__CatalystChannel__" NumberOfTuples="1" format="binary">
+        AQAAAAAAAAAAgAAAAAAAAAYAAAAAAAAADgAAAAAAAAA=eJzLzCsoLWEAAAipAjE=
+      </Array>
+      <DataArray type="Float64" Name="TimeValue" NumberOfTuples="1" format="binary" RangeMin="0" RangeMax="0">
+        AQAAAAAAAAAAgAAAAAAAAAgAAAAAAAAACwAAAAAAAAA=eJxjYIAAAAAIAAE=
+      </DataArray>
+    </FieldData>
+    <PCellData>
+      <PDataArray type="Float64" Name="cell_density"/>
+    </PCellData>
+    <PPoints>
+      <PDataArray type="Float32" Name="Points" NumberOfComponents="3"/>
+    </PPoints>
+    <Piece Source="simOutagewww_0000/simOutagewww_0000_0.vtu"/>
+    <Piece Source="simOutagewww_0000/simOutagewww_0000_1.vtu"/>
+  </PUnstructuredGrid>
+</VTKFile>

@@ -18,15 +18,23 @@
 #include <ristra/initialization/input.h>
 
 // flecsi insitu
-#ifdef FLECSI_SP_ENABLE_CATALYST_ON
+#ifdef FLECSI_SP_ENABLE_CATALYST
 #include "ristra/io/catalyst/adaptor.h"
 #include "ristra/io/catalyst/flecsale_unstructuredGrid.h"
 #include "ristra/io/catalyst/utils/catalystUtils.hpp"
-#endif
+
+#endif //FLECSI_SP_ENABLE_CATALYST
 
 // system includes
 #include <array>
 #include <string>
+#include <assert.h> 
+#include <chrono>
+#include <thread>
+
+#include <limits.h>
+#include <unistd.h>
+#define GetCurrentDir getcwd
 
 
 
@@ -72,11 +80,13 @@ auto prefix()
 //! \brief Insitu Catalyst
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifdef FLECSI_SP_ENABLE_CATALYST_ON
+#ifdef FLECSI_SP_ENABLE_CATALYST
+
+
 vtkCPProcessor* catalyst_init(std::vector<std::string> scripts)
 {
-  clog(info) << "Init Catalyst" << std::endl;
-  //std::cout << "Init Catalyst" << std::endl;
+  clog(info) << "Init Catalyst test" << std::endl;
+  std::cout << "Insitu Catalyst test" << std::endl;
   auto p = ristra::io::catalyst::initAdaptor(scripts);
 
   return p;
@@ -90,6 +100,7 @@ vtkSmartPointer<vtkUnstructuredGrid> catalyst_create_vtk(
   flecsi_sp::utils::client_handle_r<mesh_t> mesh
 ) 
 {
+  std::cout << "Insitu catalyst_create_vtk" << std::endl;
   clog(info) << "OUTPUT MESH TASK" << std::endl;
 
   // get the context
@@ -111,7 +122,7 @@ vtkSmartPointer<vtkUnstructuredGrid> catalyst_create_vtk(
 flecsi_register_task(catalyst_create_vtk, flecsi_sp::burton::test, loc, index|flecsi::leaf);
 
 
-void catalyst_coprocess( 
+int catalyst_coprocess( 
   vtkCPProcessor* processor_,
   vtkSmartPointer<vtkUnstructuredGrid> theGrid, 
   real_t time,
@@ -120,14 +131,15 @@ void catalyst_coprocess(
 ) 
 {
   clog(info) << "OUTPUT MESH TASK" << std::endl;
+  std::cout << "Insitu catalyst_coprocess" << std::endl;
 
   ristra::io::catalyst::processCatalyst(processor_, theGrid, time, timestep, last_timestep);
-
+  return 0;
 }
 
 flecsi_register_task(catalyst_coprocess,  flecsi_sp::burton::test, loc, index|flecsi::leaf);
 
-#endif
+#endif //FLECSI_SP_ENABLE_CATALYST
 
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief Update the goemetry
@@ -808,23 +820,24 @@ namespace execution {
 ////////////////////////////////////////////////////////////////////////////////
 void driver(int argc, char ** argv)
 {
-  #ifdef FLECSI_SP_ENABLE_CATALYST_ON
+  #ifdef FLECSI_SP_ENABLE_CATALYST
   auto & cmdl = ristra::initialization::command_line_arguments_t::instance();
   auto args = cmdl.process_arguments(argc, argv);
   const auto & variables = args.variables;
   auto inputFilename = variables.as<std::string>("catalyst-file");
-  std::cout << "inputFilename: " << inputFilename << std::endl;
+  //std::cout << "inputFilename: " << inputFilename << std::endl;
 
   std::vector<std::string> scripts = getCatalystScripts(inputFilename);
   auto tempInsitu = flecsi_execute_task(catalyst_init, flecsi_sp::burton::test, index, scripts);
   auto insitu = tempInsitu.get();
-  #endif
+  #endif //FLECSI_SP_ENABLE_CATALYST
 
   // get the mesh handle
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
   auto f = 
     flecsi_execute_task(update_geometry, flecsi_sp::burton::test, index, mesh_handle);
   f.wait(); // dont go forward until this is done!
+
 
 
   // launch the validity test task
@@ -877,12 +890,18 @@ void driver(int argc, char ** argv)
       edge_data_handle,
       vert_data_handle );
  
- #ifdef FLECSI_SP_ENABLE_CATALYST_ON
+
+ #ifdef FLECSI_SP_ENABLE_CATALYST
+
   auto grid = flecsi_execute_task(catalyst_create_vtk, flecsi_sp::burton::test, index,   mesh_handle);
-  grid.wait();
+  grid.wait();  
   auto vtkData = grid.get();
-  flecsi_execute_task(catalyst_coprocess, flecsi_sp::burton::test, index,   insitu, vtkData, 0, 0, 1);
- #endif
+
+  auto catalystDone = flecsi_execute_task(catalyst_coprocess, flecsi_sp::burton::test, index,   insitu, vtkData, 0, 0, 1);
+  catalystDone.wait();
+  auto done = catalystDone.get();
+
+ #endif //FLECSI_SP_ENABLE_CATALYST
 
 
 #ifdef FLECSI_SP_BURTON_MESH_EXTRAS
