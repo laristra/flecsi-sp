@@ -23,6 +23,10 @@ template<typename T>
 using dense_handle_r =
   flecsi::dense_accessor<T, flecsi::ro, flecsi::ro, flecsi::ro>;
 
+template<typename T, long unsigned int U, long unsigned int V>
+using dense_handle =
+  flecsi::dense_accessor<T, U, U, V>;
+
 // the sparse handle type
 template<typename T>
 using sparse_mutator =

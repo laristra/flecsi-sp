@@ -8,7 +8,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // hydro includes
-#include <cinch/logging/cinchlog.h>
+#include <cinchlog.h>
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <ristra/initialization/arguments.h>
 
@@ -28,6 +28,11 @@ auto register_mesh_args_entries =
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<int>( "mesh", "max-entries,e",
         "Specify the maximum number of sparse entries" ); 
+
+auto register_part_args =
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument( "mesg", "partition-only,p",
+        "Partition mesh and exit" );
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -72,7 +77,9 @@ void specialization_tlt_init(int argc, char** argv)
   std::size_t max_entries = variables.as<int>("max-entries", 5);
   if ( variables.count("max-entries") && rank == 0 )
       std::cout << "Setting max_entries to \"" << max_entries << "\"." << std::endl;
-
+  
+  bool partition_only = variables.count("partition-only");
+  
   //===========================================================================
   // Partition mesh
   //===========================================================================
@@ -84,7 +91,9 @@ void specialization_tlt_init(int argc, char** argv)
 
   // execute the mpi task to partition the mesh
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename,
-    max_entries);
+    max_entries, partition_only);
+
+  if (partition_only) exit(0);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

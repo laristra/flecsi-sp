@@ -149,13 +149,15 @@ cinch_load_extras()
 #------------------------------------------------------------------------------#
 # Legion / MPI
 #------------------------------------------------------------------------------#
+if ( FLECSI_SP_RUNTIME_MODEL STREQUAL "legion" )
+  find_package(Legion REQUIRED)
 
-find_package(Legion)
-
-if (Legion_FOUND) 
-  include_directories(${Legion_INCLUDE_DIRS})
+  if (Legion_FOUND)
+    include_directories(${Legion_INCLUDE_DIRS})
+  endif()
 endif()
 
+#TODO: Gate MPI correctly as not all (?) backends will require it
 find_package(MPI COMPONENTS C CXX REQUIRED)
 
 if (MPI_FOUND) 

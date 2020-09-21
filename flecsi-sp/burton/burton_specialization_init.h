@@ -9,7 +9,7 @@
 #pragma once
 
 // user incldues
-#include <cinch/logging/cinchlog.h>
+#include <cinchlog.h>
 #include <ristra/utils/algorithm.h>
 #include <ristra/utils/string_utils.h>
 #include <flecsi/coloring/dcrs_utils.h>
@@ -34,7 +34,7 @@ namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
 
-//! \brief holds some extra mesh info.  
+//! \brief holds some extra mesh info.
 //! This is used to pass information between tlt and spmd initializations.
 //! The alternative would be to duplicate some computation.
 struct extra_mesh_info_t {
@@ -3543,7 +3543,7 @@ void make_corners(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
+void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool partition_only )
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3684,7 +3684,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
   //----------------------------------------------------------------------------
 
   // figure out this ranks file name
-  if ( file_type == file_type_t::exodus )
+  if ( file_type == file_type_t::exodus && partition_only)
   {
     auto basename = ristra::utils::basename( filename_string );
     auto output_prefix = ristra::utils::remove_extension( basename );
@@ -3697,6 +3697,7 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries )
     if (rank == 0 && comm_size > 1)
       std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
     exo_def->write( output_filename );
+    return;
   }
 
 

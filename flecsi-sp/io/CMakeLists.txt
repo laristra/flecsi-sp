@@ -15,6 +15,7 @@
 set(io_HEADERS
   detail.h
   exodus_definition.h
+  io_exodus.h
   x3d_definition.h
   PARENT_SCOPE
 )

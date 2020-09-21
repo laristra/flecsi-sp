@@ -6,7 +6,7 @@ centOS_mpich_mpi_gcc:
   extends:
     - .build_n_test
     - .nightly
-  dependencies: [ mpich_mpi ]
+  dependencies: [ mpich_legion ]
   variables:
     FLECSISP_RUNTIME: "mpi"
     FLECSISP_BUILD_TYPE: "Debug"
@@ -31,7 +31,7 @@ centOS_mpich_mpi_intel_release:
 
 centOS_openmpi_mpi_gcc_release:
   extends: centOS_mpich_mpi_gcc
-  dependencies: [ openmpi_mpi ]
+  dependencies: [ openmpi_legion ]
   variables:
     FLECSISP_BUILD_TYPE: "Release"
     FLECSISP_MPI_PROVIDER: "openmpi"
