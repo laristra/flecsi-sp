@@ -53,12 +53,29 @@ void validate_mesh(
 
 }
 
+////////////////////////////////////////////////////////////////////////////
+//! \brief save the coordinates
+//!
+//! \param [in] mesh the mesh object
+//! \param [out] coord0  storage for the mesh coordinates
+////////////////////////////////////////////////////////////////////////////
+void store_coordinates(
+    flecsi_sp::utils::client_handle_r<mesh_t>  mesh,
+    flecsi_sp::utils::dense_handle_w<mesh_t::vector_t> coord)
+{
+  for ( auto vt : mesh.vertices() ) {
+    coord(vt) = vt->coordinates();
+  }
+}  // save_coordinates
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // TASK REGISTRATION
 ////////////////////////////////////////////////////////////////////////////////
 
 flecsi_register_task(update_geometry, flecsi_sp::burton, loc, index|flecsi::leaf);
 flecsi_register_task(validate_mesh, flecsi_sp::burton, loc, index|flecsi::leaf);
+flecsi_register_task(store_coordinates, flecsi_sp::burton, loc, index|flecsi::leaf);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -169,6 +186,19 @@ public:
         break;
       }
     return alpha_axis_vec;
+  }
+ 
+  void get_coordinates(
+      flecsi_sp::utils::dense_handle_w<mesh_t::vector_t> & coord) {
+   
+    flecsi_execute_task(
+     store_coordinates,
+     flecsi_sp::burton,
+     index,
+     handle_,
+     coord
+   );
+  
   }
 
 };
