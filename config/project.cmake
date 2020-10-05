@@ -208,7 +208,7 @@ endif()
 # Portage
 #------------------------------------------------------------------------------#
 
-find_package(PORTAGE NAMES portage CONFIG REQUIRED QUIET)
+find_package(PORTAGE NAMES portage CONFIG QUIET)
 
 option(FLECSI_SP_ENABLE_PORTAGE "Enable Portage Support" ${PORTAGE_FOUND})
 
