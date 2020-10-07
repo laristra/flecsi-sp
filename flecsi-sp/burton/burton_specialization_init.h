@@ -3543,7 +3543,7 @@ void make_corners(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool partition_only )
+void partition_mesh( utils::char_array_t filename, std::size_t max_entries, int partition_only )
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3635,6 +3635,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   //----------------------------------------------------------------------------
   // Cell Coloring
   //----------------------------------------------------------------------------
+    
+  size_t num_parts = comm_size;
+  if (partition_only && partition_only>0)
+    num_parts = partition_only;
 
   // Cells index coloring.
   auto & cells = entities[index_spaces::cells];
@@ -3643,8 +3647,8 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   // distributed compressed row storage
   flecsi::coloring::dcrs_t dcrs;
 
-  if ( needs_partitioning ) {
-
+  if ( needs_partitioning || partition_only ) {
+  
     if ( rank == 0 ) std::cout << "Partitioning mesh..." << std::flush;
     // Create the dCRS representation for the distributed colorer.
     // This essentialy makes the graph of the dual mesh.
@@ -3654,12 +3658,15 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
     auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
 
     // Create the primary coloring and partition the mesh.
-    auto partitioning = colorer->new_color(dcrs);
+    auto partitioning = colorer->new_color(num_parts, dcrs);
+    mesh_def->set_partitioning(partitioning);
     if ( rank == 0 ) std::cout << "done." << std::endl;
 
     // now migrate the entities to their respective ranks
     if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
-    flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
+    std::vector<size_t> part_dist;
+    flecsi::coloring::subdivide(num_parts, comm_size, part_dist);
+    flecsi::coloring::migrate( num_dims, partitioning, part_dist, dcrs, *mesh_def );
     if ( rank == 0 ) std::cout << "done." << std::endl;
   
   } // needs_partitioning
@@ -3684,19 +3691,37 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   //----------------------------------------------------------------------------
 
   // figure out this ranks file name
-  if ( file_type == file_type_t::exodus && partition_only)
-  {
-    auto basename = ristra::utils::basename( filename_string );
-    auto output_prefix = ristra::utils::remove_extension( basename );
-    auto output_extension = ristra::utils::file_extension(basename); 
-    auto digits = ristra::utils::num_digits(comm_size);
-    auto output_filename = output_prefix + "-partitioned." + output_extension + "." +
-    ristra::utils::zero_padded(comm_size, digits) + "." +
-    ristra::utils::zero_padded(rank, digits);
-    auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
-    if (rank == 0 && comm_size > 1)
-      std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
-    exo_def->write( output_filename );
+  if (partition_only) {
+    //----------------------------------
+    // Original file was a serial exodus file
+    if (file_type==file_type_t::exodus)
+    {
+      auto basename = ristra::utils::basename( filename_string );
+      auto output_prefix = ristra::utils::remove_extension( basename );
+      auto output_extension = ristra::utils::file_extension(basename); 
+      auto output_filename = output_prefix + "-partitioned." + output_extension;
+      if (rank == 0)
+        std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
+      auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
+      exo_def->write( output_filename );
+    }
+    else if (file_type==file_type_t::partitioned_exodus)
+    {
+      auto basename = ristra::utils::basename( filename_string );
+      auto output_prefix = ristra::utils::remove_extension( basename );
+      auto output_extension = ristra::utils::file_extension(output_prefix); 
+      output_prefix = ristra::utils::remove_extension( output_prefix );
+      auto output_filename = output_prefix + "-partitioned." + output_extension;
+      if (rank == 0)
+        std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
+      auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
+      exo_def->write( output_filename );
+    }
+    else {
+      if (rank == 0)
+        std::cout << "File type does not support writing." << std::endl;
+    }
+    MPI_Finalize();
     return;
   }
 

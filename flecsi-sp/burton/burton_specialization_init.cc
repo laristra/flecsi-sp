@@ -31,7 +31,7 @@ auto register_mesh_args_entries =
 
 auto register_part_args =
   ristra::initialization::command_line_arguments_t::instance().
-    register_argument( "mesg", "partition-only,p",
+    register_argument<int>( "mesh", "partition-only,p",
         "Partition mesh and exit" );
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -78,8 +78,10 @@ void specialization_tlt_init(int argc, char** argv)
   if ( variables.count("max-entries") && rank == 0 )
       std::cout << "Setting max_entries to \"" << max_entries << "\"." << std::endl;
   
-  bool partition_only = variables.count("partition-only");
-  
+  int partition_only = variables.as<int>("partition-only", 0);
+  if ( variables.count("partition-only") && rank == 0 )
+    std::cout << "Partitioning mesh into \"" << partition_only << "\" pieces." << std::endl;
+
   //===========================================================================
   // Partition mesh
   //===========================================================================
