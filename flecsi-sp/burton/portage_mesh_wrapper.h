@@ -108,9 +108,9 @@ public:
   using subset_t = typename mesh_t::subset_t;
 
   //! \brief The entity kind type
-  using entity_kind_t = Portage::Entity_kind;
+  using entity_kind_t = Wonton::Entity_kind;
   //! \brief The entity type 
-  using entity_type_t = Portage::Entity_type;
+  using entity_type_t = Wonton::Entity_type;
   //! \brief the portage point type
   using point_t = Wonton::Point< mesh_t::num_dimensions >;
   //! \brief the portage element type
@@ -148,8 +148,7 @@ public:
     // access to methods in this class which in turn need access to
     // its member variables. But these member vars don't get
     // initialized until the base class is constructed
-    if ( mesh_t::num_dimensions == 3 )
-      portage_mesh_aux_t::build_aux_entities(); 
+    portage_mesh_aux_t::build_aux_entities(); 
     
     const auto & context = flecsi::execution::context_t::instance();
     vert_local_to_global_id_map_ = 
@@ -245,89 +244,6 @@ public:
   size_t num_ghost_nodes() const 
   {
     return mesh_->num_vertices() - mesh_->num_vertices(subset_t::overlapping);
-  }
-
-  //! Number of items of given entity
-  //! \param [in] entity  The enumerated entity of interest
-  //! \param [in] entity_type   The type of entity information (ghost, shared, 
-  //!   all, etc...) 
-  size_t num_entities(
-    entity_kind_t entity, 
-    entity_type_t entity_type = entity_type_t::ALL
-  ) const 
-  {
-    switch(entity) {
-      case entity_kind_t::NODE :
-        switch (entity_type) {
-          case entity_type_t::ALL:
-            return mesh_->num_vertices();
-          case entity_type_t::PARALLEL_OWNED:
-            return num_owned_nodes();
-          case entity_type_t::PARALLEL_GHOST:
-            return num_ghost_nodes();
-          }
-      case entity_kind_t::EDGE :
-        switch (entity_type) {
-          case entity_type_t::ALL:
-            return mesh_->num_edges();
-          case entity_type_t::PARALLEL_OWNED:
-            return num_owned_edges();
-          case entity_type_t::PARALLEL_GHOST:
-            return num_ghost_edges();
-          }
-      case entity_kind_t::FACE :
-        switch (entity_type) {
-          case entity_type_t::ALL:
-            return mesh_->num_faces();
-          case entity_type_t::PARALLEL_OWNED:
-            return num_owned_faces();
-          case entity_type_t::PARALLEL_GHOST:
-            return num_ghost_faces();
-          }
-      case entity_kind_t::CELL :
-        switch (entity_type) {
-          case entity_type_t::ALL:
-            return num_owned_cells() + num_ghost_cells();
-          case entity_type_t::PARALLEL_OWNED:
-            return num_owned_cells();
-          case entity_type_t::PARALLEL_GHOST:
-            return num_ghost_cells();
-          }
-      case entity_kind_t::WEDGE :
-        return mesh_->num_wedges();
-        break;
-      case entity_kind_t::CORNER :
-        return mesh_->num_corners();
-      default :
-        //raise_runtime_error("Unknown entity type");
-        std::cerr<<"Unknown entity type\n";
-        return 0;
-    }
-  }
-
-  //! The begin iterator for iterating over mesh entities.
-  //! \param [in] entity  The enumerated entity of interest
-  //! \param [in] entity_type   The type of entity information (ghost, shared, 
-  //!   all, etc...) 
-  auto begin(
-    entity_kind_t entity,
-    entity_type_t entity_type = entity_type_t::ALL
-  ) const 
-  {
-    int start_index = 0;
-    return Portage::make_counting_iterator(start_index);
-  }
-
-  //! The end Iterator for iterating over mesh entities.
-  //! \param [in] entity  The enumerated entity of interest
-  //! \param [in] entity_type   The type of entity information (ghost, shared, 
-  //!   all, etc...) 
-  auto end(
-    entity_kind_t entity,
-    entity_type_t entity_type = entity_type_t::ALL
-  ) const 
-  {
-    return begin(entity, entity_type) + num_entities(entity, entity_type);
   }
 
   //! Get list of nodes for a cell

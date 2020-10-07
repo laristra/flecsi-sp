@@ -15,9 +15,7 @@
 #include <flecsi-sp/burton/mesh_interface.h>
 
 #include <flecsi-sp/burton/portage_helpers.h>
-#include <portage/driver/write_to_gmv.h>
-//#include "tangram/reconstruct/xmof2D_wrapper.h"
-//#include "tangram/reconstruct/MOF.h"                                                             
+
 // system includes
 #include <array>
 #include <cmath>
