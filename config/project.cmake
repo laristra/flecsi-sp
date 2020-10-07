@@ -208,7 +208,7 @@ endif()
 # Portage
 #------------------------------------------------------------------------------#
 
-find_package(PORTAGE QUIET)
+find_package(PORTAGE NAMES portage CONFIG QUIET)
 
 option(FLECSI_SP_ENABLE_PORTAGE "Enable Portage Support" ${PORTAGE_FOUND})
 
@@ -216,8 +216,7 @@ if(FLECSI_SP_ENABLE_PORTAGE)
   if(NOT Boost_FOUND)
     message( FATAL_ERROR "Boost is needed for Portage" )
   endif()
-  message( STATUS "Portage location: ${PORTAGE_INCLUDE_DIRS}" )
-  include_directories(${PORTAGE_INCLUDE_DIRS})
+  message( STATUS "Portage location: ${PORTAGE_ROOT}" )
   list( APPEND FLECSI_SP_LIBRARIES ${PORTAGE_LIBRARIES} )
 endif()
 

@@ -41,6 +41,27 @@ include:
     - mkdir -p ${CI_PROJECT_DIR}/build
     - mkdir -p ${CI_PROJECT_DIR}/build/install
     - cd ${CI_PROJECT_DIR}
+    - echo "BUILDING WONTON"
+    - git clone ssh://git@xcp-stash.lanl.gov:7999/laristra/wonton.git
+    - cd wonton
+    - git checkout ${FLECSISP_WONTON_REF}
+    - git submodule update --init --recursive
+    - mkdir build
+    - cd build
+    - |
+      cmake \
+        -D CMAKE_BUILD_TYPE=Release \
+        -D ENABLE_UNIT_TESTS=True \
+        -D WONTON_ENABLE_MPI=True \
+        -D WONTON_ENABLE_THRUST=False \
+        -D WONTON_ENABLE_LAPACKE=False \
+        -D WONTON_ENABLE_TCMALLOC=False \
+        -D CMAKE_INSTALL_PREFIX=${FLECSISP_WONTON_INSTALL_PREFIX} \
+        ..
+    - make -j2
+    - make install
+    - export CMAKE_PREFIX_PATH=${FLECSISP_WONTON_INSTALL_PREFIX}:${CMAKE_PREFIX_PATH}
+    - echo "DONE BUILDING WONTON"
     - echo "BUILDING TANGRAM"
     - git clone ssh://git@xcp-stash.lanl.gov:7999/laristra/tangram.git
     - cd tangram
@@ -50,15 +71,17 @@ include:
     - cd build
     - |
       cmake \
-        -D CMAKE_C_COMPILER=`which mpicc` \
-        -D CMAKE_CXX_COMPILER=`which mpiCC` \
         -D CMAKE_BUILD_TYPE=Release \
         -D ENABLE_UNIT_TESTS=True \
-        -D ENABLE_MPI=True \
+        -D TANGRAM_ENABLE_MPI=True \
+        -D TANGRAM_ENABLE_THRUST=False \
+        -D TANGRAM_ENABLE_XMOF2D=False \
+        -D XMOF2D_DIR:FILEPATH=${XMOF2D_INSTALL_PREFIX}/share/cmake \
+        -D WONTON_ROOT=${FLECSISP_WONTON_INSTALL_PREFIX} \
         -D CMAKE_INSTALL_PREFIX=${FLECSISP_TANGRAM_INSTALL_PREFIX} \
         ..
     - make -j2
-    - make install/local
+    - make install
     - export CMAKE_PREFIX_PATH=${FLECSISP_TANGRAM_INSTALL_PREFIX}:${CMAKE_PREFIX_PATH}
     - echo "DONE BUILDING TANGRAM"
     - echo "BUILDING PORTAGE"
@@ -74,9 +97,10 @@ include:
         -D CMAKE_BUILD_TYPE=Release \
         -D ENABLE_UNIT_TESTS=True \
         -D ENABLE_APP_TESTS=True \
-        -D ENABLE_MPI=True \
-        -D TANGRAM_DIR:FILEPATH=${FLECSISP_TANGRAM_INSTALL_PREFIX} \
-        -D XMOF2D_DIR:FILEPATH=${XMOF2D_INSTALL_PREFIX}/share/cmake \
+        -D PORTAGE_ENABLE_MPI=True \
+        -D PORTAGE_ENABLE_THRUST=False \
+        -D PORTAGE_ENABLE_TANGRAM=True \
+        -D TANGRAM_ROOT=${FLECSISP_TANGRAM_INSTALL_PREFIX} \
         -D CMAKE_INSTALL_PREFIX=${FLECSISP_PORTAGE_INSTALL_PREFIX} \
         ..
     - make -j4
@@ -123,16 +147,13 @@ include:
     - make -k VERBOSE=1 -j2 -l40
     - make install
     - export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/flecsi-dev/build/install:$CMAKE_PREFIX_PATH
+    - echo ${CMAKE_PREFIX_PATH}
     - cd ${CI_PROJECT_DIR}/build/
     - |
       cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
             -DCMAKE_BUILD_TYPE=$FLECSISP_BUILD_TYPE \
             -DFLECSI_RUNTIME_MODEL=$FLECSISP_RUNTIME \
             -DENABLE_UNIT_TESTS=ON \
-            -DPORTAGE_LIBRARY=${FLECSISP_PORTAGE_INSTALL_PREFIX}/lib64/libportage.so \
-            -DWONTON_LIBRARY=${FLECSISP_PORTAGE_INSTALL_PREFIX}/lib64/libwonton.so \
-            -DPORTAGE_INCLUDE_DIR=${FLECSISP_PORTAGE_INSTALL_PREFIX}/include \
-            -DTANGRAM_INCLUDE_DIR=${FLECSISP_TANGRAM_INSTALL_PREFIX}/include \
             ..
     - make -k -j2 -l40 || make VERBOSE=1
     - make install DESTDIR=${CI_PROJECT_DIR}/build/install
