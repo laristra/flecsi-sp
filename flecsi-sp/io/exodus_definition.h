@@ -5170,12 +5170,15 @@ public:
           auto local_id = faces_this_blk[f];
           const auto & vs = face_vertices.at(local_id);
           // flip if someone else owns
+          using decayed_t = typename std::decay_t<decltype(vert_list)>;
+          typename decayed_t::iterator it;
           if ( face_flipped[local_id] ) {
-            vert_list.insert(vert_list.end(), vs.rbegin(), vs.rend());
+            it = vert_list.insert(vert_list.end(), vs.rbegin(), vs.rend());
           }
           else {
-            vert_list.insert(vert_list.end(), vs.begin(), vs.end());
+            it = vert_list.insert(vert_list.end(), vs.begin(), vs.end());
           }
+          for (unsigned i=0; i<vs.size(); ++i, ++it) *it = part_verts.at(*it);
         };
       
         // write the params before we write a face block
