@@ -11,6 +11,8 @@
 #include <cinchlog.h>
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <ristra/initialization/arguments.h>
+  
+using partition_alg_t = flecsi_sp::burton::partition_alg_t;
 
 namespace flecsi {
 namespace execution {
@@ -33,6 +35,12 @@ auto register_part_args =
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<int>( "mesh", "partition-only,p",
         "Partition mesh and exit" );
+
+auto register_dist_args =
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<std::string>( "mesh", "partition-distribution",
+        "How to distribute mesh files among ranks when using M-to-N partitioning."
+        "  Options include: round-robin (default), sequential.");
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -82,6 +90,16 @@ void specialization_tlt_init(int argc, char** argv)
   if ( variables.count("partition-only") && rank == 0 )
     std::cout << "Partitioning mesh into \"" << partition_only << "\" pieces." << std::endl;
 
+  auto distribution_str = variables.as<std::string>("partition-distribution", "round-robin");
+  
+  partition_alg_t partition_alg;
+  if (distribution_str ==  "round-robin")
+    partition_alg = partition_alg_t::roundrobin;
+  else if (distribution_str ==  "sequential")
+    partition_alg = partition_alg_t::sequential;
+  else
+    THROW_RUNTIME_ERROR("Unknown partition distribution type '" << distribution_str << "'");
+
   //===========================================================================
   // Partition mesh
   //===========================================================================
@@ -93,7 +111,7 @@ void specialization_tlt_init(int argc, char** argv)
 
   // execute the mpi task to partition the mesh
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename,
-    max_entries, partition_only);
+    max_entries, partition_only, partition_alg);
 
   if (partition_only) exit(0);
 }

@@ -34,6 +34,32 @@ namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
 
+enum class partition_alg_t {
+  roundrobin,
+  sequential
+};
+
+inline int distribute(int size, int comm_size, int comm_rank, partition_alg_t alg)
+{
+  if (alg == partition_alg_t::sequential) {
+    if (comm_rank < size)
+      return comm_rank;
+    else
+      return -1;
+  }
+  else if (alg == partition_alg_t::roundrobin) {
+    auto n = comm_size / size;
+    auto r = comm_rank / n;
+    auto q = comm_rank % n;
+    if (q == 0 && r < size)
+      return r;
+    else
+      return -1;
+  }
+
+  return -1;
+}
+
 //! \brief holds some extra mesh info.
 //! This is used to pass information between tlt and spmd initializations.
 //! The alternative would be to duplicate some computation.
@@ -3543,7 +3569,11 @@ void make_corners(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename, std::size_t max_entries, int partition_only )
+void partition_mesh(
+    utils::char_array_t filename,
+    std::size_t max_entries,
+    int partition_only,
+    partition_alg_t partition_alg)
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3617,11 +3647,23 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, int 
   else if ( file_type == file_type_t::partitioned_exodus ) {
     // get extension, which should be number of ranks
     auto ext = ristra::utils::file_extension(filename_string);
+    size_t num_files = 0;
+    try { 
+      num_files = std::atoi(ext.c_str());
+    }
+    catch (...) {
+      THROW_RUNTIME_ERROR("Could not convert '" << ext << "' to integer.");
+    }
+    // distribute the ranks among processors
+    auto r = distribute(num_files, comm_size, rank, partition_alg);
     // how many digits in padded number
     auto n = ext.size();
     // figure out this processors filename 
-    auto my_filename = filename_string + "." + ristra::utils::zero_padded(rank, n);
+    std::string my_filename = (r>=0) ?
+      filename_string + "." + ristra::utils::zero_padded(r, n) :
+      "";
     mesh_def = std::make_unique<exodus_definition_t>( my_filename, false );
+    if (comm_size != num_files) needs_partitioning = true;
   }
   else
     THROW_IMPLEMENTED_ERROR( "Unknown mesh file type" );

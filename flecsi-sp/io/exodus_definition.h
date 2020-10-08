@@ -188,14 +188,17 @@ public:
       flecsi::topology::uncast( buffer, len, label.data() );
     }
 
-    static void broadcast( std::map<size_t, side_set_info_t> & side_sets_ ) {
+    static void broadcast(
+        std::map<size_t, side_set_info_t> & side_sets_,
+        MPI_Comm comm = MPI_COMM_WORLD)
+    {
 
       using byte_t = unsigned char;
       auto num_side_sets = side_sets_.size();
     
       int comm_size, comm_rank;
-      MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-      MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+      MPI_Comm_size(comm, &comm_size);
+      MPI_Comm_rank(comm, &comm_rank);
       
       // now make sure everyone has all side set meta data
       const auto mpi_size_t = flecsi::utils::mpi_typetraits_u<size_t>::type();
@@ -206,7 +209,7 @@ public:
         1,
         mpi_size_t,
         MPI_SUM,
-        MPI_COMM_WORLD);
+        comm);
 
       if ( tot_side_sets > 0 ) {
 
@@ -221,7 +224,7 @@ public:
         int buf_len = sendbuf.size();
         std::vector<int> recvcounts(comm_size);
         MPI_Allgather(&buf_len, 1, MPI_INT, recvcounts.data(), 1, MPI_INT,
-                MPI_COMM_WORLD);
+                comm);
 
         // compute receive displacements
         std::vector<int> recvdispls(comm_size+1);
@@ -233,7 +236,7 @@ public:
         std::vector<byte_t> recvbuf(recvdispls[comm_size]);
         MPI_Allgatherv(sendbuf.data(), buf_len, MPI_BYTE,
           recvbuf.data(), recvcounts.data(), recvdispls.data(),
-          MPI_BYTE, MPI_COMM_WORLD);
+          MPI_BYTE, comm);
 
         // unpack
         for ( size_t r=0; r<comm_size; ++r ) {
@@ -3005,10 +3008,24 @@ public:
 
     clog(info) << "Reading mesh from: " << name << std::endl;
     
-    int comm_size, comm_rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+    bool has_file = !name.empty();
+    
+    //--------------------------------------------------------------------------
+    // Determine communicator
+    MPI_Comm file_comm;
+    if (serial) {
+      file_comm = MPI_COMM_WORLD;
+    }
+    else {
+      file_comm = flecsi::coloring::create_communicator(MPI_COMM_WORLD, has_file);
+    }
+    
+    if (!has_file) return;
 
+    int comm_size, comm_rank;
+    MPI_Comm_size(file_comm, &comm_size);
+    MPI_Comm_rank(file_comm, &comm_rank);
+    
     //--------------------------------------------------------------------------
     // Open file
     bool do_read = (serial && comm_rank==0) ||  (!serial);
@@ -3202,7 +3219,7 @@ public:
         side_to_vertices_,
         side_id_);
 
-    base_t::side_set_info_t::broadcast( side_sets_ );
+    base_t::side_set_info_t::broadcast( side_sets_, file_comm );
 
     //--------------------------------------------------------------------------
     // close the file
@@ -3687,6 +3704,7 @@ public:
 
 
   void build_connectivity() override {
+    if (local_connectivity_.empty()) return;
     
     //--------------------------------------------------------------------------
     // build the edges
@@ -3732,6 +3750,7 @@ public:
         return vertices_.size() / dimension();
       case 1:
       case 2:
+        if (local_connectivity_.empty()) return 0;
         return local_connectivity_.at(dim).at(0).size();
       default:
         clog_fatal(
@@ -4059,9 +4078,12 @@ public:
 
     // get the numbering and connectivity maps
     constexpr auto num_dims = base_t::num_dims;
-    auto & cells2verts = local_connectivity_.at(num_dims).at(0);
-    auto & cells_local2global = local_to_global_.at(num_dims);
-    auto & cells_global2local = global_to_local_.at(num_dims);
+    auto & cells2verts = local_connectivity_[num_dims][0];
+    auto & cells_local2global = local_to_global_[num_dims];
+    auto & cells_global2local = global_to_local_[num_dims];
+    
+    auto & verts_local2global = local_to_global_[0];
+    auto & verts_global2local = global_to_local_[0];
     
     // compute the new local id
     local_id = cells_local2global.size();
@@ -4091,11 +4113,10 @@ public:
     flecsi::topology::uncast( buffer, 1, &num_verts );
    
     // retrieve global vertex ids
-    auto start = cells2verts.offsets.back();
-    auto end = start + num_verts;
-    cells2verts.offsets.emplace_back( end );
-    cells2verts.indices.resize( end );
-    flecsi::topology::uncast( buffer, num_verts, &cells2verts.indices[start] );
+    std::vector<size_t> vs(num_verts);
+    flecsi::topology::uncast( buffer, num_verts, vs.data() );
+    // now append to the connectivity list
+    cells2verts.append( vs.begin(), vs.end() );
     
     // unpack vertex coordinates
     vector<real_t> coords(num_dims*num_verts);
@@ -4121,8 +4142,7 @@ public:
     } // has sides
 
     // need to convert global vertex ids to local ids
-    auto & verts_local2global = local_to_global_.at(0);
-    auto & verts_global2local = global_to_local_.at(0);
+    auto start = cells2verts.offsets.back() - num_verts;
     for ( size_t i=0; i<num_verts; ++i ) {
       auto iv = start + i;
       auto gid = cells2verts.indices[iv];
@@ -4281,10 +4301,24 @@ public:
   void read(const std::string & name, bool serial) {
 
     clog(info) << "Reading mesh from: " << name << std::endl;
+      
+    bool has_file = !name.empty();
+    
+    //--------------------------------------------------------------------------
+    // Determine communicator
+    MPI_Comm file_comm;
+    if (serial) {
+      file_comm = MPI_COMM_WORLD;
+    }
+    else {
+      file_comm = flecsi::coloring::create_communicator(MPI_COMM_WORLD, has_file);
+    }
+    
+    if (!has_file) return;
     
     int comm_size, comm_rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
+    MPI_Comm_size(file_comm, &comm_size);
+    MPI_Comm_rank(file_comm, &comm_rank);
 
     //--------------------------------------------------------------------------
     // Open file
@@ -4715,7 +4749,7 @@ public:
         side_to_vertices_,
         side_id_);
 
-    base_t::side_set_info_t::broadcast( side_sets_ );
+    base_t::side_set_info_t::broadcast( side_sets_, file_comm );
 
     //--------------------------------------------------------------------------
     // close the file
@@ -5341,6 +5375,7 @@ public:
       case 0:
         return vertices_.size() / dimension();
       default:
+        if (local_connectivity_.empty()) return 0;
         return local_connectivity_.at(dim).at(0).size();
     }
   }
@@ -5508,14 +5543,14 @@ public:
     // get the numbering and connectivity maps
     constexpr auto num_dims = base_t::num_dims;
 
-    auto & cells2verts = local_connectivity_.at(num_dims).at(0);
-    auto & cells2faces = local_connectivity_.at(num_dims).at(2);
-    auto & faces2verts = local_connectivity_.at(2).at(0);
+    auto & cells2verts = local_connectivity_[num_dims][0];
+    auto & cells2faces = local_connectivity_[num_dims][2];
+    auto & faces2verts = local_connectivity_[2][0];
 
-    auto & cells_local2global = local_to_global_.at(num_dims);
-    auto & cells_global2local = global_to_local_.at(num_dims);
-    auto & verts_local2global = local_to_global_.at(0);
-    auto & verts_global2local = global_to_local_.at(0);
+    auto & cells_local2global = local_to_global_[num_dims];
+    auto & cells_global2local = global_to_local_[num_dims];
+    auto & verts_local2global = local_to_global_[0];
+    auto & verts_global2local = global_to_local_[0];
     
     // compute the new local id
     local_id = cells_local2global.size();
@@ -5961,6 +5996,7 @@ public:
   }
 
   void build_connectivity() override {
+    if (local_connectivity_.empty()) return;
 
     //--------------------------------------------------------------------------
     // build the edges
