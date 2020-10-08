@@ -34,20 +34,21 @@ namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
 
-enum class partition_alg_t {
-  roundrobin,
-  sequential
+enum class distribution_alg_t {
+  balanced,
+  sequential,
+  hostname
 };
 
-inline int distribute(int size, int comm_size, int comm_rank, partition_alg_t alg)
+inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t alg)
 {
-  if (alg == partition_alg_t::sequential) {
+  if (alg == distribution_alg_t::sequential) {
     if (comm_rank < size)
       return comm_rank;
     else
       return -1;
   }
-  else if (alg == partition_alg_t::roundrobin) {
+  else if (alg == distribution_alg_t::balanced) {
     auto n = comm_size / size;
     auto r = comm_rank / n;
     auto q = comm_rank % n;
@@ -55,6 +56,43 @@ inline int distribute(int size, int comm_size, int comm_rank, partition_alg_t al
       return r;
     else
       return -1;
+  }
+  else if (alg == distribution_alg_t::hostname) {
+    char hostname[MPI_MAX_PROCESSOR_NAME];
+    int len;
+    MPI_Get_processor_name(hostname, &len);
+
+    auto hash = flecsi::utils::string_hash<size_t>(hostname, len); 
+  
+    std::vector<size_t> hashes(comm_size);
+
+    const auto mpi_size_t = flecsi::utils::mpi_typetraits_u<size_t>::type();
+    MPI_Allgather( &hash, 1, mpi_size_t, hashes.data(), 1, mpi_size_t, MPI_COMM_WORLD);
+
+    std::map<size_t, int> hostmap;
+    for (int i=0; i<comm_size; ++i)
+      hostmap.emplace( hashes[i], i );
+    
+    auto num_hosts = hostmap.size();
+    auto n = size / num_hosts;
+    auto q = size % num_hosts;
+    
+    auto it = hostmap.find(hash);
+    auto host_id = std::distance(hostmap.begin(), it);
+    if (host_id<0 || host_id>= num_hosts)
+      THROW_RUNTIME_ERROR("Mistake computing node position");
+
+    auto host_start = n * host_id;
+    host_start += std::min<size_t>(q, host_id);
+    
+    auto start = it->second;
+    auto local_id = comm_rank - start;
+    auto global_id = host_start + local_id;
+
+    auto num_local = host_id < q ? n+1 : n;
+
+    if (local_id<num_local) return global_id;
+    else return -1;
   }
 
   return -1;
@@ -3573,7 +3611,7 @@ void partition_mesh(
     utils::char_array_t filename,
     std::size_t max_entries,
     int partition_only,
-    partition_alg_t partition_alg)
+    distribution_alg_t distribution_alg)
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3655,7 +3693,7 @@ void partition_mesh(
       THROW_RUNTIME_ERROR("Could not convert '" << ext << "' to integer.");
     }
     // distribute the ranks among processors
-    auto r = distribute(num_files, comm_size, rank, partition_alg);
+    auto r = distribute(num_files, comm_size, rank, distribution_alg);
     // how many digits in padded number
     auto n = ext.size();
     // figure out this processors filename 
