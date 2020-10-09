@@ -15,6 +15,9 @@
 #include <flecsi/coloring/dcrs_utils.h>
 #include <flecsi/coloring/mpi_communicator.h>
 #include <flecsi/coloring/parmetis_colorer.h>
+#include <flecsi/coloring/parmetis_geom_colorer.h>
+#include <flecsi/coloring/parmetis_geomkway_colorer.h>
+#include <flecsi/coloring/naive_colorer.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
 #include <flecsi-sp/burton/burton_mesh.h>
@@ -97,6 +100,15 @@ inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t
 
   return -1;
 }
+
+
+enum class partition_alg_t {
+  kway,
+  sfc,
+  best,
+  naive
+};
+
 
 //! \brief holds some extra mesh info.
 //! This is used to pass information between tlt and spmd initializations.
@@ -3611,7 +3623,8 @@ void partition_mesh(
     utils::char_array_t filename,
     std::size_t max_entries,
     int partition_only,
-    distribution_alg_t distribution_alg)
+    distribution_alg_t distribution_alg,
+    partition_alg_t partition_alg)
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3735,7 +3748,21 @@ void partition_mesh(
     mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
 
     // Create a colorer instance to generate the primary coloring.
-    auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
+    std::unique_ptr<flecsi::coloring::colorer_t> colorer;
+    if (partition_alg == partition_alg_t::kway) 
+      colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
+    else if (partition_alg == partition_alg_t::sfc) {
+      auto xyz = mesh_def->midpoints(num_dims);
+      colorer = std::make_unique<flecsi::coloring::parmetis_geom_colorer_t>(xyz, num_dims);
+    }
+    else if (partition_alg == partition_alg_t::best) {
+      auto xyz = mesh_def->midpoints(num_dims);
+      colorer = std::make_unique<flecsi::coloring::parmetis_geomkway_colorer_t>(xyz, num_dims);
+    }
+    else if (partition_alg == partition_alg_t::naive)
+      colorer = std::make_unique<flecsi::coloring::naive_colorer_t>();
+    else
+      THROW_RUNTIME_ERROR("Unkown partition algorithm.");
 
     // Create the primary coloring and partition the mesh.
     auto partitioning = colorer->new_color(num_parts, dcrs);

@@ -4195,6 +4195,33 @@ public:
     for (size_t i=0; i<num_cells; ++i) cell_part_id_[i] = part[i];
   }
 
+  virtual std::vector<real_t> midpoints(size_t indice) const override {
+    auto num_ents = num_entities(indice);
+    if (!num_ents) return  {};
+
+    constexpr auto num_dims = dimension();
+    std::vector<real_t> mx(num_dims * num_ents, 0);
+    
+    const auto & conn = local_connectivity_.at(indice).at(0);
+    
+    std::array<real_t, num_dims> xc, xv; 
+    for (size_t e=0; e<num_ents; ++e) {
+      for (unsigned d=0; d<num_dims; ++d) xc[d] = 0;
+
+      const auto & vs = conn.at(e);
+      for (auto v : vs) {
+        vertex(v, xv.data());
+        for (unsigned d=0; d<num_dims; ++d) xc[d] += xv[d];
+      }
+        
+      auto num_verts = vs.size();
+      for (unsigned d=0; d<num_dims; ++d) 
+        mx[num_dims*e + d] = xc[d] / num_verts;
+    }
+
+    return mx;
+  }
+
 private:
   //============================================================================
   // Private data

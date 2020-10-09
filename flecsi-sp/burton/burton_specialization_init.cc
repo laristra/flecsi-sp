@@ -13,6 +13,7 @@
 #include <ristra/initialization/arguments.h>
   
 using distribution_alg_t = flecsi_sp::burton::distribution_alg_t;
+using partition_alg_t = flecsi_sp::burton::partition_alg_t;
 
 namespace flecsi {
 namespace execution {
@@ -42,6 +43,11 @@ auto register_dist_args =
         "How to distribute mesh files among ranks when using M-to-N partitioning"
         "  from pre-partitioned files. Options include: sequential (default), balanced,"
         " hostname.");
+
+auto register_partition_args =
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<std::string>( "mesh", "partition-algorithm",
+        "Partition algorithm.  Options include: kway (default), sfc, best, naive.");
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -110,6 +116,20 @@ void specialization_tlt_init(int argc, char** argv)
   else
     THROW_RUNTIME_ERROR("Unknown partition distribution type '" << distribution_str << "'");
 
+  auto partition_str = variables.as<std::string>("partition-algorithm", "kway");
+  
+  partition_alg_t partition_alg;
+  if (partition_str ==  "kway")
+    partition_alg = partition_alg_t::kway;
+  else if (partition_str ==  "sfc")
+    partition_alg = partition_alg_t::sfc;
+  else if (partition_str ==  "best")
+    partition_alg = partition_alg_t::best;
+  else if (partition_str ==  "naive")
+    partition_alg = partition_alg_t::naive;
+  else
+    THROW_RUNTIME_ERROR("Unknown partition algorithm type '" << partition_str << "'");
+
   //===========================================================================
   // Partition mesh
   //===========================================================================
@@ -121,7 +141,7 @@ void specialization_tlt_init(int argc, char** argv)
 
   // execute the mpi task to partition the mesh
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename,
-    max_entries, partition_only, distribution_alg);
+    max_entries, partition_only, distribution_alg, partition_alg);
 
   if (partition_only) exit(0);
 }
