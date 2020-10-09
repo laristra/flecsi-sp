@@ -104,8 +104,8 @@ inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t
 
 enum class partition_alg_t {
   kway,
-  sfc,
-  best,
+  geom,
+  geomkway,
   naive
 };
 
@@ -3751,11 +3751,11 @@ void partition_mesh(
     std::unique_ptr<flecsi::coloring::colorer_t> colorer;
     if (partition_alg == partition_alg_t::kway) 
       colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
-    else if (partition_alg == partition_alg_t::sfc) {
+    else if (partition_alg == partition_alg_t::geom) {
       auto xyz = mesh_def->midpoints(num_dims);
       colorer = std::make_unique<flecsi::coloring::parmetis_geom_colorer_t>(xyz, num_dims);
     }
-    else if (partition_alg == partition_alg_t::best) {
+    else if (partition_alg == partition_alg_t::geomkway) {
       auto xyz = mesh_def->midpoints(num_dims);
       colorer = std::make_unique<flecsi::coloring::parmetis_geomkway_colorer_t>(xyz, num_dims);
     }

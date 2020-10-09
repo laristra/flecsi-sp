@@ -47,7 +47,7 @@ auto register_dist_args =
 auto register_partition_args =
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<std::string>( "mesh", "partition-algorithm",
-        "Partition algorithm.  Options include: kway (default), sfc, best, naive.");
+        "Partition algorithm.  Options include: kway (default), geom, geomkway, naive.");
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -121,10 +121,10 @@ void specialization_tlt_init(int argc, char** argv)
   partition_alg_t partition_alg;
   if (partition_str ==  "kway")
     partition_alg = partition_alg_t::kway;
-  else if (partition_str ==  "sfc")
-    partition_alg = partition_alg_t::sfc;
-  else if (partition_str ==  "best")
-    partition_alg = partition_alg_t::best;
+  else if (partition_str ==  "geom")
+    partition_alg = partition_alg_t::geom;
+  else if (partition_str ==  "geomkway")
+    partition_alg = partition_alg_t::geomkway;
   else if (partition_str ==  "naive")
     partition_alg = partition_alg_t::naive;
   else
