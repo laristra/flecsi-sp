@@ -17,6 +17,7 @@
 #include <flecsi/coloring/parmetis_colorer.h>
 #include <flecsi/coloring/parmetis_geom_colorer.h>
 #include <flecsi/coloring/parmetis_geomkway_colorer.h>
+#include <flecsi/coloring/parmetis_repart_colorer.h>
 #include <flecsi/coloring/naive_colorer.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
@@ -3624,7 +3625,8 @@ void partition_mesh(
     std::size_t max_entries,
     int partition_only,
     distribution_alg_t distribution_alg,
-    partition_alg_t partition_alg)
+    partition_alg_t partition_alg,
+    bool repartition)
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3764,6 +3766,29 @@ void partition_mesh(
     else
       THROW_RUNTIME_ERROR("Unkown partition algorithm.");
 
+    // Create the primary coloring and partition the mesh.
+    auto partitioning = colorer->new_color(num_parts, dcrs);
+    mesh_def->set_partitioning(partitioning);
+    if ( rank == 0 ) std::cout << "done." << std::endl;
+
+    // now migrate the entities to their respective ranks
+    if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
+    std::vector<size_t> part_dist;
+    flecsi::coloring::subdivide(num_parts, comm_size, part_dist);
+    flecsi::coloring::migrate( num_dims, partitioning, part_dist, dcrs, *mesh_def );
+    if ( rank == 0 ) std::cout << "done." << std::endl;
+  
+  } // needs_partitioning
+
+  if (repartition) {
+    if ( rank == 0 ) std::cout << "RE-partitioning mesh..." << std::flush;
+    // Create the dCRS representation for the distributed colorer.
+    // This essentialy makes the graph of the dual mesh.
+    mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
+
+    // Create a colorer instance to generate the primary coloring.
+    auto colorer = std::make_unique<flecsi::coloring::parmetis_repart_colorer_t>();
+    
     // Create the primary coloring and partition the mesh.
     auto partitioning = colorer->new_color(num_parts, dcrs);
     mesh_def->set_partitioning(partitioning);

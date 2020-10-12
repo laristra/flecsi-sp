@@ -11,7 +11,7 @@
 #include <cinchlog.h>
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <ristra/initialization/arguments.h>
-  
+
 using distribution_alg_t = flecsi_sp::burton::distribution_alg_t;
 using partition_alg_t = flecsi_sp::burton::partition_alg_t;
 
@@ -48,6 +48,11 @@ auto register_partition_args =
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<std::string>( "mesh", "partition-algorithm",
         "Partition algorithm.  Options include: kway (default), geom, geomkway, naive.");
+
+auto register_repart_args =
+  ristra::initialization::command_line_arguments_t::instance().
+  register_argument( "mesh", "repartition",
+      "Refine partitioned mesh.");
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -130,6 +135,8 @@ void specialization_tlt_init(int argc, char** argv)
   else
     THROW_RUNTIME_ERROR("Unknown partition algorithm type '" << partition_str << "'");
 
+  auto do_repart = variables.count("repartition");
+
   //===========================================================================
   // Partition mesh
   //===========================================================================
@@ -141,7 +148,7 @@ void specialization_tlt_init(int argc, char** argv)
 
   // execute the mpi task to partition the mesh
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename,
-    max_entries, partition_only, distribution_alg, partition_alg);
+    max_entries, partition_only, distribution_alg, partition_alg, do_repart);
 
   if (partition_only) exit(0);
 }
