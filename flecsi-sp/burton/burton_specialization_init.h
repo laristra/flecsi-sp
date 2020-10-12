@@ -192,7 +192,7 @@ void create_cells(
   for(auto & vm: vertex_lid_to_mid) {
 
     // search this ranks mesh definition for the matching offset
-    auto it = vert_global2local.find( vm.second );
+    auto it = vert_global2local.find( vm );
     // the vertex exists on this rank so create it
     if ( it != vert_global2local.end() ) {
       // get the point
@@ -205,7 +205,7 @@ void create_cells(
     // now create it, if the vertex did not exist, it doesnt matter what
     // data we give it
     auto v = mesh.create_vertex( temp_point );
-    v->global_id().set_global(vm.second);
+    v->global_id().set_global(vm);
     vertices.emplace_back(v);
   } // for vertices
   
@@ -251,10 +251,9 @@ void create_cells(
   std::map<size_t, std::vector<size_t>> vertex_tags;
 
   // create the edges
-  for(auto & em: edge_lid_to_mid) {
+  for(size_t lid=0; lid<edge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = edge_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -368,10 +367,9 @@ void create_cells(
   const auto & cell_region_ids = mesh_def.region_ids();
 
   // create the cells
-  for(auto & cm: cell_lid_to_mid) {
+  for(size_t lid=0; lid<cell_lid_to_mid.size(); ++lid) {
 
-    auto lid = cm.first;
-    auto mid = cm.second;
+    auto mid = cell_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -420,7 +418,7 @@ void create_cells(
     // otherwise, it is a ghost cell
     else {
       // find out what its connectivity info is
-      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), cm.second );
+      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), mid );
       assert( it != ghost_cells.end() && "Could not find ghost cell id" );
       auto i = std::distance( ghost_cells.begin(), it );
       // reserve space
@@ -507,7 +505,7 @@ void create_cells(
   for(auto & vm: vertex_lid_to_mid) {
 
     // search this ranks mesh definition for the matching offset
-    auto it = vert_global2local.find( vm.second );
+    auto it = vert_global2local.find( vm );
     // the vertex exists on this rank so create it
     if ( it != vert_global2local.end() ) {
       // get the point
@@ -520,7 +518,7 @@ void create_cells(
     // now create it, if the vertex did not exist, it doesnt matter what
     // data we give it
     auto v = mesh.create_vertex( temp_point );
-    v->global_id().set_global(vm.second);
+    v->global_id().set_global(vm);
     vertices.emplace_back(v);
   } // for vertices
   
@@ -542,10 +540,9 @@ void create_cells(
   std::vector< vertex_t * > elem_vs;
 
   // create the edges
-  for(auto & em: edge_lid_to_mid) {
+  for(size_t lid=0; lid<edge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = edge_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -637,10 +634,9 @@ void create_cells(
   }
   
   // create the faces
-  for(auto & em: face_lid_to_mid) {
+  for(size_t lid=0; lid<face_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = face_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -744,10 +740,9 @@ void create_cells(
   const auto & cell_region_ids = mesh_def.region_ids();
 
   // create the cells
-  for(auto & cm: cell_lid_to_mid) {
+  for(size_t lid=0; lid<cell_lid_to_mid.size(); ++lid) {
 
-    auto lid = cm.first;
-    auto mid = cm.second;
+    auto mid = cell_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -783,7 +778,7 @@ void create_cells(
     // otherwise, it is a ghost cell
     else {
       // find out what its connectivity info is
-      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), cm.second );
+      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), mid );
       assert( it != ghost_cells.end() && "Could not find ghost cell id" );
       auto i = std::distance( ghost_cells.begin(), it );
       // reserve space
@@ -892,10 +887,9 @@ void create_extras(
   
  
   // create the wedges
-  for(auto & em: wedge_lid_to_mid) {
+  for(size_t lid=0; lid<wedge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = wedge_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1015,10 +1009,9 @@ void create_extras(
   
  
   // create the corners
-  for(auto & em: corner_lid_to_mid) {
+  for(size_t lid=0; lid<corner_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = corner_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1162,10 +1155,9 @@ void create_extras(
   
  
   // create the sides
-  for(auto & em: side_lid_to_mid) {
+  for(size_t lid=0; lid<side_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = side_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1395,10 +1387,9 @@ void create_extras(
   
  
   // create the wedges
-  for(auto & em: wedge_lid_to_mid) {
+  for(size_t lid=0; lid<wedge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = wedge_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1541,10 +1532,9 @@ void create_extras(
   
  
   // create the corners
-  for(auto & em: corner_lid_to_mid) {
+  for(size_t lid=0; lid<corner_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = corner_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1711,10 +1701,9 @@ void create_extras(
   
  
   // create the sides
-  for(auto & em: side_lid_to_mid) {
+  for(size_t lid=0; lid<side_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = side_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
