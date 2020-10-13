@@ -264,16 +264,8 @@ struct burton_element_t<1,1>
     const connectivity_t& conn,
     id_t * entities 
   ) {
-    assert( dim == 1 );
-
-    const auto v = conn.get_entities( cell, /* dimension */ 0 );
-    auto num_cell_verts = v.size();
-    assert( num_cell_verts == 2 );
-
-    entities[ 0 ] = v[ 0 ];
-    entities[ 1 ] = v[ 1 ];
-
-    return std::vector<size_t>(2, 1);
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
@@ -305,32 +297,8 @@ struct burton_element_t<1,1>
     const connectivity_t& domain_conn,
     id_t * entities
   ) {
-
-    // general connecitivity that is needed in all cases
-    const auto cell_verts = primal_conn.get_entities( cell, /* dimension */ 0 );
-    auto num_vertices = cell_verts.size();
-    assert( num_vertices == 2 );
-
-    // main counter
-    size_t i = 0;
-
-
-    switch (dim) {
-      //------------------------------------------------------------------------
-      // Corners ( = wedges in 1D )
-    case 0: {
-    
-      entities[i++] = cell_verts[0];
-      entities[i++] = cell_verts[1];
-
-      return std::vector<size_t>( 2, 1 );
-    }
-      //------------------------------------------------------------------------
-      // Failure
-    default:
-      THROW_RUNTIME_ERROR("Unknown bound entity type");
-    } // switch
-
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
@@ -809,22 +777,8 @@ struct burton_element_t<2,2>
     const connectivity_t& conn,
     id_t * entities 
   ) {
-    assert( dim == 1 );
-
-    const auto v = conn.get_entities( cell, /* dimension */ 0 );
-    auto num_cell_verts = v.size();
-
-    size_t ind=0;
-    for ( int i=0; i<static_cast<int>(num_cell_verts)-1; i++ ) {
-      auto vp = v[i];
-      auto vn = v[i+1];
-      entities[ ind++ ] = vp;
-      entities[ ind++ ] = vn;
-    }
-    entities[ ind++ ] = v[ num_cell_verts-1 ];
-    entities[ ind++ ] = v[ 0 ];
-
-    return std::vector<size_t>(num_cell_verts, 2);
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
@@ -856,174 +810,8 @@ struct burton_element_t<2,2>
     const connectivity_t& domain_conn,
     id_t * entities
   ) {
-
-    // general connecitivity that is needed in all cases
-    const auto cell_verts = primal_conn.get_entities( cell, /* dimension */ 0 );
-    const auto cell_edges = primal_conn.get_entities( cell, /* dimension */ 1 );
-    auto num_vertices = cell_verts.size();
-    auto num_edges = cell_edges.size();
-    
-    // main counter
-    size_t i = 0;
-
-    // a lambda function to locate an edge connected to two points
-    auto _find_edge = [&]( const auto & pa, const auto & pb  ) 
-    {
-      // locate the edge with the two vertices
-      auto edge = std::find_if( 
-        cell_edges.begin(), cell_edges.end(), 
-        [&]( const auto & e ) 
-        { 
-          const auto verts = primal_conn.get_entities( e, /* dim */ 0 );
-          assert( verts.size() == 2 && "should be two vertices per edge" );
-          return ( (verts[0] == pa && verts[1] == pb) || 
-                   (verts[0] == pb && verts[1] == pa) );
-        } 
-      );
-      // make sure we found an edge
-      assert( edge != cell_edges.end() && "should have found an edge");
-      // return the edge
-      return edge;
-    };
-
-
-    switch (dim) {
-      //------------------------------------------------------------------------
-      // Corners
-      // The right edge is always first
-    case 0: {
-    
-      // loop over each edge (pair of vertices)
-      // there is a corner for each vertex
-      auto p1 = std::prev( cell_verts.end() );
-      auto p0 = std::prev( p1 );
-      auto edge0 = _find_edge( *p0, *p1 );
-      for ( auto p2=cell_verts.begin(); p2!=cell_verts.end(); ++p2 ) {
-        // get the next edge
-        auto edge1 = _find_edge( *p1, *p2 );
-        // the first point, this is the right (even) one
-        entities[i++] = *p1;
-        entities[i++] = *edge1;
-        entities[i++] = *edge0;
-        // update the iterators
-        p0 = p1;
-        p1 = p2;
-        edge0 = edge1;
-      } // foreach vertex
-
-      // rotate the results forward because we were looping over the vertices
-      // in a slightly shifter manner
-      std::rotate( entities, entities+3, entities+num_vertices*3 );
-
-      return std::vector<size_t>( num_vertices, 3 );
-    }
-      //------------------------------------------------------------------------
-      // wedges
-      // The right wedge is always first
-    case 1: {
-
-      // get connectivity specific to wedges
-      auto cell_corners = domain_conn.get_entities_vec( cell, /* dimension */ 0 );
-      
-      // sort cell corners for later intersection
-      std::sort( cell_corners.begin(),  cell_corners.end() );
-
-      // temporary storage for found corners
-      std::vector<id_t> corners;
-      corners.reserve(1);
-
-      // loop over each edge (pair of vertices)
-      // there is a wedge for each vertex -> edge combination
-      auto p1 = std::prev( cell_verts.end() );
-      auto p0 = std::prev( p1 );
-      auto edge0 = _find_edge( *p0, *p1 );
-      for ( auto p2=cell_verts.begin(); p2!=cell_verts.end(); ++p2 ) {
-        // get the next edge
-        auto edge1 = _find_edge( *p1, *p2 );
-        // get the corner of this point, but also associated with this cell
-        auto point_corners =
-          domain_conn.get_entities_vec(  *p1, /* dim */ 0 );
-        // sort the lists for intersectinos
-        std::sort( point_corners.begin(), point_corners.end() );
-        // get the intersections of the sets
-        corners.clear();
-        std::set_intersection( point_corners.begin(), point_corners.end(),
-                               cell_corners.begin(), cell_corners.end(),
-                               std::back_inserter(corners));
-        assert( corners.size() == 1 );
-        const auto & c1 = corners.front();
-        // the first point, this is the right (even) one
-        entities[i++] = *p1;
-        entities[i++] = *edge1;
-        entities[i++] = c1;
-        // for the next point, this one is the left (odd) one
-        entities[i++] = *p1;
-        entities[i++] = *edge0;
-        entities[i++] = c1;
-        // update the iterators
-        p0 = p1;
-        p1 = p2;
-        edge0 = edge1;
-      } // foreach vertex
-      
-      // rotate the results forward because we were looping over the vertices
-      // in a slightly shifter manner
-      std::rotate( entities, entities+6, entities + 2*num_vertices*3 );
-
-
-      return std::vector<size_t>(2*num_vertices, 3);
-
-    }
-      //------------------------------------------------------------------------
-      // sides
-    case 2: {
-
-      // get connectivity specific to sides
-      // list of wedges associated to this cell.
-      auto cell_wedges = domain_conn.get_entities_vec( cell, /* dimension */ 1 );
-      
-      // sort cell wedges for later intersection
-      std::sort( cell_wedges.begin(),  cell_wedges.end() );
-
-      // temporary storage for found wedges
-      std::vector<id_t> wedges;
-      wedges.reserve(2);
-
-      // loop over each edge (pair of vertices)
-      for(auto e1 = cell_edges.begin(); e1 != cell_edges.end();++e1)
-      {
-          auto edge_wedges = domain_conn.get_entities_vec(*e1,/*dimension*/1);
-          
-          // sort cell wedges for later intersection
-          std::sort( edge_wedges.begin(),  edge_wedges.end() );
-
-          wedges.clear();
-          std::set_intersection( edge_wedges.begin(), edge_wedges.end(),
-                                 cell_wedges.begin(), cell_wedges.end(),
-                                 std::back_inserter(wedges));
-
-          // it should have two wedges per edges..
-          assert(wedges.size()==2);
-          const auto edge_verts = primal_conn.get_entities( *e1, /* dimension */ 0 );
-
-          for( auto v:edge_verts) 
-              entities[i++]=v;
-          entities[i++]=*e1;
-          for(auto we: wedges)
-          {
-              entities[i++]= we;
-          }//we
-      }//e1
-
-      return std::vector<size_t>(num_edges, 5);
-    }
-        
-      //------------------------------------------------------------------------
-      // Failure
-    default:
-      THROW_RUNTIME_ERROR("Unknown bound entity type");
-    } // switch
-
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
@@ -1315,22 +1103,8 @@ struct burton_element_t<3,2>
     const connectivity_t& conn,
     id_t * entities
   )  {
-    assert( dim == 1 );
-
-    const auto v = conn.get_entities( cell, /* dimension */ 0 );
-    auto num_cell_verts = v.size();
-
-    size_t ind=0;
-    for ( int i=0; i<static_cast<int>(num_cell_verts)-1; i++ ) {
-      auto vp = v[i];
-      auto vn = v[i+1];
-      entities[ ind++ ] = vp;
-      entities[ ind++ ] = vn;
-    }
-    entities[ ind++ ] = v[ num_cell_verts-1 ];
-    entities[ ind++ ] = v[ 0 ];
-
-    return std::vector<size_t>(num_cell_verts, 2);
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
@@ -1656,67 +1430,8 @@ struct burton_element_t<3,3>
     const connectivity_t& conn,
     id_t * entities
   )  {
-    // you should only be coming in here to build edges
-    assert( dim == 1 ); 
-  
-    // get the cell entities
-    const auto cell_faces = conn.get_entities( cell, /* dimension */ 2 );
-    // make sure the faces exist
-    assert( cell_faces.size() > 0 && "no cell faces yet" );
-    
-    // the list of edge pairs
-    std::vector< std::pair< id_t, id_t > > cell_edges;
-  
-    // get the edges of each face
-    for ( const auto & face : cell_faces ) { 
-      // get all vertices in this face
-      const auto face_verts = conn.get_entities( face, /* dimension */ 0 );
-      assert( face_verts.size() > 2 && "not enough vertices for a valid face" );
-      // reserve space 
-      cell_edges.reserve( cell_edges.size() + face_verts.size() );
-      // add each edge pair to the list
-      auto vp = std::prev( face_verts.end() );
-      assert( vp != face_verts.begin() && "no vertices in this face" ); 
-      for ( auto vn = face_verts.begin(); vn != face_verts.end(); vn++ ) {
-        assert( *vn != *vp && "edge has two equal vertices" );
-        if ( *vn < *vp ) 
-          cell_edges.emplace_back( std::make_pair( *vn, *vp ) );
-        else
-          cell_edges.emplace_back( std::make_pair( *vp, *vn ) );
-        vp = vn;
-      }          
-    }
-  
-    // now sort the list of edges
-    std::sort( 
-      cell_edges.begin(), cell_edges.end(), 
-      [](const auto & a, const auto & b) 
-      { 
-        id_t a1 = a.first;
-        id_t b1 = b.first;
-        if ( a1 == b1 )
-          return ( a.second < b.second );
-        else
-          return (a1 < b1);
-      }
-    );
-    // remove uniques
-    auto end = std::unique( cell_edges.begin(), cell_edges.end() );
-    auto num_edges = std::distance( cell_edges.begin(), end );
-  
-    // copy the unique results to the output array   
-    size_t i = 0;
-  
-    std::for_each( 
-      cell_edges.begin(), end, 
-      [&](const auto & edge) 
-      {
-        entities[i++] = edge.first;
-        entities[i++] = edge.second;
-      }
-    );
-  
-    return std::vector<size_t>( num_edges, 2 );
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
@@ -1743,260 +1458,8 @@ struct burton_element_t<3,3>
     const connectivity_t& domain_conn,
     id_t * entities
   ) {
-  
-    size_t i = 0;
-  
-    switch (dim) {
-      //------------------------------------------------------------------------
-      // Corners
-      //
-      // Take your right hand, its origin is the vertex of the corner.  Curl 
-      // your hand from the first edge to the second edge, with the third edge
-      // aligned with your thumb.  You hand also curls from the first to the 
-      // first to second face, with the third face on the bottom.
-      //
-    case 0: {
-  
-      std::vector<size_t> entity_count;
-  
-      // get the cell entities
-      const auto cell_verts = primal_conn.get_entities( cell, /* dim */ 0 );
-      auto cell_edges = primal_conn.get_entities_vec( cell, /* dim */ 1 );
-      auto cell_faces = primal_conn.get_entities_vec( cell, /* dim */ 2 );
-  
-      // sort the edges and faces for intersections later      
-      std::sort( cell_edges.begin(), cell_edges.end() );
-      std::sort( cell_faces.begin(), cell_faces.end() );
-  
-      // temparary lists
-      std::vector<id_t> edges, faces;
-  
-      for ( const auto & vert : cell_verts ) { 
-        // clear temporary lits
-        edges.clear();
-        faces.clear();
-        // get all entities attached to this vertex
-        auto vert_edges = primal_conn.get_entities_vec( vert, /* dim */ 1 );
-        auto vert_faces = primal_conn.get_entities_vec( vert, /* dim */ 2 );
-        // sort the lists for intersectinos
-        std::sort( vert_edges.begin(), vert_edges.end() );
-        std::sort( vert_faces.begin(), vert_faces.end() );
-        // get the intersections of the sets
-        std::set_intersection( vert_edges.begin(), vert_edges.end(),
-                               cell_edges.begin(), cell_edges.end(),
-                               std::back_inserter(edges));
-        std::set_intersection( vert_faces.begin(), vert_faces.end(),
-                               cell_faces.begin(), cell_faces.end(),
-                               std::back_inserter(faces));
-        // add the entities to the list
-        entities[i++] = vert;
-        for ( auto e : edges ) entities[i++] = e;
-        for ( auto f : faces ) entities[i++] = f;
-        // add the final number of entities to the list
-        entity_count.emplace_back( 1 + edges.size() + faces.size() );
-        
-      }  // foreach vertex
-  
-      return entity_count;
-    }
-      //------------------------------------------------------------------------
-      // Wedges
-      //
-      // There is an even/odd ordering so we 
-      // know which way to compute normals.  So edges are defined in pairs
-      //
-    case 1: {
-  
-      // get the higher dimensional entities
-      const auto cell_faces   = primal_conn.get_entities( cell, /* dim */ 2 );
-      auto cell_corners = domain_conn.get_entities_vec( cell, /* dim */ 0 );
-
-      // sort cell corners for later intersections
-      std::sort( cell_corners.begin(),  cell_corners.end() );
-      
-      // a counter for the number of wedges
-      size_t num_wedges = 0;
-  
-      // loop over faces
-      for ( const auto & face : cell_faces ) { 
-  
-        // get the vertices of the face
-        const auto face_verts = primal_conn.get_entities( face, /* dim */ 0 );
-        auto ccw_face_verts =
-          std::vector<id_t>( face_verts.begin(), face_verts.end() );
-        
-        // get the edges of the face
-        const auto face_edges = primal_conn.get_entities( face, /* dim */ 1 );
-  
-        // get the cells of this face
-        const auto face_cells = primal_conn.get_entities( face, /* dim */ 3 );
-        // reverse the list of vertices if this is backwards
-        if ( face_cells[0] != cell ) 
-          std::reverse( ccw_face_verts.begin(), ccw_face_verts.end() );
-  
-        // a lambda function to locate an edge connected to two points
-        auto _find_edge = [&]( const auto & pa, const auto & pb  ) 
-        {
-          // locate the edge with the two vertices
-          auto edge = std::find_if( 
-            face_edges.begin(), face_edges.end(), 
-            [&]( const auto & e ) 
-            { 
-              const auto verts = primal_conn.get_entities( e, /* dim */ 0 );
-              assert( verts.size() == 2 && "should be two vertices per edge" );
-              return ( (verts[0] == pa && verts[1] == pb) || 
-                       (verts[0] == pb && verts[1] == pa) );
-            } 
-          );
-          // make sure we found an edge
-          assert( edge != face_edges.end() );
-          // return the edge
-          return edge;
-        };
-          
-        // loop over each edge (pair of vertices of the face)
-        // there is a wedge for each vertex -> edge -> face combination
-        auto p1 = std::prev( ccw_face_verts.end() );
-        auto p0 = std::prev( p1 );
-        auto edge0 = _find_edge( *p0, *p1 );
-        for ( auto p2=ccw_face_verts.begin(); p2!=ccw_face_verts.end(); p2++ ) {
-          // get the next edge
-          auto edge1 = _find_edge( *p1, *p2 );
-          // get the corner of this point, but also associated with this cell
-          auto point_corners =
-            domain_conn.get_entities_vec(  *p1, /* dim */ 0 );
-          // sort the lists for intersectinos
-          std::sort( point_corners.begin(), point_corners.end() );
-          // get the intersections of the sets
-          std::vector<id_t> corners;
-          corners.reserve(1);
-          std::set_intersection( point_corners.begin(), point_corners.end(),
-                                 cell_corners.begin(), cell_corners.end(),
-                                 std::back_inserter(corners));
-          assert( corners.size() == 1 );
-          const auto & c1 = corners.front();
-          // the first point, this is the right (even) one
-          entities[i++] = *p1;
-          entities[i++] = *edge0;
-          entities[i++] = face;
-          entities[i++] = c1;
-          // for the next point, this one is the left (odd) one
-          entities[i++] = *p1;
-          entities[i++] = *edge1;
-          entities[i++] = face;
-          entities[i++] = c1;
-          // update the iterators
-          p0 = p1;
-          p1 = p2;
-          edge0 = edge1;
-          // increment the wedge counter
-          num_wedges += 2;
-        }
-      } // foreach vertex
-  
-      return std::vector<size_t>( num_wedges, 4 );
-    }
-      //------------------------------------------------------------------------
-      // sides
-    case 2: {
-
-      /////////////////////////////////////////////////////
-      // loop over each edge (pair of vertices of the face)
-      auto num_sides(0);
-      
-      // get the cell entities
-      const auto cell_verts = primal_conn.get_entities( cell, /* dim */ 0 );
-      const auto cell_faces = primal_conn.get_entities( cell, /* dim */ 2 );
-
-      // get connectivity specific to sides
-      // list of wedges associated to this cell.
-      auto cell_wedges = domain_conn.get_entities_vec( cell, /* dimension */ 1 );
-      
-      // sort cell wedges for later intersection
-      // somehow, sort is important.
-      // without sort, the intersection fails..
-      std::sort( cell_wedges.begin(),  cell_wedges.end() );
-
-      // temporary storage for found wedges
-      std::vector<id_t> wedges;
-      wedges.reserve(2);
-
-      std::vector<id_t> faces;
-      faces.reserve(1);
-
-      // loop over each face.
-      for( auto f = cell_faces.begin(); f != cell_faces.end();++f)
-      {
-        auto face_edges = primal_conn.get_entities( *f, /* dim */ 1 );
-
-        // list of wedges that attached to this face.
-        auto face_wedges = domain_conn.get_entities_vec(*f, 1);
-        std::sort(face_wedges.begin(), face_wedges.end());
-        
-        std::vector<id_t> cell_face_wedges;
-        // find intersection, wedges that belongs to this cell and face.
-        cell_face_wedges.clear();
-        std::set_intersection( face_wedges.begin(), face_wedges.end(),
-                               cell_wedges.begin(), cell_wedges.end(),
-                               std::back_inserter(cell_face_wedges));
-
-        std::sort(cell_face_wedges.begin(), cell_face_wedges.end());
-        assert(cell_face_wedges.size() == face_edges.size()*2);
-        
-        
-        // loop over edges that belongs to this face.
-        for(auto e = face_edges.begin(); e != face_edges.end();++e)
-        {
-          // wedges attached to edge, e.
-          auto edge_wedges = domain_conn.get_entities_vec(*e,/*dimension*/1);
-          std::sort(edge_wedges.begin(),edge_wedges.end());
-          
-          
-          // find intersection, that belongs this cell/face/edge.
-          std::vector<id_t> cell_face_edge_wedges;
-          // find intersection, wedges that belongs to this cell and face.
-          cell_face_edge_wedges.clear();
-          std::set_intersection( cell_face_wedges.begin(), cell_face_wedges.end(),
-                                 edge_wedges.begin(), edge_wedges.end(),
-                                 std::back_inserter(cell_face_edge_wedges));
-          assert(cell_face_edge_wedges.size() == 2);
-
-          // now attach the entities.
-          // sides consists of:
-          // 2 vertices,
-          // 1 edge,
-          // 1 face,
-          // 2 wedges,
-          // 
-          const auto edge_verts  = primal_conn.get_entities( *e, /* dimension */ 0 );
-
-          // 2 vertex entries 
-          for( auto v=edge_verts.begin(); v != edge_verts.end();++v) 
-              entities[i++]=*v;
-          
-          //1 edge entries
-          entities[i++]=*e;
-
-          // 1 face entries
-          entities[i++]=*f;
-
-          // 2 wedges.
-          for(auto we: cell_face_edge_wedges)
-            entities[i++]= we;
-
-          num_sides++;
-        }//e
-      }//f
-      return std::vector<size_t>(num_sides, 6);
-    }
-        
-      //------------------------------------------------------------------------
-      // failure
-    default:
-      THROW_RUNTIME_ERROR("Unknown bound entity type");
-      return {};
-  
-    } // switch
+    THROW_RUNTIME_ERROR("Should not get here");
+    return {};
   }
 
   //----------------------------------------------------------------------------
