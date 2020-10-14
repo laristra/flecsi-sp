@@ -3638,13 +3638,16 @@ public:
           for (unsigned i=0; i<vs.size(); ++i, ++it) *it = part_verts.at(*it);
         };
   
+    int comm_size, comm_rank;
+    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
         if (int64) {
           base_t::template write_element_block<long long>(
-              exoid, bid, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+              exoid, comm_rank, "cells", type_str, num_cells_this_blk, cell_vertices_func);
         }
         else {
           base_t::template write_element_block<int>(
-              exoid, bid, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+              exoid, comm_rank, "cells", type_str, num_cells_this_blk, cell_vertices_func);
         }
   
       }

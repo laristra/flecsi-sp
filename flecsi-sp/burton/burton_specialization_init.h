@@ -1920,7 +1920,7 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & vert_subspace =
      mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
-     vert_subspace.push_back( v->template global_id<0>() );
+     vert_subspace.push_back( v->template global_id<0>().entity() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1985,12 +1985,12 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & vert_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
-    vert_subspace.push_back( v->global_id() );
+    vert_subspace.push_back( v->global_id().entity() );
 
   auto & edge_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_edges >();
   for ( auto e : my_edges )
-    edge_subspace.push_back( e->global_id() );
+    edge_subspace.push_back( e->global_id().entity() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -2060,17 +2060,17 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & vert_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
-    vert_subspace.push_back( v->global_id() );
+    vert_subspace.push_back( v->global_id().entity() );
 
   auto & edge_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_edges >();
   for ( auto e : my_edges )
-    edge_subspace.push_back( e->global_id() );
+    edge_subspace.push_back( e->global_id().entity() );
 
   auto & face_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_faces >();
   for ( auto f : my_faces )
-    face_subspace.push_back( f->global_id() );
+    face_subspace.push_back( f->global_id().entity() );
 }
 
 
