@@ -3756,6 +3756,11 @@ void partition_mesh(
       auto xyz = mesh_def->midpoints(num_dims);
       colorer = std::make_unique<flecsi::coloring::parmetis_geomkway_colorer_t>(xyz, num_dims);
     }
+    else if (partition_alg == partition_alg_t::refinekway) { 
+      colorer = std::make_unique<flecsi::coloring::parmetis_repart_colorer_t>();
+    }
+    else if (partition_alg == partition_alg_t::metis) 
+      colorer = std::make_unique<flecsi::coloring::metis_colorer_t>();
     else if (partition_alg == partition_alg_t::naive)
       colorer = std::make_unique<flecsi::coloring::naive_colorer_t>();
     else
