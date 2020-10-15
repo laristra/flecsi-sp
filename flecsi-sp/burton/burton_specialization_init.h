@@ -75,15 +75,14 @@ inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t
 
     std::map<size_t, int> hostmap;
     for (int i=0; i<comm_size; ++i)
-      hostmap.emplace( hashes[i], i );
+      hostmap.emplace( hashes[i], hostmap.size() );
     
     auto num_hosts = hostmap.size();
 
     std::vector<size_t> local_rank_order(comm_size);
     std::vector<size_t> host_counts(num_hosts, 0);
     for (int i=0; i<comm_size; ++i) {
-      auto it = hostmap.find( hashes[i] );
-      auto j = std::distance(hostmap.begin(), it);
+      auto j = hostmap.at( hashes[i] );
       local_rank_order[i] = host_counts[j];
       host_counts[j]++;
     }
@@ -91,21 +90,16 @@ inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t
     auto n = size / num_hosts;
     auto q = size % num_hosts;
     
-    auto it = hostmap.find(hash);
-    auto host_id = std::distance(hostmap.begin(), it);
-    if (host_id<0 || host_id>= num_hosts)
-      THROW_RUNTIME_ERROR("Mistake computing node position");
-
+    auto host_id = hostmap.at(hash);
     auto host_start = n * host_id;
     host_start += std::min<size_t>(q, host_id);
     
-    auto local_id = local_rank_order[comm_rank] - it->second;
-    auto global_id = host_start + local_id;
-
     auto num_local = host_id < q ? n+1 : n;
-
-    if (local_id<num_local) return global_id;
-    else return -1;
+    
+    auto local_id = local_rank_order[comm_rank];
+    int global_id = local_id<num_local ? host_start + local_id : -1;
+    
+    return global_id;
   }
 
   return -1;
