@@ -14,6 +14,7 @@
 #include <ristra/utils/string_utils.h>
 #include <flecsi/coloring/dcrs_utils.h>
 #include <flecsi/coloring/mpi_communicator.h>
+#include <flecsi/coloring/metis_colorer.h>
 #include <flecsi/coloring/parmetis_colorer.h>
 #include <flecsi/coloring/parmetis_geom_colorer.h>
 #include <flecsi/coloring/parmetis_geomkway_colorer.h>
@@ -110,6 +111,8 @@ enum class partition_alg_t {
   kway,
   geom,
   geomkway,
+  refinekway,
+  metis,
   naive
 };
 

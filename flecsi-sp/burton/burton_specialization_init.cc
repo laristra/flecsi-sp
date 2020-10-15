@@ -49,7 +49,8 @@ auto register_dist_args =
 auto register_partition_args =
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<std::string>( "mesh", "partition-algorithm",
-        "Partition algorithm.  Options include: kway (default), geom, geomkway, naive.");
+        "Partition algorithm.  Options include: kway (default), geom, geomkway, "
+        "refinekway, metis, naive.");
 
 auto register_repart_args =
   ristra::initialization::command_line_arguments_t::instance().
@@ -132,6 +133,10 @@ void specialization_tlt_init(int argc, char** argv)
     partition_alg = partition_alg_t::geom;
   else if (partition_str ==  "geomkway")
     partition_alg = partition_alg_t::geomkway;
+  else if (partition_str ==  "refinekway")
+    partition_alg = partition_alg_t::refinekway;
+  else if (partition_str ==  "metis")
+    partition_alg = partition_alg_t::metis;
   else if (partition_str ==  "naive")
     partition_alg = partition_alg_t::naive;
   else
