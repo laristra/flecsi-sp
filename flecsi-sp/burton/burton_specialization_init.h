@@ -78,6 +78,16 @@ inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t
       hostmap.emplace( hashes[i], i );
     
     auto num_hosts = hostmap.size();
+
+    std::vector<size_t> local_rank_order(comm_size);
+    std::vector<size_t> host_counts(num_hosts, 0);
+    for (int i=0; i<comm_size; ++i) {
+      auto it = hostmap.find( hashes[i] );
+      auto j = std::distance(hostmap.begin(), it);
+      local_rank_order[i] = host_counts[j];
+      host_counts[j]++;
+    }
+
     auto n = size / num_hosts;
     auto q = size % num_hosts;
     
@@ -89,8 +99,7 @@ inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t
     auto host_start = n * host_id;
     host_start += std::min<size_t>(q, host_id);
     
-    auto start = it->second;
-    auto local_id = comm_rank - start;
+    auto local_id = local_rank_order[comm_rank] - it->second;
     auto global_id = host_start + local_id;
 
     auto num_local = host_id < q ? n+1 : n;
