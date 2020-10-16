@@ -12,8 +12,6 @@
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <ristra/initialization/arguments.h>
 
-//#include <gperftools/heap-profiler.h>
-  
 using distribution_alg_t = flecsi_sp::burton::distribution_alg_t;
 using partition_alg_t = flecsi_sp::burton::partition_alg_t;
 
@@ -173,9 +171,7 @@ void specialization_spmd_init(int argc, char** argv)
   
   auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
-  //if (rank==0) HeapProfilerDump("Before-init");
   flecsi_execute_task(initialize_mesh, flecsi_sp::burton, index, mesh_handle);
-  //if (rank==0) HeapProfilerDump("After-init");
 }
 
 } // namespace
