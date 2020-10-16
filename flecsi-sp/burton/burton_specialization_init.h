@@ -3164,7 +3164,7 @@ void make_corners(
   ai.index_space = index_spaces::edges_to_corners;
   ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  context.add_adjacency(ai);
+  if (ai.index_space!=7777) context.add_adjacency(ai);
 
   // corners <-> faces
   ai.index_space = index_spaces::corners_to_faces;
@@ -3176,7 +3176,7 @@ void make_corners(
   ai.index_space = index_spaces::faces_to_corners;
   ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.to_index_space = index_spaces::entity_map[corner_t::domain][corner_t::dimension];
-  context.add_adjacency(ai);
+  if (ai.index_space!=7777) context.add_adjacency(ai);
 
   // corners <-> cells
   ai.index_space = index_spaces::corners_to_cells;
@@ -3248,7 +3248,7 @@ void make_corners(
   ai.index_space = index_spaces::vertices_to_sides;
   ai.from_index_space = index_spaces::entity_map[vertex_t::domain][vertex_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
-  context.add_adjacency(ai);
+  if (ai.index_space!=7777) context.add_adjacency(ai);
 
   // sides <-> edges
   ai.index_space = index_spaces::sides_to_edges;
@@ -3260,7 +3260,7 @@ void make_corners(
   ai.index_space = index_spaces::edges_to_sides;
   ai.from_index_space = index_spaces::entity_map[edge_t::domain][edge_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
-  context.add_adjacency(ai);
+  if (ai.index_space!=7777) context.add_adjacency(ai);
 
   // sides <-> faces
   ai.index_space = index_spaces::sides_to_faces;
@@ -3272,7 +3272,7 @@ void make_corners(
   ai.index_space = index_spaces::faces_to_sides;
   ai.from_index_space = index_spaces::entity_map[face_t::domain][face_t::dimension];
   ai.to_index_space = index_spaces::entity_map[side_t::domain][side_t::dimension];
-  context.add_adjacency(ai);
+  if (ai.index_space!=7777) context.add_adjacency(ai);
 
   // sides <-> cells
   ai.index_space = index_spaces::sides_to_cells;
@@ -3985,11 +3985,13 @@ void partition_mesh(
 
       // skip the case where both dimensions are the same
       if ( from_dim == to_dim ) continue;
+        
+      auto index_space_id = index_spaces::connectivity_map[ from_dim ][ to_dim ];
+      if (index_space_id == 7777) continue;
       
       // populate the adjacency information
       flecsi::coloring::adjacency_info_t ai;
-      ai.index_space =
-        index_spaces::connectivity_map[ from_dim ][ to_dim ];
+      ai.index_space = index_space_id;
       ai.from_index_space = index_spaces::entity_map[0][ from_dim ];
       ai.to_index_space = index_spaces::entity_map[0][to_dim ];
       ai.color_sizes.resize(comm_size);
