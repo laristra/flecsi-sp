@@ -32,7 +32,7 @@ variables:
   FLECSISP_TANGRAM_INSTALL_PREFIX: "${CI_PROJECT_DIR}/tangram/build/install"
   FLECSISP_TANGRAM_REF: "1.0.4"
   FLECSISP_PORTAGE_INSTALL_PREFIX: "${CI_PROJECT_DIR}/portage/build/install"
-  FLECSISP_PORTAGE_REF: "3.0.0rc1"
+  FLECSISP_PORTAGE_REF: "3.0.0.rc1"
   FLECSISP_SPACK_SPEC: "flecsi-sp-deps%gcc@${FLECSISP_GCC_VERSION} backend=${FLECSISP_RUNTIME} +portage"
   FLECSISP_SPACK_REPO: "https://github.com/spack/spack.git"
   FLECSISP_SPACK_REF: "v0.15.3"
