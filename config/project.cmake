@@ -93,6 +93,7 @@ if ( _ristra_contents )
 else()
   find_package(Ristra CONFIG REQUIRED)
   include_directories(${RISTRA_INCLUDE_DIRS})
+  set(RISTRA_LIBRARIES Ristra::Ristra CACHE STRING "Ristra library target name (not being set by RistraConfig.cmake")
   list(APPEND FLECSI_SP_LIBRARIES ${RISTRA_LIBRARIES})
 endif()
 
