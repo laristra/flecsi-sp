@@ -197,31 +197,32 @@ auto make_interface_reconstructor(
          tolerances_t & tols,
          bool & all_convex
          ) {
-
+  
   using mesh_wrapper_t = flecsi_sp::burton::portage_mesh_wrapper_t<mesh_t>;
-
+  
   constexpr int num_dims = mesh_wrapper_a_t::mesh_t::num_dimensions;
-  if constexpr (num_dims == 2){
-    auto interface_reconstructor = std::make_shared<Tangram::Driver<Tangram::VOF, num_dims, 
-                                          mesh_wrapper_t,Tangram::SplitR2D,Tangram::ClipR2D> 
-					  >(mesh_wrapper_a, tols, all_convex);
-    return std::move(interface_reconstructor);
-  } else if (num_dims == 3) {
-    auto interface_reconstructor = std::make_shared<Tangram::Driver<Tangram::VOF, num_dims, 
-                                          mesh_wrapper_t,Tangram::SplitR3D,Tangram::ClipR3D> 
-					  >(mesh_wrapper_a, tols, all_convex);
-    return std::move(interface_reconstructor);
-  } else {
-    static_assert(num_dims != 3 || num_dims !=2 , 
-                  "make_interface_reconstructor dimensions are out of range");
-  }
+  static_assert(num_dims != 3 || num_dims !=2 , 
+                "make_interface_reconstructor dimensions are out of range");
+  auto interface_reconstructor = 
+      std::make_shared<Tangram::Driver<Tangram::VOF, num_dims, 
+                                       mesh_wrapper_t,
+                                       Tangram::SplitRnD<num_dims>,
+                                       Tangram::ClipRnD<num_dims>
+                                       >
+                       >(mesh_wrapper_a, tols, all_convex);
+  return std::move(interface_reconstructor);
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief Test the remap capabilities of portage + tangram
-/// \param [in] mesh       the mesh object
-/// \param [in] mat_state  a densely populated set of data
-/// \param [in] coord0     the set of coordinates to be applied
+/// \param [in] mesh             the mesh object
+/// \param [in] density_handle   density field
+/// \param [in] volfrac_handle   material volume fractions in cells
+/// \param [in] velocity_hanle   velocity field
+/// \param [in] density_mutator
+/// \param [in] volfrac_mutator
+/// \param [in] velocity_mutator
+/// \param [in] coord0           the set of coordinates to be applied
 ////////////////////////////////////////////////////////////////////////////////
 void remap_tangram_test(
   utils::client_handle_r<mesh_t> mesh,
@@ -347,9 +348,9 @@ void remap_tangram_test(
   Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
   bool all_convex = false;
   std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
-  auto source_interface_reconstructor = make_interface_reconstructor(source_mesh_wrapper,
-  								     tols,
-  								     all_convex);  
+  auto source_interface_reconstructor = 
+      make_interface_reconstructor(source_mesh_wrapper, tols, all_convex);
+  
   // Create the mat centroid list
   auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
                                                             source_interface_reconstructor,
@@ -366,22 +367,16 @@ void remap_tangram_test(
     }
   }
 
-  // Build remapper
-	auto distributed = distrubute_mesh(
+  // Make the remapper with source mesh/state - redistribution does
+  // not apply to swept face remap
+  auto remapper = make_remapper<num_dims>(
       source_mesh_wrapper,
       source_state_wrapper,
       target_mesh_wrapper,
-      target_state_wrapper,
-			var_names);
+      target_state_wrapper);
 
-  auto remapper = make_remapper<num_dims>(
-             *distributed.first,
-             *distributed.second,
-             target_mesh_wrapper,
-             target_state_wrapper);
-
-  // Do the remap 
-	compute_weights<num_dims>(remapper);
+  // Do the remap
+  compute_weights_intersect(remapper);
 
   constexpr auto RealMin = std::numeric_limits<double>::min();
   constexpr auto RealMax = std::numeric_limits<double>::max();
@@ -658,6 +653,7 @@ void driver(int argc, char ** argv)
           xn);
 
 #if 1
+  std::cout << "Swept-face based remap..." << std::endl;
   flecsi_execute_mpi_task(
           remap_tangram_test, 
           flecsi_sp::burton::test, 
