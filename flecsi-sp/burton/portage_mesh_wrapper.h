@@ -699,9 +699,9 @@ private:
   const real_t * cell_volumes_ = nullptr;
   const vector_t * cell_centroids_ = nullptr;
 
-  const std::map<size_t, size_t> * vert_local_to_global_id_map_ = nullptr;
-  const std::map<size_t, size_t> * face_local_to_global_id_map_ = nullptr; 
-  const std::map<size_t, size_t> * cell_local_to_global_id_map_ = nullptr; 
+  const std::vector<size_t> * vert_local_to_global_id_map_ = nullptr;
+  const std::vector<size_t> * face_local_to_global_id_map_ = nullptr; 
+  const std::vector<size_t> * cell_local_to_global_id_map_ = nullptr; 
 };
 
 
