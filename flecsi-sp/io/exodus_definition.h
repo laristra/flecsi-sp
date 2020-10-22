@@ -32,7 +32,7 @@
 #include <unordered_map>
 #include <vector>
 
-#define CHUNK_SIZE 128
+#define CHUNK_SIZE 256
 
 extern "C" {
 void  ex_iqsort(int v[], int iv[], int count );
@@ -752,6 +752,9 @@ public:
           start += chunk;
           rank_verts -= chunk;
         } // while
+        
+        // without this, some ranks seem to get too far ahead and timeout
+        MPI_Barrier(MPI_COMM_WORLD);
           
       } // ranks
       
@@ -3432,6 +3435,9 @@ public:
           start += chunk;
           rank_cells -= chunk;
         } // while
+        
+        // without this, some ranks seem to get too far ahead and timeout
+        MPI_Barrier(MPI_COMM_WORLD);
           
       } // ranks
         
@@ -4608,7 +4614,7 @@ public:
         "Mismatch in read blocks");
 
     clog_assert( cell_block_id_.size() == num_cells, "Mismatch in block types" );
-    
+
     cell_part_id_.assign(num_cells, comm_rank);
     
    
@@ -4996,6 +5002,9 @@ public:
           start += chunk;
           rank_cells -= chunk;
         } // while
+
+        // without this, some ranks seem to get too far ahead and timeout
+        MPI_Barrier(MPI_COMM_WORLD);
           
       } // ranks
         
