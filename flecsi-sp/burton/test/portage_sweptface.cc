@@ -11,8 +11,10 @@
 #include <cinchtest.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi-sp/burton/burton_mesh.h>
-#include <flecsi-sp/utils/types.h>
 #include <flecsi-sp/burton/mesh_interface.h>
+#include <flecsi-sp/burton/portage_mesh_wrapper.h>
+#include <flecsi-sp/burton/portage_state_wrapper.h>
+#include <flecsi-sp/utils/types.h>
 
 #include <flecsi-sp/burton/portage_helpers.h>
 
@@ -37,18 +39,11 @@ using index_spaces_t = mesh_t::index_spaces_t;
 using real_t = mesh_t::real_t;
 using vector_t = mesh_t::vector_t;
 
-using entity_kind_t = Portage::Entity_kind;
-using entity_type_t = Portage::Entity_type;
-using field_type_t = Portage::Field_type;
-
 namespace flecsi_sp {
 namespace burton {
 namespace test {
 
-template< typename T >
-real_t prescribed_function( const T & c ) {
-  return 2.0 + c[0];
-}
+
 
 ////////////////////////////////////////////////////////////////////////////////
 // Register the mesh state
@@ -58,7 +53,7 @@ flecsi_register_field(
   hydro,
   density,
   real_t,
-  sparse,
+  dense,
   1,
   index_spaces_t::cells
 );
@@ -68,16 +63,6 @@ flecsi_register_field(
   hydro,
   velocity,
   vector_t,
-  sparse,
-  1,
-  index_spaces_t::cells
-);
-
-flecsi_register_field(
-  mesh_t,      
-  hydro,
-  volume_fraction,
-  real_t,
   sparse,
   1,
   index_spaces_t::cells
@@ -114,8 +99,7 @@ static auto zero_padded(
 void output( 
   utils::client_handle_r<mesh_t> mesh, 
   size_t iteration,
-  utils::sparse_handle_r<real_t> d,
-  utils::sparse_handle_r<real_t> vf
+  utils::dense_handle_r<real_t> d
 ) {
   clog(info) << "OUTPUT MESH TASK" << std::endl;
 
@@ -172,81 +156,30 @@ void output(
   file << "LOOKUP_TABLE default" << std::endl;
   
   for ( auto c : cells ) {
-    auto bulk = 0.0;
-    for (auto m: d.entries(c)){
-      //      bulk += d(c,m);
-      bulk += d(c,m) * vf(c,m);
-      //      file << d(c,m) << std::endl;
-    }
-    file << bulk << std::endl;
+    file << d(c) << std::endl;
   }
 
   file.close();
 
 }
 
-////////////////////////////////////////////////////////////////////////////////
-/// \brief make a remapper object
-////////////////////////////////////////////////////////////////////////////////
-template<
-  typename mesh_wrapper_a_t,
-  typename tolerances_t
-  >
-auto make_interface_reconstructor(
-         mesh_wrapper_a_t & mesh_wrapper_a,
-         tolerances_t & tols,
-         bool & all_convex
-         ) {
-  
-  using mesh_wrapper_t = flecsi_sp::burton::portage_mesh_wrapper_t<mesh_t>;
-  
-  constexpr int num_dims = mesh_wrapper_a_t::mesh_t::num_dimensions;
-  static_assert(num_dims != 3 || num_dims !=2 , 
-                "make_interface_reconstructor dimensions are out of range");
-  auto interface_reconstructor = 
-      std::make_shared<Tangram::Driver<Tangram::VOF, num_dims, 
-                                       mesh_wrapper_t,
-                                       Tangram::SplitRnD<num_dims>,
-                                       Tangram::ClipRnD<num_dims>
-                                       >
-                       >(mesh_wrapper_a, tols, all_convex);
-  return std::move(interface_reconstructor);
-}
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Test the remap capabilities of portage + tangram
-/// \param [in] mesh             the mesh object
-/// \param [in] density_handle   density field
-/// \param [in] volfrac_handle   material volume fractions in cells
-/// \param [in] velocity_hanle   velocity field
-/// \param [in] density_mutator
-/// \param [in] volfrac_mutator
-/// \param [in] velocity_mutator
-/// \param [in] coord0           the set of coordinates to be applied
+/// \brief Test intersection based remap in portage
+/// \param [in] mesh       the mesh object
+/// \param [in] mat_state  a densely populated set of data
+/// \param [in] coord0     the set of coordinates to be applied
 ////////////////////////////////////////////////////////////////////////////////
-void remap_tangram_test(
+void remap_test(
   utils::client_handle_r<mesh_t> mesh,
-  utils::sparse_handle_rw<real_t> density_handle,
-  utils::sparse_handle_rw<real_t> volfrac_handle,
+  utils::dense_handle_rw<real_t> density_handle,
   utils::sparse_handle_rw<vector_t> velocity_handle,
-  utils::sparse_mutator<real_t> density_mutator,
-  utils::sparse_mutator<real_t> volfrac_mutator,
-  utils::sparse_mutator<vector_t> velocity_mutator,
   utils::dense_handle_r<vector_t> new_vertex_coords
 ) {
   
-  using mesh_wrapper_t = flecsi_sp::burton::portage_mesh_wrapper_t<mesh_t>;
-
   constexpr auto num_dims = mesh_t::num_dimensions;
-  auto max_mats = volfrac_handle.max_entries(); 
-  constexpr auto epsilon = 10*config::test_tolerance;
-
-  // some mesh parameters
-  const auto & cells = mesh.cells();
-  const auto & owned_cells = mesh.cells(flecsi::owned);
-  auto num_cells = cells.size();
-  auto num_owned_cells = owned_cells.size();
-
+  constexpr auto epsilon = config::test_tolerance;
+  
   // get the context
   auto & context = flecsi::execution::context_t::instance();
   auto comm_rank = context.color();
@@ -258,7 +191,6 @@ void remap_tangram_test(
   // Apply the new coordinates to the mesh and update its geometry.
   // Here we save some info we need.
   std::vector< real_t > target_cell_volume(mesh.num_cells());
-  std::vector< vector_t > target_cell_centroid(mesh.num_cells());
   // update coordinates
   for ( auto v : mesh.vertices() )
     std::swap(v->coordinates(), new_vertex_coords(v));
@@ -266,7 +198,6 @@ void remap_tangram_test(
   for ( auto c: mesh.cells() ) {
     c->update(&mesh);
     target_cell_volume[c] = c->volume();
-    target_cell_centroid[c] = c->centroid();
   }
 
   // Store the cell volumes for the source mesh 
@@ -280,104 +211,79 @@ void remap_tangram_test(
     source_volume[c] = c->volume();
   }
 
+
   //---------------------------------------------------------------------------
   // Set up portage mesh/data wrappers
 
   // Create the mesh wrapper objects
-  portage_mesh_wrapper_t<mesh_t> source_mesh_wrapper(mesh);
-  portage_mesh_wrapper_t<mesh_t> target_mesh_wrapper(mesh);
+  portage_mesh_wrapper_t<mesh_t> mesh_wrapper_a(mesh);
+  portage_mesh_wrapper_t<mesh_t> mesh_wrapper_b(mesh);
 
-  target_mesh_wrapper.set_new_coordinates(
+  mesh_wrapper_b.set_new_coordinates(
     &new_vertex_coords(0),
-    target_cell_volume.data(),
-    target_cell_centroid.data() );
+    target_cell_volume.data());
 
-  // Create the state wrapper objects
-  portage_mm_state_wrapper_t<mesh_t> source_state_wrapper(mesh);
-  portage_mm_state_wrapper_t<mesh_t> target_state_wrapper(mesh);
+  // Create temporary vectors for the data to be remapped
+  std::vector< double > remap_density(mesh.num_cells(), 0);
 
+  std::vector< double > velocity(mesh.num_cells()*num_dims, 0);
+  std::vector< double > remap_velocity(mesh.num_cells()*num_dims, 0);
 
-  // Compute material/cell offsets
-  std::vector< std::vector< int > > mat_cells(max_mats);
-  std::vector< std::vector< int > > cell_mats(num_cells);
-  std::vector< std::vector< int > > cell_mat_offsets(num_cells);
-
-  for (size_t m=0; m<max_mats; ++m){
-    size_t mat_cell_id = 0;
-    for (auto c: velocity_handle.indices(m) ){
-      mat_cells[m].push_back(c);
-      cell_mats[c].push_back(m);
-      cell_mat_offsets[c].push_back( mat_cell_id );
-      // bump counters
-      mat_cell_id++;
+  // Fill the temporary vectors with the data that needs to be remapped
+  for (int dim=0; dim < num_dims; ++dim) {
+    for (auto c: mesh.cells()) {
+      for ( auto m : velocity_handle.entries(c) ) {
+        velocity[c + dim*mesh.num_cells()] = velocity_handle(c,m)[dim];
+      }
     }
   }
-
-  // Initialize material offsets and cells in wrappers
-  source_state_wrapper.set_materials(mat_cells, cell_mats, cell_mat_offsets );
 
   // Create a vector of strings that correspond to the names of the variables
   //   that will be remapped
-  static const char coordinate[] = {'x', 'y', 'z'};    
   std::vector<std::string> var_names;
 
+  // Create the state wrapper objects
+  portage_state_wrapper_t<mesh_t> state_wrapper_a(mesh);
+  portage_state_wrapper_t<mesh_t> state_wrapper_b(mesh);
 
-  // First, set special internal fields
-  auto volfrac_name = "mat_volfracs";
-  auto volfrac = source_state_wrapper.template add_cell_field<real_t>(
-      std::string{"mat_volfracs"}, entity_kind_t::CELL,
-      field_type_t::MULTIMATERIAL_FIELD);
+  // Add the fields that need to be remapped to the state wrappers
+  // Special care is taken to handle each dimension of the velocity field
+  var_names.push_back(std::string{"density"});
+  state_wrapper_a.add_cell_field( "density", &density_handle(0) );
+  state_wrapper_b.add_cell_field( "density", remap_density.data() );
 
-  // now set fields to be reconstructed
-  auto density_name = "density";
-  auto density = source_state_wrapper.template add_cell_field<real_t>(
-      density_name, entity_kind_t::CELL, field_type_t::MULTIMATERIAL_FIELD);
-  var_names.push_back(density_name);
-  
-  // Populate data to be remapped
-  size_t offset{0};
-  for (int m=0; m<max_mats; ++m){
-    for (auto c: velocity_handle.indices(m) ){
-      volfrac[offset] = volfrac_handle(c,m);
-      offset++;
-    }
+  static char coordinate[] = {'x', 'y', 'z'};    
+  for ( int dim=0; dim<num_dims; ++dim ) {
+    std::string name = "vel_";
+    name += coordinate[dim];
+    var_names.emplace_back(name);
+    state_wrapper_a.add_cell_field( name, velocity.data() + mesh.num_cells()*dim );
+    state_wrapper_b.add_cell_field( name, remap_velocity.data() + mesh.num_cells()*dim );
   }
 
-  // Get the material centroid values via Tangram
-  auto mpi_comm = MPI_COMM_WORLD;
-  Wonton::MPIExecutor_type mpiexecutor(mpi_comm);
-  bool all_convex = false;
-  std::vector<Tangram::IterativeMethodTolerances_t> tols(2,{1000, 1e-15, 1e-15});
-  auto source_interface_reconstructor = 
-      make_interface_reconstructor(source_mesh_wrapper, tols, all_convex);
   
-  // Create the mat centroid list
-  auto centroid_list = source_state_wrapper.build_centroids(source_mesh_wrapper,
-                                                            source_interface_reconstructor,
-                                                            &mpiexecutor);
-
-  // Hand-off mat centroid list to matcentroid pointer object
-  offset = 0;
-  for (int m=0; m<max_mats; ++m){
-    auto mat_index = 0;
-    for (auto c: velocity_handle.indices(m) ){
-      density[offset] = prescribed_function( centroid_list[m][mat_index] );
-      offset++;
-      mat_index++;
-    }
+  std::cout << " Before make_remapper" << std::endl;
+  for ( auto v: var_names) {
+    state_wrapper_a.check_map(v);
+    state_wrapper_b.check_map(v);
   }
 
-  // Make the remapper with source mesh/state - redistribution does
-  // not apply to swept face remap
+  // Make remapper with native source mesh/state - redistribution not
+  // applicable for swept face remapper
+
   auto remapper = make_remapper<num_dims>(
-      source_mesh_wrapper,
-      source_state_wrapper,
-      target_mesh_wrapper,
-      target_state_wrapper);
+             mesh_wrapper_a,
+             state_wrapper_a,
+             mesh_wrapper_b,
+             state_wrapper_b);
 
-  // Do the remap
-  compute_weights_intersect(remapper);
+  std::cout << " Before weights" << std::endl;
 
+  // Do the remap using sweptface volume intersection
+  compute_weights_sweptface(remapper);
+
+  std::cout << "Before interpolate" << std::endl;
+	
   constexpr auto RealMin = std::numeric_limits<double>::min();
   constexpr auto RealMax = std::numeric_limits<double>::max();
 
@@ -387,39 +293,24 @@ void remap_tangram_test(
     >( var, var, RealMin, RealMax, Portage::Limiter_type::NOLIMITER,
         Portage::Boundary_Limiter_type::BND_NOLIMITER);
   }
-  
+
+
   //---------------------------------------------------------------------------
   // Swap old for new data
-  
+
   // Checking conservation for remap test
   real_t total_density{0};
-  real_t total_volume{0};
+  vector_t total_velocity{0};
 
-  // Calculate totals for old data
   for (auto c: mesh.cells(flecsi::owned)) {
+    total_density +=  c->volume() *  density_handle(c);
+    density_handle(c) = remap_density[c];
     for ( auto m : velocity_handle.entries(c) ) {
-      total_density +=  c->volume() * volfrac_mutator(c,m) *  density_handle(c,m);
-      total_volume +=  c->volume() * volfrac_mutator(c,m);
-    }
-  }
-
-  // Swap old data for new data
-  for (int mat_num=0; mat_num < max_mats; ++mat_num){
-  
-    real_t const * remap_density;
-    real_t const * remap_volfracs;
-    target_state_wrapper.mat_get_celldata( "density", mat_num, &remap_density ); 
-    target_state_wrapper.mat_get_celldata( "mat_volfracs", mat_num, &remap_volfracs ); 
-
-    auto & these_mat_cells = mat_cells[mat_num];
-    these_mat_cells.clear();
-    target_state_wrapper.mat_get_cells(mat_num, &these_mat_cells);
-
-    size_t count{0}; 
-    for ( auto c : these_mat_cells ) {
-      density_mutator(c, mat_num) = remap_density[count];
-      volfrac_mutator(c, mat_num) = remap_volfracs[count]; 
-      count++;
+      auto & vel = velocity_handle(c,m);
+      for (int dim=0; dim < num_dims; ++dim) {
+        total_velocity[dim] += c->volume() * vel[dim];
+        vel[dim] = remap_velocity[c + dim * mesh.num_cells()];
+      }
     }
   }
 
@@ -432,34 +323,51 @@ void remap_tangram_test(
 
   // Check conservation for remap test
   real_t total_remap_density{0};
+  vector_t total_remap_velocity{0};
   // Calculate the L1 and L2 norms
   real_t total_vol = 0.0;
   real_t L1 = 0.0;
   real_t L2 = 0.0;
-  
-  std::vector<double> vfrac_sum(num_cells, 0.0);
 
-  std::vector<real_t> actual(num_cells, 0.0);
-  for (int mat_num=0; mat_num < max_mats; ++mat_num){
-    for (auto element: mat_cells[mat_num]){
-      auto c = cells[element];
-      total_vol += c->volume() * volfrac_mutator(c,mat_num);
-      actual[c.id()] += volfrac_mutator(c,mat_num) * density_mutator(c,mat_num);
-      total_remap_density += c->volume() * volfrac_mutator(c,mat_num) * density_mutator(c,mat_num);
-      vfrac_sum[c.id()] += volfrac_mutator(c,mat_num);
+  for (auto c : mesh.cells(flecsi::owned) ) {
+
+    // remapped sums
+    auto actual = density_handle(c);
+    total_remap_density += c->volume() * density_handle(c);
+    for ( auto m : velocity_handle.entries(c) ) {
+      const auto & vel = velocity_handle(c,m);
+      for (int dim=0; dim<num_dims; ++dim) {
+        total_remap_velocity[dim] += c->volume() * vel[dim];
+      }
+
+      // expected answer
+      real_t sum{0}, expected;
+#ifdef CUBIC
+      for ( int i=0; i < num_dims; ++i)
+        sum += ((c->centroid())[i]+0.5);
+      expected = pow(sum,3.0);
+#elif LINEAR
+      for ( int i=0; i < num_dims; ++i)
+        sum += ((c->centroid())[i]+0.5);
+      expected = sum * 2.0;
+#elif COSINE
+      real_t arg = 10.0 * std::sqrt( pow((c->centroid())[0], 2) + pow((c->centroid())[1], 2) );
+      expected = 1.0 + (std::cos(arg) / 3.0);
+#else
+      expected = 1.0;
+      EXPECT_NEAR( expected, actual, epsilon );
+#endif
+
+      // L1,L2 errors
+      auto each_error = std::abs(actual - expected);
+      L1 +=  c->volume() * each_error; // L1
+      L2 +=  c->volume() * std::pow(each_error, 2); // L2
+      total_vol += c->volume();
     }
-  }
-  
-  for (auto c: mesh.cells(flecsi::owned)){
-    EXPECT_NEAR( vfrac_sum[c], 1.0, epsilon );
-    auto expected = prescribed_function( c->centroid() );
-    // L1,L2 errors
-    auto each_error = std::abs(actual[c.id()] - expected);
-    L1 +=  c->volume() * each_error; // L1
-    L2 +=  c->volume() * std::pow(each_error, 2); // L2    
   }
 
   // output L1, L2 errors for debug
+  auto mpi_comm = MPI_COMM_WORLD;
   real_t total_vol_sum{0}, L1_sum{0}, L2_sum{0};
   int ret;
   ret = MPI_Allreduce( &total_vol, &total_vol_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
@@ -469,21 +377,22 @@ void remap_tangram_test(
   L2_sum = pow(L2_sum/total_vol_sum, 0.5); // L2
 
   if ( comm_rank == 0 ) {
-    printf("L1 Norm: %14.7e, Total Volume: %f \n", L1_sum, total_vol_sum);
-    printf("L2 Norm: %14.7e, Total Volume: %f \n", L2_sum, total_vol_sum);
-    EXPECT_NEAR(L1_sum, 0.0, epsilon);
-    EXPECT_NEAR(L2_sum, 0.0, epsilon);
-    EXPECT_NEAR( total_vol_sum, 1.0, epsilon );
+    printf("L1 Norm: %.20f, Total Volume: %f \n", L1_sum, total_vol_sum);
+    printf("L2 Norm: %.20f, Total Volume: %f \n", L2_sum, total_vol_sum);
   }
 
   // Verify conservation
   real_t total_density_sum{0}, total_remap_density_sum{0};
-  ret = MPI_Allreduce( &total_density, &total_density_sum, 1, MPI_DOUBLE, 
-                       MPI_SUM, mpi_comm);
-  ret = MPI_Allreduce( &total_remap_density, &total_remap_density_sum, 1, 
-                       MPI_DOUBLE, MPI_SUM, mpi_comm);
+  vector_t total_velocity_sum{0}, total_remap_velocity_sum{0};
+  ret = MPI_Allreduce( &total_density, &total_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( &total_remap_density, &total_remap_density_sum, 1, MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( total_velocity.data(), total_velocity_sum.data(), total_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
+  ret = MPI_Allreduce( total_remap_velocity.data(), total_remap_velocity_sum.data(), total_remap_velocity.size(), MPI_DOUBLE, MPI_SUM, mpi_comm);
 
   EXPECT_NEAR( total_density_sum, total_remap_density_sum, epsilon);
+  for ( int i=0; i<num_dims; ++i)
+    EXPECT_NEAR( total_velocity_sum[i], total_remap_velocity_sum[i], epsilon);
+
 }
 
 
@@ -492,31 +401,91 @@ void remap_tangram_test(
 /// \param [in] mesh       the mesh object
 /// \param [in] mat_state  a densely populated set of data
 ////////////////////////////////////////////////////////////////////////////////
-void initialize(
+void initialize_flat(
   utils::client_handle_r<mesh_t> mesh,
-  utils::sparse_mutator<real_t> density,
-  utils::sparse_mutator<real_t> vol_frac,
+  utils::dense_handle_w<real_t> density,
   utils::sparse_mutator<vector_t> velocity
 ) {
-  for (auto c: mesh.cells(flecsi::owned)){
-    c->update(&mesh);
-    const auto & centroid = c->centroid();
-    auto func = prescribed_function( centroid );
-    std::vector<int> mats;
-    // MM initalization
-    if (centroid[0] < -0.21875) mats.push_back(0);
-    if (centroid[0] > -0.25) mats.push_back(1);
-    // Single material initialization
-    // if (centroid[0] < -0.25) mats.push_back(0);
-    // if (centroid[0] > -0.25) mats.push_back(1);
-    for ( auto m : mats ) {
-      vol_frac(c,m) = static_cast<real_t>(1) / mats.size();
-      density(c,m) = func;
-      velocity(c,m) = func;
-    }
+
+  int m = 0;
+  for (auto c: mesh.cells()){
+    density(c) = 1.0;
+    velocity(c,m) = 1.0;
   }
 }
- 
+
+void initialize_linear(
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
+) {
+
+  real_t val;
+  int m = 0;
+  for (auto c: mesh.cells()){
+    real_t sum = 0.0;
+    for ( int i=0; i < mesh_t::num_dimensions; i++)
+      sum += ((c->centroid())[i]+0.5);
+    val = sum * 2.0;
+    density(c) = val;
+    velocity(c,m) = val;
+  }
+}
+
+void initialize_cubic(
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
+) {
+
+  int m = 0;
+  for (auto c: mesh.cells()){
+    real_t sum = 0.0;
+    for ( int i=0; i < mesh_t::num_dimensions; i++)
+      sum += pow((c->centroid())[i]+0.5, 3.0);
+    auto val = sum;
+    density(c) = val;
+    velocity(c,m) = val;
+  }
+}
+
+void initialize_cosine(
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
+) {
+
+  int m = 0;
+  for (auto c: mesh.cells()){
+    real_t sum = 0.0;
+    for ( int i=0; i < mesh_t::num_dimensions; i++)
+      sum += pow((c->centroid())[i], 2);
+    auto arg = 10.0 * std::sqrt( sum );
+    auto val = 1.0 + (std::cos(arg) / 3.0);
+    density(c) = val;
+    velocity(c,m) = val;
+  }
+}
+
+void initialize_step(
+  utils::client_handle_r<mesh_t> mesh,
+  utils::dense_handle_w<real_t> density,
+  utils::sparse_mutator<vector_t> velocity
+) {
+
+  int m = 0;
+  for (auto c: mesh.cells()){
+    real_t val;
+    if ( c < mesh.num_cells()/2 ){
+      val = 0;
+    } else {
+      val = 1;
+    }
+    density(c) = val;
+    velocity(c,m) = val;
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 //! \brief modify the coordinates & solution
 //!
@@ -551,11 +520,9 @@ void modify(
     for ( int j=0; j < num_dims; j++) {
       if ( vertex[j] < 0.5 && vertex[j] > 0) {
         auto perturbation = spacing * real_rand();
-	//perturbation = 0;
         vertex[j] -= perturbation;
       } else if (vertex[j] <= 0 && vertex[j]> -0.5) {
         auto perturbation = spacing * real_rand();
-	//perturbation = 0;
         vertex[j] += perturbation;
       }
     }
@@ -587,12 +554,20 @@ void restore(
 
 }// TEST_F
 
-flecsi_register_mpi_task(remap_tangram_test, flecsi_sp::burton::test);
+flecsi_register_mpi_task(remap_test, flecsi_sp::burton::test);
 flecsi_register_task(output, flecsi_sp::burton::test, loc,
   index|flecsi::leaf);
 
 // Different Initialization Tasks
-flecsi_register_task(initialize, flecsi_sp::burton::test, loc,
+flecsi_register_task(initialize_flat, flecsi_sp::burton::test, loc,
+  index|flecsi::leaf);
+flecsi_register_task(initialize_linear, flecsi_sp::burton::test, loc,
+  index|flecsi::leaf);
+flecsi_register_task(initialize_cubic, flecsi_sp::burton::test, loc,
+  index|flecsi::leaf);
+flecsi_register_task(initialize_cosine, flecsi_sp::burton::test, loc,
+  index|flecsi::leaf);
+flecsi_register_task(initialize_step, flecsi_sp::burton::test, loc,
   index|flecsi::leaf);
 
 flecsi_register_task(restore, flecsi_sp::burton::test, loc,
@@ -617,33 +592,63 @@ void driver(int argc, char ** argv)
   // get the mesh handle
   auto mesh_handle = flecsi_get_client_handle(mesh_t, meshes, mesh0);
 
-  auto num_materials = 2;
+
 
   size_t time_cnt{0};
 
   auto xn = flecsi_get_handle(mesh_handle, hydro, node_coordinates, vector_t, dense, 0);
-  auto density_handle  = flecsi_get_handle(mesh_handle, hydro, density,  real_t,   sparse, 0);
-  auto volfrac_handle  = flecsi_get_handle(mesh_handle, hydro, volume_fraction, real_t,   sparse, 0);
+  auto density_handle = flecsi_get_handle(mesh_handle, hydro, density, real_t, dense, 0);
   auto velocity_handle = flecsi_get_handle(mesh_handle, hydro, velocity, vector_t, sparse, 0);
-  auto density_mutator  = flecsi_get_mutator(mesh_handle, hydro, density,  real_t,   sparse, 0, num_materials);
-  auto volfrac_mutator  = flecsi_get_mutator(mesh_handle, hydro, volume_fraction,  real_t,   sparse, 0, num_materials);
-  auto velocity_mutator = flecsi_get_mutator(mesh_handle, hydro, velocity, vector_t, sparse, 0, num_materials);
+  auto velocity_mutator = flecsi_get_mutator(mesh_handle, hydro, velocity, vector_t, sparse, 0, 1);
 
+#ifdef CUBIC
   flecsi_execute_task(
-          initialize,
+          initialize_cubic,
           flecsi_sp::burton::test,
           index,
           mesh_handle,
-          density_mutator,
-          volfrac_mutator,
+          density_handle,
           velocity_mutator);
+#elif LINEAR
+  flecsi_execute_task(
+          initialize_linear,
+          flecsi_sp::burton::test,
+          index,
+          mesh_handle,
+          density_handle,
+          velocity_mutator);
+#elif STEP
+  flecsi_execute_task(
+          initialize_step,
+          flecsi_sp::burton::test,
+          index,
+          mesh_handle,
+          density_handle,
+          velocity_mutator);
+#elif COSINE
+  flecsi_execute_task(
+          initialize_cosine,
+          flecsi_sp::burton::test,
+          index,
+          mesh_handle,
+          density_handle,
+          velocity_mutator);
+#else
+  flecsi_execute_task(
+          initialize_flat,
+          flecsi_sp::burton::test,
+          index,
+          mesh_handle,
+          density_handle,
+          velocity_mutator);
+#endif
   
   time_cnt++;
   flecsi_execute_task(
             output,
             flecsi_sp::burton::test,
             index,
-            mesh_handle, time_cnt, density_handle, volfrac_handle);
+            mesh_handle, time_cnt, density_handle);
 
   flecsi_execute_task(
           modify,
@@ -653,17 +658,13 @@ void driver(int argc, char ** argv)
           xn);
 
 #if 1
-  std::cout << "Swept-face based remap..." << std::endl;
+  std::cout << "Performing intersection based remap ..." << std::endl;
   flecsi_execute_mpi_task(
-          remap_tangram_test, 
+          remap_test, 
           flecsi_sp::burton::test, 
           mesh_handle,
           density_handle,
-          volfrac_handle,	  
           velocity_handle,
-          density_mutator,
-          volfrac_mutator,
-          velocity_mutator,
           xn);
 #else
   flecsi_execute_task(
@@ -679,7 +680,7 @@ void driver(int argc, char ** argv)
             output,
             flecsi_sp::burton::test,
             index,
-            mesh_handle, time_cnt, density_handle, volfrac_handle);
+            mesh_handle, time_cnt, density_handle);
 
 } // driver
 

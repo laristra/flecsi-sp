@@ -255,11 +255,11 @@ cinch_add_unit(catalyst_burton_3d_validation
 endif()
 
 if (FLECSI_SP_ENABLE_PORTAGE)
-  cinch_add_unit(flecsi_sp_burton_portage_2d
+  cinch_add_unit(flecsi_sp_burton_portage_2d_intersect
     ARGUMENTS
     -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
     SOURCES
-      test/portage.cc
+      test/portage_intersect.cc
       burton_specialization_init.cc
       ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
       ${FLECSI_SP_RUNTIME_DRIVER}
@@ -273,6 +273,24 @@ if (FLECSI_SP_ENABLE_PORTAGE)
     LIBRARIES FleCSI-SP
   )
 
+  cinch_add_unit(flecsi_sp_burton_portage_2d_swept
+    ARGUMENTS
+    -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
+    SOURCES
+      test/portage_sweptface.cc
+      burton_specialization_init.cc
+      ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+      ${FLECSI_SP_RUNTIME_DRIVER}
+    DEFINES
+      -DFLECSI_SP_BURTON_MESH_DIMENSION=2
+      -DFLECSI_ENABLE_SPECIALIZATION_TLT_INIT
+      -DFLECSI_ENABLE_SPECIALIZATION_SPMD_INIT
+      -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
+      -DSWEPTFACE
+    POLICY ${FLECSI_SP_UNIT_POLICY}
+    THREADS 2
+    LIBRARIES FleCSI-SP
+  )
   cinch_add_unit(flecsi_sp_burton_portage_tangram_2d
     ARGUMENTS
     -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
