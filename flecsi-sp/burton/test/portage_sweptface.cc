@@ -165,7 +165,7 @@ void output(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Test intersection based remap in portage
+/// \brief Test sweptface based remap in portage
 /// \param [in] mesh       the mesh object
 /// \param [in] mat_state  a densely populated set of data
 /// \param [in] coord0     the set of coordinates to be applied
@@ -658,7 +658,7 @@ void driver(int argc, char ** argv)
           xn);
 
 #if 1
-  std::cout << "Performing intersection based remap ..." << std::endl;
+  std::cout << "Performing sweptface based remap ..." << std::endl;
   flecsi_execute_mpi_task(
           remap_test, 
           flecsi_sp::burton::test, 
