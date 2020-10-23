@@ -87,6 +87,35 @@ install(FILES burton_specialization_init.cc DESTINATION ${FLECSI_SP_SHARE_DIR})
 # )
 
 
+if (FLECSI_SP_ENABLE_CATALYST)
+cinch_add_unit(catalyst_burton_3d_generation
+  ARGUMENTS
+  -m ${FLECSI_SP_DATA_DIR}/meshes/3d/box/box-hex.g
+  -c ${FLECSI_SP_DATA_DIR}/catalyst_scripts/catalyst-scripts.json
+  SOURCES 
+    test/burton.cc
+    burton_specialization_init.cc
+    ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+    ${FLECSI_SP_RUNTIME_DRIVER}
+  INPUTS
+   test/burton_3d_dump_rank0.out.std
+   test/burton_3d_dump_rank1.out.std
+   test/burton_3d_connectivity_rank0.out.std
+   test/burton_3d_connectivity_rank1.out.std
+   test/burton_3d_geometry_rank0.out.std
+   test/burton_3d_geometry_rank1.out.std
+  DEFINES
+    -DFLECSI_SP_ENABLE_CATALYST
+    -DFLECSI_SP_BURTON_MESH_DIMENSION=3
+    -DFLECSI_ENABLE_SPECIALIZATION_TLT_INIT
+    -DFLECSI_ENABLE_SPECIALIZATION_SPMD_INIT
+    -DCINCH_OVERRIDE_DEFAULT_INITIALIZATION_DRIVER
+  POLICY ${FLECSI_SP_UNIT_POLICY}
+  THREADS 2
+  LIBRARIES FleCSI-SP
+)
+endif()
+
 cinch_add_unit(flecsi_sp_burton_2d
   ARGUMENTS
   -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
@@ -207,6 +236,23 @@ cinch_add_unit(flecsi_sp_larsen_thin_2d
   THREADS 4
   LIBRARIES FleCSI-SP
 )
+
+if (FLECSI_SP_ENABLE_CATALYST)
+cinch_add_unit(catalyst_burton_3d_validation
+  ARGUMENTS
+  -c ${FLECSI_SP_DATA_DIR}/catalyst_scripts/catalyst-scripts.json
+  SOURCES 
+    test/burton_catalyst_validate.cc
+    burton_specialization_init.cc
+    ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
+    ${FLECSI_SP_RUNTIME_DRIVER}
+  DEFINES
+    -DFLECSI_SP_ENABLE_CATALYST
+  POLICY ${FLECSI_SP_UNIT_POLICY}
+  THREADS 1
+  LIBRARIES FleCSI-SP
+)
+endif()
 
 if (FLECSI_SP_ENABLE_PORTAGE)
   cinch_add_unit(flecsi_sp_burton_portage_2d_intersect

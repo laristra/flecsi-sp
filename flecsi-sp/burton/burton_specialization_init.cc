@@ -24,6 +24,10 @@ auto register_mesh_args_file =
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<std::string>("mesh", "mesh-file,m", "Specify mesh file" );
 
+auto register_catalyst_args_file = 
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<std::string>("catalyst", "catalyst-file,c", "Specify catalyst file" );
+
 auto register_mesh_args_entries = 
   ristra::initialization::command_line_arguments_t::instance().
     register_argument<int>( "mesh", "max-entries,e",
@@ -72,6 +76,21 @@ void specialization_tlt_init(int argc, char** argv)
   else {
     THROW_RUNTIME_ERROR( "No mesh file provided" );
   }
+
+  // // get the input catalyst file
+  // auto catalyst_filename_string = variables.as<std::string>("catalyst-file");
+
+  // // override any inputs if need be
+  // if ( !catalyst_filename_string.empty() ) {
+  //   if ( rank == 0 )
+  //     std::cout << "Using catalyst file \"" << catalyst_filename_string << "\"."
+  //               << std::endl;
+  // }
+  // else {
+  //   THROW_RUNTIME_ERROR( "No catalyst file provided" );
+  // }
+
+  
   
   // get the maximum number of entries
   std::size_t max_entries = variables.as<int>("max-entries", 5);

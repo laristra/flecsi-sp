@@ -182,6 +182,41 @@ if(FLECSI_SP_ENABLE_EXODUS)
   list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
 endif()
 
+
+#------------------------------------------------------------------------------#
+# Catalyst
+#------------------------------------------------------------------------------#
+
+option(FLECSI_SP_ENABLE_CATALYST "Link the sim with Catalyst for in situ" OFF)
+
+if (FLECSI_SP_ENABLE_CATALYST)
+  find_package(ParaView REQUIRED)
+
+  if (NOT TARGET ParaView::PythonCatalyst)
+    message(FATAL_ERROR
+      "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
+      "with Catalyst and Python support enabled. Please rebuild ParaView (or "
+      "point to a different build of ParaView) with PARAVIEW_USE_PYTHON set "
+      "to TRUE")
+    #return ()
+  endif()
+
+  if (NOT PARAVIEW_USE_MPI)
+    message(FATAL_ERROR
+      "Skipping example: ${CMAKE_PROJECT_NAME} requires ParaView to be built "
+      "with MPI support enabled. Please rebuild ParaView (or point to a "
+      "different build of ParaView) with PARAVIEW_USE_MPI set to TRUE")
+    #return ()
+  endif ()
+
+  message(STATUS "Found Paraview: ${ParaView_DIR}")
+
+  list( APPEND FLECSI_SP_LIBRARIES ParaView::PythonCatalyst VTK::CommonDataModel VTK::ParallelMPI VTK::IOParallelXML)
+  add_definitions(-DFLECSI_SP_ENABLE_CATALYST_ON)
+  message("Enable catalyst")
+endif()
+
+
 #------------------------------------------------------------------------------#
 # ParMETIS
 #------------------------------------------------------------------------------#
