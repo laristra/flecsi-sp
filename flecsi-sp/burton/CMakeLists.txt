@@ -213,7 +213,7 @@ if (FLECSI_SP_ENABLE_PORTAGE)
     ARGUMENTS
     -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
     SOURCES
-      test/portage_intersect.cc
+      test/portage.cc
       burton_specialization_init.cc
       ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
       ${FLECSI_SP_RUNTIME_DRIVER}
@@ -231,7 +231,7 @@ if (FLECSI_SP_ENABLE_PORTAGE)
     ARGUMENTS
     -m ${FLECSI_SP_DATA_DIR}/meshes/2d/square/square_32x32.g
     SOURCES
-      test/portage_sweptface.cc
+      test/portage.cc
       burton_specialization_init.cc
       ${FLECSI_SP_DEFAULT_TEST_INITIALIZATION_DRIVER}
       ${FLECSI_SP_RUNTIME_DRIVER}
