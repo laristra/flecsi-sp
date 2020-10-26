@@ -128,7 +128,7 @@ include:
     - git clone --recursive https://github.com/laristra/flecsi.git
     - mv flecsi flecsi-dev
     - cd flecsi-dev
-    - git checkout 1.4
+    - git checkout l1-milestone
     - git submodule update --init --recursive
     - mkdir -p build
     - mkdir -p build/install
