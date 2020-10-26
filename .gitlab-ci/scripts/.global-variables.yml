@@ -18,11 +18,11 @@ variables:
   FLECSISP_CI_JOB_NAME_NOSTAGE: ${CI_JOB_NAME#*:}
   FLECSISP_MPI_PROVIDER: ""
   FLECSISP_MPICH_VERSION: "3.2.1"
-  FLECSISP_MPICH_SPEC: "+slurm+verbs"
+  FLECSISP_MPICH_SPEC: "+slurm"
   FLECSISP_OPENMPI_VERSION: "3.1.4"
   #FLECSISP_OPENMPI_SPEC: "+pmi+legacylaunchers+thread_multiple schedulers=slurm"
   #FLECSISP_OPENMPI_SPEC: "+pmi+legacylaunchers+thread_multiple"
-  FLECSISP_OPENMPI_SPEC: "fabrics=auto"
+  FLECSISP_OPENMPI_SPEC: ""
   FLECSISP_INTEL_VERSION: "19.0.2"
   FLECSISP_CLANG_VERSION: "8.0.1"
   FLECSISP_GCC_VERSION: "8.3.0"
