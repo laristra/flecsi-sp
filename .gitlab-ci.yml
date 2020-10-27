@@ -125,7 +125,7 @@ include:
     - make install
     - export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/libristra-dev/build/install:$CMAKE_PREFIX_PATH
     - cd ${CI_PROJECT_DIR}
-    - git clone --recursive https://github.com/laristra/flecsi.git
+    - git clone --recursive git@gitlab.lanl.gov:laristra/flecsi.git
     - mv flecsi flecsi-dev
     - cd flecsi-dev
     - git checkout l1-milestone
