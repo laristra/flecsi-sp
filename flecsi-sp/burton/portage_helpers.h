@@ -7,50 +7,16 @@
 
 #include <portage/driver/uberdriver.h>
 #include <tangram/reconstruct/VOF.h>
-#include <tangram/intersect/split_r3d.h>
-#include <tangram/intersect/split_r2d.h>
 
 namespace flecsi_sp {
 namespace burton {
 
 template<
-	int DIM,
+  int DIM,
   typename mesh_wrapper_a_t,
   typename state_wrapper_a_t,
   typename mesh_wrapper_b_t,
-  typename state_wrapper_b_t,
-	std::enable_if_t<(DIM==2)>* = nullptr
->
-auto make_remapper(
-    mesh_wrapper_a_t & mesh_wrapper_a,
-    state_wrapper_a_t & state_wrapper_a,
-    mesh_wrapper_b_t & mesh_wrapper_b,
-    state_wrapper_b_t & state_wrapper_b)
-{
-
-    Portage::UberDriver<
-      mesh_t::num_dimensions,
-      mesh_wrapper_a_t,
-      state_wrapper_a_t,
-      mesh_wrapper_b_t,
-      state_wrapper_b_t,
-      Tangram::VOF,
-      Tangram::SplitR2D,
-      Tangram::ClipR2D > remapper(
-          mesh_wrapper_a,
-          state_wrapper_a,
-          mesh_wrapper_b,
-          state_wrapper_b);
-    return std::move(remapper);
-}
-
-template<
-	int DIM,
-  typename mesh_wrapper_a_t,
-  typename state_wrapper_a_t,
-  typename mesh_wrapper_b_t,
-  typename state_wrapper_b_t,
-	typename = typename std::enable_if_t<(DIM==3)>
+  typename state_wrapper_b_t
 >
 auto make_remapper(
     mesh_wrapper_a_t & mesh_wrapper_a,
@@ -59,14 +25,14 @@ auto make_remapper(
     state_wrapper_b_t & state_wrapper_b)
 {
     Portage::UberDriver<
-      mesh_t::num_dimensions,
+      DIM,
       mesh_wrapper_a_t,
       state_wrapper_a_t,
       mesh_wrapper_b_t,
       state_wrapper_b_t,
       Tangram::VOF,
-      Tangram::SplitR3D,
-      Tangram::ClipR3D > remapper(
+      Tangram::SplitRnD<DIM>,
+      Tangram::ClipRnD<DIM> > remapper(
           mesh_wrapper_a,
           state_wrapper_a,
           mesh_wrapper_b,
@@ -74,12 +40,11 @@ auto make_remapper(
     return std::move(remapper);
 }
 
-template< typename T, typename U, typename V, typename W>
-auto distrubute_mesh(
+
+template< typename T, typename U>
+auto make_flat(
  	const T & sourceMeshWrapper,
   const U & sourceStateWrapper,
- 	const V & targetMeshWrapper,
-  const W & targetStateWrapper,
 	const std::vector<std::string> & varNames)
 { 
   // create the flat mesh
@@ -92,28 +57,41 @@ auto distrubute_mesh(
 
   // mat_volfracs and mat_centroids are always imported from the state wrapper
   source_state_flat->initialize(sourceStateWrapper, varNames);
+	
+  return std::move(std::make_pair(std::move(source_mesh_flat), std::move(source_state_flat)));
+}
+
+
+template< typename T, typename U, typename V, typename W>
+void distrubute_mesh(
+ 	T & sourceMeshWrapper,
+  U & sourceStateWrapper,
+ 	const V & targetMeshWrapper,
+  const W & targetStateWrapper)
+{ 
 
   Wonton::MPIExecutor_type mpiexecutor(MPI_COMM_WORLD);
 
   // Use a bounding box distributor to send the source cells to the target
   // partitions where they are needed
   Portage::MPI_Bounding_Boxes distributor(&mpiexecutor);
-  distributor.distribute(*source_mesh_flat, *source_state_flat, targetMeshWrapper, 
+  distributor.distribute(sourceMeshWrapper, sourceStateWrapper, targetMeshWrapper, 
 		targetStateWrapper);
-	return std::move(std::make_pair(std::move(source_mesh_flat), std::move(source_state_flat)));
 }
 
 
-template<int D, typename T>
-std::enable_if_t<(D==2)> compute_weights(T & remapper)
+template<typename T>
+void compute_weights_intersect(T & remapper)
 {
-	remapper.template compute_interpolation_weights<Portage::SearchKDTree, Portage::IntersectR2D>();
+  remapper.template compute_interpolation_weights<Portage::SearchKDTree,
+                                                  Portage::IntersectRnD>();
 }
 
-template<int D, typename T, std::enable_if_t<(D==3)>* = nullptr >
-void compute_weights(T & remapper)
+template<typename T>
+void compute_weights_sweptface(T & remapper)
 {
-	remapper.template compute_interpolation_weights<Portage::SearchKDTree, Portage::IntersectR3D>();
+  remapper.template compute_interpolation_weights<Portage::SearchSweptFace,
+                                                  Portage::IntersectSweptFace>();
 }
 
 
