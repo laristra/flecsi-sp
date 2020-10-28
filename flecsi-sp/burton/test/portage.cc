@@ -165,7 +165,7 @@ void output(
 
 
 ////////////////////////////////////////////////////////////////////////////////
-/// \brief Test sweptface based remap in portage
+/// \brief Test intersection based remap in portage
 /// \param [in] mesh       the mesh object
 /// \param [in] mat_state  a densely populated set of data
 /// \param [in] coord0     the set of coordinates to be applied
@@ -267,20 +267,36 @@ void remap_test(
     state_wrapper_a.check_map(v);
     state_wrapper_b.check_map(v);
   }
+  std::cout << " Before distribute_mesh" << std::endl;
+  
+  auto source_flat = make_flat(
+      mesh_wrapper_a,
+      state_wrapper_a,
+			var_names);
+#ifndef SWEPTFACE
+  distrubute_mesh(
+      *source_flat.first,
+      *source_flat.second,
+      mesh_wrapper_b,
+      state_wrapper_b);
+#endif
 
-  // Make remapper with native source mesh/state - redistribution not
-  // applicable for swept face remapper
-
+  std::cout << " Before make_remapper" << std::endl;
+  
   auto remapper = make_remapper<num_dims>(
-             mesh_wrapper_a,
-             state_wrapper_a,
+             *source_flat.first,
+             *source_flat.second,
              mesh_wrapper_b,
              state_wrapper_b);
 
   std::cout << " Before weights" << std::endl;
 
-  // Do the remap using sweptface volume intersection
+  // Do the remap using exact intersection 
+#ifdef SWEPTFACE
   compute_weights_sweptface(remapper);
+#else
+  compute_weights_intersect(remapper);
+#endif
 
   std::cout << "Before interpolate" << std::endl;
 	
@@ -658,7 +674,7 @@ void driver(int argc, char ** argv)
           xn);
 
 #if 1
-  std::cout << "Performing sweptface based remap ..." << std::endl;
+  std::cout << "Performing intersection based remap ..." << std::endl;
   flecsi_execute_mpi_task(
           remap_test, 
           flecsi_sp::burton::test, 
