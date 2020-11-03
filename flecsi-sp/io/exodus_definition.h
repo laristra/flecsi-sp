@@ -2056,7 +2056,7 @@ public:
       const W & element_sides, const X & side_vertices,
       const X & element_faces, const X & face_vertices,
       const Y & element_global_to_local, const Y & vertex_global_to_local,
-      const Z * renumber_elem)
+      const Z & renumber_elem)
   {
     // some type aliases
     using ex_index_t = U;
@@ -2119,7 +2119,7 @@ public:
 
     assert( elem_list.size() == num_sides && "side count mismatch" );
 
-    if (renumber_elem) for ( auto & e : elem_list ) e = renumber_elem->at(e-1)+1;
+    for ( auto & e : elem_list ) e = renumber_elem(e-1) + 1;
     
     status = ex_put_side_set (exoid, ss_id, elem_list.data(), side_list.data());
     if (status)
@@ -3607,8 +3607,11 @@ public:
       // element blocks
   
       // need to keep track of global ids, since the order might change
+      std::vector<unsigned> local_ids(num_cells);
       std::vector<index_t> global_ids;
       global_ids.reserve(num_part_cells);
+      
+      unsigned cell_counter{0};
       
       for ( auto [bid, btype] : blocks ) { 
         
@@ -3632,6 +3635,8 @@ public:
           if (cell_block_id_[i] == bid) {
             cells_this_blk.emplace_back(i);
             global_ids.emplace_back( cells_local2global[i] );
+            local_ids[i] = cell_counter;
+            cell_counter++;
           }
         }
         auto num_cells_this_blk = cells_this_blk.size();
@@ -3643,17 +3648,17 @@ public:
           auto it = vert_list.insert(vert_list.end(), vs.begin(), vs.end());
           for (unsigned i=0; i<vs.size(); ++i, ++it) *it = part_verts.at(*it);
         };
+          
+        std::stringstream ss;
+        ss << "Block " << bid;
   
-    int comm_size, comm_rank;
-    MPI_Comm_size(MPI_COMM_WORLD, &comm_size);
-    MPI_Comm_rank(MPI_COMM_WORLD, &comm_rank);
         if (int64) {
           base_t::template write_element_block<long long>(
-              exoid, comm_rank, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+              exoid, bid, ss.str().c_str(), type_str, num_cells_this_blk, cell_vertices_func);
         }
         else {
           base_t::template write_element_block<int>(
-              exoid, comm_rank, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+              exoid, bid, ss.str().c_str(), type_str, num_cells_this_blk, cell_vertices_func);
         }
   
       }
@@ -3689,6 +3694,10 @@ public:
       
       //--------------------------------------------------------------------------
       // Write side sets
+      
+      auto renumber_ss_elem = [&](auto e) {
+        return local_ids[e];
+      };
     
       for ( auto ss_id : part_sides ) {
         ss_id++;
@@ -3696,11 +3705,11 @@ public:
         if (int64)
           base_t::template write_side_set<long long>(exoid, ss_id, side_id_,
               part_element_to_side, side_to_vertices_, cell_edges, edge_vertices,
-              cells_global2local, verts_global2local, &part_cells);
+              cells_global2local, verts_global2local, renumber_ss_elem);
         else
           base_t::template write_side_set<int>(exoid, ss_id, side_id_,
               part_element_to_side, side_to_vertices_, cell_edges, edge_vertices,
-              cells_global2local, verts_global2local, &part_cells);
+              cells_global2local, verts_global2local, renumber_ss_elem);
   
       }
 
@@ -5278,10 +5287,12 @@ public:
       // element blocks
   
       // need to keep track of global ids, since the order might change
+      std::vector<unsigned> local_ids(num_cells);
       std::vector<index_t> global_ids;
       global_ids.reserve(num_cells);
   
       size_t block_counter{1};
+      unsigned cell_counter{0};
       
       for ( auto [bid, btype] : blocks ) { 
   
@@ -5294,6 +5305,8 @@ public:
           if (cell_block_id_[i] == bid) {
             cells_this_blk.emplace_back(i);
             global_ids.emplace_back( cells_local2global[i] );
+            local_ids[i] = cell_counter;
+            cell_counter++;
           }
         }
         auto num_cells_this_blk = cells_this_blk.size();
@@ -5331,14 +5344,17 @@ public:
             auto it = vert_list.insert(vert_list.end(), vs.begin(), vs.end());
             for (unsigned i=0; i<vs.size(); ++i, ++it) *it = part_verts.at(*it);
           };
+
+          std::stringstream ss;
+          ss << "Block " << this_blk_id;
   
           if (int64) {
             base_t::template write_element_block<long long>(
-                exoid, this_blk_id, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+                exoid, this_blk_id, ss.str().c_str(), type_str, num_cells_this_blk, cell_vertices_func);
           }
           else {
             base_t::template write_element_block<int>(
-                exoid, this_blk_id, "cells", type_str, num_cells_this_blk, cell_vertices_func);
+                exoid, this_blk_id, ss.str().c_str(), type_str, num_cells_this_blk, cell_vertices_func);
           }
   
         } // type
@@ -5380,6 +5396,10 @@ public:
   
       //--------------------------------------------------------------------------
       // Write side sets
+    
+      auto renumber_ss_elem = [&](auto e) {
+        return local_ids[e];
+      };
       
       for ( auto ss_id : part_sides ) {
         ss_id++;
@@ -5387,11 +5407,11 @@ public:
         if (int64)
           base_t::template write_side_set<long long>(exoid, ss_id, side_id_,
               part_element_to_side, side_to_vertices_, cell_faces, face_vertices,
-              cells_global2local, verts_global2local, &part_cells);
+              cells_global2local, verts_global2local, renumber_ss_elem);
         else
           base_t::template write_side_set<int>(exoid, ss_id, side_id_,
               part_element_to_side, side_to_vertices_, cell_faces, face_vertices,
-              cells_global2local, verts_global2local, &part_cells);
+              cells_global2local, verts_global2local, renumber_ss_elem);
   
       }
   
