@@ -14,7 +14,12 @@
 #include <ristra/utils/string_utils.h>
 #include <flecsi/coloring/dcrs_utils.h>
 #include <flecsi/coloring/mpi_communicator.h>
+#include <flecsi/coloring/metis_colorer.h>
 #include <flecsi/coloring/parmetis_colorer.h>
+#include <flecsi/coloring/parmetis_geom_colorer.h>
+#include <flecsi/coloring/parmetis_geomkway_colorer.h>
+#include <flecsi/coloring/parmetis_repart_colorer.h>
+#include <flecsi/coloring/naive_colorer.h>
 #include <flecsi/execution/execution.h>
 #include <flecsi/topology/closure_utils.h>
 #include <flecsi-sp/burton/burton_mesh.h>
@@ -33,6 +38,84 @@ namespace flecsi_sp {
 namespace burton {
 
 using dom_dim_t = std::pair<size_t, size_t>;
+
+enum class distribution_alg_t {
+  balanced,
+  sequential,
+  hostname
+};
+
+inline int distribute(int size, int comm_size, int comm_rank, distribution_alg_t alg)
+{
+  if (alg == distribution_alg_t::sequential) {
+    if (comm_rank < size)
+      return comm_rank;
+    else
+      return -1;
+  }
+  else if (alg == distribution_alg_t::balanced) {
+    auto n = comm_size / size;
+    auto r = comm_rank / n;
+    auto q = comm_rank % n;
+    if (q == 0 && r < size)
+      return r;
+    else
+      return -1;
+  }
+  else if (alg == distribution_alg_t::hostname) {
+    char hostname[MPI_MAX_PROCESSOR_NAME];
+    int len;
+    MPI_Get_processor_name(hostname, &len);
+
+    auto hash = flecsi::utils::string_hash<size_t>(hostname, len); 
+  
+    std::vector<size_t> hashes(comm_size);
+
+    const auto mpi_size_t = flecsi::utils::mpi_typetraits_u<size_t>::type();
+    MPI_Allgather( &hash, 1, mpi_size_t, hashes.data(), 1, mpi_size_t, MPI_COMM_WORLD);
+
+    std::map<size_t, int> hostmap;
+    for (int i=0; i<comm_size; ++i)
+      hostmap.emplace( hashes[i], hostmap.size() );
+    
+    auto num_hosts = hostmap.size();
+
+    std::vector<size_t> local_rank_order(comm_size);
+    std::vector<size_t> host_counts(num_hosts, 0);
+    for (int i=0; i<comm_size; ++i) {
+      auto j = hostmap.at( hashes[i] );
+      local_rank_order[i] = host_counts[j];
+      host_counts[j]++;
+    }
+
+    auto n = size / num_hosts;
+    auto q = size % num_hosts;
+    
+    auto host_id = hostmap.at(hash);
+    auto host_start = n * host_id;
+    host_start += std::min<size_t>(q, host_id);
+    
+    auto num_local = host_id < q ? n+1 : n;
+    
+    auto local_id = local_rank_order[comm_rank];
+    int global_id = local_id<num_local ? host_start + local_id : -1;
+    
+    return global_id;
+  }
+
+  return -1;
+}
+
+
+enum class partition_alg_t {
+  kway,
+  geom,
+  geomkway,
+  refinekway,
+  metis,
+  naive
+};
+
 
 //! \brief holds some extra mesh info.
 //! This is used to pass information between tlt and spmd initializations.
@@ -115,7 +198,7 @@ void create_cells(
   for(auto & vm: vertex_lid_to_mid) {
 
     // search this ranks mesh definition for the matching offset
-    auto it = vert_global2local.find( vm.second );
+    auto it = vert_global2local.find( vm );
     // the vertex exists on this rank so create it
     if ( it != vert_global2local.end() ) {
       // get the point
@@ -128,7 +211,7 @@ void create_cells(
     // now create it, if the vertex did not exist, it doesnt matter what
     // data we give it
     auto v = mesh.create_vertex( temp_point );
-    v->global_id().set_global(vm.second);
+    v->global_id().set_global(vm);
     vertices.emplace_back(v);
   } // for vertices
   
@@ -174,10 +257,9 @@ void create_cells(
   std::map<size_t, std::vector<size_t>> vertex_tags;
 
   // create the edges
-  for(auto & em: edge_lid_to_mid) {
+  for(size_t lid=0; lid<edge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = edge_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -291,10 +373,9 @@ void create_cells(
   const auto & cell_region_ids = mesh_def.region_ids();
 
   // create the cells
-  for(auto & cm: cell_lid_to_mid) {
+  for(size_t lid=0; lid<cell_lid_to_mid.size(); ++lid) {
 
-    auto lid = cm.first;
-    auto mid = cm.second;
+    auto mid = cell_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -343,7 +424,7 @@ void create_cells(
     // otherwise, it is a ghost cell
     else {
       // find out what its connectivity info is
-      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), cm.second );
+      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), mid );
       assert( it != ghost_cells.end() && "Could not find ghost cell id" );
       auto i = std::distance( ghost_cells.begin(), it );
       // reserve space
@@ -430,7 +511,7 @@ void create_cells(
   for(auto & vm: vertex_lid_to_mid) {
 
     // search this ranks mesh definition for the matching offset
-    auto it = vert_global2local.find( vm.second );
+    auto it = vert_global2local.find( vm );
     // the vertex exists on this rank so create it
     if ( it != vert_global2local.end() ) {
       // get the point
@@ -443,7 +524,7 @@ void create_cells(
     // now create it, if the vertex did not exist, it doesnt matter what
     // data we give it
     auto v = mesh.create_vertex( temp_point );
-    v->global_id().set_global(vm.second);
+    v->global_id().set_global(vm);
     vertices.emplace_back(v);
   } // for vertices
   
@@ -465,10 +546,9 @@ void create_cells(
   std::vector< vertex_t * > elem_vs;
 
   // create the edges
-  for(auto & em: edge_lid_to_mid) {
+  for(size_t lid=0; lid<edge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = edge_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -560,10 +640,9 @@ void create_cells(
   }
   
   // create the faces
-  for(auto & em: face_lid_to_mid) {
+  for(size_t lid=0; lid<face_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = face_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -667,10 +746,9 @@ void create_cells(
   const auto & cell_region_ids = mesh_def.region_ids();
 
   // create the cells
-  for(auto & cm: cell_lid_to_mid) {
+  for(size_t lid=0; lid<cell_lid_to_mid.size(); ++lid) {
 
-    auto lid = cm.first;
-    auto mid = cm.second;
+    auto mid = cell_lid_to_mid[lid];
 
     // clear the list
     elem_vs.clear();
@@ -706,7 +784,7 @@ void create_cells(
     // otherwise, it is a ghost cell
     else {
       // find out what its connectivity info is
-      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), cm.second );
+      auto it = std::find( ghost_cells.begin(), ghost_cells.end(), mid );
       assert( it != ghost_cells.end() && "Could not find ghost cell id" );
       auto i = std::distance( ghost_cells.begin(), it );
       // reserve space
@@ -815,10 +893,9 @@ void create_extras(
   
  
   // create the wedges
-  for(auto & em: wedge_lid_to_mid) {
+  for(size_t lid=0; lid<wedge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = wedge_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -938,10 +1015,9 @@ void create_extras(
   
  
   // create the corners
-  for(auto & em: corner_lid_to_mid) {
+  for(size_t lid=0; lid<corner_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = corner_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1085,10 +1161,9 @@ void create_extras(
   
  
   // create the sides
-  for(auto & em: side_lid_to_mid) {
+  for(size_t lid=0; lid<side_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = side_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1318,10 +1393,9 @@ void create_extras(
   
  
   // create the wedges
-  for(auto & em: wedge_lid_to_mid) {
+  for(size_t lid=0; lid<wedge_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = wedge_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1464,10 +1538,9 @@ void create_extras(
   
  
   // create the corners
-  for(auto & em: corner_lid_to_mid) {
+  for(size_t lid=0; lid<corner_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = corner_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1634,10 +1707,9 @@ void create_extras(
   
  
   // create the sides
-  for(auto & em: side_lid_to_mid) {
+  for(size_t lid=0; lid<side_lid_to_mid.size(); ++lid) {
 
-    auto lid = em.first;
-    auto mid = em.second;
+    auto mid = side_lid_to_mid[lid];
     
     // clear the lists
     entity_vs.clear();
@@ -1854,7 +1926,7 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & vert_subspace =
      mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
-     vert_subspace.push_back( v->template global_id<0>() );
+     vert_subspace.push_back( v->template global_id<0>().entity() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1919,12 +1991,12 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & vert_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
-    vert_subspace.push_back( v->global_id() );
+    vert_subspace.push_back( v->global_id().entity() );
 
   auto & edge_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_edges >();
   for ( auto e : my_edges )
-    edge_subspace.push_back( e->global_id() );
+    edge_subspace.push_back( e->global_id().entity() );
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1994,17 +2066,17 @@ void create_subspaces( MESH_DEFINITION && mesh_def, MESH_TYPE && mesh )
   auto & vert_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_vertices >();
   for ( auto v : my_verts )
-    vert_subspace.push_back( v->global_id() );
+    vert_subspace.push_back( v->global_id().entity() );
 
   auto & edge_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_edges >();
   for ( auto e : my_edges )
-    edge_subspace.push_back( e->global_id() );
+    edge_subspace.push_back( e->global_id().entity() );
 
   auto & face_subspace =
     mesh.template sub_ids< index_subspaces::overlapping_faces >();
   for ( auto f : my_faces )
-    face_subspace.push_back( f->global_id() );
+    face_subspace.push_back( f->global_id().entity() );
 }
 
 
@@ -3543,7 +3615,13 @@ void make_corners(
 ////////////////////////////////////////////////////////////////////////////////
 /// \brief the main cell coloring driver
 ////////////////////////////////////////////////////////////////////////////////
-void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool partition_only )
+void partition_mesh(
+    utils::char_array_t filename,
+    std::size_t max_entries,
+    int partition_only,
+    distribution_alg_t distribution_alg,
+    partition_alg_t partition_alg,
+    bool repartition)
 {
   // set some compile time constants
   constexpr auto num_dims = burton_mesh_t::num_dimensions;
@@ -3617,11 +3695,23 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   else if ( file_type == file_type_t::partitioned_exodus ) {
     // get extension, which should be number of ranks
     auto ext = ristra::utils::file_extension(filename_string);
+    size_t num_files = 0;
+    try { 
+      num_files = std::atoi(ext.c_str());
+    }
+    catch (...) {
+      THROW_RUNTIME_ERROR("Could not convert '" << ext << "' to integer.");
+    }
+    // distribute the ranks among processors
+    auto r = distribute(num_files, comm_size, rank, distribution_alg);
     // how many digits in padded number
     auto n = ext.size();
     // figure out this processors filename 
-    auto my_filename = filename_string + "." + ristra::utils::zero_padded(rank, n);
+    std::string my_filename = (r>=0) ?
+      filename_string + "." + ristra::utils::zero_padded(r, n) :
+      "";
     mesh_def = std::make_unique<exodus_definition_t>( my_filename, false );
+    if (comm_size != num_files) needs_partitioning = true;
   }
   else
     THROW_IMPLEMENTED_ERROR( "Unknown mesh file type" );
@@ -3635,6 +3725,10 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   //----------------------------------------------------------------------------
   // Cell Coloring
   //----------------------------------------------------------------------------
+    
+  size_t num_parts = comm_size;
+  if (partition_only && partition_only>0)
+    num_parts = partition_only;
 
   // Cells index coloring.
   auto & cells = entities[index_spaces::cells];
@@ -3643,23 +3737,68 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   // distributed compressed row storage
   flecsi::coloring::dcrs_t dcrs;
 
-  if ( needs_partitioning ) {
-
+  if ( needs_partitioning || partition_only ) {
+  
     if ( rank == 0 ) std::cout << "Partitioning mesh..." << std::flush;
     // Create the dCRS representation for the distributed colorer.
     // This essentialy makes the graph of the dual mesh.
     mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
 
     // Create a colorer instance to generate the primary coloring.
-    auto colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
+    std::unique_ptr<flecsi::coloring::colorer_t> colorer;
+    if (partition_alg == partition_alg_t::kway) 
+      colorer = std::make_unique<flecsi::coloring::parmetis_colorer_t>();
+    else if (partition_alg == partition_alg_t::geom) {
+      auto xyz = mesh_def->midpoints(num_dims);
+      colorer = std::make_unique<flecsi::coloring::parmetis_geom_colorer_t>(xyz, num_dims);
+    }
+    else if (partition_alg == partition_alg_t::geomkway) {
+      auto xyz = mesh_def->midpoints(num_dims);
+      colorer = std::make_unique<flecsi::coloring::parmetis_geomkway_colorer_t>(xyz, num_dims);
+    }
+    else if (partition_alg == partition_alg_t::refinekway) { 
+      colorer = std::make_unique<flecsi::coloring::parmetis_repart_colorer_t>();
+    }
+    else if (partition_alg == partition_alg_t::metis) 
+      colorer = std::make_unique<flecsi::coloring::metis_colorer_t>();
+    else if (partition_alg == partition_alg_t::naive)
+      colorer = std::make_unique<flecsi::coloring::naive_colorer_t>();
+    else
+      THROW_RUNTIME_ERROR("Unkown partition algorithm.");
 
     // Create the primary coloring and partition the mesh.
-    auto partitioning = colorer->new_color(dcrs);
+    auto partitioning = colorer->new_color(num_parts, dcrs);
+    mesh_def->set_partitioning(partitioning);
     if ( rank == 0 ) std::cout << "done." << std::endl;
 
     // now migrate the entities to their respective ranks
     if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
-    flecsi::coloring::migrate( num_dims, partitioning, dcrs, *mesh_def );
+    std::vector<size_t> part_dist;
+    flecsi::coloring::subdivide(num_parts, comm_size, part_dist);
+    flecsi::coloring::migrate( num_dims, partitioning, part_dist, dcrs, *mesh_def );
+    if ( rank == 0 ) std::cout << "done." << std::endl;
+  
+  } // needs_partitioning
+
+  if (repartition) {
+    if ( rank == 0 ) std::cout << "RE-partitioning mesh..." << std::flush;
+    // Create the dCRS representation for the distributed colorer.
+    // This essentialy makes the graph of the dual mesh.
+    mesh_def->create_graph( num_dims, 0, num_dims, dcrs );
+
+    // Create a colorer instance to generate the primary coloring.
+    auto colorer = std::make_unique<flecsi::coloring::parmetis_repart_colorer_t>();
+    
+    // Create the primary coloring and partition the mesh.
+    auto partitioning = colorer->new_color(num_parts, dcrs);
+    mesh_def->set_partitioning(partitioning);
+    if ( rank == 0 ) std::cout << "done." << std::endl;
+
+    // now migrate the entities to their respective ranks
+    if ( rank == 0 ) std::cout << "Migrating mesh..." << std::flush;
+    std::vector<size_t> part_dist;
+    flecsi::coloring::subdivide(num_parts, comm_size, part_dist);
+    flecsi::coloring::migrate( num_dims, partitioning, part_dist, dcrs, *mesh_def );
     if ( rank == 0 ) std::cout << "done." << std::endl;
   
   } // needs_partitioning
@@ -3684,19 +3823,37 @@ void partition_mesh( utils::char_array_t filename, std::size_t max_entries, bool
   //----------------------------------------------------------------------------
 
   // figure out this ranks file name
-  if ( file_type == file_type_t::exodus && partition_only)
-  {
-    auto basename = ristra::utils::basename( filename_string );
-    auto output_prefix = ristra::utils::remove_extension( basename );
-    auto output_extension = ristra::utils::file_extension(basename); 
-    auto digits = ristra::utils::num_digits(comm_size);
-    auto output_filename = output_prefix + "-partitioned." + output_extension + "." +
-    ristra::utils::zero_padded(comm_size, digits) + "." +
-    ristra::utils::zero_padded(rank, digits);
-    auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
-    if (rank == 0 && comm_size > 1)
-      std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
-    exo_def->write( output_filename );
+  if (partition_only) {
+    //----------------------------------
+    // Original file was a serial exodus file
+    if (file_type==file_type_t::exodus)
+    {
+      auto basename = ristra::utils::basename( filename_string );
+      auto output_prefix = ristra::utils::remove_extension( basename );
+      auto output_extension = ristra::utils::file_extension(basename); 
+      auto output_filename = output_prefix + "-partitioned." + output_extension;
+      if (rank == 0)
+        std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
+      auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
+      exo_def->write( output_filename );
+    }
+    else if (file_type==file_type_t::partitioned_exodus)
+    {
+      auto basename = ristra::utils::basename( filename_string );
+      auto output_prefix = ristra::utils::remove_extension( basename );
+      auto output_extension = ristra::utils::file_extension(output_prefix); 
+      output_prefix = ristra::utils::remove_extension( output_prefix );
+      auto output_filename = output_prefix + "-partitioned." + output_extension;
+      if (rank == 0)
+        std::cout << "Writing partitioned mesh to " << output_filename << std::endl;
+      auto exo_def = dynamic_cast<exodus_definition_t*>(mesh_def.get());
+      exo_def->write( output_filename );
+    }
+    else {
+      if (rank == 0)
+        std::cout << "File type does not support writing." << std::endl;
+    }
+    MPI_Finalize();
     return;
   }
 

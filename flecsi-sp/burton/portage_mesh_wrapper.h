@@ -246,6 +246,83 @@ public:
     return mesh_->num_vertices() - mesh_->num_vertices(subset_t::overlapping);
   }
 
+  //! Number of items of given entity
+  //! \param [in] entity  The enumerated entity of interest
+  //! \param [in] entity_type   The type of entity information (ghost, shared, 
+  //!   all, etc...) 
+  size_t num_entities(
+    entity_kind_t entity, 
+    entity_type_t entity_type = entity_type_t::ALL
+  ) const 
+  {
+    switch(entity) {
+      case entity_kind_t::NODE :
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return mesh_->num_vertices();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_nodes();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_nodes();
+          }
+      case entity_kind_t::EDGE :
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return mesh_->num_edges();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_edges();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_edges();
+          }
+      case entity_kind_t::FACE :
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return mesh_->num_faces();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_faces();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_faces();
+          }
+      case entity_kind_t::CELL :
+        switch (entity_type) {
+          case entity_type_t::ALL:
+            return num_owned_cells() + num_ghost_cells();
+          case entity_type_t::PARALLEL_OWNED:
+            return num_owned_cells();
+          case entity_type_t::PARALLEL_GHOST:
+            return num_ghost_cells();
+          }
+      default :
+        //raise_runtime_error("Unknown entity type");
+        return portage_mesh_aux_t::num_entities(entity, entity_type);
+    }
+  }
+
+  //! The begin iterator for iterating over mesh entities.
+  //! \param [in] entity  The enumerated entity of interest
+  //! \param [in] entity_type   The type of entity information (ghost, shared, 
+  //!   all, etc...) 
+  auto begin(
+    entity_kind_t entity,
+    entity_type_t entity_type = entity_type_t::ALL
+  ) const 
+  {
+    int start_index = 0;
+    return Wonton::make_counting_iterator(start_index);
+  }
+
+  //! The end Iterator for iterating over mesh entities.
+  //! \param [in] entity  The enumerated entity of interest
+  //! \param [in] entity_type   The type of entity information (ghost, shared, 
+  //!   all, etc...) 
+  auto end(
+    entity_kind_t entity,
+    entity_type_t entity_type = entity_type_t::ALL
+  ) const 
+  {
+    return begin(entity, entity_type) + num_entities(entity, entity_type);
+  }
+
   //! Get list of nodes for a cell
   //! \param [in] cell_id  The id of the cell
   //! \param [in,out] nodes  The list of nodes to populate
@@ -463,29 +540,61 @@ public:
       std::vector<point_3d_t> *points) const
   {
     auto c = cells_[cellid];
+    
+    const auto & c_vs = mesh_->vertices(c);
+    auto num_cell_verts = c_vs.size();
+    
+    int nextra = 0;
+    int nfacet = 0;
+    for (auto f : mesh_->faces(c)) {
+      auto nv = mesh_->vertices(f).size();
+      if (nv > 3) {
+        nextra++;
+        nfacet += nv;
+      }
+      else {
+        nfacet++;
+      }
+    }
+    points->resize(num_cell_verts + nextra);
+    facetpoints->resize(nfacet);
+
+    std::map<int, int> vert_map;
+    for (auto v : c_vs) {
+      auto id = vert_map.size();
+      node_get_coordinates(v.id(), &points->operator[](id));
+      vert_map.emplace(v.id(), id);
+    }
+    
+
+
+    std::vector<int> verts;
+    nextra = 0;
+    nfacet = 0;
     for (auto f : mesh_->faces(c)) {
 
       const auto & vs = mesh_->vertices(f);
       auto nv = vs.size();
-      auto add_one = (nv == 3) ? 0 : 1;
-      points->resize( nv + add_one );
 
+      verts.resize(nv);
+     
       // go backwards cause flipped
       if ( f->is_flipped(c) ) {
         for ( size_t i=nv, j=0; i --> 0; ++j)
-          node_get_coordinates(vs[i]->id(), &points->operator[](j));
+          verts[j] = vert_map.at(vs[i].id());
       }
       // iterate through points forward
       else {
         for ( size_t i=0; i<nv; ++i ) 
-          node_get_coordinates(vs[i]->id(), &points->operator[](i));
+          verts[i] = vert_map.at(vs[i].id());
       }
-
+        
       // if there is only 3 vertices, it is a planar triangle
       if ( nv == 3 ) {
-        facetpoints->resize(1);
-        facetpoints->front().reserve(3);
-        for ( size_t i=0; i<nv; ++i ) facetpoints->front().emplace_back(i);
+        auto & this_facet = facetpoints->operator[](nfacet);
+        this_facet.resize(3);
+        for ( size_t i=0; i<nv; ++i ) this_facet[verts[i]];
+        nfacet++;
       }
 
       // if there are more than 3 vertices, it might be non-planar,
@@ -493,16 +602,18 @@ public:
       else {
 
         // figureout the last point
+        int new_point_id = num_cell_verts + nextra;
         for ( size_t i=0; i<nv; ++i )
-          points->operator[](nv) += points->operator[](i);
-        points->operator[](nv) /= nv;
+          points->operator[](new_point_id) += points->operator[](verts[i]);
+        points->operator[](new_point_id) /= nv;
 
         // now create facets
-        facetpoints->resize(nv);
         for ( int i=0; i<nv-1; ++i )
-          facetpoints->operator[](i) = {i, i+1, int(nv)};
-        facetpoints->operator[](nv-1) = {int(nv-1), 0, int(nv)};
+          facetpoints->operator[](nfacet+i) = {verts[i], verts[i+1], new_point_id};
+        facetpoints->operator[](nfacet+nv-1) = {verts[nv-1], verts[0], new_point_id};
 
+        nfacet += nv;
+        nextra++;
       } // num verts
     
     } // face
@@ -699,9 +810,9 @@ private:
   const real_t * cell_volumes_ = nullptr;
   const vector_t * cell_centroids_ = nullptr;
 
-  const std::map<size_t, size_t> * vert_local_to_global_id_map_ = nullptr;
-  const std::map<size_t, size_t> * face_local_to_global_id_map_ = nullptr; 
-  const std::map<size_t, size_t> * cell_local_to_global_id_map_ = nullptr; 
+  const std::vector<size_t> * vert_local_to_global_id_map_ = nullptr;
+  const std::vector<size_t> * face_local_to_global_id_map_ = nullptr; 
+  const std::vector<size_t> * cell_local_to_global_id_map_ = nullptr; 
 };
 
 

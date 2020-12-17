@@ -12,6 +12,9 @@
 #include <flecsi-sp/burton/burton_specialization_init.h>
 #include <ristra/initialization/arguments.h>
 
+using distribution_alg_t = flecsi_sp::burton::distribution_alg_t;
+using partition_alg_t = flecsi_sp::burton::partition_alg_t;
+
 namespace flecsi {
 namespace execution {
  
@@ -35,8 +38,26 @@ auto register_mesh_args_entries =
 
 auto register_part_args =
   ristra::initialization::command_line_arguments_t::instance().
-    register_argument( "mesg", "partition-only,p",
+    register_argument<int>( "mesh", "partition-only,p",
         "Partition mesh and exit" );
+
+auto register_dist_args =
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<std::string>( "mesh", "rank-distribution",
+        "How to distribute mesh files among ranks when using M-to-N partitioning"
+        "  from pre-partitioned files. Options include: sequential (default), balanced,"
+        " hostname.");
+
+auto register_partition_args =
+  ristra::initialization::command_line_arguments_t::instance().
+    register_argument<std::string>( "mesh", "partition-algorithm",
+        "Partition algorithm.  Options include: kway (default), geom, geomkway, "
+        "refinekway, metis, naive.");
+
+auto register_repart_args =
+  ristra::initialization::command_line_arguments_t::instance().
+  register_argument( "mesh", "repartition",
+      "Refine partitioned mesh.");
 
 ///////////////////////////////////////////////////////////////////////////////
 //! \brief The specialization initialization driver.
@@ -51,6 +72,7 @@ void specialization_tlt_init(int argc, char** argv)
   // get the color
   auto & context = flecsi::execution::context_t::instance();
   auto rank = context.color();
+  auto size = context.colors();
 
   //===========================================================================
   // Parse arguments
@@ -97,8 +119,48 @@ void specialization_tlt_init(int argc, char** argv)
   if ( variables.count("max-entries") && rank == 0 )
       std::cout << "Setting max_entries to \"" << max_entries << "\"." << std::endl;
   
-  bool partition_only = variables.count("partition-only");
+  int partition_only = variables.as<int>("partition-only", 0);
+  if ( variables.count("partition-only") && rank == 0 ) {
+    if (partition_only < size) {
+      THROW_RUNTIME_ERROR(
+          "Number of mpi ranks must be less than or equal to number "
+          "of partitions");
+    }
+    std::cout << "Partitioning mesh into \"" << partition_only << "\" pieces." << std::endl;
+  }
+
+  auto distribution_str = variables.as<std::string>("rank-distribution", "sequential");
   
+  distribution_alg_t distribution_alg;
+  if (distribution_str ==  "balanced")
+    distribution_alg = distribution_alg_t::balanced;
+  else if (distribution_str ==  "sequential")
+    distribution_alg = distribution_alg_t::sequential;
+  else if (distribution_str ==  "hostname")
+    distribution_alg = distribution_alg_t::hostname;
+  else
+    THROW_RUNTIME_ERROR("Unknown partition distribution type '" << distribution_str << "'");
+
+  auto partition_str = variables.as<std::string>("partition-algorithm", "kway");
+  
+  partition_alg_t partition_alg;
+  if (partition_str ==  "kway")
+    partition_alg = partition_alg_t::kway;
+  else if (partition_str ==  "geom")
+    partition_alg = partition_alg_t::geom;
+  else if (partition_str ==  "geomkway")
+    partition_alg = partition_alg_t::geomkway;
+  else if (partition_str ==  "refinekway")
+    partition_alg = partition_alg_t::refinekway;
+  else if (partition_str ==  "metis")
+    partition_alg = partition_alg_t::metis;
+  else if (partition_str ==  "naive")
+    partition_alg = partition_alg_t::naive;
+  else
+    THROW_RUNTIME_ERROR("Unknown partition algorithm type '" << partition_str << "'");
+
+  auto do_repart = variables.count("repartition");
+
   //===========================================================================
   // Partition mesh
   //===========================================================================
@@ -110,7 +172,7 @@ void specialization_tlt_init(int argc, char** argv)
 
   // execute the mpi task to partition the mesh
   flecsi_execute_mpi_task(partition_mesh, flecsi_sp::burton, mesh_filename,
-    max_entries, partition_only);
+    max_entries, partition_only, distribution_alg, partition_alg, do_repart);
 
   if (partition_only) exit(0);
 }
@@ -126,6 +188,8 @@ void specialization_spmd_init(int argc, char** argv)
   auto mesh_handle = flecsi_get_client_handle(
       flecsi_sp::burton::burton_mesh_t, meshes, mesh0);
   
+  auto & context = flecsi::execution::context_t::instance();
+  auto rank = context.color();
   flecsi_execute_task(initialize_mesh, flecsi_sp::burton, index, mesh_handle);
 }
 

@@ -41,12 +41,10 @@ auto make_remapper(
 }
 
 
-template< typename T, typename U, typename V, typename W>
-auto distrubute_mesh(
+template< typename T, typename U>
+auto make_flat(
  	const T & sourceMeshWrapper,
   const U & sourceStateWrapper,
- 	const V & targetMeshWrapper,
-  const W & targetStateWrapper,
 	const std::vector<std::string> & varNames)
 { 
   // create the flat mesh
@@ -59,15 +57,26 @@ auto distrubute_mesh(
 
   // mat_volfracs and mat_centroids are always imported from the state wrapper
   source_state_flat->initialize(sourceStateWrapper, varNames);
+	
+  return std::move(std::make_pair(std::move(source_mesh_flat), std::move(source_state_flat)));
+}
+
+
+template< typename T, typename U, typename V, typename W>
+void distrubute_mesh(
+ 	T & sourceMeshWrapper,
+  U & sourceStateWrapper,
+ 	const V & targetMeshWrapper,
+  const W & targetStateWrapper)
+{ 
 
   Wonton::MPIExecutor_type mpiexecutor(MPI_COMM_WORLD);
 
   // Use a bounding box distributor to send the source cells to the target
   // partitions where they are needed
   Portage::MPI_Bounding_Boxes distributor(&mpiexecutor);
-  distributor.distribute(*source_mesh_flat, *source_state_flat, targetMeshWrapper, 
+  distributor.distribute(sourceMeshWrapper, sourceStateWrapper, targetMeshWrapper, 
 		targetStateWrapper);
-	return std::move(std::make_pair(std::move(source_mesh_flat), std::move(source_state_flat)));
 }
 
 

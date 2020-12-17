@@ -269,18 +269,23 @@ void remap_test(
   }
   std::cout << " Before distribute_mesh" << std::endl;
   
-  auto distributed = distrubute_mesh(
+#ifndef SWEPTFACE
+
+  auto source_flat = make_flat(
       mesh_wrapper_a,
       state_wrapper_a,
-      mesh_wrapper_b,
-      state_wrapper_b,
 			var_names);
+  distrubute_mesh(
+      *source_flat.first,
+      *source_flat.second,
+      mesh_wrapper_b,
+      state_wrapper_b);
 
   std::cout << " Before make_remapper" << std::endl;
   
   auto remapper = make_remapper<num_dims>(
-             *distributed.first,
-             *distributed.second,
+             *source_flat.first,
+             *source_flat.second,
              mesh_wrapper_b,
              state_wrapper_b);
 
@@ -288,6 +293,23 @@ void remap_test(
 
   // Do the remap using exact intersection 
   compute_weights_intersect(remapper);
+
+#else
+
+  std::cout << " Before make_remapper" << std::endl;
+  
+  auto remapper = make_remapper<num_dims>(
+             mesh_wrapper_a,
+             state_wrapper_a,
+             mesh_wrapper_b,
+             state_wrapper_b);
+
+  std::cout << " Before weights" << std::endl;
+
+  // Do the remap using exact intersection 
+  compute_weights_sweptface(remapper);
+
+#endif
 
   std::cout << "Before interpolate" << std::endl;
 	
