@@ -22,6 +22,8 @@
 #include <ristra/geometry/shapes/tetrahedron.h>
 #include <ristra/geometry/shapes/triangle.h>
 #include <ristra/math/general.h>
+#include <cmath>
+#include <iostream>
 
 namespace flecsi_sp {
 namespace burton {
@@ -672,7 +674,7 @@ struct burton_element_t<2,2>
   static constexpr auto domain = 0;
 
   //! Type of floating point.
-  using real_t = typename config_t::real_t;
+  using real_t = typename config_t::real_t; 
 
   //! Type of floating point.
   using size_t = typename config_t::size_t;
@@ -696,8 +698,7 @@ struct burton_element_t<2,2>
 
   //! a bitfield type
   using bitfield_t = typename config_t::bitfield_t;
-
-
+  
   //============================================================================
   // Constructors
   //============================================================================
@@ -717,11 +718,10 @@ struct burton_element_t<2,2>
   burton_element_t( burton_element_t && ) = delete;
   burton_element_t & operator=( burton_element_t && ) = delete;
 
-
+  
   //============================================================================
   // Accessors / Modifiers
   //============================================================================
-
   //! the centroid
   const auto & centroid() const 
   { return centroid_; };
@@ -736,9 +736,8 @@ struct burton_element_t<2,2>
 
   //! the area of the element
   auto volume() const
-  { return area_; };
-
-  //! the minimum length in the element
+  { return volume_; };
+  
   auto min_length() const
   { return min_length_; }
 
@@ -1009,12 +1008,11 @@ struct burton_element_t<2,2>
   //! \brief update the mesh geometry
   //----------------------------------------------------------------------------
   template< typename MESH_TOPOLOGY >
-  void update( const MESH_TOPOLOGY * mesh )
+  void update( const MESH_TOPOLOGY * mesh, real_t alpha=1 , real_t axis=1)
   {
     // get general entity connectivity
     auto vs = mesh->template entities<0, domain>(this);
     auto es = mesh->template entities<1, domain>(this);
-
     switch (shape_) {
 
       // the element is a triangle
@@ -1052,6 +1050,7 @@ struct burton_element_t<2,2>
         area_ = 
           ristra::geometry::shapes::quadrilateral<num_dimensions>::area(
               a, b, c, d );
+	
         // check the edges first
         min_length_ = abs( a - b );
         min_length_ = std::min( abs( b - c ), min_length_ );
@@ -1072,6 +1071,7 @@ struct burton_element_t<2,2>
           ristra::geometry::shapes::polygon<num_dimensions>::midpoint( coords );
         area_ =
           ristra::geometry::shapes::polygon<num_dimensions>::area( coords );
+
         // now check min edge length
         auto vs = mesh->template entities<0, domain>(this);
         min_length_ = detail::min_length( vs );
@@ -1083,6 +1083,11 @@ struct burton_element_t<2,2>
         THROW_RUNTIME_ERROR( "Unknown cell type" );
 
     } // switch
+    //s:w
+    volume_ = area_*2*M_PI*centroid_[axis];
+    if ((alpha-0)<1E-7){
+      volume_ = area_;
+    }
   }
 
 private:
@@ -1099,6 +1104,7 @@ private:
 
   //! the geometry informtation
   real_t area_ = 0;
+  real_t volume_ = 0;
   point_t midpoint_ = 0;
   point_t centroid_ = 0;
   real_t min_length_ = 0;
@@ -1549,6 +1555,7 @@ struct burton_element_t<3,3>
   //! the area of the element
   auto volume() const
   { return volume_; };
+
 
   //! the minimum length in the element
   auto min_length() const
@@ -2027,6 +2034,7 @@ private:
   size_t region_ = 0;
 
   //! the geometry informtation
+  real_t area_ = 0;
   real_t volume_ = 0;
   point_t centroid_ = 0;
   point_t midpoint_ = 0;
