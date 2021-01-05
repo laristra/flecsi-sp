@@ -63,4 +63,4 @@ class FlecsiSpDeps(BundlePackage):
     
     #portage requires LAPACKE
     depends_on('netlib-lapack lapacke=true', when='+portage')
-    
+
