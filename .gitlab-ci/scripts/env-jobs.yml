@@ -30,6 +30,16 @@
     - cd spack && git checkout ${FLECSISP_SPACK_REF##*-} && cd ${CI_PROJECT_DIR}
     - export SPACK_ARCH=`./spack/bin/spack arch`
     - echo ${SPACK_ARCH}
+    - export TARGET="${SPACK_ARCH##*-}"
+    - echo ${TARGET}
+    - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} $(([ ${TARGET} == 'haswell' ] || [ ${TARGET} == 'skylake_avx512' ]) && echo 'target=x86_64')"
+    - |
+      if [[ ${FLECSISP_MPI_PROVIDER} == 'openmpi' ]];
+      then
+        export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PROVIDER}@${FLECSISP_OPENMPI_VERSION}%gcc@${FLECSISP_GCC_VERSION} ${FLECSISP_OPENMPI_SPEC}";
+      else
+        export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PROVIDER}@${FLECSISP_MPICH_VERSION}%gcc@${FLECSISP_GCC_VERSION} ${FLECSISP_MPICH_SPEC}";
+      fi
     - export PLATFORM="${SPACK_ARCH%%-*}"
     - echo ${PLATFORM}
     - mkdir -p ${CI_PROJECT_DIR}/spack/etc/spack/${PLATFORM}

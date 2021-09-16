@@ -5,14 +5,6 @@ before_script:
   - unset SPACK_ROOT
   - source ${CI_PROJECT_DIR}/spack/share/spack/setup-env.sh || /bin/true
   - echo ${CI_RUNNER_TAGS}
-  - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} $([ ${CI_RUNNER_TAGS} == 'laristra-setuid-shared' ] && echo 'target=x86_64')"
-  - |
-    if [[ ${FLECSISP_MPI_PROVIDER} == 'openmpi' ]];
-    then
-      export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PROVIDER}@${FLECSISP_OPENMPI_VERSION}%gcc@${FLECSISP_GCC_VERSION} ${FLECSISP_OPENMPI_SPEC}";
-    else
-      export FLECSISP_SPACK_FULL_SPEC="${FLECSISP_SPACK_SPEC} ^${FLECSISP_MPI_PROVIDER}@${FLECSISP_MPICH_VERSION}%gcc@${FLECSISP_GCC_VERSION} ${FLECSISP_MPICH_SPEC}";
-    fi
   - |
     if [[ -d ${CI_PROJECT_DIR}/spack ]];
     then
