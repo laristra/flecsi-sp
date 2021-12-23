@@ -33,6 +33,7 @@
     - export TARGET="${SPACK_ARCH##*-}"
     - echo ${TARGET}
     - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} $(([ ${TARGET} == 'haswell' ] || [ ${TARGET} == 'skylake_avx512' ]) && echo 'target=x86_64')"
+    - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} $(([ ${SYMPHONY_RUNTIME} == 'legion' ]) && echo '^legion conduit=mpi')"
     - |
       if [[ ${FLECSISP_MPI_PROVIDER} == 'openmpi' ]];
       then
@@ -78,7 +79,7 @@
 # Env Jobs #
 ############
 
-.openmpi_mpi:
+openmpi_mpi:
   extends:
     - .env
   variables:
@@ -86,24 +87,24 @@
     FLECSISP_BUILD_TYPE: "Debug"
     FLECSISP_MPI_PROVIDER: "openmpi"
 
-openmpi_legion:
-  extends: .openmpi_mpi
+.openmpi_legion:
+  extends: openmpi_mpi
   variables:
     FLECSISP_RUNTIME: "legion"
 
-.mpich_mpi:
-  extends: .openmpi_mpi
+mpich_mpi:
+  extends: openmpi_mpi
   variables:
     FLECSISP_MPI_PROVIDER: "mpich"
 
-mpich_legion:
-  extends: .mpich_mpi
+.mpich_legion:
+  extends: mpich_mpi
   variables:
     FLECSISP_RUNTIME: "legion"
 
 .update:
   extends:
-    - .openmpi_mpi
+    - openmpi_mpi
     - .update_spackage
   only:
     refs:
