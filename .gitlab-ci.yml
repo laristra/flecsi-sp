@@ -145,6 +145,7 @@ include:
       cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
             -DCMAKE_BUILD_TYPE=$FLECSISP_BUILD_TYPE \
             -DFLECSI_RUNTIME_MODEL=$FLECSISP_RUNTIME \
+            -DFLECSI_SP_ENABLE_EXODUS=ON \
             -DENABLE_UNIT_TESTS=ON \
             ..
     - make -k -j2 -l40 || make VERBOSE=1
