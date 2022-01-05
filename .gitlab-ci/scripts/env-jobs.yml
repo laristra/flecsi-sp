@@ -33,7 +33,7 @@
     - echo ${TARGET}
     - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} $(([ ${TARGET} == 'haswell' ] || [ ${TARGET} == 'skylake_avx512' ]) && echo 'target=x86_64')"
     - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} $(([ ${SYMPHONY_RUNTIME} == 'legion' ]) && echo '^legion conduit=mpi')"
-    - export FLECSISP_SPACK_SPEC-"${FLECSISP_SPACK_SPEC} ^exodusii@2016-08-09"
+    - export FLECSISP_SPACK_SPEC="${FLECSISP_SPACK_SPEC} ^exodusii@2016-08-09"
     - |
       if [[ ${FLECSISP_MPI_PROVIDER} == 'openmpi' ]];
       then
