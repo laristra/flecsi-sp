@@ -277,7 +277,7 @@ include_directories(${CMAKE_BINARY_DIR})
 #------------------------------------------------------------------------------#
 
 cinch_add_library_target(FleCSI-SP flecsi-sp EXPORT_TARGET FleCSI-SPTargets)
-target_link_libraries( FleCSI-SP ${FLECSI_SP_LIBRARIES} )
+target_link_libraries( FleCSI-SP PUBLIC ${FLECSI_SP_LIBRARIES} )
 
 # this has to go here.  Since cinch_add_library_target is a function, it
 # cannot propagate anything outside of function scope.
