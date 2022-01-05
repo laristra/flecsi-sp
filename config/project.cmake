@@ -169,7 +169,7 @@ endif()
 # Exodus II
 #------------------------------------------------------------------------------#
 
-find_package(EXODUSII QUIET)
+find_package(EXODUSII)
 
 option(FLECSI_SP_ENABLE_EXODUS "Enable I/O with exodus." ${EXODUSII_FOUND})
 
