@@ -169,7 +169,7 @@ endif()
 # Exodus II
 #------------------------------------------------------------------------------#
 
-find_package(EXODUSII)
+find_package(EXODUSII REQUIRED)
 
 option(FLECSI_SP_ENABLE_EXODUS "Enable I/O with exodus." ${EXODUSII_FOUND})
 
@@ -179,6 +179,8 @@ endif()
 
 if(FLECSI_SP_ENABLE_EXODUS)
   include_directories(${EXODUSII_INCLUDE_DIRS})
+  message("Exodus Libraries is")
+  message(${EXODUSII_LIBRARIES})
   list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
 endif()
 
