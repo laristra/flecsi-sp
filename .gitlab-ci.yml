@@ -148,7 +148,7 @@ include:
             -DFLECSI_SP_ENABLE_EXODUS=ON \
             -DENABLE_UNIT_TESTS=ON \
             ..
-    - make -k -j2 -l40 || make VERBOSE=1
+    - make -k -j2 -l40 VERBOSE=1 || make VERBOSE=1
     - make install DESTDIR=${CI_PROJECT_DIR}/build/install
     #- make install
     #- ccache -s
