@@ -63,7 +63,6 @@
     - ${CI_PROJECT_DIR}/spack/bin/spack mirror rm --scope site lanl
     - . ${CI_PROJECT_DIR}/spack/share/spack/setup-env.sh
     - spack repo add --scope site ${CI_PROJECT_DIR}/ristra_spackages/spack-repo
-    - spack repo add --scope site ${CI_PROJECT_DIR}/spack-repo
     - spack repo list
     - mkdir -p ${CI_PROJECT_DIR}/spack_env
     - spack env create --without-view -d ${CI_PROJECT_DIR}/spack_env
@@ -111,15 +110,3 @@ mpich_mpi:
   variables:
     FLECSISP_RUNTIME: "legion"
 
-.update:
-  extends:
-    - openmpi_mpi
-    - .update_spackage
-  only:
-    refs:
-      - "1.4"
-    changes:
-      - spack-repo/*
-  artifacts:
-    paths:
-  allow_failure: true
