@@ -260,7 +260,7 @@ endif()
 # HDF5
 #------------------------------------------------------------------------------#
 find_package(HDF5 REQUIRED)
-list( APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES} )
+list( APPEND FLECSI_SP_LIBRARIES HDF5::HDF5 )
 
 #------------------------------------------------------------------------------#
 # configure header
