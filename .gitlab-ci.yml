@@ -140,8 +140,6 @@ include:
     - make install
     - export CMAKE_PREFIX_PATH=${CI_PROJECT_DIR}/flecsi-dev/build/install:$CMAKE_PREFIX_PATH
     - echo ${CMAKE_PREFIX_PATH}
-    - mpicc -showme
-    - mpic++ -showme
     - cd ${CI_PROJECT_DIR}/build/
     - |
       cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
