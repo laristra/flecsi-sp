@@ -42,7 +42,6 @@ include:
     - cd build
     - |
       cmake \
-        -D MPIEXEC_PREFLAGS=$([ "$FLECSISP_MPI_PROVIDER" = "openmpi" ] && echo '--oversubscribe' )
         -D CMAKE_BUILD_TYPE=Release \
         -D ENABLE_UNIT_TESTS=True \
         -D WONTON_ENABLE_MPI=True \
@@ -143,7 +142,8 @@ include:
     - echo ${CMAKE_PREFIX_PATH}
     - cd ${CI_PROJECT_DIR}/build/
     - |
-      cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
+      cmake -DMPIEXEC_PREFLAGS=$([ "$FLECSISP_MPI_PROVIDER" = "openmpi" ] && echo '--oversubscribe' ) \
+            -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
             -DCMAKE_BUILD_TYPE=$FLECSISP_BUILD_TYPE \
             -DFLECSI_RUNTIME_MODEL=$FLECSISP_RUNTIME \
             -DFLECSI_SP_ENABLE_EXODUS=ON \
