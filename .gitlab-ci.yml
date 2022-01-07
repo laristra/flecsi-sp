@@ -42,6 +42,7 @@ include:
     - cd build
     - |
       cmake \
+        -D MPIEXEC_PREFLAGS=$([ "$FLECSISP_MPI_PROVIDER" = "openmpi" ] && echo '--oversubscribe' )
         -D CMAKE_BUILD_TYPE=Release \
         -D ENABLE_UNIT_TESTS=True \
         -D WONTON_ENABLE_MPI=True \
