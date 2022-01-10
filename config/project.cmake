@@ -169,7 +169,7 @@ endif()
 # Exodus II
 #------------------------------------------------------------------------------#
 
-find_package(EXODUSII QUIET)
+find_package(EXODUSII REQUIRED)
 
 option(FLECSI_SP_ENABLE_EXODUS "Enable I/O with exodus." ${EXODUSII_FOUND})
 
@@ -179,6 +179,8 @@ endif()
 
 if(FLECSI_SP_ENABLE_EXODUS)
   include_directories(${EXODUSII_INCLUDE_DIRS})
+  message("Exodus Libraries is")
+  message(${EXODUSII_LIBRARIES})
   list(APPEND FLECSI_SP_LIBRARIES ${EXODUSII_LIBRARIES})
 endif()
 
@@ -260,7 +262,7 @@ endif()
 # HDF5
 #------------------------------------------------------------------------------#
 find_package(HDF5 REQUIRED)
-list( APPEND FLECSI_SP_LIBRARIES ${HDF5_LIBRARIES} )
+list( APPEND FLECSI_SP_LIBRARIES HDF5::HDF5 )
 
 #------------------------------------------------------------------------------#
 # configure header
@@ -277,7 +279,7 @@ include_directories(${CMAKE_BINARY_DIR})
 #------------------------------------------------------------------------------#
 
 cinch_add_library_target(FleCSI-SP flecsi-sp EXPORT_TARGET FleCSI-SPTargets)
-target_link_libraries( FleCSI-SP ${FLECSI_SP_LIBRARIES} )
+target_link_libraries( FleCSI-SP PUBLIC ${FLECSI_SP_LIBRARIES} )
 
 # this has to go here.  Since cinch_add_library_target is a function, it
 # cannot propagate anything outside of function scope.

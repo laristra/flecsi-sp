@@ -23,14 +23,6 @@ include:
     - module purge
     - module use ${CI_PROJECT_DIR}/spack_env
     - module load loads # module load compiler, deps, etc.
-    - |
-      if [[ ${CI_JOB_NAME} =~ "clang" ]];
-      then
-        module load clang/${FLECSISP_CLANG_VERSION};
-      elif [[ ${CI_JOB_NAME} =~ "intel" ]];
-      then
-        module load intel/${FLECSISP_INTEL_VERSION};
-      fi
     - module list
     - echo $CC
     - echo $CXX
@@ -150,11 +142,16 @@ include:
     - echo ${CMAKE_PREFIX_PATH}
     - cd ${CI_PROJECT_DIR}/build/
     - |
-      cmake -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
+      cmake -DMPIEXEC_PREFLAGS=$([ "$FLECSISP_MPI_PROVIDER" = "openmpi" ] && echo '--oversubscribe' ) \
+            -DCMAKE_INSTALL_PREFIX=${CI_PROJECT_DIR}/build/install \
             -DCMAKE_BUILD_TYPE=$FLECSISP_BUILD_TYPE \
             -DFLECSI_RUNTIME_MODEL=$FLECSISP_RUNTIME \
+            -DFLECSI_SP_ENABLE_EXODUS=ON \
             -DENABLE_UNIT_TESTS=ON \
             ..
+    - make -k -j2 -l40 VERBOSE=1 FleCSI-SP
+    - ldd ./libFleCSI-SP.so
+    - printenv | grep LD_LIBRARY_PATH
     - make -k -j2 -l40 || make VERBOSE=1
     - make install DESTDIR=${CI_PROJECT_DIR}/build/install
     #- make install

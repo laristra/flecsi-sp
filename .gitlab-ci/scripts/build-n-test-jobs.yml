@@ -4,7 +4,7 @@
 
 centOS_openmpi_mpi_gcc:
   extends: .build_n_test
-  dependencies: [ openmpi_legion ]
+  dependencies: [ openmpi_mpi ]
   variables:
     FLECSISP_RUNTIME: "mpi"
     FLECSISP_BUILD_TYPE: "Debug"
@@ -12,19 +12,19 @@ centOS_openmpi_mpi_gcc:
 
 centOS_mpich_mpi_clang:
   extends: centOS_openmpi_mpi_gcc
-  dependencies: [ mpich_legion ]
+  dependencies: [ mpich_mpi ]
   variables:
     FLECSISP_MPI_PROVIDER: "mpich"
 
-centOS_openmpi_legion_gcc:
+.centOS_openmpi_legion_gcc:
   extends: centOS_openmpi_mpi_gcc
-  dependencies: [ openmpi_legion ]
+  dependencies: [ .openmpi_legion ]
   variables:
     FLECSISP_RUNTIME: "legion"
 
-centOS_mpich_legion_clang:
-  extends: centOS_openmpi_legion_gcc
-  dependencies: [ mpich_legion ]
+.centOS_mpich_legion_clang:
+  extends: .centOS_openmpi_legion_gcc
+  dependencies: [ .mpich_legion ]
   variables:
     FLECSISP_MPI_PROVIDER: "mpich"
 
